@@ -1,0 +1,2206 @@
+{
+  "categories": [
+    {
+      "prefix": "LAY",
+      "file": "references/ui-rules/layout-spacing.md",
+      "title": "Layout and spacing",
+      "rules": 13
+    },
+    {
+      "prefix": "TYP",
+      "file": "references/ui-rules/typography.md",
+      "title": "Typography",
+      "rules": 8
+    },
+    {
+      "prefix": "COL",
+      "file": "references/ui-rules/color-contrast.md",
+      "title": "Color and contrast",
+      "rules": 9
+    },
+    {
+      "prefix": "DRK",
+      "file": "references/ui-rules/dark-mode.md",
+      "title": "Dark mode",
+      "rules": 8
+    },
+    {
+      "prefix": "BTN",
+      "file": "references/ui-rules/buttons-cta.md",
+      "title": "Buttons and calls to action",
+      "rules": 9
+    },
+    {
+      "prefix": "FRM",
+      "file": "references/ui-rules/forms-inputs.md",
+      "title": "Forms and inputs",
+      "rules": 16
+    },
+    {
+      "prefix": "NAV",
+      "file": "references/ui-rules/navigation.md",
+      "title": "Navigation",
+      "rules": 11
+    },
+    {
+      "prefix": "MOB",
+      "file": "references/ui-rules/mobile-touch.md",
+      "title": "Mobile and touch",
+      "rules": 8
+    },
+    {
+      "prefix": "FBK",
+      "file": "references/ui-rules/feedback-states.md",
+      "title": "Feedback, loading and empty states",
+      "rules": 9
+    },
+    {
+      "prefix": "CMP",
+      "file": "references/ui-rules/components.md",
+      "title": "Components and design system",
+      "rules": 16
+    },
+    {
+      "prefix": "ICO",
+      "file": "references/ui-rules/icons-imagery.md",
+      "title": "Icons and imagery",
+      "rules": 6
+    },
+    {
+      "prefix": "COP",
+      "file": "references/ui-rules/copy-microcopy.md",
+      "title": "Copy and microcopy",
+      "rules": 6
+    },
+    {
+      "prefix": "PRN",
+      "file": "references/ui-rules/principles.md",
+      "title": "UX principles",
+      "rules": 6
+    },
+    {
+      "prefix": "SCR",
+      "file": "references/ui-rules/screen-patterns.md",
+      "title": "Screen patterns",
+      "rules": 11
+    },
+    {
+      "prefix": "STY",
+      "file": "references/ui-rules/style-options.md",
+      "title": "Style options",
+      "rules": 10
+    }
+  ],
+  "rules": [
+    {
+      "id": "LAY-01",
+      "category": "layout-spacing",
+      "title": "Use a 4/8 spacing scale",
+      "why": "Values drawn from one scale give every screen the same rhythm, while one-off numbers make layouts look accidental.",
+      "do": [
+        "Take every padding, margin and gap from a token scale such as 4, 8, 12, 16, 24, 32, 40, 48.",
+        "Use padding for space inside an element and gap or margin for space between elements, both from the same scale.",
+        "Give repeated elements (cards, rows, chips) identical spacing."
+      ],
+      "avoid": [
+        "Off-scale values such as 7, 13 or 22px, or different inner padding on sibling cards."
+      ],
+      "note": "A 4px base and an 8px base are both fine; pick one and enforce it."
+    },
+    {
+      "id": "LAY-02",
+      "category": "layout-spacing",
+      "title": "Let spacing show what belongs together",
+      "why": "People read small gaps as \"related\" and large gaps as \"separate\", so spacing can carry structure without borders or labels.",
+      "do": [
+        "Use tiers: about 4-8px between a label and its own input, 12-16px between items in a group, 24-32px between groups, and 40-48px between independent sections.",
+        "Keep every label clearly closer to its own field than to the field above it.",
+        "Leave the largest gap in a form just before the primary action, and keep qualifying text (for example consent text) close to the button it qualifies."
+      ],
+      "avoid": [
+        "One uniform gap between labels, fields, buttons and sections.",
+        "Label placement that floats halfway between two inputs."
+      ],
+      "note": null
+    },
+    {
+      "id": "LAY-03",
+      "category": "layout-spacing",
+      "title": "Give content room to breathe",
+      "why": "Cramped layouts are hard to scan and tap; adding space is often the fastest way to make a busy screen calm.",
+      "do": [
+        "Keep at least 16px between text and container edges, and 24px on roomy mobile cards.",
+        "Give every card in a set the same inner padding on all sides.",
+        "When a screen feels busy, try doubling the gaps inside cards and between sections before removing content."
+      ],
+      "avoid": [
+        "Text or buttons touching card edges, or tight 4px gaps between headings and their content.",
+        "Spacing so large that related items stop looking related."
+      ],
+      "note": null
+    },
+    {
+      "id": "LAY-04",
+      "category": "layout-spacing",
+      "title": "Align to shared edges",
+      "why": "Near-miss alignment of a few pixels reads as sloppiness even when users cannot say why.",
+      "do": [
+        "Align icons, text and buttons in a column to one left edge, and align numeric values such as prices to one right edge.",
+        "In card rows, make cards equal height and pin the action to the bottom (flex column with margin-top: auto) so buttons share a baseline.",
+        "Inspect layouts at high zoom or with guides to catch 1-6px offsets."
+      ],
+      "avoid": [
+        "Centered body paragraphs next to left-aligned headings in the same block."
+      ],
+      "note": null
+    },
+    {
+      "id": "LAY-05",
+      "category": "layout-spacing",
+      "title": "One focal point per screen",
+      "why": "When every element has the same weight, users do not know where to look first.",
+      "do": [
+        "Rank content with size, weight and color: one large title, quieter body text and one high-contrast primary action.",
+        "Run a squint test: with the screen blurred, the most important element should still stand out.",
+        "Vary emphasis deliberately, for example a featured card larger than regular ones."
+      ],
+      "avoid": [
+        "Headline, body and button text at similar size and weight.",
+        "A loud primary button repeated on every row of a list."
+      ],
+      "note": null
+    },
+    {
+      "id": "LAY-06",
+      "category": "layout-spacing",
+      "title": "Remove elements that do not earn their place",
+      "why": "Every element competes for attention, so extras slow users down on the main task.",
+      "do": [
+        "For each element, ask which user task it supports; remove or move it if the answer is none.",
+        "Move secondary details into detail views or disclosures.",
+        "Consolidate scattered secondary actions into one clearly placed control."
+      ],
+      "avoid": [
+        "Decorative icons, duplicate buttons, \"see all\" links and filler added just because there is space."
+      ],
+      "note": "Never remove information people need to decide or act, such as price, limits, errors or legal text."
+    },
+    {
+      "id": "LAY-07",
+      "category": "layout-spacing",
+      "title": "Group with space and tint before borders",
+      "why": "Every line adds visual noise; spacing and subtle background tints group content more quietly.",
+      "do": [
+        "Separate list rows with consistent spacing instead of a divider under every item.",
+        "Give inputs such as search a light filled background instead of a box inside another bordered band.",
+        "Set off footers or action bars with a faint background tint."
+      ],
+      "avoid": [
+        "Stacking borders, bands and outlines on the same element."
+      ],
+      "note": "Dense data tables can still benefit from row separators."
+    },
+    {
+      "id": "LAY-08",
+      "category": "layout-spacing",
+      "title": "Lay out on a column grid",
+      "why": "A shared grid makes widths and gutters repeat, so edges line up across rows and screens.",
+      "do": [
+        "Use about 4 columns on mobile, 8 on tablet and 12 on desktop, with fixed gutters such as 16px.",
+        "Size cards and tiles to whole columns, using CSS Grid or a layout primitive rather than hand-set widths."
+      ],
+      "avoid": [
+        "Arbitrary component widths that share no edges, or gutters that change between rows of one layout."
+      ],
+      "note": null
+    },
+    {
+      "id": "LAY-09",
+      "category": "layout-spacing",
+      "title": "Chunk long content and disclose progressively",
+      "why": "Working memory is limited; short labeled sections are easier to scan than a wall of text.",
+      "do": [
+        "Break long content into short titled sections with numbers or icons.",
+        "Show a one-line summary on detail cards and put secondary details in collapsible rows.",
+        "Keep the primary action visible after the summary, not after all the text."
+      ],
+      "avoid": [
+        "Hiding information needed for the decision (price, key specs) inside collapsed sections."
+      ],
+      "note": null
+    },
+    {
+      "id": "LAY-10",
+      "category": "layout-spacing",
+      "title": "Keep text and images in separate tracks",
+      "why": "Text that wraps around a small inline image keeps changing line length, which breaks reading rhythm.",
+      "do": [
+        "Put the image full width above or below the paragraph, or give image and text their own columns.",
+        "Stack image above text on narrow screens."
+      ],
+      "avoid": [
+        "Floating a small image inside a paragraph so lines are short beside it and long below it."
+      ],
+      "note": null
+    },
+    {
+      "id": "LAY-11",
+      "category": "layout-spacing",
+      "title": "Let feature media break out of the text column",
+      "why": "In long-form pages, images wider than the reading column add rhythm and immersion while text keeps a comfortable measure.",
+      "do": [
+        "Define grid tracks for a narrow text column plus wider \"breakout\" and \"full-bleed\" tracks for media.",
+        "Keep body text at a readable measure while hero and key images use the wider tracks."
+      ],
+      "avoid": [
+        "Forcing every image in a long article to the narrow text width."
+      ],
+      "note": "Optional technique for editorial layouts."
+    },
+    {
+      "id": "LAY-12",
+      "category": "layout-spacing",
+      "title": "Vary image sizes in editorial galleries",
+      "why": "A few larger images give the eye an entry point; a wall of identical thumbnails has none.",
+      "do": [
+        "Let the lead image span a full row or a 2x2 block, with smaller images around it, using grid-column and grid-row spans.",
+        "Put the strongest image in the largest slot and keep gutters uniform."
+      ],
+      "avoid": [
+        "Mixed sizes in product listings, where uniform tiles are better for comparison."
+      ],
+      "note": null
+    },
+    {
+      "id": "LAY-13",
+      "category": "layout-spacing",
+      "title": "Spacing recipe for a single-question mobile step",
+      "why": "One-field steps (email, name, code) look calm and structured when every gap follows a deliberate rhythm.",
+      "do": [
+        "On a 375pt-wide frame: title about 28px with 8px to its description, text block about 96px from the top, 24px to a 56px-tall full-width input with 16px side margins.",
+        "Put a related secondary link 16px below the input, then a large gap before the bottom group.",
+        "Keep consent text 24px above a 56px full-width primary button that sits 16px above the keyboard or safe area."
+      ],
+      "avoid": [
+        "Using the same gap within and between groups, or letting the button touch the keyboard."
+      ],
+      "note": "Scale the values proportionally for other device sizes; read safe areas at runtime."
+    },
+    {
+      "id": "TYP-01",
+      "category": "typography",
+      "title": "Use one or two typefaces and build hierarchy inside them",
+      "why": "Several unrelated typefaces look improvised; one family varied by size, weight and color stays coherent.",
+      "do": [
+        "Use the platform system stack (system-ui, -apple-system, Roboto) or one neutral, well-hinted UI sans for body, labels and buttons.",
+        "Reserve any expressive display face for large headlines, if at all.",
+        "Load only the weights in use, subset fonts, use font-display: swap and keep a system fallback stack."
+      ],
+      "avoid": [
+        "Mixing script, serif and sans faces within one card or heading.",
+        "Decorative faces for paragraphs, form labels or button text."
+      ],
+      "note": null
+    },
+    {
+      "id": "TYP-02",
+      "category": "typography",
+      "title": "Keep a short type scale",
+      "why": "Many slightly different font sizes read as noise; a few deliberate steps create clear levels.",
+      "do": [
+        "Define about 5-6 sizes as tokens or utility classes, each with a fixed line height and weight, for example Display 32, Title 24, Heading 18, Body 16, Small 13.",
+        "Start from platform ramps where they apply (iOS body 17pt, Android body 16sp, web body 16px) and step headings with a ratio of about 1.2-1.25."
+      ],
+      "avoid": [
+        "Ten or more sizes on one page, or 1px nudges used to fix layout problems."
+      ],
+      "note": "Data-dense apps may need one or two extra steps, but every size still comes from the scale."
+    },
+    {
+      "id": "TYP-03",
+      "category": "typography",
+      "title": "Match weight to size and avoid thin weights",
+      "why": "Thin and light weights look elegant but are hard to read at small sizes and on poor screens.",
+      "do": [
+        "Use Regular (400) as the minimum for body text and labels.",
+        "Use Semibold or Bold (600-700) for headings and button labels."
+      ],
+      "avoid": [
+        "Weights 100-300 for body text or small labels, especially combined with light gray.",
+        "Long passages of small text set in bold."
+      ],
+      "note": null
+    },
+    {
+      "id": "TYP-04",
+      "category": "typography",
+      "title": "Keep text sizes readable on mobile",
+      "why": "Tiny text slows scanning and excludes people with low vision.",
+      "do": [
+        "Keep body text at the platform default or larger (iOS 17pt, Android 16sp, web 16px).",
+        "Treat about 14px as the floor for list items and secondary text, and 12px as the floor for small field labels.",
+        "Use 16px for web form inputs so mobile browsers do not zoom on focus."
+      ],
+      "avoid": [
+        "8-10px labels or list text, especially in pale gray."
+      ],
+      "note": null
+    },
+    {
+      "id": "TYP-05",
+      "category": "typography",
+      "title": "Limit line length and set comfortable line height",
+      "why": "Very long lines make it hard to find the next line; tight leading makes paragraphs dense.",
+      "do": [
+        "Cap body text at about 45-75 characters per line (for example max-width: 65ch).",
+        "Use a line height of about 1.4-1.6 for body text and tighter (1.1-1.3) for large headings."
+      ],
+      "avoid": [
+        "Paragraphs that stretch across the full width of wide screens."
+      ],
+      "note": null
+    },
+    {
+      "id": "TYP-06",
+      "category": "typography",
+      "title": "Leave body tracking alone and use capitals sparingly",
+      "why": "Extra letter spacing breaks up word shapes, and long runs of capitals are slow to read.",
+      "do": [
+        "Keep letter-spacing at the font default for body text.",
+        "Use uppercase only for short eyebrows, tags and overlines, set smaller with about +0.05-0.1em tracking, applied with text-transform so screen readers do not spell words out.",
+        "Use slight negative tracking only on very large display headings, if needed."
+      ],
+      "avoid": [
+        "Widened tracking on paragraphs, or headlines and paragraphs in all caps."
+      ],
+      "note": null
+    },
+    {
+      "id": "TYP-07",
+      "category": "typography",
+      "title": "Make headings darker than body text",
+      "why": "A near-black, heavier heading above a slightly lighter body creates an instant reading order.",
+      "do": [
+        "Set titles in the strongest text color token and a heavier weight.",
+        "Set supporting text in a medium gray that still reaches at least 4.5:1 against its background."
+      ],
+      "avoid": [
+        "Titles in the same light gray as body copy, or low-contrast gray for errors and other critical messages."
+      ],
+      "note": null
+    },
+    {
+      "id": "TYP-08",
+      "category": "typography",
+      "title": "Style same-role text identically",
+      "why": "When all prices, dates or labels look the same, users learn the pattern once.",
+      "do": [
+        "Define named text styles (eyebrow, H1, H2, body, caption, price) and apply them everywhere.",
+        "Give every value with the same role the same size, weight and color."
+      ],
+      "avoid": [
+        "Coloring each highlighted word or price differently for variety."
+      ],
+      "note": null
+    },
+    {
+      "id": "COL-01",
+      "category": "color-contrast",
+      "title": "Measure contrast against WCAG AA",
+      "why": "Text that looks fine to the designer can be unreadable for people with low vision or in bright light.",
+      "do": [
+        "Reach at least 4.5:1 for normal text and 3:1 for large text (24px+, or 18.66px+ bold).",
+        "Reach at least 3:1 for UI component boundaries, focus indicators and icons that carry meaning.",
+        "Check every token pair with a contrast tool, including white labels on brand-colored buttons."
+      ],
+      "avoid": [
+        "Judging contrast by eye, or pale brand text on a light tint of the same hue."
+      ],
+      "note": "A bright brand color does not guarantee readable white text; many oranges, greens and cyans fail with white."
+    },
+    {
+      "id": "COL-02",
+      "category": "color-contrast",
+      "title": "Start neutral and give one accent a job",
+      "why": "When everything is colorful nothing stands out; a neutral base lets the accent signal importance.",
+      "do": [
+        "Lay out the screen in neutrals first, then add color only where it carries meaning: primary action, links, active state, status.",
+        "Work from a compact palette: a light base, a dark base, one accent and at most one supporting tone.",
+        "Keep structural colors (surfaces, text) separate from semantic colors (success, warning, error)."
+      ],
+      "avoid": [
+        "A different pastel or gradient on every card, banner and icon.",
+        "Using the accent on decorative elements until it no longer signals interactivity."
+      ],
+      "note": null
+    },
+    {
+      "id": "COL-03",
+      "category": "color-contrast",
+      "title": "Use 60-30-10 as a starting balance",
+      "why": "A rough split between base, secondary and accent color keeps a screen calm and the accent meaningful.",
+      "do": [
+        "Aim for about 60% neutral base, 30% secondary surfaces and 10% accent, judged by visual weight.",
+        "Define the three roles as tokens (for example --color-bg, --color-surface, --color-accent)."
+      ],
+      "avoid": [
+        "Spreading the accent across large backgrounds."
+      ],
+      "note": "A heuristic, not a quota."
+    },
+    {
+      "id": "COL-04",
+      "category": "color-contrast",
+      "title": "Give the most important action the strongest color",
+      "why": "The eye lands first on the most saturated, highest-contrast element.",
+      "do": [
+        "Give the single most important action the most vivid fill on the screen and keep surrounding controls muted.",
+        "On dark screens, use a bold filled call to action rather than an outlined one that blends in."
+      ],
+      "avoid": [
+        "Several equally vivid elements competing, or a muted primary action beside vivid decoration."
+      ],
+      "note": null
+    },
+    {
+      "id": "COL-05",
+      "category": "color-contrast",
+      "title": "Avoid pure primaries and pure black on white for large areas",
+      "why": "Fully saturated hues and maximal contrast across large surfaces look harsh and tire the eyes.",
+      "do": [
+        "Use slightly toned variants instead of #FF0000, #00FF00, #0000FF and similar pure hues.",
+        "Use near-black (for example #171717) for text and dark surfaces and an off-white for large light backgrounds.",
+        "Store the chosen values as tokens and verify each text pairing still meets contrast minimums."
+      ],
+      "avoid": [
+        "Pure #000000 text on pure #FFFFFF across large reading areas."
+      ],
+      "note": null
+    },
+    {
+      "id": "COL-06",
+      "category": "color-contrast",
+      "title": "Reserve status colors for status",
+      "why": "If red and green appear decoratively, users misread them as errors or success.",
+      "do": [
+        "Keep red for errors, green for success and amber for warnings, applied consistently across the product.",
+        "Pair every status color with an icon and explicit wording."
+      ],
+      "avoid": [
+        "Brand or decorative elements in the error red or success green."
+      ],
+      "note": null
+    },
+    {
+      "id": "COL-07",
+      "category": "color-contrast",
+      "title": "Never rely on color alone",
+      "why": "Color-blind users, low-vision users and anyone in bright light can miss color-only cues.",
+      "do": [
+        "Add a second cue to every color-coded meaning: text, icon, shape, weight or position.",
+        "Keep status words inside status badges and check marks on selected items."
+      ],
+      "avoid": [
+        "Red borders as the only error signal, or color-only active states and chart series."
+      ],
+      "note": null
+    },
+    {
+      "id": "COL-08",
+      "category": "color-contrast",
+      "title": "Protect text placed over images",
+      "why": "Text over photos becomes unreadable wherever the image is bright or busy.",
+      "do": [
+        "Add a scrim behind overlaid text, such as linear-gradient(to top, rgba(0,0,0,.6), transparent) across the lower third.",
+        "Check contrast against the lightest part of the image behind the text.",
+        "Put small overlays such as ratings on solid pills."
+      ],
+      "avoid": [
+        "White text straight on skies, buildings or busy textures, or a text shadow as the only protection for small text."
+      ],
+      "note": null
+    },
+    {
+      "id": "COL-09",
+      "category": "color-contrast",
+      "title": "Collapse near-duplicate colors into tokens",
+      "why": "Five grays a few RGB steps apart are values that drifted off the system; they cause inconsistency and maintenance pain.",
+      "do": [
+        "Define a small set of named tokens (text-primary, text-secondary, border, surface) and reference only those.",
+        "Search stylesheets for raw hex values and merge near-duplicates into the nearest token."
+      ],
+      "avoid": [
+        "Hard-coded one-off colors inside components."
+      ],
+      "note": null
+    },
+    {
+      "id": "DRK-01",
+      "category": "dark-mode",
+      "title": "Build dark mode as its own palette, not an inversion",
+      "why": "Inverting light colors produces glare and broken hierarchy; a dark theme needs its own tuned values.",
+      "do": [
+        "Implement themes by remapping semantic color tokens per mode, so components need no theme-specific code.",
+        "Keep brand hues recognizable but retune their lightness and saturation for dark surfaces."
+      ],
+      "avoid": [
+        "Automatic inversion of the light palette, or hard-coded colors that force separate dark components."
+      ],
+      "note": null
+    },
+    {
+      "id": "DRK-02",
+      "category": "dark-mode",
+      "title": "Use a near-black base, not pure black",
+      "why": "Dark gray reduces harsh contrast and leaves room to show depth with lighter surfaces.",
+      "do": [
+        "Use a near-black base such as #121212, or a dark tinted toward the brand hue.",
+        "Fill cards with a slightly lighter surface rather than outlining them."
+      ],
+      "avoid": [
+        "Pure #000000 backgrounds, or #000000 cards on #000000 backgrounds."
+      ],
+      "note": "A true-black option can suit OLED-focused media apps; offer it as a setting, not the default."
+    },
+    {
+      "id": "DRK-03",
+      "category": "dark-mode",
+      "title": "Show elevation with lighter surfaces",
+      "why": "Shadows barely show on dark backgrounds, so lightness must communicate which layer is on top.",
+      "do": [
+        "Step surfaces lighter as they rise, for example base #121212, card #1E1E1E, app bar #272727, menu #2E2E2E, dialog #383838.",
+        "Expose these as elevation tokens so components pick the right surface automatically."
+      ],
+      "avoid": [
+        "One dark color for background, cards and dialogs, or black drop shadows as the only separation."
+      ],
+      "note": null
+    },
+    {
+      "id": "DRK-04",
+      "category": "dark-mode",
+      "title": "Use dimmed whites for text tiers",
+      "why": "Pure white on near-black glares; graded off-whites keep reading comfortable and preserve hierarchy.",
+      "do": [
+        "Use about 87% white (#E0E0E0) for primary text, about 60% (#A0A0A0) for secondary text and about 38% only for disabled elements.",
+        "Or use light grays tinted toward the background hue, and check each tier for contrast."
+      ],
+      "avoid": [
+        "Long body text in pure #FFFFFF at bold weight on a dark base."
+      ],
+      "note": "The 38% tier is below 4.5:1; it is acceptable only for disabled controls."
+    },
+    {
+      "id": "DRK-05",
+      "category": "dark-mode",
+      "title": "Retune accent colors for dark surfaces",
+      "why": "A brand color tuned for white backgrounds often loses contrast or vibrates on dark ones.",
+      "do": [
+        "Define a separate dark-theme accent token, usually a lighter and less saturated tone of the brand hue.",
+        "Check the button fill against the surface (at least 3:1) and the label against the fill (at least 4.5:1).",
+        "Soften semantic colors the same way, for example a lighter error red."
+      ],
+      "avoid": [
+        "Reusing the saturated light-theme brand color unchanged, or deep 600-900 tones that sink into dark cards."
+      ],
+      "note": null
+    },
+    {
+      "id": "DRK-06",
+      "category": "dark-mode",
+      "title": "Keep interactive states visible on dark surfaces",
+      "why": "Subtle hover and pressed changes that work on white often vanish on dark backgrounds.",
+      "do": [
+        "Give buttons and links a clear hover and pressed change: a color shift, inversion, border or icon motion.",
+        "Show a 2px or thicker high-contrast focus ring on every focusable element."
+      ],
+      "avoid": [
+        "A tiny opacity change as the only hover cue, or removed focus outlines."
+      ],
+      "note": null
+    },
+    {
+      "id": "DRK-07",
+      "category": "dark-mode",
+      "title": "Let people choose the theme",
+      "why": "Preference for light or dark varies by person and context.",
+      "do": [
+        "Default to the system setting (prefers-color-scheme) and offer a Light / Dark / System choice that persists.",
+        "Build colors as semantic tokens so both themes stay in sync."
+      ],
+      "avoid": [
+        "Dark-only or light-only products with no way to switch."
+      ],
+      "note": null
+    },
+    {
+      "id": "DRK-08",
+      "category": "dark-mode",
+      "title": "Check every screen in both themes",
+      "why": "Assets designed only against white, such as dark logos and shadows, silently break in dark mode.",
+      "do": [
+        "Review every screen end to end in dark mode before shipping.",
+        "Provide a light logo variant or an SVG that uses currentColor.",
+        "Replace shadow-based separation with lighter surfaces or borders in the dark theme."
+      ],
+      "avoid": [
+        "A black logo disappearing on a dark card."
+      ],
+      "note": null
+    },
+    {
+      "id": "BTN-01",
+      "category": "buttons-cta",
+      "title": "One primary action per view, with a clear hierarchy",
+      "why": "Users should spot the main action instantly; secondary and tertiary styles support it instead of competing.",
+      "do": [
+        "Style the primary action as a solid fill in the accent color, one per view or section.",
+        "Style secondary actions as outlined or neutral filled buttons, and minor actions as text buttons.",
+        "Keep height, radius and type identical across levels so only emphasis changes, and repeat the same mapping on every repeated card."
+      ],
+      "avoid": [
+        "Two filled primary buttons side by side, or a different saturated color on each button.",
+        "Switching which action is filled between cards in the same list."
+      ],
+      "note": null
+    },
+    {
+      "id": "BTN-02",
+      "category": "buttons-cta",
+      "title": "Design every state of every button",
+      "why": "Visible states tell users what is interactive, what is happening and what is unavailable.",
+      "do": [
+        "Define default, hover, pressed, focus-visible (2px ring with offset), disabled and loading states for every variant, including icon-only buttons.",
+        "Keep the button's width fixed while loading and block repeat presses.",
+        "Animate state changes briefly (about 100-200ms) and disable the motion under prefers-reduced-motion."
+      ],
+      "avoid": [
+        "A pressed state that looks like disabled, a disabled state that looks enabled, or removed focus outlines."
+      ],
+      "note": "Disabled buttons are exempt from contrast minimums but should stay legible; consider saying why an action is unavailable."
+    },
+    {
+      "id": "BTN-03",
+      "category": "buttons-cta",
+      "title": "Size buttons for touch and balance their padding",
+      "why": "Consistent height and padding make buttons easy to hit and visually balanced.",
+      "do": [
+        "Make touch buttons at least 44pt (iOS) or 48dp (Android) tall; pointer-only interfaces can use 36-40px with an enlarged hit area.",
+        "Use roughly twice as much horizontal as vertical padding (for example 12-16px vertical, 24-32px horizontal).",
+        "With a leading icon, use slightly less padding on the icon side and a 6-8px icon-label gap.",
+        "Set labels at about 14-17px on mobile in a medium or semibold weight."
+      ],
+      "avoid": [
+        "Equal tiny padding on all sides, or primary buttons shorter than 44pt on touch screens."
+      ],
+      "note": null
+    },
+    {
+      "id": "BTN-04",
+      "category": "buttons-cta",
+      "title": "Make primary mobile buttons full width",
+      "why": "On narrow screens, full-width buttons are bigger targets and look finished.",
+      "do": [
+        "Span the content width inside the platform side margins (typically 16-24px).",
+        "Stack paired actions vertically, with the secondary in a lower-emphasis style."
+      ],
+      "avoid": [
+        "Small fixed-width buttons floating mid-screen, or buttons that touch the screen edges."
+      ],
+      "note": "On wide desktop layouts, size buttons to content or a max width instead."
+    },
+    {
+      "id": "BTN-05",
+      "category": "buttons-cta",
+      "title": "Place actions where the task ends",
+      "why": "Actions placed where the eye and thumb finish their path are found and reached faster.",
+      "do": [
+        "On mobile, anchor the main forward action at the bottom of the screen, inside the thumb zone and above the safe area.",
+        "In forms, put the submit button directly after the last field, aligned with the fields.",
+        "In dialogs, align footer buttons the way the target platform does, and keep the order identical across the product."
+      ],
+      "avoid": [
+        "The primary action as a small button in a top corner of a mobile screen, or button order that changes between similar screens."
+      ],
+      "note": "Primary-left versus primary-right ordering differs by platform; consistency matters more than either choice."
+    },
+    {
+      "id": "BTN-06",
+      "category": "buttons-cta",
+      "title": "Make the recommended option stand out",
+      "why": "Among similar items, the one that differs is noticed and remembered.",
+      "do": [
+        "Give the recommended plan or default choice one distinct treatment, such as an accent border, a filled button or a \"Recommended\" badge.",
+        "Keep the other options visually quieter and emphasize only one item per group."
+      ],
+      "avoid": [
+        "Emphasis by color alone, or emphasis used to push users toward an option against their interest."
+      ],
+      "note": null
+    },
+    {
+      "id": "BTN-07",
+      "category": "buttons-cta",
+      "title": "Make buttons look like buttons and links look like links",
+      "why": "Users expect buttons to act and underlined text to navigate; mixing the two causes mistakes.",
+      "do": [
+        "Give buttons a filled or bordered shape with padding.",
+        "Use button elements for actions and anchor elements for navigation, and reserve underlines for links."
+      ],
+      "avoid": [
+        "Actions shown as bare colored text, or an underlined link inside a row of action buttons."
+      ],
+      "note": null
+    },
+    {
+      "id": "BTN-08",
+      "category": "buttons-cta",
+      "title": "Pair labels with a meaningful icon when it helps",
+      "why": "A recognizable icon beside the label speeds scanning.",
+      "do": [
+        "Add a leading icon that matches the action (for example a phone glyph on \"Call\"), sized to the label line height.",
+        "Keep the text label and mark the icon aria-hidden."
+      ],
+      "avoid": [
+        "Ambiguous icons, or icon-only buttons for uncommon actions."
+      ],
+      "note": null
+    },
+    {
+      "id": "BTN-09",
+      "category": "buttons-cta",
+      "title": "Show keyboard shortcuts on desktop actions",
+      "why": "A shortcut hint on the control teaches the faster path at the moment it is needed.",
+      "do": [
+        "Render the shortcut as a small kbd chip inside or beside the button, styled quieter than the label.",
+        "Show the platform's modifier (Cmd on macOS, Ctrl elsewhere) and mirror it in the tooltip and aria-keyshortcuts."
+      ],
+      "avoid": [
+        "Shortcut chips on touch-only devices, or shortcuts documented nowhere in the UI."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-01",
+      "category": "forms-inputs",
+      "title": "Visible labels; placeholders only for examples",
+      "why": "Placeholder text disappears while typing and is usually low contrast, so it cannot replace a label.",
+      "do": [
+        "Show a persistent label above every input, linked with label for/id.",
+        "Use the placeholder only for an example of the expected format (for example name@example.com), or leave it empty.",
+        "Put essential instructions in helper text below the field."
+      ],
+      "avoid": [
+        "Placeholder-only labels such as \"Enter email\", or a placeholder that repeats the label."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-02",
+      "category": "forms-inputs",
+      "title": "Top-aligned labels in a single column",
+      "why": "Labels stacked above fields along one edge create a straight scan path that works at every width.",
+      "do": [
+        "Stack each field full width with its label above it, aligned to the same edge as the submit button.",
+        "Let short related pairs (first and last name, city and postcode) share a row when space allows."
+      ],
+      "avoid": [
+        "Unrelated fields side by side, or labels in a left column that force a zig-zag eye path on mobile."
+      ],
+      "note": "Left-aligned labels can suit wide desktop forms that must stay vertically compact."
+    },
+    {
+      "id": "FRM-03",
+      "category": "forms-inputs",
+      "title": "Group long forms under section headings",
+      "why": "Headings and spacing break long forms into chunks users can understand and complete.",
+      "do": [
+        "Split long forms into titled groups (for example Personal information, Billing address, Change password) using fieldset/legend or real headings.",
+        "Make section headings clearly larger than field labels and leave more space between groups than between fields."
+      ],
+      "avoid": [
+        "Seven or more unrelated fields in one undifferentiated column."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-04",
+      "category": "forms-inputs",
+      "title": "Ask for less and let the product do the work",
+      "why": "Every field adds effort and abandonment risk; the system should absorb complexity it can handle.",
+      "do": [
+        "Remove fields that are not needed for the task, and collect optional details later.",
+        "Prefer one full-name field over separate first and last name when the data model allows.",
+        "Prefill known data from the account or device, set autocomplete attributes, suggest addresses and reuse saved payment methods, keeping prefilled values visible and editable."
+      ],
+      "avoid": [
+        "Asking again for information the product already has."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-05",
+      "category": "forms-inputs",
+      "title": "Use the input type that matches the data",
+      "why": "Purpose-built inputs bring up the right keyboard, enable autofill and signal the expected answer.",
+      "do": [
+        "Set type, inputmode and autocomplete (type=\"email\", type=\"tel\", inputmode=\"numeric\", autocomplete=\"one-time-code\").",
+        "Use one field for an email address, allow paste and trim whitespace before validating.",
+        "Let users type values they know, such as a birth year, instead of scrolling a long dropdown.",
+        "Size fields to the answer: a single line for short values, a textarea for messages."
+      ],
+      "avoid": [
+        "Email split into local part and domain boxes, or a one-line box for a long message."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-06",
+      "category": "forms-inputs",
+      "title": "Choose the control by the kind of choice",
+      "why": "The control itself tells users whether one or many options can be chosen.",
+      "do": [
+        "Use a visible radio group or segmented control for about 2-5 mutually exclusive options, and a select or combobox for long lists.",
+        "Use checkboxes for multi-select, a switch for on/off settings that apply immediately, and a single checkbox for yes/no choices submitted with a form.",
+        "Use chips for filters and tags, and labeled swatches for visual attributes such as color."
+      ],
+      "avoid": [
+        "Hiding three or four short options in a dropdown, Yes/No in a dropdown, or checkboxes for mutually exclusive options."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-07",
+      "category": "forms-inputs",
+      "title": "Type-to-filter for long lists",
+      "why": "Scrolling hundreds of items such as countries is slow; typing a few letters finds the item immediately.",
+      "do": [
+        "Replace long select menus with a combobox that filters as the user types and matches partial input.",
+        "Support arrow-key navigation and ARIA combobox semantics, and surface likely choices (for example the detected country) first."
+      ],
+      "avoid": [
+        "Hundreds of alphabetical options in a plain dropdown."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-08",
+      "category": "forms-inputs",
+      "title": "Pair sliders with numeric inputs",
+      "why": "Sliders are fast for rough values but imprecise; people also need to see and type exact numbers.",
+      "do": [
+        "Show the live value, label the minimum and maximum, and use a dual-thumb slider for ranges.",
+        "Pair the slider with editable number fields that stay in sync.",
+        "Give thumbs at least a 44px target and support arrow keys and Home/End."
+      ],
+      "avoid": [
+        "A bare slider with no visible value, or a long dropdown of fixed numeric steps."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-09",
+      "category": "forms-inputs",
+      "title": "Selectable tiles for a few comparable options",
+      "why": "When options differ by one or two key values, large tiles are easier to compare and tap than tiny radios.",
+      "do": [
+        "For 2-6 options, lay out tiles with the main value bold (for example 1TB) and the secondary value below (for example the price).",
+        "Mark the selected tile with an accent border plus a check or filled indicator.",
+        "Keep radio semantics (role=\"radiogroup\", arrow-key navigation, checked state)."
+      ],
+      "avoid": [
+        "Tiles for long or plain-text lists, or selection shown by a subtle color change only."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-10",
+      "category": "forms-inputs",
+      "title": "Design every field state",
+      "why": "Fields that change with state show users where they are and whether input is valid.",
+      "do": [
+        "Define default, focused, filled, disabled, error and success states.",
+        "Reserve a helper-text slot under each field so messages appear without shifting the layout.",
+        "Pair status colors with an icon and text."
+      ],
+      "avoid": [
+        "Disabled fields that look empty or enabled, or states shown by border color alone."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-11",
+      "category": "forms-inputs",
+      "title": "Show specific errors inline, next to the field",
+      "why": "An error far from its field makes users hunt for the problem.",
+      "do": [
+        "Validate on blur or submit, show the message directly under the field with a red border and an error icon, and say how to fix it.",
+        "Link the message with aria-describedby, set aria-invalid=\"true\" and move focus to the first invalid field on submit.",
+        "For passwords, show a live checklist of requirements that updates while typing."
+      ],
+      "avoid": [
+        "A list of errors under the submit button, a generic \"Error found\" banner, or validating on every keystroke before the user has finished."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-12",
+      "category": "forms-inputs",
+      "title": "Mark required and optional fields one consistent way",
+      "why": "Users need to know what they can skip; clutter on every label slows them down.",
+      "do": [
+        "When most fields are required, mark only the exceptions with a muted \"(optional)\".",
+        "Otherwise mark required fields with an asterisk and explain it once at the top of the form.",
+        "Always set required or aria-required on the input."
+      ],
+      "avoid": [
+        "\"(required)\" in red on every label, or a symbol whose meaning is never explained."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-13",
+      "category": "forms-inputs",
+      "title": "Show formats with hints and gentle masks",
+      "why": "Showing the expected format prevents errors before they happen.",
+      "do": [
+        "Show patterns such as MM/YY or DD/MM/YYYY in persistent helper text or a mask.",
+        "Insert separators as the user types (card numbers in groups of four, or 4-6-5 for 15-digit cards) and strip them before validating.",
+        "Accept pasted values in common formats."
+      ],
+      "avoid": [
+        "Blank date or phone fields with no hint, or rejecting input because separators differ."
+      ],
+      "note": "Masks must not block editing or confuse screen readers."
+    },
+    {
+      "id": "FRM-14",
+      "category": "forms-inputs",
+      "title": "Split long forms into steps with visible progress",
+      "why": "Short steps with a progress indicator reduce overwhelm and show how much is left.",
+      "do": [
+        "Group about 3-4 related fields per step and show a stepper or progress bar.",
+        "End each step with a primary \"Next\" and a secondary \"Skip\" for optional steps.",
+        "Keep entered data when users move back between steps."
+      ],
+      "avoid": [
+        "Hiding how many steps remain, or splitting very short forms into many steps."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-15",
+      "category": "forms-inputs",
+      "title": "Use boxed fields, not underline-only fields",
+      "why": "Enclosed fields are recognized as editable and have a clear tap area.",
+      "do": [
+        "Render inputs as outlined or filled boxes about 44-56px tall with a visible focus style."
+      ],
+      "avoid": [
+        "Bare underlines that look like dividers."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-16",
+      "category": "forms-inputs",
+      "title": "Give rich-text editors familiar controls",
+      "why": "People writing formatted content should not need markup knowledge.",
+      "do": [
+        "Provide a toolbar with bold, italic, underline, lists, link and image, plus a compact floating toolbar on text selection.",
+        "Explain where the content will appear and end with a secondary Cancel and a primary Save."
+      ],
+      "avoid": [
+        "Raw markup for basic formatting in consumer-facing editors, or equally weighted Cancel and Save buttons."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-01",
+      "category": "navigation",
+      "title": "Use one primary navigation pattern",
+      "why": "Combining navigation types splits destinations and makes the structure hard to learn.",
+      "do": [
+        "On mobile apps, use a bottom tab bar with 3-5 top-level destinations.",
+        "Put overflow destinations such as settings into a Profile or More tab.",
+        "Keep the top bar for the screen title, search and notifications."
+      ],
+      "avoid": [
+        "A hamburger menu on top of an existing tab bar, or primary destinations hidden in a drawer when a tab bar fits."
+      ],
+      "note": "A menu drawer is fine for secondary links; it lowers discoverability for anything important."
+    },
+    {
+      "id": "NAV-02",
+      "category": "navigation",
+      "title": "Label every navigation icon",
+      "why": "Icons alone are ambiguous; labels make navigation predictable.",
+      "do": [
+        "Show an icon plus a short text label for every tab, and color both when active.",
+        "Give icon-only controls elsewhere an accessible name and a tooltip."
+      ],
+      "avoid": [
+        "Icon-only tab bars with abstract icons, or vaguely named menus."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-03",
+      "category": "navigation",
+      "title": "Make the current location unmistakable",
+      "why": "Users orient themselves by the active item; a weak active state leaves them lost.",
+      "do": [
+        "Mark the active item with at least two cues: a tinted pill or indicator plus a bolder label or filled icon.",
+        "Use one accent color for the active item and one neutral for inactive items, with inactive icons still at about 3:1 contrast.",
+        "Set aria-current=\"page\" on the active link."
+      ],
+      "avoid": [
+        "A different color for every nav icon, or a subtle color shift as the only active cue."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-04",
+      "category": "navigation",
+      "title": "Pick the navigation component that fits the scope",
+      "why": "Each component implies a different scope; the right one tells users where they are.",
+      "do": [
+        "Use a tab bar or sidebar for top-level app sections, in-page tabs for views of one page, breadcrumbs for deep hierarchies and pagination for long result sets.",
+        "In pagination, highlight the current page, show previous/next arrows and use an ellipsis for skipped ranges."
+      ],
+      "avoid": [
+        "Tabs for sequential steps (use a stepper), or pagination without a current-page indicator."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-05",
+      "category": "navigation",
+      "title": "Breadcrumbs for deep hierarchies",
+      "why": "A visible path orients users and lets them jump up levels without repeated Back taps.",
+      "do": [
+        "Show breadcrumbs on pages three or more levels deep.",
+        "Link every crumb except the last; render the current page as plain text with aria-current=\"page\".",
+        "On narrow screens, collapse middle levels into an ellipsis that expands on tap."
+      ],
+      "avoid": [
+        "Breadcrumbs as a replacement for primary navigation, or on flat one-level sites."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-06",
+      "category": "navigation",
+      "title": "Follow the conventions people already know",
+      "why": "People learn habits from many other products; familiar layouts need no relearning.",
+      "do": [
+        "Put the logo top-left, inline with the main navigation, linked to home (mirrored for right-to-left languages).",
+        "Use conventional icons: magnifier for search, bell for notifications, house for home, person for profile, gear for settings.",
+        "Reuse standard gestures and behaviors such as swipe back and pull to refresh."
+      ],
+      "avoid": [
+        "Novel icons for common concepts, or a centered logo above a separate row of links on content and product sites."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-07",
+      "category": "navigation",
+      "title": "Put account and settings where people look for them",
+      "why": "People look for settings in a few conventional spots; anywhere else feels hidden.",
+      "do": [
+        "In simpler apps, make the avatar in the header open profile and settings.",
+        "In larger apps, give Profile or More its own tab-bar item.",
+        "Keep the entry point in the same place on every top-level screen."
+      ],
+      "avoid": [
+        "Settings reachable from only one screen or behind an unlabeled control."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-08",
+      "category": "navigation",
+      "title": "Structure sidebars top to bottom",
+      "why": "A predictable sidebar structure lets users orient themselves and switch sections quickly.",
+      "do": [
+        "Order zones as logo with collapse toggle, optional search, main items under small section labels, secondary groups, settings and help, then the account or workspace switcher.",
+        "Use about 240px expanded width and a 64-80px icon rail when collapsed, with tooltips and accessible labels on every icon.",
+        "Use about 40px item rows with small gaps, consistent horizontal inset, and counts as right-aligned badges."
+      ],
+      "avoid": [
+        "One long unlabeled list of links, or an icon-only rail without labels or tooltips."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-09",
+      "category": "navigation",
+      "title": "Limit sidebar nesting to two levels",
+      "why": "One expandable sub-level keeps related pages together; deeper nesting becomes hard to scan.",
+      "do": [
+        "Let a primary item expand with a chevron to reveal indented second-level items, connected by a thin guide line.",
+        "Move deeper structure into in-page tabs or the page itself."
+      ],
+      "avoid": [
+        "Third-level nesting inside the sidebar."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-10",
+      "category": "navigation",
+      "title": "Use the sidebar foot for at most one promo card",
+      "why": "The space below navigation is visible on every page without blocking tasks.",
+      "do": [
+        "Place one compact card (usage meter with upgrade, trial offer or feature teaser) above settings and account.",
+        "Give it a close control, hide it in the collapsed rail and keep its button quieter than the page's primary action."
+      ],
+      "avoid": [
+        "Several promo cards, or a card that pushes navigation out of view on short screens."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-11",
+      "category": "navigation",
+      "title": "Give tab bars full-size hit areas and safe-area padding",
+      "why": "Tab items need generous touch areas and must stay clear of the system home indicator.",
+      "do": [
+        "Make each tab's hit area fill its whole column, with a 2-4px gap between icon and label.",
+        "Pad the bar's bottom with env(safe-area-inset-bottom) or the platform equivalent, and add bottom padding to the scroll content so the bar never covers it."
+      ],
+      "avoid": [
+        "Labels sitting on the home indicator, or only the icon glyph being tappable."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOB-01",
+      "category": "mobile-touch",
+      "title": "Make touch targets at least 44pt",
+      "why": "Small hit areas cause missed taps, especially on icon-only controls.",
+      "do": [
+        "Make every tappable element at least 44x44pt (iOS) or 48x48dp (Android).",
+        "Keep icons visually small if desired (about 24px) and enlarge the hit area with padding or an invisible overlay.",
+        "Give text buttons and links a full-height hit area even when the text is small."
+      ],
+      "avoid": [
+        "Hit areas that match a 16-24px glyph exactly, such as back, close, favorite or password-visibility icons."
+      ],
+      "note": "WCAG 2.2 sets 24x24 CSS px as the AA minimum and 44x44 as enhanced; platform guidance asks for 44pt/48dp."
+    },
+    {
+      "id": "MOB-02",
+      "category": "mobile-touch",
+      "title": "Space touch targets so taps land where intended",
+      "why": "Crowded targets cause mis-taps; the smaller the target, the more space it needs.",
+      "do": [
+        "Keep at least 8px between adjacent targets, and more between small ones (for example about 32px between 44px targets, 12px between 72px targets).",
+        "Keep hit areas from overlapping."
+      ],
+      "avoid": [
+        "Tiny icon buttons packed edge to edge or against screen edges."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOB-03",
+      "category": "mobile-touch",
+      "title": "Keep key actions in the thumb zone",
+      "why": "In one-handed use the bottom of the screen is easiest to reach.",
+      "do": [
+        "Anchor the main forward action (Continue, Next, Pay) at the bottom of the screen above the safe area.",
+        "Add bottom padding to scroll content so a sticky action never covers the last field.",
+        "Keep destructive or rarely used actions out of the easiest reach zone."
+      ],
+      "avoid": [
+        "Critical actions as small targets in the top corners."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOB-04",
+      "category": "mobile-touch",
+      "title": "Respect safe areas",
+      "why": "Content under the status bar, notch or home indicator is obscured or collides with system gestures.",
+      "do": [
+        "Read insets at runtime: env(safe-area-inset-top/bottom) on the web, SafeAreaView or platform APIs in native code.",
+        "Keep the top navigation row clear of the status area and leave the home-indicator zone free of controls, including when the keyboard is open."
+      ],
+      "avoid": [
+        "Hard-coded inset values from one device."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOB-05",
+      "category": "mobile-touch",
+      "title": "Use consistent side margins",
+      "why": "A fixed horizontal margin keeps content aligned and away from screen edges.",
+      "do": [
+        "Apply the same page margin on every mobile screen, typically 16-24px, and align headers, titles and grids to it.",
+        "Let only intentional full-bleed elements such as images and carousels break the margin."
+      ],
+      "avoid": [
+        "Text or cards touching the screen edges, or different margins on different screens."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOB-06",
+      "category": "mobile-touch",
+      "title": "Design for the full range of phone sizes",
+      "why": "Phones vary widely in width and height; layouts must adapt without per-device tweaks.",
+      "do": [
+        "Verify layouts from about 320pt to 440pt wide and on short screens.",
+        "Use fluid widths, flex and grid rather than fixed pixel layouts.",
+        "Check that primary actions and key content are not pushed off-screen on short devices."
+      ],
+      "avoid": [
+        "Designing for one device size and assuming it scales."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOB-07",
+      "category": "mobile-touch",
+      "title": "Use horizontal rows with a peek for browsable sections",
+      "why": "Horizontally scrolling rows let users see more categories without a long vertical scroll.",
+      "do": [
+        "Lay out each category as one horizontal row under its heading, with the next card partly visible to signal more.",
+        "Use scroll snapping and offer a \"See all\" route."
+      ],
+      "avoid": [
+        "Rows whose cards fit the viewport exactly, hiding that more content exists."
+      ],
+      "note": "Content in carousels is easy to miss; put the most important items first."
+    },
+    {
+      "id": "MOB-08",
+      "category": "mobile-touch",
+      "title": "Keep push notifications rare and useful",
+      "why": "Too many or irrelevant notifications lead people to disable them or uninstall the app.",
+      "do": [
+        "Send only notifications with clear value, written short and specific, and targeted to the relevant users.",
+        "Let users control categories and frequency, batch updates and respect quiet hours."
+      ],
+      "avoid": [
+        "Bursts of near-identical notifications or generic marketing pushes to everyone."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-01",
+      "category": "feedback-states",
+      "title": "Respond to every action immediately",
+      "why": "Silence after a tap leaves users unsure whether anything happened, so they tap again.",
+      "do": [
+        "Show a pressed state at once, then a loading state (for example a spinner and \"Saving...\") while work runs.",
+        "Disable the control while the request is in flight to prevent double submits.",
+        "Confirm the result explicitly, success or failure."
+      ],
+      "avoid": [
+        "A button that looks unchanged while a request runs in the background."
+      ],
+      "note": "Responses slower than roughly 400ms should show progress."
+    },
+    {
+      "id": "FBK-02",
+      "category": "feedback-states",
+      "title": "Match the loading indicator to the wait",
+      "why": "The right indicator reassures users without flashing or lying about progress.",
+      "do": [
+        "Show nothing for actions under about 300ms, a spinner with a short label for waits over about a second, and skeletons for content-shaped loads.",
+        "Use a determinate bar or ring with a percentage when progress is measurable.",
+        "Mark loading regions with role=\"status\" or aria-busy."
+      ],
+      "avoid": [
+        "An indefinite spinner for an operation whose progress is known, or a progress bar with no label."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-03",
+      "category": "feedback-states",
+      "title": "Confirm outcomes with clear status messages",
+      "why": "Users need to know whether an action worked, failed or needs attention.",
+      "do": [
+        "Use distinct success, error and warning variants, each with a tinted background, a matching icon and plain wording.",
+        "Say what failed and what to do next (for example \"Couldn't save your changes. Try again.\").",
+        "Put decision buttons inside warning banners when a choice is needed, and expose messages with role=\"status\" or role=\"alert\"."
+      ],
+      "avoid": [
+        "Completing an action with no visible change, or generic errors without a next step."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-04",
+      "category": "feedback-states",
+      "title": "Use toasts for confirmations, not for errors that need work",
+      "why": "Toasts disappear; anything users must act on needs to stay visible.",
+      "do": [
+        "Show short success toasts with an icon, a title and one line, auto-dismissing after a few seconds and pausing on hover or focus.",
+        "Announce toasts through an ARIA live region and give them a close control.",
+        "Keep errors that need action inline or in a persistent banner."
+      ],
+      "avoid": [
+        "Important information that exists only in a toast."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-05",
+      "category": "feedback-states",
+      "title": "Show steps in multi-step flows",
+      "why": "Seeing which steps are done, current and left reduces anxiety and drop-off.",
+      "do": [
+        "Show 3-6 named steps: completed steps with a check, the current one highlighted, upcoming ones muted.",
+        "Let users go back to completed steps."
+      ],
+      "avoid": [
+        "States told apart by color alone, or hidden step counts."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-06",
+      "category": "feedback-states",
+      "title": "Show progress toward goals",
+      "why": "People are more motivated the closer they see themselves to a goal.",
+      "do": [
+        "Show progress bars with a value for goals, profile completion and long tasks (for example \"Step 2 of 4\" or 70%).",
+        "Give an honest head start where the user has genuinely made progress."
+      ],
+      "avoid": [
+        "Raw numbers with no visual indicator, or invented progress."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-07",
+      "category": "feedback-states",
+      "title": "Design the high point and the ending",
+      "why": "People judge an experience mostly by its most intense moment and how it ends.",
+      "do": [
+        "Make completion screens clear and warm: an icon or illustration, a headline, a short summary and a useful next action.",
+        "Celebrate real milestones briefly without blocking the user."
+      ],
+      "avoid": [
+        "Ending a long flow with a blank page or silent redirect, or placing upsells and extra forms at the final step."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-08",
+      "category": "feedback-states",
+      "title": "Make destructive confirmations unmistakable",
+      "why": "Destructive dialogs must say exactly what will be lost and which button does what.",
+      "do": [
+        "Name the specific object being deleted and show a warning icon.",
+        "Label buttons with explicit outcomes (\"Keep project\", \"Delete project\") and style the destructive one red and the safe one neutral.",
+        "Offer undo, or require typed confirmation for high-impact irreversible actions."
+      ],
+      "avoid": [
+        "Generic Yes/No buttons with identical styling."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-09",
+      "category": "feedback-states",
+      "title": "Turn empty states into a first step",
+      "why": "An empty screen is a dead end unless it explains what belongs there and how to start.",
+      "do": [
+        "Show a specific headline (\"No projects yet\"), one line on what will appear and why it helps, and one primary action that starts it.",
+        "Offer templates, examples or import options where relevant, and keep navigation visible.",
+        "Write different messages for \"nothing created yet\", \"no search results\" and \"failed to load\" (with a retry)."
+      ],
+      "avoid": [
+        "A bare \"No data\" message on a blank screen, or several competing buttons."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-01",
+      "category": "components",
+      "title": "Set foundations before drawing screens",
+      "why": "Settling color, type, spacing, radius and elevation scales first prevents one-off values and keeps screens consistent.",
+      "do": [
+        "Define tonal ramps for the brand hue and a neutral gray, a 5-6 step type scale, a 4- or 8-based spacing scale, and small radius and elevation scales.",
+        "Build screens only from those scales."
+      ],
+      "avoid": [
+        "Choosing values ad hoc screen by screen."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-02",
+      "category": "components",
+      "title": "Layer tokens and name them by purpose",
+      "why": "Referencing named decisions instead of raw values lets one change propagate everywhere and makes theming possible.",
+      "do": [
+        "Use three tiers: primitives (blue-500 = #2563EB), semantic tokens (color-action-primary) and component tokens (button-bg-default).",
+        "Name semantic and component tokens by purpose, not appearance (button-primary, not blue-button).",
+        "Rebrand by changing primitives and support dark mode by remapping the semantic tier per theme, using the same names in code as in design files."
+      ],
+      "avoid": [
+        "Hex, spacing or radius values hard-coded inside components."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-03",
+      "category": "components",
+      "title": "Build a few core components completely",
+      "why": "A small, fully specified set covers most screens and stays maintainable.",
+      "do": [
+        "Start with button, input, card, avatar and navigation.",
+        "Give each explicit variants (primary, secondary, ghost, destructive), sizes (sm, md, lg) and states (default, hover, pressed, focus, disabled, loading).",
+        "Build one configurable Button component (variant, tone, size, leading or trailing icon, icon-only, badge) instead of styling buttons per screen."
+      ],
+      "avoid": [
+        "Dozens of half-finished components, or components that only have a default state."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-04",
+      "category": "components",
+      "title": "Document how each component is used",
+      "why": "Short, consistent documentation turns a library into a shared language for design and code.",
+      "do": [
+        "Give each component one page: when to use it, do and don't examples, properties and accessibility requirements (contrast, focus ring, target size).",
+        "Record version, status and owner, and keep release notes."
+      ],
+      "avoid": [
+        "Shipping or changing components without usage guidance or a changelog."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-05",
+      "category": "components",
+      "title": "Pick one radius scale that fits the brand",
+      "why": "Corner rounding sets the tone, and a consistent scale makes components feel like one system.",
+      "do": [
+        "Choose one tier and store it as tokens: sharp (0-2px) for formal products, moderate (4-16px) for neutral ones, or pill (height/2) for friendly ones.",
+        "Apply it consistently to buttons, inputs, chips and cards, scaling with component size."
+      ],
+      "avoid": [
+        "Sharp, rounded and pill buttons mixed on one screen without a reason."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-06",
+      "category": "components",
+      "title": "Keep nested corners concentric",
+      "why": "An inner element with the same radius as its container leaves an uneven gap at the corners.",
+      "do": [
+        "Set inner radius = outer radius - padding (a 24px card with 8px padding gets a 16px inner radius).",
+        "Use a small or zero inner radius when padding is equal to or larger than the outer radius."
+      ],
+      "avoid": [
+        "The same radius on a card and the image inset inside it."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-07",
+      "category": "components",
+      "title": "Keep elevation soft and consistent",
+      "why": "Dark, tight or overused shadows look heavy and dated; soft, consistent elevation separates layers cleanly.",
+      "do": [
+        "Use low-opacity, diffuse shadows with blur about twice the offset and no horizontal offset, for example 0 8px 24px rgba(15,23,42,.08), tinted toward the background hue rather than pure black.",
+        "Define a few elevation tokens (sm, md, lg) and reserve the strongest for floating layers such as menus and dialogs.",
+        "Or separate cards with a 1px light border, using one method for every card in a set."
+      ],
+      "avoid": [
+        "Default heavy black shadows on every card and button, or shadows and strong borders on the same element."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-08",
+      "category": "components",
+      "title": "Size components to their content",
+      "why": "Content-driven sizing keeps padding consistent when labels change or are translated.",
+      "do": [
+        "Let buttons hug their label plus fixed padding, fixing only the dimension that must stay constant (such as height).",
+        "Use flex or grid gaps for lists and cards so repeated items keep consistent spacing.",
+        "Use full width only where the layout calls for it, such as a bottom action on mobile."
+      ],
+      "avoid": [
+        "Fixed button widths that clip longer labels, or absolute positioning that breaks when content changes."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-09",
+      "category": "components",
+      "title": "Same look, same meaning",
+      "why": "Elements that look alike are read as related, so visual treatments must map consistently to meaning.",
+      "do": [
+        "Style every element with the same function identically: one button style per emphasis level, one link color, one chip shape.",
+        "Use one shared component for parallel items such as pricing tiers, and emphasize the recommended one with a single deliberate variant.",
+        "Group items that share a state together (for example unread items first)."
+      ],
+      "avoid": [
+        "Reusing a highlight style for unrelated purposes, or letting heading and icon colors drift between sibling cards."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-10",
+      "category": "components",
+      "title": "Give segmented controls an inset track",
+      "why": "An inset track makes segmented options read as one control.",
+      "do": [
+        "Wrap the options in a track with about 4-8px inset, and show the selected option as a raised or contrasting pill.",
+        "Give each option button-like padding and keyboard support."
+      ],
+      "avoid": [
+        "Segmented options placed directly on the page background with no track."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-11",
+      "category": "components",
+      "title": "Keep tooltips short and reachable without hover",
+      "why": "Brief contextual help explains a control without cluttering the layout, but hover-only help excludes touch and keyboard users.",
+      "do": [
+        "Show tooltips on hover, keyboard focus and tap, anchored to the trigger, with one or two short sentences or a 1-4 word label.",
+        "Give icon buttons an aria-label matching their tooltip, and give first-run hints an explicit \"Got it\"."
+      ],
+      "avoid": [
+        "Essential instructions that exist only in a tooltip, or interactive content inside tooltips."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-12",
+      "category": "components",
+      "title": "Use modals for focused tasks and popovers for light context",
+      "why": "Blocking overlays interrupt; they should be reserved for tasks that need full attention.",
+      "do": [
+        "Use a modal (scrim, trapped focus, visible close, Escape to dismiss, Cancel plus one primary action) for focused edits.",
+        "Use a non-blocking popover anchored to its trigger for short contextual content, dismissed by an outside click or Escape.",
+        "Return focus to the trigger when either closes."
+      ],
+      "avoid": [
+        "Blocking overlays for trivial information, or dialogs with no visible way out."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-13",
+      "category": "components",
+      "title": "Give avatars fixed sizes and fallbacks",
+      "why": "Avatars personalize the interface, but missing photos must never break the layout.",
+      "do": [
+        "Use a fixed size scale (for example 24, 32, 40, 48, 64px).",
+        "Fall back from photo to initials to a generic person icon, and place status badges at the bottom-right, scaled with the avatar.",
+        "Add a 2-4px ring in the surface color when an avatar overlaps a photo or another avatar."
+      ],
+      "avoid": [
+        "Broken-image icons or arbitrary avatar sizes per screen."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-14",
+      "category": "components",
+      "title": "Structure action menus",
+      "why": "Account and overflow menus stay scannable when items are grouped and the exit action is isolated.",
+      "do": [
+        "Open with a header that identifies the context (avatar, name), then group related items with dividers and leading icons.",
+        "Show shortcut hints right-aligned on desktop, and place Sign out or destructive items last in their own group."
+      ],
+      "avoid": [
+        "A long undivided list, or Sign out mixed into everyday items."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-15",
+      "category": "components",
+      "title": "Make cards self-contained modules",
+      "why": "One topic per bounded card makes feeds and dashboards scannable and lets them reflow responsively.",
+      "do": [
+        "Give each card one topic: a title, one key value, supporting metadata and at most one or two actions.",
+        "Keep padding, radius and separation identical across sibling cards."
+      ],
+      "avoid": [
+        "Unrelated data or several competing buttons in one card."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-16",
+      "category": "components",
+      "title": "Make selected items obvious",
+      "why": "A small checked box alone is easy to miss in a list.",
+      "do": [
+        "Change the whole row when selected (accent fill or tint, stronger border) and keep a check or checkbox as a non-color cue."
+      ],
+      "avoid": [
+        "A selected row that looks identical to unselected ones except for a tiny checkbox."
+      ],
+      "note": null
+    },
+    {
+      "id": "ICO-01",
+      "category": "icons-imagery",
+      "title": "Use one icon family and one style",
+      "why": "Mixed icon styles look assembled from scraps and can make one icon seem selected.",
+      "do": [
+        "Use a single icon library with one style (outline or filled), one stroke width and one size grid (for example 20 or 24px), optically centered.",
+        "If filled icons mean \"active\", apply that rule to every item."
+      ],
+      "avoid": [
+        "Filled and outline icons, or different stroke widths, in the same bar or list."
+      ],
+      "note": null
+    },
+    {
+      "id": "ICO-02",
+      "category": "icons-imagery",
+      "title": "Use conventional icon metaphors",
+      "why": "Familiar icons are recognized instantly; novel metaphors make users guess.",
+      "do": [
+        "Use widely understood icons: gear for settings, sliders for filters, bookmark for save-for-later, paper plane for send, lock for privacy, globe for language.",
+        "Add a text label wherever an icon could be ambiguous."
+      ],
+      "avoid": [
+        "Custom metaphors for common actions, or an icon that conventionally means something else."
+      ],
+      "note": null
+    },
+    {
+      "id": "ICO-03",
+      "category": "icons-imagery",
+      "title": "Add leading icons to list and settings rows",
+      "why": "A familiar icon beside each label is a second cue that makes long lists faster to scan.",
+      "do": [
+        "Place a 20-24px icon at the start of each row in a single aligned column.",
+        "Keep the text label and mark decorative icons aria-hidden."
+      ],
+      "avoid": [
+        "Long text-only settings lists, or icons that replace the label."
+      ],
+      "note": null
+    },
+    {
+      "id": "ICO-04",
+      "category": "icons-imagery",
+      "title": "Give icon-only controls a name",
+      "why": "Screen readers and new users cannot interpret an unlabeled glyph.",
+      "do": [
+        "Give every icon-only control an aria-label and a tooltip with the same text.",
+        "Prefer visible labels for primary navigation and uncommon actions."
+      ],
+      "avoid": [
+        "Unnamed icon buttons, or names that differ from the visible tooltip."
+      ],
+      "note": null
+    },
+    {
+      "id": "ICO-05",
+      "category": "icons-imagery",
+      "title": "Use imagery that supports the message",
+      "why": "Images that do not illustrate the message add noise; relevant visuals speed understanding.",
+      "do": [
+        "Choose images or illustrations that show what the headline promises, in a style consistent with the brand.",
+        "Keep content backgrounds calm and let product imagery provide the visual interest."
+      ],
+      "avoid": [
+        "Generic stock photos as filler, or decorative blobs and shapes behind product grids and text."
+      ],
+      "note": null
+    },
+    {
+      "id": "ICO-06",
+      "category": "icons-imagery",
+      "title": "Crop images to keep the subject visible",
+      "why": "Cropping that cuts off the subject makes a card lose its meaning.",
+      "do": [
+        "Use object-fit: cover with object-position set to the subject's focal point, and check crops at each breakpoint."
+      ],
+      "avoid": [
+        "Stretched images (object-fit: fill) or automatic center crops that cut off faces or products."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-01",
+      "category": "copy-microcopy",
+      "title": "Label buttons with the outcome",
+      "why": "A verb that names the result tells users exactly what will happen.",
+      "do": [
+        "Use verb plus object: \"Save changes\", \"Add to basket\", \"Delete project\", \"Pay $12.96\".",
+        "Keep the label consistent with the screen title and the confirmation message."
+      ],
+      "avoid": [
+        "\"Yes\", \"No\", \"OK\", \"Submit\" or \"Done\" when a specific verb exists, or a bare noun as a label."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-02",
+      "category": "copy-microcopy",
+      "title": "Keep button labels on one line",
+      "why": "Wrapped button text looks broken and gets worse on small screens and in translation.",
+      "do": [
+        "Write labels of 1-3 words and test at the narrowest supported width (320px) and in long languages.",
+        "Shorten the copy or let the button go full width instead of wrapping."
+      ],
+      "avoid": [
+        "Labels that break onto two lines, or shrinking the font below the standard button size."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-03",
+      "category": "copy-microcopy",
+      "title": "Write labels in plain language",
+      "why": "Internal or marketing jargon confuses users who have never seen those terms.",
+      "do": [
+        "Name settings by their effect (\"Hide balances\", \"Help and support\"), and be specific with legal links (\"Privacy policy\", \"Terms and conditions\").",
+        "Use standard wording for account actions: \"Log out\", \"Close account\".",
+        "Phrase toggle labels as the state that turning them on produces."
+      ],
+      "avoid": [
+        "Team-internal feature names, single vague nouns, or the same word for two different rows."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-04",
+      "category": "copy-microcopy",
+      "title": "Keep confirmations short",
+      "why": "People skim, so brief messages are understood faster.",
+      "do": [
+        "Use one or two words for routine confirmations (\"Saved\", \"Copied\") next to the relevant icon.",
+        "Add detail only when users need it to decide or act."
+      ],
+      "avoid": [
+        "Full exclamatory sentences for simple confirmations."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-05",
+      "category": "copy-microcopy",
+      "title": "Ship no placeholder copy",
+      "why": "Leftover template words are the first thing users notice and they undermine trust.",
+      "do": [
+        "Search the UI and code for \"Title\", \"Button\", \"Label\", \"Text\", \"Lorem ipsum\" and similar strings before shipping.",
+        "Use realistic sample data in demos and empty fixtures."
+      ],
+      "avoid": [
+        "A checkout card headed \"Title\" with a button labeled \"Button\"."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-06",
+      "category": "copy-microcopy",
+      "title": "Avoid all-caps labels",
+      "why": "Mixed case keeps word shapes recognizable, so it reads faster and feels calmer.",
+      "do": [
+        "Write labels in sentence case or title case and apply one convention across the product.",
+        "Keep source strings in natural case and set text-transform: none on buttons."
+      ],
+      "avoid": [
+        "All-caps primary buttons or long all-caps labels."
+      ],
+      "note": null
+    },
+    {
+      "id": "PRN-01",
+      "category": "principles",
+      "title": "Offer fewer, clearer choices",
+      "why": "Decision time grows with the number and similarity of options.",
+      "do": [
+        "Show only the options most users need at each step and move the rest behind \"More\" or \"Advanced\".",
+        "Mark a recommended default and give options short distinguishing subtitles.",
+        "Collapse fine-grained ranges into a few non-overlapping buckets (for example 0-1, 2-3, 4-5, 6+)."
+      ],
+      "avoid": [
+        "Long flat lists of near-identical options, or every setting on the first screen."
+      ],
+      "note": null
+    },
+    {
+      "id": "PRN-02",
+      "category": "principles",
+      "title": "Put key items first and last",
+      "why": "People remember the first and last items of a sequence best; the middle is the weakest spot.",
+      "do": [
+        "Lead lists, onboarding and landing sections with the strongest benefit or most-used item.",
+        "Place the most important action at the end of a sequence."
+      ],
+      "avoid": [
+        "Burying essential information or actions in the middle of a long list."
+      ],
+      "note": null
+    },
+    {
+      "id": "PRN-03",
+      "category": "principles",
+      "title": "Chunk information without hard caps",
+      "why": "Grouped information is easier to scan and remember than one undivided mass.",
+      "do": [
+        "Group related items under headings or spacing, keeping each visible group small.",
+        "Format long values in chunks (card numbers 4-4-4-4, phone numbers by local convention).",
+        "Reveal further items on demand."
+      ],
+      "avoid": [
+        "Sixteen or more equally weighted items in one grid with no grouping."
+      ],
+      "note": "The \"seven plus or minus two\" figure describes short-term recall, not a hard limit on menu or navigation length."
+    },
+    {
+      "id": "PRN-04",
+      "category": "principles",
+      "title": "Prefer conventions over trends",
+      "why": "Trendy effects date quickly and often add noise; standard patterns stay clear and familiar.",
+      "do": [
+        "Default to solid single-color primary buttons, standard navigation placement and platform conventions.",
+        "Express personality through one or two restrained touches such as an accent color or illustration."
+      ],
+      "avoid": [
+        "Multi-color gradient buttons or extra floating controls added only for flair."
+      ],
+      "note": null
+    },
+    {
+      "id": "PRN-05",
+      "category": "principles",
+      "title": "Polish shapes perceived usability",
+      "why": "People perceive well-crafted interfaces as easier to use and forgive small issues in them.",
+      "do": [
+        "Keep typography, spacing, color and corner radius consistent and deliberate on every screen.",
+        "Still test the flow itself, because polish can hide real usability problems."
+      ],
+      "avoid": [
+        "Treating visual consistency as optional or \"later\"."
+      ],
+      "note": null
+    },
+    {
+      "id": "PRN-06",
+      "category": "principles",
+      "title": "Give enough detail; avoid over-minimal UI",
+      "why": "Stripping supporting details in the name of minimalism leaves users guessing about state and size.",
+      "do": [
+        "Show useful metadata under item titles (file size, date, episode number).",
+        "Label progress bars with a value and give in-progress tasks a cancel control.",
+        "Label ambiguous numbers (\"Episode 3\", not \"#3\")."
+      ],
+      "avoid": [
+        "Removing information that helps users decide."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-01",
+      "category": "screen-patterns",
+      "title": "Build dashboards around the decision they support",
+      "why": "Every widget should help users understand or act; decorative or redundant widgets bury the key numbers.",
+      "do": [
+        "Lead with one primary metric and its trend, with a period selector.",
+        "Follow with 3-4 secondary KPI cards showing value and change, then a short recent-items table with status pills and \"View all\".",
+        "Show the primary value large and the raw numbers smaller and muted."
+      ],
+      "avoid": [
+        "Ten or more small widgets, upsell cards and icon grids on one screen, or uniform \"Label: value\" lists with equal weight."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-02",
+      "category": "screen-patterns",
+      "title": "Show statuses as labeled pills",
+      "why": "Status written as small plain text blends into metadata; colored pills are scannable.",
+      "do": [
+        "Render statuses as small pill badges with a consistent color per status, keeping the status word inside the pill.",
+        "Check the text contrast against the pill fill."
+      ],
+      "avoid": [
+        "Status as faint gray text styled like other metadata, or color without a label."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-03",
+      "category": "screen-patterns",
+      "title": "Group settings into titled sections",
+      "why": "A long flat list makes people read every row; themed groups let them jump to the right cluster.",
+      "do": [
+        "Split settings into groups such as Security, General and Legal, each with a small muted label and its own inset block.",
+        "Put session and destructive actions (\"Log out\", \"Close account\") in a separate final group."
+      ],
+      "avoid": [
+        "Twelve or more unrelated rows in one list, or destructive actions mixed with everyday preferences."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-04",
+      "category": "screen-patterns",
+      "title": "Disclose settings progressively",
+      "why": "Showing the most-used options first reduces load while details stay one tap away.",
+      "do": [
+        "Keep frequent settings at the top level and move detailed options into sub-pages opened from chevron rows.",
+        "Add quick actions on detail pages, such as a copy button beside each account value."
+      ],
+      "avoid": [
+        "Every option on one screen, or common actions buried several levels deep."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-05",
+      "category": "screen-patterns",
+      "title": "Add search to long settings",
+      "why": "Typing a keyword is faster than drilling in and out of sub-screens.",
+      "do": [
+        "Add a search field under the settings title once the list grows past about 6-8 items.",
+        "Match labels, section names and common synonyms, and show each result with its group."
+      ],
+      "avoid": [
+        "Forcing users to browse nested screens to find one option."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-06",
+      "category": "screen-patterns",
+      "title": "Personalize the account header",
+      "why": "Showing the user's name and avatar makes the account area feel personal and confirms the right account.",
+      "do": [
+        "Title the account screen with the user's name and plan, with an avatar, initials fallback and an edit badge.",
+        "Keep any offer card secondary and dismissible."
+      ],
+      "avoid": [
+        "Turning the account screen into an ad surface."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-07",
+      "category": "screen-patterns",
+      "title": "Make search one prominent field with filters on demand",
+      "why": "Most people just want to type; a wall of filters up front slows everyone down.",
+      "do": [
+        "Use one full-width input with a magnifier icon and a specific placeholder (\"Search products\").",
+        "Put advanced filters behind a single filter button or panel, submit on Enter and show a clear control only after text is entered."
+      ],
+      "avoid": [
+        "Five or more dropdowns plus extra buttons before anything is typed, or vague placeholders like \"Type here\"."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-08",
+      "category": "screen-patterns",
+      "title": "Collect sensible defaults during onboarding",
+      "why": "Gathering key preferences early lets the product start personal instead of blank.",
+      "do": [
+        "Ask one topic per screen with a progress bar and a single Continue button.",
+        "Reuse the answers to prefill the profile and settings, keeping every value editable, and flag anything unconfirmed inline."
+      ],
+      "avoid": [
+        "Asking again later for information already collected."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-09",
+      "category": "screen-patterns",
+      "title": "Keep preference setup skippable",
+      "why": "A short preference step personalizes the experience, but forcing it traps users.",
+      "do": [
+        "Offer a visible Skip with sensible defaults, and let users change preferences later in settings."
+      ],
+      "avoid": [
+        "Mandatory wizards, or asking for preferences the product does not use."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-10",
+      "category": "screen-patterns",
+      "title": "Open with a clear welcome screen",
+      "why": "The first screen sets expectations and trust.",
+      "do": [
+        "Pair one relevant visual with a short value headline.",
+        "Offer a filled \"Get started\" and a lower-emphasis \"Log in\", with page dots if it is a short carousel."
+      ],
+      "avoid": [
+        "A bare login form with no context, or a long animated splash screen."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-11",
+      "category": "screen-patterns",
+      "title": "Keep hero sections focused",
+      "why": "One message, one action and one trust signal communicate value within seconds.",
+      "do": [
+        "Use a top bar with the logo left, a few short links and one distinct action on the right.",
+        "Use one headline of a few short lines, one supporting sentence, one primary call to action and a trust signal such as a rating or outcome figure.",
+        "Pair the text with one dominant visual, keep text on calm image areas, and stack headline above the action on mobile."
+      ],
+      "avoid": [
+        "Several equally weighted calls to action, long navigation menus, or competing badges and decorations."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-01",
+      "category": "style-options",
+      "title": "Commit to one visual style",
+      "why": "A consistent style gives a product a coherent personality; mixing styles looks unplanned.",
+      "do": [
+        "If a named style is wanted, apply its traits consistently: glass (translucent blurred panels with thin light borders), soft extruded (controls in the background hue shaped by paired light and dark shadows), bold flat (saturated fills, thick dark outlines, hard offset shadows) or flat minimal (solid fills, no depth effects).",
+        "Verify contrast for text, controls and focus states in the chosen style."
+      ],
+      "avoid": [
+        "Mixing several styles in one product."
+      ],
+      "note": "Translucent and soft-extruded styles often fail contrast for controls and text; check every state."
+    },
+    {
+      "id": "STY-02",
+      "category": "style-options",
+      "title": "Floating tab bar",
+      "why": "A floating, rounded tab bar can give a mobile app a distinctive feel while keeping destinations in reach.",
+      "do": [
+        "Inset a fully rounded bar from the screen edges above the safe area, with a soft shadow and 4-5 destinations.",
+        "Mark the active tab with a filled icon and label inside a contrasting pill, and keep labels or accessible names on every tab.",
+        "Add bottom padding to the scroll container so the bar never hides content."
+      ],
+      "avoid": [
+        "Hiding labels on inactive tabs without accessible names, or more than five destinations."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-03",
+      "category": "style-options",
+      "title": "Emphasized create action in the tab bar",
+      "why": "One larger accent button can separate an app's core create action from ordinary navigation.",
+      "do": [
+        "Use it for exactly one action (create post, add entry), with an accessible label.",
+        "Prefer a detached floating button at the trailing edge over a slot inside the row of destinations."
+      ],
+      "avoid": [
+        "Emphasizing more than one item, or using the emphasized slot for a regular destination."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-04",
+      "category": "style-options",
+      "title": "Signature glow button",
+      "why": "A luminous, layered treatment can make one special action, such as an AI \"Generate\" button, feel distinct.",
+      "do": [
+        "Build it from consistent layers: a radial gradient fill, a fading 1px highlight stroke, soft inset highlights and tinted drop shadows.",
+        "Verify the label meets 4.5:1 against the lightest part of the gradient."
+      ],
+      "avoid": [
+        "Using it on more than one action per screen, or heavy blur and blend layers on low-end devices."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-05",
+      "category": "style-options",
+      "title": "Translucent blur on floating chrome",
+      "why": "Blurred translucent bars and inputs over imagery add depth while keeping context visible.",
+      "do": [
+        "Use a translucent fill with backdrop-filter blur, plus a subtle gradient so text stays readable.",
+        "Provide a solid fallback for reduce-transparency settings and browsers without backdrop-filter."
+      ],
+      "avoid": [
+        "Stacked heavy blurs that cost performance or drop text contrast."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-06",
+      "category": "style-options",
+      "title": "Additive glows on dark backgrounds",
+      "why": "Decorative light effects look natural when they brighten what is beneath them instead of sitting on top as opaque blobs.",
+      "do": [
+        "Build glows from a small bright core and a larger dim halo with an additive blend (mix-blend-mode: plus-lighter or screen).",
+        "Keep glows behind content, never behind body text."
+      ],
+      "avoid": [
+        "Glows that reduce legibility or cost noticeable rendering time."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-07",
+      "category": "style-options",
+      "title": "Glossy showcase icon tile",
+      "why": "A layered gradient tile with a soft halo and glow gives hero or store artwork depth and polish.",
+      "do": [
+        "Use a square tile with continuous corners at about 24% of its size, a gradient between neighboring hues and a white glyph.",
+        "Add a faint, larger halo tile and a blurred same-gradient glow beneath it, built with pseudo-elements and filter: blur()."
+      ],
+      "avoid": [
+        "Using this treatment for small in-app icons, or many large blur filters on performance-sensitive pages."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-08",
+      "category": "style-options",
+      "title": "Tint surfaces with colors from the imagery",
+      "why": "Echoing a product photo's dominant color in its card gives a cohesive, characterful look.",
+      "do": [
+        "Use a light tint of the image's dominant color for the card background and a darker shade of the same hue for text and icons.",
+        "Verify text contrast on the tint."
+      ],
+      "avoid": [
+        "Tints strong enough to weaken the product or the text, or this treatment in dense data UI."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-09",
+      "category": "style-options",
+      "title": "Atmospheric background imagery",
+      "why": "A deeply cropped, toned-down image used full-bleed adds mood without adding controls.",
+      "do": [
+        "Crop a high-resolution image until it reads as texture, lower its intensity and blend it with a color layer that matches the palette.",
+        "Add an overlay wherever text or a logo sits on top and check contrast."
+      ],
+      "avoid": [
+        "Upscaled low-resolution images, or heavy images on pages where load time matters."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-10",
+      "category": "style-options",
+      "title": "Overlap elements for depth",
+      "why": "Slight overlaps, such as an avatar crossing the edge of a cover image, create layering that ties sections together.",
+      "do": [
+        "Let avatars overlap cover images with a ring in the surface color, and use overlapping avatar stacks for groups of people."
+      ],
+      "avoid": [
+        "Overlaps that hide content or shrink touch targets."
+      ],
+      "note": null
+    }
+  ]
+}

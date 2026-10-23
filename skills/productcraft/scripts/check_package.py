@@ -3,6 +3,7 @@
 import argparse, json, re, pathlib, sys
 
 PATTERN_FIELDS = ('id', 'title', 'category', 'principle', 'rule', 'guardrail')
+UI_RULE_FIELDS = ('id', 'category', 'title', 'why', 'do', 'avoid')
 
 def check(root):
     root=pathlib.Path(root)
@@ -31,7 +32,29 @@ def check(root):
         lib=(root/'references'/'pattern-library.md').read_text()
         for p in patterns:
             if f"## {p.get('id',0):02d}. {p.get('title','')}" not in lib: failures.append(f"pattern {p.get('id')} not in pattern-library.md")
-    for p in ['WORKSPACE-SETUP-PROMPT.txt','README.md','LICENSE','modules/product-design.md','modules/interaction-feedback.md','modules/forms-conversion.md','modules/data-and-product-surfaces.md','modules/responsive-accessibility.md','modules/ethical-persuasion.md','assets/review-template.md','modules/launchguard/references/security-baseline.md']:
+    ui_rules=[]
+    ui_index=root/'references'/'ui-rules-index.json'
+    if not ui_index.is_file(): failures.append('ui-rules-index.json missing')
+    else:
+        try: ui=json.loads(ui_index.read_text())
+        except Exception as e: failures.append('bad UI rules JSON '+str(e)); ui={}
+        ui_rules=ui.get('rules',[])
+        if not ui_rules: failures.append('no UI rules indexed')
+        ids=[r.get('id','') for r in ui_rules]
+        if len(ids)!=len(set(ids)): failures.append('duplicate UI rule id')
+        for c in ui.get('categories',[]):
+            f=root/c.get('file','')
+            mine=[r for r in ui_rules if r.get('id','').startswith(c.get('prefix','?')+'-')]
+            if [r['id'] for r in mine]!=[f"{c['prefix']}-{n:02d}" for n in range(1,len(mine)+1)] or len(mine)!=c.get('rules'): failures.append(f"UI rule ids not consecutive for {c.get('prefix')}")
+            if not f.is_file(): failures.append(f"missing UI rules file {c.get('file')}"); continue
+            text=f.read_text()
+            for r in mine:
+                if f"## {r['id']}. {r.get('title','')}" not in text: failures.append(f"UI rule {r['id']} not in {c['file']}")
+        if sum(c.get('rules',0) for c in ui.get('categories',[]))!=len(ui_rules): failures.append('UI rules not all assigned to a category')
+        for r in ui_rules:
+            missing=[f for f in UI_RULE_FIELDS if not r.get(f)]
+            if missing: failures.append(f"UI rule {r.get('id')} missing {', '.join(missing)}")
+    for p in ['WORKSPACE-SETUP-PROMPT.txt','README.md','LICENSE','modules/product-design.md','modules/interaction-feedback.md','modules/forms-conversion.md','modules/data-and-product-surfaces.md','modules/responsive-accessibility.md','modules/ethical-persuasion.md','assets/review-template.md','modules/launchguard/references/security-baseline.md','modules/ui-rules.md']:
         if not (root/p).is_file(): failures.append('missing '+p)
     for slug in ['ui-distiller','credential-shield','launchguard']:
         d=root/'modules'/slug
@@ -44,7 +67,7 @@ def check(root):
         print('FAIL',len(failures))
         for x in failures: print('-',x)
         return 1
-    print(f'PASS: one skill entry, {len(patterns)} patterns, 3 specialist modules, guides and tools present')
+    print(f'PASS: one skill entry, {len(patterns)} patterns, {len(ui_rules)} UI rules, 3 specialist modules, guides and tools present')
     return 0
 
 if __name__=='__main__':

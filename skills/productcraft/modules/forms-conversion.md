@@ -1,6 +1,6 @@
 # Forms, onboarding, authentication UI, search and checkout
 
-Related patterns in `../references/pattern-library.md`: 9, 24, 26-28, 30, 33, 35-36, 40, 58, 65, 67. For actual login abuse architecture, **also read** `credential-shield/GUIDE.md`. For payments/PII launch security, **also read** `launchguard/GUIDE.md`.
+Related patterns in `../references/pattern-library.md`: 9, 24, 26-28, 30, 33, 35-36, 40, 58, 65, 67. For actual login abuse architecture, **also read** `credential-shield/GUIDE.md`. For payments/PII launch security, **also read** `launchguard/GUIDE.md`. Field-level conventions (labels, input types, selection controls, errors, masks) are the `FRM` rules in `../references/ui-rules/forms-inputs.md`.
 
 ## Forms
 

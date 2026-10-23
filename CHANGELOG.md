@@ -1,5 +1,11 @@
 # Changelog
 
+## ProductCraft 1.2.0 (2026-10-23)
+
+- Added the UI rulebook: `modules/ui-rules.md` routes to 146 screen-level rules in 15 category files under `references/ui-rules/`, with a machine-readable index. Every rule has an ID (for example `BTN-02`), why it matters, what to do and what to avoid.
+- The router sends screen-level visual work (spacing, type, color, dark mode, buttons, form fields, navigation, icons, microcopy, settings, dashboards) to the matching rule categories, and change reports cite UI rule IDs.
+- `check_package.py` validates the rulebook (unique, consecutive IDs, required fields, every rule present in its category file).
+
 ## ProductCraft 1.1.0 (2026-10-23)
 
 - Added the LaunchGuard 20-control security baseline (`modules/launchguard/references/security-baseline.md`). Each control lists its gate, what to do, the common trap and how to verify it.

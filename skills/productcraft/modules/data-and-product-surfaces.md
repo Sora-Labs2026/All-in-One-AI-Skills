@@ -1,6 +1,6 @@
 # Data-dense and application-specific surfaces
 
-Read only the relevant entries in `../references/pattern-library.md`. Related patterns: 1, 26-28, 31-34, 36, 41, 47, 49, 53-54, 56-57, 62-64, 69.
+Read only the relevant entries in `../references/pattern-library.md`. Related patterns: 1, 26-28, 31-34, 36, 41, 47, 49, 53-54, 56-57, 62-64, 69. Dashboard, settings and search screens: `SCR` rules in `../references/ui-rules/screen-patterns.md`.
 
 ## Tables and dashboards
 

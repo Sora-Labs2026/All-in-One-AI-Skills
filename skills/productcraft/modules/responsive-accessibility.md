@@ -1,6 +1,6 @@
 # Responsive behavior, accessibility and internationalization
 
-Related patterns in `../references/pattern-library.md`: 10-11, 15-17, 21, 27, 32, 39, 41-42, 45, 48, 50-51, 54, 60, 64-66.
+Related patterns in `../references/pattern-library.md`: 10-11, 15-17, 21, 27, 32, 39, 41-42, 45, 48, 50-51, 54, 60, 64-66. Touch targets, safe areas and contrast values: `MOB` and `COL` rules in `../references/ui-rules/`.
 
 - Use semantic HTML and proper ARIA only when native elements cannot represent the interaction. Separate focused, hovered, pressed, selected and disabled semantics.
 - Test pointer, touch, keyboard, screen reader, reduced motion, zoom, high-contrast/light/dark where applicable; do not put essential information behind hover.
