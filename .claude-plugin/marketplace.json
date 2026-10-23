@@ -5,13 +5,13 @@
   },
   "metadata": {
     "description": "All-in-One AI Skills by Sora Labs: production-minded Agent Skills for coding agents.",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "plugins": [
     {
       "name": "productcraft",
-      "description": "Build and harden app UIs with one routed skill: design hierarchy, honest interaction feedback, forms and checkout, data views, mobile and accessibility, ethical conversion, Credential Shield auth-abuse defense and LaunchGuard pre-launch security review with a 20-control security baseline, backed by a UI/UX pattern library.",
-      "version": "1.1.0",
+      "description": "Build and harden app UIs with one routed skill: design hierarchy, a screen-level UI rulebook, honest interaction feedback, forms and checkout, data views, mobile and accessibility, ethical conversion, Credential Shield auth-abuse defense and LaunchGuard pre-launch security review with a 20-control security baseline, backed by a UI/UX pattern library.",
+      "version": "1.2.0",
       "author": {
         "name": "Sora Labs"
       },

@@ -11,6 +11,14 @@ class ProductCraftTest(unittest.TestCase):
   self.assertEqual([x['id'] for x in v],list(range(1,len(v)+1)))
   self.assertEqual(len({x['title'] for x in v}),len(v))
   self.assertTrue(all(x['rule'] and x['guardrail'] for x in v))
+ def test_ui_rules_index(self):
+  ui=json.loads((ROOT/'references'/'ui-rules-index.json').read_text())
+  ids=[r['id'] for r in ui['rules']]
+  self.assertGreater(len(ids),0)
+  self.assertEqual(len(ids),len(set(ids)))
+  self.assertEqual(sum(c['rules'] for c in ui['categories']),len(ids))
+  self.assertTrue(all(r['why'] and r['do'] and r['avoid'] for r in ui['rules']))
+  self.assertTrue(all((ROOT/c['file']).is_file() for c in ui['categories']))
  def test_exactly_one_skill(self):
   self.assertEqual([p.relative_to(ROOT).as_posix() for p in ROOT.rglob('SKILL.md')],['SKILL.md'])
 if __name__=='__main__':unittest.main()

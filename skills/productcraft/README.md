@@ -1,6 +1,6 @@
 # ProductCraft
 
-**A Sora Labs Agent Skill** · version 1.1.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
+**A Sora Labs Agent Skill** · version 1.2.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
 
 ProductCraft is one installable skill that teaches a coding agent to build product interfaces that **show the important thing first, respond honestly, work on every device, and are secured where it matters**. It routes each task to only the modules that task needs, so a table change reads the table guidance, an auth change reads the auth-defense module, and a launch reads the five-gate security review.
 
@@ -19,6 +19,7 @@ It is a coding skill, not a theme pack, component gallery or security certificat
 | **Ethical persuasion** | Funnels, copy and engagement without fake urgency, fake social proof or hidden fees | `modules/ethical-persuasion.md` |
 | **Credential Shield** | Login, OTP/MFA, password reset, credential stuffing and password spraying defense | `modules/credential-shield/GUIDE.md` |
 | **LaunchGuard** | Pre-launch five-gate security review plus a 20-control security baseline: secrets, user data, authorization, payments, release go/no-go | `modules/launchguard/GUIDE.md` |
+| **UI rules** | A rulebook of screen-level rules with IDs (spacing, type, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, screens) | `modules/ui-rules.md` |
 | **Pattern library** | One principle, one implementation rule and one guardrail for each UI/UX pattern | `references/pattern-library.md` |
 
 The pattern library covers foundations, feedback, forms, interaction, navigation, responsive layout, data views, conversion, safety and advanced patterns such as live presence, chat and view transitions. A machine-readable version is in `references/pattern-index.json`.
@@ -29,7 +30,8 @@ The pattern library covers foundations, feedback, forms, interaction, navigation
 
 | The task involves | ProductCraft reads |
 |---|---|
-| A new UI, a redesign, or decluttering | UI Distiller + product design |
+| A new UI, a redesign, or decluttering | UI Distiller + product design + UI rules |
+| Spacing, type, color, dark mode, buttons, form fields, navigation, icons, microcopy | The matching UI rules categories |
 | Controls, motion, toasts, modals | Interaction & feedback |
 | Forms, signup, OTP, checkout, search | Forms & conversion |
 | Tables, dashboards, calendars, Kanban, chat, uploads | Data & product surfaces |
@@ -79,6 +81,9 @@ Once installed, ProductCraft triggers on relevant work. You can also call it dir
 Use productcraft to redesign the billing dashboard so the overdue invoices and the
 "Send reminder" action are visible first on mobile and desktop.
 
+Use productcraft to polish the settings screen: apply the UI rules for spacing, labels,
+icons and navigation, and list the rule IDs you used.
+
 Use productcraft on the signup and OTP flow: keep codes as strings, support paste and
 autofill, and consult Credential Shield for the resend and verify endpoints.
 
@@ -102,6 +107,28 @@ Add this to your project's `CLAUDE.md` or `AGENTS.md` so the agent keeps using P
 - **Accessibility first.** Semantic elements, keyboard and touch parity, reduced motion and visible focus outrank aesthetic formulas such as 60/30/10 or the golden ratio.
 - **No false passes.** Scanners are advisory. Security checks report `PASS`, `FAIL`, `NEEDS_REVIEW`, `NOT_APPLICABLE` or `NOT_VERIFIED`, and secrets are never printed.
 - **Hands off production.** No changes to real secrets, live data, payment provider settings or deployments without explicit permission.
+
+## UI rules
+
+`modules/ui-rules.md` routes to a rulebook in `references/ui-rules/`, one file per category. Every rule has an ID such as `BTN-02` with why it matters, what to do and what to avoid, so change reports can cite exactly which rules were applied. Rules are expressed through the project's existing tokens and components, accessibility and platform guidelines always win, and the optional style treatments are used only when asked for.
+
+| Prefix | Covers |
+|---|---|
+| `LAY` | Layout and spacing |
+| `TYP` | Typography |
+| `COL` | Color and contrast |
+| `DRK` | Dark mode |
+| `BTN` | Buttons and calls to action |
+| `FRM` | Forms and inputs |
+| `NAV` | Navigation |
+| `MOB` | Mobile and touch |
+| `FBK` | Feedback, loading and empty states |
+| `CMP` | Components and design system |
+| `ICO` | Icons and imagery |
+| `COP` | Copy and microcopy |
+| `PRN` | UX principles |
+| `SCR` | Screen patterns |
+| `STY` | Style options |
 
 ## Security baseline
 
@@ -144,7 +171,7 @@ python3 -m unittest discover -s modules/credential-shield/tests -v
 python3 -m unittest discover -s modules/launchguard/tests -v
 ```
 
-The suites hold 17 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
+The suites hold 18 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
 
 ## Package layout
 
@@ -162,10 +189,13 @@ productcraft/
 │   ├── data-and-product-surfaces.md
 │   ├── responsive-accessibility.md
 │   ├── ethical-persuasion.md
+│   ├── ui-rules.md              # routes to the UI rulebook
 │   ├── ui-distiller/            # guide + design rules, patterns, quality gate
 │   ├── credential-shield/       # guide, references, policy example, simulator, tests
 │   └── launchguard/             # guide, security baseline, references, scanner, tests, report templates
 ├── references/
+│   ├── ui-rules/                # UI rulebook, one file per category
+│   ├── ui-rules-index.json
 │   ├── pattern-library.md       # UI/UX patterns with rules and guardrails
 │   └── pattern-index.json
 ├── scripts/check_package.py

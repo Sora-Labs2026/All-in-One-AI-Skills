@@ -1,10 +1,10 @@
 ---
 name: productcraft
-description: Sora Labs app-building and hardening skill with one router over task-specific modules (UI Distiller, Credential Shield, LaunchGuard) and a UI/UX pattern library. Automatically select task-relevant design hierarchy, component behavior, forms, data views, mobile UX, ethical conversion, authentication abuse defense or pre-launch security checks. Use when building or significantly modifying an application UI, flow, dashboard, authentication endpoint, sensitive workflow or preparing to launch. Implement changes in the actual codebase with tests; do not run every module on every task.
+description: Sora Labs app-building and hardening skill with one router over task-specific modules (UI Distiller, Credential Shield, LaunchGuard), a UI rulebook and a UI/UX pattern library. Automatically select task-relevant design hierarchy, component behavior, forms, data views, mobile UX, ethical conversion, authentication abuse defense or pre-launch security checks. Use when building or significantly modifying an application UI, flow, dashboard, authentication endpoint, sensitive workflow or preparing to launch. Implement changes in the actual codebase with tests; do not run every module on every task.
 license: MIT
 metadata:
   author: Sora Labs
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # ProductCraft: one skill, purpose-built modules
@@ -15,8 +15,9 @@ metadata:
 
 | Trigger in the actual task | Read these files | Typical execution |
 |---|---|---|
-| New UI, redesign, clean up AI-looking frontend | `modules/ui-distiller/GUIDE.md`; `modules/ui-distiller/references/design-rules.md`; `modules/product-design.md` | Find the job-to-be-done; restructure priorities; edit layout/tokens; verify real screenshots |
+| New UI, redesign, clean up AI-looking frontend | `modules/ui-distiller/GUIDE.md`; `modules/ui-distiller/references/design-rules.md`; `modules/product-design.md`; `modules/ui-rules.md` | Find the job-to-be-done; restructure priorities; edit layout/tokens; verify real screenshots |
 | Buttons, controls, motion, feedback, toasts, modals | `modules/interaction-feedback.md` | Implement honest states, keyboard, reduced motion, recovery |
+| Screen-level visual details: spacing, type, color, dark mode, buttons, form fields, navigation, icons, microcopy, settings, dashboards | `modules/ui-rules.md`, then only the matching `references/ui-rules/<category>.md` files | Apply the matching rules through the project's own tokens and components; cite rule IDs |
 | Forms, signup, OTP, checkout, search, password input | `modules/forms-conversion.md` | Validate at usable moments, clarify errors, preserve data and secure boundaries |
 | Data-heavy tools, tables, calendars, Kanban, chat, uploads, command palettes | `modules/data-and-product-surfaces.md` | Implement domain-specific layouts and interaction guarantees |
 | Mobile responsiveness or translation/RTL | `modules/responsive-accessibility.md` | Test target sizes, sheets, focus, text expansion, semantics |
@@ -33,10 +34,10 @@ metadata:
 1. Read project instructions and check actual source, routing, dependencies, tests, git status and design tokens; respect existing conventions and user edits.
 2. Determine page type, audience, primary task and dangerous operations. Identify primary fact/action and the highest-cost failure. Avoid inventing metrics, prices, user behavior or business rules.
 3. **Keep/Promote/Compress/Demote/Remove** existing UI elements. The first viewport must expose the user's core task, not generic hero, ornamental cards or redundant headings. Do not delete helpful legal, accessibility, expert, clinical or security content.
-4. Select **only** the relevant modules from the router. Read the matching entries in `references/pattern-library.md` when a specific interaction is unclear. Each pattern pairs a principle with an implementation rule and a guardrail.
+4. Select **only** the relevant modules from the router. Read the matching entries in `references/pattern-library.md` when a specific interaction is unclear, and the matching `references/ui-rules/` category when exact visual values or conventions are needed. Each pattern pairs a principle with an implementation rule and a guardrail.
 5. Implement in project code using semantic elements, coherent tokens, responsive states, real backend semantics, and accessible keyboard/focus behavior. Avoid static mock confirmations for real asynchronous actions.
 6. Verify populated, empty, pending, success, failure, slow, offline and narrow-width states where applicable. Test accessibility and regression; use existing test infrastructure. Do not claim visual, security or deployment verification that did not happen.
-7. Report changed files, pattern IDs applied, specialist security checks actually run, tests executed and any limitations. Use `assets/review-template.md`.
+7. Report changed files, pattern and UI rule IDs applied, specialist security checks actually run, tests executed and any limitations. Use `assets/review-template.md`.
 
 ## Specific safety and correctness overrides
 
@@ -55,6 +56,7 @@ metadata:
 - `modules/launchguard/references/security-baseline.md`: 20 baseline security controls, each with its gate, common trap and verification step.
 - `references/pattern-library.md`: UI/UX patterns, each with a principle, an implementation rule and a guardrail.
 - `references/pattern-index.json`: machine-readable pattern index.
+- `modules/ui-rules.md` and `references/ui-rules/`: UI rulebook with IDs (for example `BTN-02`), one file per category; `references/ui-rules-index.json` is its machine-readable index.
 - `assets/review-template.md`: implementation evidence summary template.
 
 ## Execution priority when several modules apply

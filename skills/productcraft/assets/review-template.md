@@ -4,6 +4,7 @@
 - User goal and routes touched:
 - Modules actually loaded:
 - Patterns applied (IDs from `references/pattern-library.md`):
+- UI rules applied (IDs from `references/ui-rules/`):
 - Existing code and design constraints:
 
 ## Implementation

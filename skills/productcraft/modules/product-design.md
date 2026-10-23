@@ -1,6 +1,6 @@
 # Product design and visual editing
 
-Route to the full [UI Distiller guide](ui-distiller/GUIDE.md) for comprehensive screen restyling. This module makes the matching entries in `../references/pattern-library.md` selectively actionable.
+Route to the full [UI Distiller guide](ui-distiller/GUIDE.md) for comprehensive screen restyling. This module makes the matching entries in `../references/pattern-library.md` selectively actionable. For exact spacing, type, color, radius and elevation values, use [ui-rules.md](ui-rules.md).
 
 ## Audit the screen, then implement
 

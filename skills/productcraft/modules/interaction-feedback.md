@@ -1,6 +1,6 @@
 # Controls, feedback and motion
 
-**System state must be comprehensible, not merely animated.** Related patterns in `../references/pattern-library.md`: 1, 4, 5, 10, 11, 19, 23-25, 29, 31-32, 36-46, 49-50, 61, 64, 68.
+**System state must be comprehensible, not merely animated.** Related patterns in `../references/pattern-library.md`: 1, 4, 5, 10, 11, 19, 23-25, 29, 31-32, 36-46, 49-50, 61, 64, 68. Button and feedback specifics: `BTN` and `FBK` rules in `../references/ui-rules/`.
 
 ## State contracts
 
