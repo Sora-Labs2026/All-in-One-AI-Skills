@@ -33,6 +33,33 @@
 | 4. Critical logic | [...] | [...] | [...] |
 | 5. Attacker perspective | [...] | [...] | [...] |
 
+## Security baseline (20 controls)
+
+Status per control: PASS / FAIL / NEEDS_REVIEW / NOT_APPLICABLE (why) / NOT_VERIFIED (why). See `references/security-baseline.md`.
+
+| # | Control | Gate | Status | Evidence / test |
+|---|---|---|---|---|
+| 1 | Hide API keys | 1 | | |
+| 2 | Purge Git secrets | 1 | | |
+| 3 | Use the public database key in the client | 1 | | |
+| 4 | Enable row-level security | 2, 4 | | |
+| 5 | Encrypt sensitive data | 2 | | |
+| 6 | Enforce server-side auth | 4 | | |
+| 7 | Lock record access | 4 | | |
+| 8 | Block field tampering | 4 | | |
+| 9 | Secure session cookies | 2 | | |
+| 10 | Hash passwords | 2 | | |
+| 11 | Rate-limit login | 3 | | |
+| 12 | Add bot protection | 3 | | |
+| 13 | Parameterize queries | 4 | | |
+| 14 | Validate all input | 4 | | |
+| 15 | Escape user content | 4 | | |
+| 16 | Restrict file uploads | 4 | | |
+| 17 | Trim API responses | 2 | | |
+| 18 | Add security headers | 3 | | |
+| 19 | Force HTTPS | 3 | | |
+| 20 | Scan dependencies | 3 | | |
+
 ## Findings (redacted)
 
 | ID | Gate | Severity | Confidence | File:line / component | Summary | State | Owner |
