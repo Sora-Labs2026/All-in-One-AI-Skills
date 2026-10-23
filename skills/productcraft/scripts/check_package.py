@@ -31,7 +31,7 @@ def check(root):
         lib=(root/'references'/'pattern-library.md').read_text()
         for p in patterns:
             if f"## {p.get('id',0):02d}. {p.get('title','')}" not in lib: failures.append(f"pattern {p.get('id')} not in pattern-library.md")
-    for p in ['WORKSPACE-SETUP-PROMPT.txt','README.md','modules/product-design.md','modules/interaction-feedback.md','modules/forms-conversion.md','modules/data-and-product-surfaces.md','modules/responsive-accessibility.md','modules/ethical-persuasion.md','assets/review-template.md']:
+    for p in ['WORKSPACE-SETUP-PROMPT.txt','README.md','LICENSE','modules/product-design.md','modules/interaction-feedback.md','modules/forms-conversion.md','modules/data-and-product-surfaces.md','modules/responsive-accessibility.md','modules/ethical-persuasion.md','assets/review-template.md']:
         if not (root/p).is_file(): failures.append('missing '+p)
     for slug in ['ui-distiller','credential-shield','launchguard']:
         d=root/'modules'/slug
