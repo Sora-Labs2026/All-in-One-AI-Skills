@@ -1,0 +1,35 @@
+{
+  "_warning": "ILLUSTRATIVE ONLY. NOT A PRODUCTION-READY OR CALIBRATED POLICY. Observe first and tune with actual traffic. Do not use numeric examples as universal values.",
+  "policy_id": "credential-shield-example-v1",
+  "mode": "observe_only",
+  "feature_flags": {
+    "collect_auth_telemetry": true,
+    "enforce_new_risk_decisions": false,
+    "use_trusted_ja4_if_available": false,
+    "allow_reversible_rollback": true
+  },
+  "windows_seconds": [60, 900, 86400],
+  "signals": {
+    "per_login_identifier_attempts": true,
+    "per_login_identifier_failed_attempts": true,
+    "distinct_trusted_sources_per_identifier": true,
+    "distinct_identifiers_per_trusted_source": true,
+    "corroborated_campaign_failure_rate": true,
+    "trusted_tls_fingerprint": "optional_unavailable_until_verified",
+    "verified_device_context": "optional_and_not_authentication"
+  },
+  "decisions": ["allow", "observe", "step_up", "throttle", "deny"],
+  "production_thresholds": "MUST_BE_CALIBRATED_FROM_BASELINES_AND_TESTING",
+  "state": {
+    "counter_store": "MUST_BE_ATOMIC_AND_SHARED",
+    "identifier_keying": "SERVER_SIDE_HMAC_OF_APP_CANONICAL_IDENTIFIER",
+    "ttl_policy": "SHORT_PURPOSE_BOUND_RETENTION",
+    "max_cardinality": "SET_FROM_ABUSE_AND_MEMORY_BUDGET",
+    "on_store_failure": "DOCUMENT_PER_ENDPOINT_DEGRADATION"
+  },
+  "audit": {
+    "redact_passwords_tokens_otp_and_cookies": true,
+    "avoid_raw_login_identifiers_and_high_cardinality_metric_labels": true,
+    "record_policy_version_and_reason_codes": true
+  }
+}
