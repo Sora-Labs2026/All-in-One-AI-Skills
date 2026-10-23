@@ -62,6 +62,7 @@ mkdir -p .agents/skills && cp -R /tmp/sora-skills/skills/productcraft .agents/sk
 ├── .claude-plugin/marketplace.json   # Claude Code plugin marketplace entry
 ├── .github/workflows/validate.yml    # runs package checks and tests on every push and PR
 ├── dist/                             # ready-to-upload ZIP + setup prompt for each skill
+├── LICENSE                           # MIT
 ├── scripts/build_dist.py             # rebuilds or verifies dist/ from skills/
 └── skills/
     └── productcraft/                 # the ProductCraft skill (SKILL.md is the entry point)
@@ -100,6 +101,6 @@ Every Sora Labs skill follows the same rules:
 
 ## License
 
-No open-source license has been chosen yet. Until one is added, all rights are reserved by Sora Labs.
+Released under the [MIT License](LICENSE). Anyone can use, copy, modify and share these skills, including for commercial work, as long as the copyright and license notice stay with the copies.
 
 © 2026 Sora Labs

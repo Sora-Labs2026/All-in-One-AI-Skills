@@ -1,6 +1,7 @@
 ---
 name: productcraft
 description: Sora Labs app-building and hardening skill with one router over task-specific modules (UI Distiller, Credential Shield, LaunchGuard) and a UI/UX pattern library. Automatically select task-relevant design hierarchy, component behavior, forms, data views, mobile UX, ethical conversion, authentication abuse defense or pre-launch security checks. Use when building or significantly modifying an application UI, flow, dashboard, authentication endpoint, sensitive workflow or preparing to launch. Implement changes in the actual codebase with tests; do not run every module on every task.
+license: MIT
 metadata:
   author: Sora Labs
   version: "1.0.0"

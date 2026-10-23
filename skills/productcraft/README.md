@@ -1,6 +1,6 @@
 # ProductCraft
 
-**A Sora Labs Agent Skill** · version 1.0.0 · part of [All-in-One AI Skills](../../README.md)
+**A Sora Labs Agent Skill** · version 1.0.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
 
 ProductCraft is one installable skill that teaches a coding agent to build product interfaces that **show the important thing first, respond honestly, work on every device, and are secured where it matters**. It routes each task to only the modules that task needs, so a table change reads the table guidance, an auth change reads the auth-defense module, and a launch reads the five-gate security review.
 
@@ -136,6 +136,7 @@ The suites hold 15 tests in total. They validate the package and its helper scri
 productcraft/
 ├── SKILL.md                     # single entry point and router
 ├── README.md                    # this file
+├── LICENSE                      # MIT
 ├── WORKSPACE-SETUP-PROMPT.txt   # paste-in installer prompt for ZIP uploads
 ├── assets/review-template.md
 ├── modules/
@@ -161,6 +162,8 @@ productcraft/
 - ProductCraft is a build guide. It does not guarantee security, accessibility compliance or a correct implementation in your app.
 - For apps that handle substantial money or sensitive data, arrange a qualified human security review before launch.
 
----
+## License
+
+Released under the [MIT License](LICENSE). Anyone can use, copy, modify and share ProductCraft, including for commercial work, as long as the copyright and license notice stay with the copies.
 
 © 2026 Sora Labs
