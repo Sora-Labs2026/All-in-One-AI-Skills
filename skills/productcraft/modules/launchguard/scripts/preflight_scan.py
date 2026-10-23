@@ -33,6 +33,9 @@ MAX_SIZE = 1024 * 1024
 MAX_FILES = 20000
 MAX_FINDINGS = 250
 
+# Fast digests that must never be used for password storage.
+FAST_HASH = r"(?:\b(?:md5|sha1)\s*\(|hashlib\.(?:md5|sha1|sha256|sha512)\s*\(|createHash\(\s*['\"](?:md5|sha1|sha256|sha512)['\"]|DigestUtils\.(?:md5|sha1|sha256))"
+
 RULES = [
     (
         "SECRET_LIKE_LITERAL", "HIGH", "LIKELY",
@@ -68,6 +71,16 @@ RULES = [
         "POSSIBLE_SENSITIVE_LOG", "MEDIUM", "POSSIBLE",
         re.compile(r"\b(?:console\.(?:log|error|warn|debug)|logger\.(?:debug|info|error|warn)|print)\s*\([^\n]*(?:password|secret|token|authorization|cookie)", re.I),
         "Logging statement may include sensitive material. Inspect whether only redacted metadata is logged.",
+    ),
+    (
+        "INSECURE_COOKIE_FLAG", "MEDIUM", "POSSIBLE",
+        re.compile(r"\bhttp_?only\s*[:=]\s*false\b|\bSESSION_COOKIE_(?:SECURE|HTTPONLY)\s*=\s*False\b|\bCSRF_COOKIE_SECURE\s*=\s*False\b", re.I),
+        "Cookie flag disables HttpOnly or Secure. Check the cookie's purpose; session and auth cookies need both in production.",
+    ),
+    (
+        "WEAK_PASSWORD_HASH", "HIGH", "POSSIBLE",
+        re.compile(rf"{FAST_HASH}[^\n]*pass(?:word|wd)|pass(?:word|wd)[^\n]*{FAST_HASH}", re.I),
+        "Fast hash near a password. Passwords need Argon2id, scrypt or bcrypt (or the auth provider); hashing high-entropy tokens this way is fine.",
     ),
 ]
 
@@ -164,7 +177,7 @@ def scan(root: Path) -> dict:
     counts = Counter(x["severity"] for x in results)
     return {
         "tool": "launchguard-heuristic-preflight",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "root": str(root),
         "scope": "bounded local text scan + Git INDEX paths (not Git history)",

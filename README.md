@@ -10,7 +10,7 @@ Each skill in this repository is a folder of instructions, references, scripts a
 
 | Skill | Version | What it does |
 |---|---|---|
-| [**ProductCraft**](skills/productcraft/README.md) | 1.0.0 | Builds and hardens app UIs with one routed skill: design hierarchy, honest interaction feedback, forms and checkout, data views, mobile and accessibility, ethical conversion, auth-abuse defense and pre-launch security review, backed by a UI/UX pattern library. |
+| [**ProductCraft**](skills/productcraft/README.md) | 1.1.0 | Builds and hardens app UIs with one routed skill: design hierarchy, honest interaction feedback, forms and checkout, data views, mobile and accessibility, ethical conversion, auth-abuse defense, a 20-control security baseline and pre-launch security review, backed by a UI/UX pattern library. |
 
 ## ProductCraft
 
@@ -23,7 +23,7 @@ ProductCraft helps an agent build interfaces that show the important thing first
 - **Responsive and accessibility**: touch targets, sheets vs. dialogs, keyboard, screen readers, i18n and RTL
 - **Ethical persuasion**: conversion without fake urgency, fake social proof or hidden fees
 - **Credential Shield**: defense against credential stuffing and password spraying on login, OTP, MFA and reset flows
-- **LaunchGuard**: five-gate pre-launch security review with a PASS / FAIL / NOT_VERIFIED evidence report
+- **LaunchGuard**: five-gate pre-launch security review with a PASS / FAIL / NOT_VERIFIED evidence report, plus a 20-control security baseline covering API keys, Git secrets, row-level security, server-side auth, record access, field tampering, session cookies, password hashing, login rate limits, bot protection, query parameterization, input validation, output escaping, file uploads, API responses, security headers, HTTPS and dependency scanning
 - **Pattern library**: UI/UX patterns, each with a principle, an implementation rule and a guardrail
 
 Full details, example prompts and limitations are in the [ProductCraft README](skills/productcraft/README.md).
@@ -61,6 +61,7 @@ mkdir -p .agents/skills && cp -R /tmp/sora-skills/skills/productcraft .agents/sk
 .
 ├── .claude-plugin/marketplace.json   # Claude Code plugin marketplace entry
 ├── .github/workflows/validate.yml    # runs package checks and tests on every push and PR
+├── CHANGELOG.md
 ├── dist/                             # ready-to-upload ZIP + setup prompt for each skill
 ├── LICENSE                           # MIT
 ├── scripts/build_dist.py             # rebuilds or verifies dist/ from skills/

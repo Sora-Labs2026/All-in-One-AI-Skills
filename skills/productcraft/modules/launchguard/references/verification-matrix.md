@@ -25,7 +25,7 @@ Evidence classes:
 
 Run: `python3 scripts/preflight_scan.py --root /path/to/repo --json-out /path/to/repo/security/launchguard-scan.json`
 
-What it does: bounded local text scan of common source/config filetypes; detects some credential-like literals (without writing them), suspicious public-variable names, potential debug/CORS/TLS bypass/unsafe HTML/logging patterns, tracks Git-indexed `.env` names when Git exists. Reports `candidate` findings as redacted file+line only.
+What it does: bounded local text scan of common source/config filetypes; detects some credential-like literals (without writing them), suspicious public-variable names, potential debug/CORS/TLS bypass/unsafe HTML/logging patterns, cookies with HttpOnly or Secure disabled, fast hashes used on passwords, tracks Git-indexed `.env` names when Git exists. Reports `candidate` findings as redacted file+line only.
 
 What it cannot do: cryptographic secret validation, full Git-history scanning, execution tracing, effective cloud configuration, true authorization checks, RLS policy quality, confirmed XSS/SQLi, full SCA or penetration tests. Requires reasoning, broader tools and negative tests.
 

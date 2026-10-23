@@ -32,7 +32,7 @@ Create per-field map: collection -> frontend -> backend -> database/cache/queue 
 
 **Authn vs authz:** authentication identifies caller; route, row and action authorization checks whether caller is allowed. Inspect every endpoint with user-supplied IDs, pagination filters, tenant IDs, admin actions, GraphQL resolvers, server actions and storage access. Owner or tenant comes from verified context, not an untrusted request.
 
-**Session/reset:** reset and email-verify tokens random, one-time, bound to user, expiry and revocation. Fixed 15 minutes is a *guide recommendation*, not a universal mandate; choose risk-appropriate lifetime and provider behavior. JWT should validate signature, intended algorithms, issuer/audience, expiry. Expired sessions should not authorize actions; define logout and refresh token revocation.
+**Session/reset:** reset and email-verify tokens random, one-time, bound to user, expiry and revocation. A fixed 15-minute lifetime is a common default, not a universal mandate; choose risk-appropriate lifetime and provider behavior. JWT should validate signature, intended algorithms, issuer/audience, expiry. Expired sessions should not authorize actions; define logout and refresh token revocation.
 
 **Payments:** server derives amount and currency from trusted price definitions; verifies provider callbacks and raw-body requirements; event ID deduplication; replay-safe state transitions, pending->paid->refunded/cancelled; receipt checks and reconciliation; only verified captures/settlement according to product semantics trigger entitlement. Client redirects/thank-you pages are not proof of payment. Stripe, Dodo Payments, Razorpay and others have different schemas and signatures: use actual provider docs.
 

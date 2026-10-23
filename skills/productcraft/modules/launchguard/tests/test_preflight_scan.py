@@ -82,6 +82,26 @@ class PreflightScanTests(unittest.TestCase):
             self.assertNotIn("element.innerHTML = input;", json.dumps(result))
             self.assertEqual(item["classification"], "CANDIDATE_NOT_CONFIRMED")
 
+    def test_insecure_cookie_flags(self):
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "session.ts").write_text("res.cookie('sid', id, { http" + "Only: false });\n")
+            (Path(d) / "settings.py").write_text("SESSION_COOKIE_" + "SECURE = False\n")
+            (Path(d) / "safe.ts").write_text("res.cookie('sid', id, { httpOnly: true, secure: true, sameSite: 'lax' });\n")
+            result = module.scan(Path(d))
+            hits = sorted(x["file"] for x in result["findings"] if x["rule_id"] == "INSECURE_COOKIE_FLAG")
+            self.assertEqual(hits, ["session.ts", "settings.py"])
+
+    def test_weak_password_hash(self):
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "auth.js").write_text("const h = crypto.createHash('" + "md5').update(password).digest('hex');\n")
+            (Path(d) / "auth.py").write_text("digest = hashlib." + "sha256(password.encode()).hexdigest()\n")
+            (Path(d) / "good.ts").write_text("const h = await argon2.hash(password);\n")
+            (Path(d) / "etag.ts").write_text("const etag = crypto.createHash('sha256').update(fileBuffer).digest('hex');\n")
+            result = module.scan(Path(d))
+            hits = sorted(x["file"] for x in result["findings"] if x["rule_id"] == "WEAK_PASSWORD_HASH")
+            self.assertEqual(hits, ["auth.js", "auth.py"])
+            self.assertTrue(all(x["severity"] == "HIGH" for x in result["findings"] if x["rule_id"] == "WEAK_PASSWORD_HASH"))
+
 
 if __name__ == "__main__":
     unittest.main()

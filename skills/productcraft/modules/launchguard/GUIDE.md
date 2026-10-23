@@ -9,7 +9,7 @@
 - A user asks to launch, ship, deploy, secure, audit, review, or harden an app, especially an AI-generated app.
 - Auth, authorization, payments, files, personal data, public APIs, or production configuration have changed substantially.
 - User explicitly asks for LaunchGuard or to 'run the five security checks'.
-- Do **not** run a full audit on every cosmetic UI change. Use focused security checks when the changed code crosses a security boundary.
+- Do **not** run a full audit on every cosmetic UI change. When the changed code crosses a security boundary, run a scoped check of only the matching controls in the [security baseline](references/security-baseline.md).
 
 ## Ground rules
 
@@ -77,11 +77,12 @@
 2. Fix narrow root causes. Preserve existing user edits and business rules. Follow framework-native patterns, update tests, run repo's formatter/typecheck/lint/unit/integration/build and any safe security tests. If unavailable, record `NOT_VERIFIED`.
 3. Re-run relevant tests after fixes. Keep static hints (`suspected`) separate from confirmed vulnerabilities and from test-verified repairs.
 4. Write `security/launchguard-report.md` and, if useful, `security/launchguard-findings.json` using [reporting conventions](references/findings-and-release-gates.md) and [template](assets/SECURITY-REVIEW-REPORT.template.md). Store only sanitized facts; avoid sensitive logs and executable exploit payloads.
-5. Result must enumerate **all five gates** and their statuses, changed files, tests and their outcomes, unresolved findings with severity/owner/next step, manual provider/deployment checks, and a **GO**, **CONDITIONAL GO**, or **NO-GO** recommendation, explicitly scoped to checked code and environments.
+5. Result must enumerate **all five gates** and **all 20 security baseline controls** with their statuses, changed files, tests and their outcomes, unresolved findings with severity/owner/next step, manual provider/deployment checks, and a **GO**, **CONDITIONAL GO**, or **NO-GO** recommendation, explicitly scoped to checked code and environments.
 6. Never declare the app 'unhackable', 'production secure', independently penetration tested, compliant or approved for launch solely because LaunchGuard ran. High-stakes/high-value applications need a human security review.
 
 ## References to consult selectively
 
+- [20-control security baseline](references/security-baseline.md)
 - [Five gates and detailed requirements](references/five-gates.md)
 - [Stack-specific traps, auth and payment patterns](references/stack-playbooks.md)
 - [Verification matrix and tools](references/verification-matrix.md)
