@@ -1,0 +1,23 @@
+PRODUCTCRAFT BY SORA LABS | SINGLE-ZIP WORKSPACE INSTALLATION AND ACTIVATION
+
+I have attached/uploaded `productcraft.zip` to this coding workspace. It contains ONE Agent Skill: ProductCraft. Please install it, integrate its task-aware rules with this repository, and apply its relevant guidance during current and future development work.
+
+1. Locate `productcraft.zip` in actual workspace/attachment paths. Inspect archive listing before extraction; reject absolute paths, `..` traversal, suspicious symlinks and unauthorized overwrites. Do not run bundled scripts just to install. If the ZIP truly isn't accessible, explain the missing access rather than inventing success.
+
+2. Extract the single top-level `productcraft/` directory. Install it into the coding agent's documented project-local skill directory. Prefer `.agents/skills/productcraft/` for compatible agents or `.claude/skills/productcraft/` when Claude Code project conventions require it. Follow the agent's actual installed skill discovery rules. Do not duplicate the registration or overwrite unrelated skills/files. Keep `SKILL.md`, `modules/`, `references/`, `scripts/`, `tests/`, `assets/`, `README.md` and `WORKSPACE-SETUP-PROMPT.txt` intact.
+
+3. Read `productcraft/SKILL.md` fully. Confirm YAML frontmatter `name: productcraft` and run `python3 <installed folder>/scripts/check_package.py --root <installed folder>` if Python 3 is available. Run bundled tests for Credential Shield and LaunchGuard when feasible, resolving their paths relative to the installed ProductCraft root. Treat module guides named `GUIDE.md` as reference modules, NOT separate installs or invocations.
+
+4. Examine existing project instructions (e.g., AGENTS.md or CLAUDE.md). Append the following project-scoped rule without erasing other instructions. If an equivalent rule already exists, update rather than duplicate it:
+
+'For significant frontend creation/redesign, UI interaction changes, complex forms, tables, dashboards, mobile layouts, or workflow UX, invoke the project-local ProductCraft skill and selectively read the matching design and interaction modules. Prioritize essential content, remove unnecessary visual noise, preserve accessible keyboard/touch behavior and real async/error handling. Use ethically transparent conversion techniques only; never fake scarcity, typing, fees, progress, social proof or server confirmations. For changes to auth/OTP/password recovery, consult its bundled Credential Shield module. For release preparation and changes to privileged operations, money, user data or production security, consult its bundled LaunchGuard module and perform scoped or five-gate verification as appropriate. Never apply the whole pattern library or run a full security audit on trivial copy/CSS edits. Keep reports honest and do not modify production secrets, cloud policy, live data or deployments without explicit authorization.'
+
+5. Read the relevant current project code before editing. Respect git status, business requirements and existing branding. Select only the skill modules required by the current task; inspect the `references/pattern-library.md` entries relevant to the changed UI. Never create demo components for every pattern.
+
+6. On applicable changes, implement the real code, not just suggestions. Check desktop/mobile, keyboard, reduced motion, empty/loading/error/success states, data privacy and backend authorization as relevant. Never show paid, booked, deleted or secured until verified by the actual server/provider. Use existing dependencies and avoid needless rewrites.
+
+7. Return a concise change report containing selected modules, pattern IDs consulted, files changed, actual tests run/results, and any unresolved issue. For deployment-related work, report release readiness evidence and permissions needed rather than declaring generic security certification.
+
+8. If overlapping design or security skills are already installed, do not silently remove them. Prefer ProductCraft as the single default router; avoid overlapping invocation or redundant instructions. Remove duplicates only with authorization.
+
+START NOW by locating and installing the provided ZIP and examining this repository. If there is a current feature to implement, apply only relevant modules. Otherwise, confirm installation and tell me which project triggers will activate ProductCraft. Do not perform unrequested project-wide redesigns or audits.

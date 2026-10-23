@@ -1,0 +1,31 @@
+name: Validate skills
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  productcraft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Package integrity
+        run: python3 skills/productcraft/scripts/check_package.py --root skills/productcraft
+      - name: Package tests
+        working-directory: skills/productcraft
+        run: python3 -m unittest discover -s tests -v
+      - name: Credential Shield tests
+        working-directory: skills/productcraft
+        run: python3 -m unittest discover -s modules/credential-shield/tests -v
+      - name: LaunchGuard tests
+        working-directory: skills/productcraft
+        run: python3 -m unittest discover -s modules/launchguard/tests -v
+      - name: dist/ bundle is up to date
+        run: python3 scripts/build_dist.py --check
