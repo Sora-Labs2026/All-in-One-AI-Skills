@@ -1,0 +1,961 @@
+<!doctype html>
+<!-- ProductCraft example: buttons, continued. Original Sora Labs example, MIT License.
+     Demonstrates: BTN-02, BTN-05, BTN-08, BTN-10, BTN-11, BTN-15, CMP-11, CMP-12, CMP-16, CMP-23, NAV-04, NAV-15,
+     FBK-01, FBK-08, FBK-10, COP-01, COP-04, COP-09, COL-07, COL-10, DRK-05, DRK-09, ICO-04, ICO-08, ENG-01, ENG-02,
+     ENG-03, ENG-05, ENG-06, ENG-07, MOB-01, MOB-03, MOB-04, TYP-09, MOT-01 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Buttons, continued</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    /* Extra tokens: pressed fill, destructive hover and a scrim that keeps labels on it legible (BTN-02, COL-12) */
+    :root { --accent-press: #3730a3; --danger-hover: #991b1b; --scrim: rgba(15, 17, 21, 0.56); }
+    [data-theme="dark"] { --accent-press: #c7d2fe; --danger-hover: #fca5a5; color: var(--text); }
+
+    [hidden] { display: none !important; }
+    .sheet-header h1 { margin-top: var(--space-2); }
+    .variant > .variant-stage { flex: 1 0 auto; }
+    .stage-fill { width: 100%; }
+    .i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .btn .i { width: 18px; height: 18px; }
+    .card h3 { font-size: var(--text-md); }
+    /* Inner layer carries the press scale so the hit box never moves (BTN-12, ENG-04) */
+    .btn-in { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); transition: transform var(--dur-fast) var(--ease-out); }
+    .btn:active > .btn-in { transform: scale(0.97); }
+    .btn-primary:active { background: var(--accent-press); }
+    .btn-danger:hover { background: var(--danger-hover); }
+    /* Stacked labels: the widest state label sets the width (ENG-03) */
+    .stack { display: grid; }
+    .stack > .lbl { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); visibility: hidden; }
+    .spin { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    kbd { font: inherit; font-size: var(--text-xs); padding: 0 var(--space-1); border-radius: 4px; border: 1px solid var(--border); background: var(--surface-2); }
+
+    /* v7 formatting toolbar and view button group */
+    .v7 { display: grid; gap: var(--space-4); }
+    .editor { padding: 0; overflow: hidden; }
+    .tb { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border); }
+    .tb .sep { width: 1px; height: 24px; margin: 0 var(--space-2); background: var(--border); }
+    .tog { position: relative; display: inline-grid; place-items: center; width: 40px; height: 40px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-2); cursor: pointer;
+      transition-property: background-color, color; transition-duration: var(--dur-fast); }
+    .tog:hover { background: var(--surface-2); color: var(--text); }
+    /* Pressed: tint, a heavier glyph and an underline bar, so the state never rests on hue alone (COL-07, ICO-08) */
+    .tog[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); }
+    .tog[aria-pressed="true"] .i { stroke-width: 2.4; }
+    .tog[aria-pressed="true"]::after { content: ""; position: absolute; left: 12px; right: 12px; bottom: 4px; height: 2px; border-radius: 2px; background: var(--accent); }
+    .tb-note { margin-left: auto; font-size: var(--text-xs); color: var(--text-3); }
+    .doc { padding: var(--space-4) var(--space-5) var(--space-5); }
+    .doc-meta { margin-top: 2px; font-size: var(--text-xs); color: var(--text-3); }
+    .doc p:not(.doc-meta) { margin-top: var(--space-3); color: var(--text-2); }
+    .sel { color: var(--text); background: var(--accent-soft); box-shadow: 0 0 0 2px var(--accent-soft); border-radius: 2px; }
+    .doc-list { margin: var(--space-2) 0 0; padding-left: var(--space-5); color: var(--text-2); }
+    .doc-list[data-list="none"] { list-style: none; padding-left: 0; }
+    .doc-list[data-list="bullets"] { list-style: disc; }
+    .doc-list[data-list="numbers"] { list-style: decimal; }
+    .files { padding: var(--space-4) var(--space-5) var(--space-5); }
+    .files-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
+    .files-head p { font-size: var(--text-sm); color: var(--text-3); }
+    .bgroup { display: inline-flex; }
+    .bgroup button { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 var(--space-4) 0 var(--space-3); border: 1px solid var(--border); background: var(--surface); color: var(--text-2); font-size: var(--text-sm); font-weight: 600; cursor: pointer;
+      transition-property: background-color, border-color, color; transition-duration: var(--dur-fast); }
+    .bgroup button .i { width: 18px; height: 18px; }
+    .bgroup button + button { margin-left: -1px; }
+    .bgroup button:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+    .bgroup button:last-child { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+    .bgroup button:hover { background: var(--surface-2); color: var(--text); }
+    .bgroup button[aria-pressed="true"] { z-index: 1; background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+    .bgroup button[aria-pressed="true"] .i { stroke-width: 2.4; }
+    .bgroup button:focus-visible { z-index: 2; }
+    .fview { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+    .fview[data-view="grid"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .fview[data-view="list"] { gap: 0; }
+    .fitem { min-width: 0; }
+    .thumb { display: block; overflow: hidden; background: var(--surface-2); }
+    .thumb svg { display: block; width: 100%; height: 100%; }
+    .fname { font-size: var(--text-sm); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .fmeta { font-size: var(--text-xs); color: var(--text-3); }
+    [data-view="grid"] .fitem { display: flex; flex-direction: column; gap: var(--space-2); }
+    [data-view="grid"] .ftext { display: flex; flex-direction: column; min-width: 0; }
+    [data-view="grid"] .thumb { aspect-ratio: 4 / 3; border-radius: var(--radius-sm); border: 1px solid var(--border); }
+    [data-view="list"] .fitem { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); padding: var(--space-2) 0; border-top: 1px solid var(--border); }
+    [data-view="list"] .fitem:first-child { border-top: 0; }
+    [data-view="list"] .thumb { width: 36px; height: 36px; border-radius: 6px; }
+    [data-view="list"] .ftext { display: contents; }
+    [data-view="list"] .fmeta { text-align: right; }
+
+    /* v8 social toggles */
+    .v8 { display: grid; gap: var(--space-4); }
+    .post { padding: var(--space-5); }
+    .author { display: flex; align-items: center; gap: var(--space-3); }
+    .author .avatar { width: 40px; height: 40px; font-size: var(--text-sm); }
+    .who { flex: 1; min-width: 0; }
+    .who b { display: block; font-size: var(--text-md); }
+    .who > span { display: block; font-size: var(--text-sm); color: var(--text-3); }
+    .follow[data-on="false"] .lbl[data-for="off"], .follow[data-on="true"] .lbl[data-for="on"] { visibility: visible; }
+    /* Following is a quieter confirmation than the call to follow (COP-09) */
+    .follow[data-on="true"] { background: var(--surface); border-color: var(--border); color: var(--text); }
+    .follow[data-on="true"]:hover { background: var(--surface-2); }
+    .kicker { margin-top: var(--space-4); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .post h3 { margin-top: 2px; font-size: var(--text-lg); }
+    .post-dek { margin-top: var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .acts { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--border); }
+    .act { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface); color: var(--text-2); font-size: var(--text-sm); font-weight: 600; cursor: pointer; text-decoration: none;
+      transition-property: background-color, border-color, color; transition-duration: var(--dur-fast); }
+    .act:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    .act .i { width: 18px; height: 18px; }
+    .act .cnt { min-width: 3ch; }
+    /* Outline glyph at rest, filled glyph plus accent border when pressed (ICO-08, COL-07) */
+    .act[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+    .act[aria-pressed="true"] .i { fill: currentColor; }
+    .acts .icon-btn { margin-left: auto; }
+    .sr { padding: var(--space-4) var(--space-5); border-radius: var(--radius-lg); background: var(--surface); border: 1px dashed var(--border); }
+    .sr-title { display: flex; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-3); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .sr-title .i { width: 16px; height: 16px; }
+    .sr-list { display: grid; gap: var(--space-2); margin: 0; }
+    .sr-list div { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: var(--space-3); align-items: baseline; }
+    .sr-list dt { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .sr-list dd { margin: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--text); }
+    .sr-list .live { padding-top: var(--space-2); border-top: 1px solid var(--border); }
+    .sr-list .live dd { color: var(--accent-ink); }
+
+    /* v9 copy to clipboard */
+    .v9 { display: grid; gap: var(--space-4); }
+    .seq3 { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: end; gap: var(--space-2); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--surface); border: 1px dashed var(--border); }
+    .seq3 .step { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); }
+    .seq3 small { font-size: var(--text-xs); color: var(--text-3); white-space: nowrap; }
+    .seq3 small b { color: var(--text-2); font-weight: 600; }
+    .seq3 .arrow { width: 16px; height: 16px; margin-bottom: 12px; color: var(--text-3); }
+    .copy[data-state="idle"] [data-for="idle"], .copy[data-state="done"] [data-for="done"], .copy[data-state="manual"] [data-for="manual"] { visibility: visible; }
+    /* The verdict color appears only once the copy really happened, paired with a check and a word (COL-10) */
+    .copy[data-state="done"] { color: var(--success); }
+    .copy-card { padding: var(--space-5); }
+    .flabel { display: block; font-size: var(--text-sm); font-weight: 600; }
+    .fhelp { margin-top: 2px; font-size: var(--text-xs); color: var(--text-3); }
+    .copy-row { display: flex; gap: var(--space-2); margin-top: var(--space-3); }
+    .ro { flex: 1; min-width: 0; height: 40px; padding: 0 var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text); font-size: var(--text-sm); }
+    .keys { padding: var(--space-2) var(--space-5) var(--space-3); }
+    .key-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; }
+    .key-row + .key-row { border-top: 1px solid var(--border); }
+    .key-name { font-size: var(--text-sm); font-weight: 600; }
+    .key-val { display: block; margin-top: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: var(--text-sm); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .key-acts { display: flex; gap: var(--space-1); }
+    .tipw { position: relative; display: inline-flex; }
+    .ctip { position: absolute; right: 0; bottom: calc(100% + 6px); padding: var(--space-1) var(--space-2); border-radius: 6px; background: var(--text); color: var(--surface); font-size: var(--text-xs); font-weight: 600; white-space: nowrap; pointer-events: none;
+      opacity: 0; transform: translateY(4px); transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+    .ctip .done { display: none; }
+    /* Tooltip names the button on hover and keyboard focus, and turns into the confirmation (CMP-11, ICO-04) */
+    .tipw:hover .ctip, .tipw:focus-within .ctip, .tipw[data-state="done"] .ctip { opacity: 1; transform: none; }
+    .tipw[data-state="done"] .ctip .idle { display: none; }
+    .tipw[data-state="done"] .ctip .done { display: inline; }
+    .ic-done { display: none; }
+    .tipw[data-state="done"] .icon-btn { color: var(--success); }
+    .tipw[data-state="done"] .ic-copy { display: none; }
+    .tipw[data-state="done"] .ic-done { display: block; }
+    .icon-btn[aria-pressed="true"] { background: var(--surface-2); color: var(--text); }
+    .codes-card { padding: var(--space-4) var(--space-5); }
+    .codes-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .codes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2); margin: var(--space-3) 0 0; padding: 0; list-style: none; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: var(--text-sm); }
+    .codes li { padding: var(--space-1) 0; border-radius: 6px; background: var(--surface-2); text-align: center; }
+    .code { border-radius: var(--radius-lg); background: var(--surface); border: 1px solid var(--border); overflow: hidden; }
+    .code-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); border-bottom: 1px solid var(--border); font-size: var(--text-xs); color: var(--text-2); }
+    .code-head .btn { min-height: 32px; padding: 0 var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
+    .code pre { margin: 0; padding: var(--space-4); overflow-x: auto; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: var(--text-sm); line-height: 1.7; color: var(--text); }
+    .code .tok-k { color: var(--accent-ink); }
+    .code .tok-s { color: var(--success); }
+
+    /* v10 floating action button and speed dial */
+    .v10 { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: var(--space-5); align-items: center; }
+    .v10 .phone { height: 720px; color: var(--text); }
+    .v10 .phone-body { position: relative; }
+    .app { flex: 1; overflow-y: auto; padding: var(--space-2) var(--space-4) 96px; scrollbar-width: none; }
+    .app-head { display: flex; align-items: center; justify-content: space-between; padding: var(--space-2) 0 var(--space-4); }
+    .app-date { font-size: var(--text-sm); color: var(--text-3); }
+    .app-title { font-size: var(--text-xl); font-weight: 700; }
+    .app .avatar { width: 36px; height: 36px; }
+    .grp { margin: var(--space-4) 0 var(--space-1); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .tasks { margin: 0; padding: 0; list-style: none; background: var(--surface); border-radius: var(--radius-lg); border: 1px solid var(--border); }
+    .task { display: flex; align-items: flex-start; gap: var(--space-3); min-height: 56px; padding: var(--space-3) var(--space-4); cursor: pointer; }
+    .tasks li + li .task { border-top: 1px solid var(--border); }
+    .task input { appearance: none; -webkit-appearance: none; flex: none; width: 22px; height: 22px; margin: 1px 0 0; border: 1.75px solid var(--text-3); border-radius: 50%; cursor: pointer; }
+    .task input { display: grid; place-items: center; }
+    .task input::after { content: ""; width: 9px; height: 5px; margin-top: -2px; border-left: 2px solid var(--on-accent); border-bottom: 2px solid var(--on-accent); transform: rotate(-45deg); opacity: 0; }
+    .task input:checked { background: var(--accent); border-color: var(--accent); }
+    .task input:checked::after { opacity: 1; }
+    .task:has(input:checked) b { color: var(--text-2); text-decoration: line-through; }
+    .task b { display: block; font-size: var(--text-md); font-weight: 500; line-height: 1.35; }
+    .task small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    /* Bottom bar and button read the safe-area inset at runtime (MOB-04) */
+    .v10 .phone-body { --safe-b: env(safe-area-inset-bottom, 0px); }
+    .tabbar { position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: repeat(4, 1fr); height: calc(64px + var(--safe-b)); padding-bottom: var(--safe-b); background: var(--surface); border-top: 1px solid var(--border); }
+    .tabbar a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--text-3); font-size: var(--text-xs); font-weight: 600; text-decoration: none; }
+    .tabbar a .i { width: 22px; height: 22px; }
+    .tabbar a[aria-current="page"] { color: var(--accent-ink); }
+    .tabbar a[aria-current="page"] .i { stroke-width: 2.25; }
+    .scrim { position: absolute; inset: 0; background: var(--scrim); opacity: 0; visibility: hidden; transition: opacity var(--dur-med) var(--ease-out), visibility 0s linear var(--dur-med); }
+    .dial { position: absolute; right: var(--space-4); bottom: calc(64px + var(--safe-b) + var(--space-4)); display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-3); }
+    .dial-list { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-2); margin: 0; padding: 0 var(--space-2) 0 0; list-style: none; }
+    .dial-act { display: inline-flex; align-items: center; gap: var(--space-3); min-height: 48px; padding: 0; border: 0; background: transparent; color: var(--text); cursor: pointer;
+      opacity: 0; transform: translateY(8px); transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+    .dial-lbl { padding: 6px var(--space-3); border-radius: var(--radius-sm); background: var(--surface); font-size: var(--text-sm); font-weight: 600; box-shadow: var(--shadow-sm); }
+    .mini { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--surface); color: var(--accent-ink); box-shadow: var(--shadow-sm); }
+    .dial-act:hover .mini, .dial-act:hover .dial-lbl { background: var(--accent-soft); }
+    .fab { display: inline-flex; align-items: center; gap: var(--space-2); height: 56px; min-width: 56px; padding: 0 var(--space-5) 0 var(--space-4); border: 0; border-radius: 18px; background: var(--accent); color: var(--on-accent); font-size: var(--text-md); font-weight: 600; cursor: pointer; box-shadow: var(--shadow-lg); }
+    .fab:hover { background: var(--accent-hover); }
+    .fab .i { width: 24px; height: 24px; transition: transform var(--dur-med) var(--ease-out); }
+    /* One root attribute drives the open state: scrim, actions, icon turn and the collapsed label (ENG-06) */
+    .dial-root[data-open="true"] .scrim { opacity: 1; visibility: visible; transition-delay: 0s; }
+    .dial-root[data-open="true"] .dial-act { opacity: 1; transform: none; }
+    .dial-root[data-open="true"] .fab .i { transform: rotate(45deg); }
+    .dial-root[data-open="true"] .fab, .dial-root[data-compact="true"] .fab { justify-content: center; padding: 0; }
+    .dial-root[data-open="true"] .fab-txt, .dial-root[data-compact="true"] .fab-txt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .dial-root[data-open="false"] .dial-list { visibility: hidden; }
+    .specs { display: grid; gap: var(--space-3); }
+    .spec { margin: 0; padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--border); }
+    .spec-vis { display: flex; align-items: center; justify-content: flex-start; gap: var(--space-3); min-height: 56px; margin-bottom: var(--space-3); }
+    .spec .fab { cursor: default; box-shadow: var(--shadow-sm); }
+    .spec .fab.round { justify-content: center; width: 56px; padding: 0; }
+    .spec .fab.round .i { transform: rotate(45deg); }
+    .spec-vis.on-scrim { justify-content: flex-end; padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--scrim); }
+    .spec figcaption { font-size: var(--text-xs); line-height: 1.45; color: var(--text-2); }
+    .spec figcaption b { display: block; margin-bottom: 2px; font-size: var(--text-sm); color: var(--text); }
+
+    /* v11 dialog button order (dark) */
+    .v11 { display: grid; gap: var(--space-5); }
+    .cap { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); margin-bottom: var(--space-2); font-size: var(--text-xs); color: var(--text-3); }
+    .cap b { font-size: var(--text-sm); color: var(--text); font-weight: 600; }
+    .dlg { padding: var(--space-5); border-radius: var(--radius-lg); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-lg); }
+    .dlg h3 { font-size: var(--text-md); }
+    .dlg-desc { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--text-2); }
+    .dlg-foot { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-5); }
+    .dlg-foot .apart { margin-right: auto; } /* the non-saving exit sits apart from the pair */
+    .dz-head { display: flex; align-items: flex-start; gap: var(--space-3); }
+    .warn-ic { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--danger-soft); color: var(--danger); }
+    .impact { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); margin: var(--space-4) 0 0; padding: 0; list-style: none; }
+    .impact li { padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--surface-2); }
+    .impact b { display: block; font-size: var(--text-lg); line-height: 1.3; }
+    .impact span { font-size: var(--text-xs); color: var(--text-2); }
+    .dz-field { margin-top: var(--space-4); }
+    .dz-field label { display: block; margin-bottom: 6px; font-size: var(--text-sm); color: var(--text-2); }
+    .dz-field label b { color: var(--text); }
+    .dz-input { width: 100%; height: 44px; padding: 0 var(--space-3); border: 1px solid #6b7280; border-radius: var(--radius-sm); background: var(--bg); font-size: var(--text-md); }
+    .dz-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.3); }
+    .dz-hint { display: flex; align-items: center; gap: 6px; min-height: 18px; margin-top: 6px; font-size: var(--text-xs); color: var(--text-3); }
+    .dz-hint .i { width: 14px; height: 14px; }
+    .dz-hint[data-tone="ok"] { color: var(--text-2); }
+    .dz-hint[data-tone="error"] { color: var(--danger); }
+    .dz .dlg-foot { margin-top: var(--space-4); }
+
+    /* v12 pagination and load more */
+    .v12 { display: grid; gap: var(--space-4); }
+    .v12 .card { padding: var(--space-4) var(--space-5) var(--space-5); }
+    .list-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); }
+    .list-head p { font-size: var(--text-sm); color: var(--text-2); }
+    .list-head p:focus-visible { outline-offset: 4px; }
+    .tpl-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+    .tpl { display: block; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); overflow: hidden; color: inherit; transition: border-color var(--dur-fast); }
+    .tpl:hover { border-color: var(--text-3); text-decoration: none; }
+    .tpl-thumb { display: block; height: 56px; background: var(--surface-2); }
+    .tpl-thumb svg { display: block; width: 100%; height: 100%; }
+    .tpl-body { display: block; padding: var(--space-2) var(--space-3) var(--space-3); }
+    .tpl-name { display: block; font-size: var(--text-sm); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tpl-meta { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .pager { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-top: var(--space-4); }
+    .pages { display: flex; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+    .pg { display: inline-grid; place-items: center; min-width: 36px; height: 36px; padding: 0 var(--space-2); border-radius: var(--radius-sm); color: var(--text-2); font-size: var(--text-sm); font-weight: 600; }
+    a.pg:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    /* Current page: tint, border and heavier weight (NAV-03, COL-07) */
+    .pg[aria-current="page"] { background: var(--accent-soft); color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent); font-weight: 700; }
+    .pg-gap { color: var(--text-3); min-width: 24px; }
+    .pg-step { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 36px; padding: 0 var(--space-3) 0 var(--space-2); border-radius: var(--radius-sm); color: var(--text); font-size: var(--text-sm); font-weight: 600; border: 1px solid var(--border); }
+    .pg-step.next { padding: 0 var(--space-2) 0 var(--space-3); }
+    .pg-step .i { width: 16px; height: 16px; }
+    a.pg-step:hover { background: var(--surface-2); text-decoration: none; }
+    .pg-step[aria-disabled="true"] { color: var(--text-3); }
+    .po-list { margin: 0; padding: 0; list-style: none; }
+    .po { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto 96px; align-items: center; gap: var(--space-3); min-height: 44px; padding: 0 var(--space-2); margin: 0 calc(-1 * var(--space-2)); border-radius: var(--radius-sm); color: var(--text); font-size: var(--text-sm); }
+    .po:hover { background: var(--surface-2); text-decoration: none; }
+    .po-list li + li { border-top: 1px solid var(--border); }
+    .po-date { color: var(--text-2); }
+    .po-dest { color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .po-amt { text-align: right; font-weight: 600; }
+    .po-list li.is-new { animation: rise var(--dur-med) var(--ease-out) backwards; }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+    .po-foot { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--border); }
+    .po-foot p { font-size: var(--text-sm); color: var(--text-2); }
+    .meter { width: 160px; height: 4px; border-radius: var(--radius-pill); background: var(--border); overflow: hidden; }
+    .meter span { display: block; height: 100%; background: var(--accent); transform-origin: left center; transform: scaleX(var(--p, 0)); transition: transform var(--dur-med) var(--ease-out); }
+    .po-more[data-state="idle"] [data-for="idle"], .po-more[data-state="working"] [data-for="working"] { visibility: visible; }
+    .po-more[data-state="working"] { cursor: progress; }
+    .po-foot .btn { margin-top: var(--space-2); }
+  </style>
+</head>
+<body>
+  <!-- Inline icon set: one 24px stroke family (ICO-01) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-bold" viewBox="0 0 24 24"><path d="M7 5h5.5a3.5 3.5 0 0 1 0 7H7z"/><path d="M7 12h6.5a3.5 3.5 0 0 1 0 7H7z"/></symbol>
+    <symbol id="i-italic" viewBox="0 0 24 24"><path d="M11 5h7"/><path d="M6 19h7"/><path d="M14.5 5l-5 14"/></symbol>
+    <symbol id="i-underline" viewBox="0 0 24 24"><path d="M7 4v6a5 5 0 0 0 10 0V4"/><path d="M5 20h14"/></symbol>
+    <symbol id="i-strike" viewBox="0 0 24 24"><path d="M4 12h16"/><path d="M16.5 7.5C15.9 5.9 14.2 5 12 5 9.4 5 7.5 6.3 7.5 8.3c0 1.3.8 2.3 2.4 3.1"/><path d="M7.5 16.5c.6 1.6 2.3 2.5 4.5 2.5 2.6 0 4.5-1.3 4.5-3.3 0-.6-.2-1.2-.5-1.7"/></symbol>
+    <symbol id="i-ul" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4.5 6h.01M4.5 12h.01M4.5 18h.01" stroke-width="2.5"/></symbol>
+    <symbol id="i-ol" viewBox="0 0 24 24"><path d="M10 6h10M10 12h10M10 18h10"/><path d="M4 4.5h1.5V9"/><path d="M4 9h3"/><path d="M4 14.6c.3-.6.8-1 1.5-1 .8 0 1.4.5 1.4 1.2 0 1.1-2.9 2-2.9 3.7h3"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-rows" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="5" rx="1.5"/><rect x="3.5" y="14.5" width="17" height="5" rx="1.5"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.2 4.2 0 0 1 12 7.3a4.2 4.2 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 4h10a1 1 0 0 1 1 1v15l-6-4-6 4V5a1 1 0 0 1 1-1z"/></symbol>
+    <symbol id="i-comment" viewBox="0 0 24 24"><path d="M20 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></symbol>
+    <symbol id="i-user-plus" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 20a7 7 0 0 1 11.5-5.4"/><path d="M19 14v6M16 17h6"/></symbol>
+    <symbol id="i-user-check" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 20a7 7 0 0 1 11.5-5.4"/><path d="M15.5 18l2 2 4-4.5"/></symbol>
+    <symbol id="i-speaker" viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 9a4 4 0 0 1 0 6"/><path d="M18 6.5a7.5 7.5 0 0 1 0 11"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-task" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12l2.5 2.5 4.5-5"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-note" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M4 12h16"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M3.5 13.5l2.6-7.2A2 2 0 0 1 8 5h8a2 2 0 0 1 1.9 1.3l2.6 7.2"/><path d="M3.5 13.5V18a2 2 0 0 0 2 2h13a2 2 0 0 0 2-2v-4.5h-5L14 16h-4l-1.5-2.5z"/></symbol>
+    <symbol id="i-alert-tri" viewBox="0 0 24 24"><path d="M10.3 4.3L2.6 17.5a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/></symbol>
+    <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+    <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-chev-d" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" opacity="0.3"/><path d="M20.5 12A8.5 8.5 0 0 0 12 3.5"/></symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="6"/><circle cx="12" cy="12" r="3.5"/></svg>ProductCraft · Example screens</span>
+        <h1>Buttons, continued</h1>
+        <p>Toggle buttons and groups, social toggles with counts, copy confirmation, a mobile speed dial, dialog button order, and pagination with load more for Sora.</p>
+      </div>
+    </header>
+
+    <div class="variants cols-2">
+      <!-- v7: toggle buttons in a toolbar, and an exclusive button group -->
+      <section class="variant" aria-labelledby="v7-title">
+        <h2 class="variant-label" id="v7-title"><span class="v">v7</span> Toggle buttons and button groups</h2>
+        <div class="variant-stage">
+          <div class="stage-fill v7">
+            <div class="card editor">
+              <div class="tb" role="toolbar" aria-label="Text formatting" aria-controls="doc" id="fmt-bar">
+                <button class="tog" type="button" aria-label="Bold" aria-keyshortcuts="Control+B" aria-pressed="true" data-fmt="bold" tabindex="0"><svg class="i" aria-hidden="true"><use href="#i-bold"/></svg></button>
+                <button class="tog" type="button" aria-label="Italic" aria-keyshortcuts="Control+I" aria-pressed="false" data-fmt="italic" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-italic"/></svg></button>
+                <button class="tog" type="button" aria-label="Underline" aria-keyshortcuts="Control+U" aria-pressed="false" data-fmt="underline" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-underline"/></svg></button>
+                <button class="tog" type="button" aria-label="Strikethrough" aria-pressed="false" data-fmt="strike" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-strike"/></svg></button>
+                <span class="sep" aria-hidden="true"></span>
+                <button class="tog" type="button" aria-label="Bulleted list" aria-pressed="true" data-list="bullets" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-ul"/></svg></button>
+                <button class="tog" type="button" aria-label="Numbered list" aria-pressed="false" data-list="numbers" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-ol"/></svg></button>
+                <span class="sep" aria-hidden="true"></span>
+                <button class="tog" type="button" aria-label="Insert link" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-link"/></svg></button>
+                <span class="tb-note" aria-hidden="true">Arrow keys move</span>
+              </div>
+              <div class="doc" id="doc">
+                <h3>Release notes, v2.4</h3>
+                <p class="doc-meta">Draft · edited by Priya Nair</p>
+                <p>Scheduled exports now run <span class="sel" id="fmt-sel">every weekday at 9:00 AM</span> in your workspace time zone.</p>
+                <ul class="doc-list" id="fmt-list" data-list="bullets">
+                  <li>CSV and PDF formats</li>
+                  <li>Up to 50,000 rows per file</li>
+                  <li>Delivery to 10 recipients</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="card files">
+              <div class="files-head">
+                <div><h3>Campaign assets</h3><p class="num">4 files · 49.4 MB</p></div>
+                <div class="bgroup" role="group" aria-label="View" id="view-group">
+                  <button type="button" aria-pressed="true" data-view="grid"><svg class="i" aria-hidden="true"><use href="#i-grid"/></svg>Grid</button>
+                  <button type="button" aria-pressed="false" data-view="list"><svg class="i" aria-hidden="true"><use href="#i-rows"/></svg>List</button>
+                </div>
+              </div>
+              <ul class="fview" id="fview" data-view="grid">
+                <li class="fitem"><span class="thumb" aria-hidden="true"><svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice"><rect width="120" height="90" fill="#e0e7ff"/><circle cx="88" cy="26" r="10" fill="#a5b4fc"/><path d="M0 90L38 46l24 24 18-16 40 36z" fill="#6366f1"/></svg></span><span class="ftext"><span class="fname">spring-hero.png</span><span class="fmeta num">PNG · 4.8 MB</span></span></li>
+                <li class="fitem"><span class="thumb" aria-hidden="true"><svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice"><rect width="120" height="90" fill="#f1f3f5"/><rect x="36" y="12" width="48" height="66" rx="4" fill="#ffffff" stroke="#d1d5db"/><path d="M44 28h32M44 37h32M44 46h20" stroke="#9ca3af" stroke-width="3" stroke-linecap="round"/></svg></span><span class="ftext"><span class="fname">media-kit.pdf</span><span class="fmeta num">PDF · 6.2 MB</span></span></li>
+                <li class="fitem"><span class="thumb" aria-hidden="true"><svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice"><rect width="120" height="90" fill="#272b36"/><circle cx="60" cy="45" r="17" fill="#ffffff" fill-opacity="0.16"/><path d="M55 36v18l14-9z" fill="#ffffff"/></svg></span><span class="ftext"><span class="fname">teaser-15s.mp4</span><span class="fmeta num">MP4 · 38.4 MB</span></span></li>
+                <li class="fitem"><span class="thumb" aria-hidden="true"><svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice"><rect width="120" height="90" fill="#f1f3f5"/><rect x="24" y="16" width="72" height="58" rx="4" fill="#ffffff" stroke="#d1d5db"/><path d="M24 30h72M24 44h72M24 58h72M48 16v58M72 16v58" stroke="#d1d5db"/></svg></span><span class="ftext"><span class="fname">utm-links.csv</span><span class="fmeta num">CSV · 24 KB</span></span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-23</code> <code>CMP-16</code> <code>ICO-04</code> <code>ICO-08</code> <code>COL-07</code> <code>ENG-01</code> <code>ENG-06</code> <code>BTN-02</code></p>
+      </section>
+
+      <!-- v8: like, save and follow with counts and spoken state -->
+      <section class="variant" aria-labelledby="v8-title">
+        <h2 class="variant-label" id="v8-title"><span class="v">v8</span> Like, save and follow with live counts</h2>
+        <div class="variant-stage">
+          <div class="stage-fill v8">
+            <article class="card post" aria-labelledby="post-title">
+              <div class="author">
+                <span class="avatar" aria-hidden="true">NP</span>
+                <p class="who"><b>Nina Park</b><span>Design lead · <span class="num" id="fol-n">2,481</span> followers</span></p>
+                <!-- The label itself states the state, so this button carries no aria-pressed (never both) -->
+                <button class="btn btn-primary follow" type="button" id="follow" data-on="false">
+                  <span class="btn-in stack">
+                    <span class="lbl" data-for="off"><svg class="i" aria-hidden="true"><use href="#i-user-plus"/></svg>Follow<span class="visually-hidden"> Nina Park</span></span>
+                    <span class="lbl" data-for="on"><svg class="i" aria-hidden="true"><use href="#i-user-check"/></svg>Following<span class="visually-hidden"> Nina Park</span></span>
+                  </span>
+                </button>
+              </div>
+              <p class="kicker">Sora Journal · 6 min read</p>
+              <h3 id="post-title">How we cut checkout time by 31%</h3>
+              <p class="post-dek">We dropped the account step, put the amount in the pay button and prefilled shipping from the last order. Median checkout fell from 2 min 24 s to 1 min 39 s.</p>
+              <div class="acts">
+                <button class="act" type="button" id="like" aria-pressed="true" aria-describedby="like-sr" data-n="1205" data-unit="like">
+                  <svg class="i" aria-hidden="true"><use href="#i-heart"/></svg><span class="visually-hidden">Like</span><span class="cnt num" aria-hidden="true">1,205</span>
+                </button>
+                <span class="visually-hidden" id="like-sr">1,205 likes</span>
+                <a class="act" href="#comments"><svg class="i" aria-hidden="true"><use href="#i-comment"/></svg><span class="cnt num">48</span><span class="visually-hidden"> comments</span></a>
+                <button class="act" type="button" id="save" aria-pressed="false" aria-describedby="save-sr" data-n="312" data-unit="save">
+                  <svg class="i" aria-hidden="true"><use href="#i-bookmark"/></svg>Save<span class="cnt num" aria-hidden="true">312</span>
+                </button>
+                <span class="visually-hidden" id="save-sr">312 saves</span>
+                <button class="icon-btn" type="button" aria-label="Share"><svg class="i" aria-hidden="true"><use href="#i-share"/></svg></button>
+              </div>
+            </article>
+            <p class="visually-hidden" role="status" id="social-live"></p>
+
+            <section class="sr" aria-labelledby="sr-title">
+              <h3 class="sr-title" id="sr-title"><svg class="i" aria-hidden="true"><use href="#i-speaker"/></svg>What a screen reader announces</h3>
+              <dl class="sr-list">
+                <div><dt>Like</dt><dd id="sr-like">“Like, toggle button, pressed, 1,205 likes”</dd></div>
+                <div><dt>Comments</dt><dd>“48 comments, link”</dd></div>
+                <div><dt>Save</dt><dd id="sr-save">“Save, toggle button, not pressed, 312 saves”</dd></div>
+                <div><dt>Follow</dt><dd id="sr-follow">“Follow Nina Park, button”</dd></div>
+                <div class="live"><dt>Live region</dt><dd id="sr-last">“Liked. 1,205 likes”</dd></div>
+              </dl>
+            </section>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-23</code> <code>ICO-08</code> <code>COP-09</code> <code>ENG-03</code> <code>TYP-09</code> <code>BTN-08</code> <code>ICO-04</code> <code>COL-07</code></p>
+      </section>
+
+      <!-- v9: copy to clipboard, confirm, then revert -->
+      <section class="variant" aria-labelledby="v9-title">
+        <h2 class="variant-label" id="v9-title"><span class="v">v9</span> Copy with a confirmation that reverts</h2>
+        <div class="variant-stage">
+          <div class="stage-fill v9">
+            <div class="seq3" inert>
+              <div class="step"><small><b>1 Idle</b> · names the outcome</small>
+                <button class="btn btn-secondary copy" type="button" data-state="idle"><span class="btn-in stack"><span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Copy link</span><span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Copied</span></span></button></div>
+              <svg class="i arrow" aria-hidden="true"><use href="#i-arrow-r"/></svg>
+              <div class="step"><small><b>2 Copied</b> · for 2 seconds</small>
+                <button class="btn btn-secondary copy" type="button" data-state="done"><span class="btn-in stack"><span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Copy link</span><span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Copied</span></span></button></div>
+              <svg class="i arrow" aria-hidden="true"><use href="#i-arrow-r"/></svg>
+              <div class="step"><small><b>3 Reverts</b> · ready again</small>
+                <button class="btn btn-secondary copy" type="button" data-state="idle"><span class="btn-in stack"><span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Copy link</span><span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Copied</span></span></button></div>
+            </div>
+
+            <div class="card copy-card">
+              <label class="flabel" for="invite-url">Invite link</label>
+              <p class="fhelp" id="invite-help">Anyone with the link joins Sora Analytics as a viewer. Expires Sat, Nov 7.</p>
+              <div class="copy-row">
+                <input class="ro" id="invite-url" readonly value="https://example.com/join/sora-analytics/7Hq2Kd" aria-describedby="invite-help">
+                <button class="btn btn-secondary copy" type="button" data-state="idle" data-copy="invite-url" data-said="Invite link copied">
+                  <span class="btn-in stack">
+                    <span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Copy link</span>
+                    <span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Copied</span>
+                    <span class="lbl" data-for="manual">Press <span data-keys>Ctrl+C</span></span>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div class="card keys">
+              <div class="key-row">
+                <div><p class="key-name">Publishable key</p><code class="key-val" id="pk">sora_pk_test_7Hq2Kd9xLm4R</code></div>
+                <div class="key-acts">
+                  <span class="tipw" data-state="idle" id="pk-tip"><button class="icon-btn" type="button" aria-label="Copy publishable key" data-copy="pk" data-said="Publishable key copied"><svg class="i ic-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i ic-done" aria-hidden="true"><use href="#i-check"/></svg></button><span class="ctip" aria-hidden="true"><span class="idle">Copy publishable key</span><span class="done">Copied</span></span></span>
+                </div>
+              </div>
+              <div class="key-row">
+                <div><p class="key-name">Secret key</p><code class="key-val" id="sk" data-full="sora_sk_test_4fT8wQ1nZp6Ra9Q2">sora_sk_test_••••••••••••a9Q2</code></div>
+                <div class="key-acts">
+                  <button class="icon-btn" type="button" id="sk-reveal" aria-label="Show secret key" aria-pressed="false"><svg class="i" aria-hidden="true"><use href="#i-eye"/></svg></button>
+                  <span class="tipw" data-state="idle"><button class="icon-btn" type="button" aria-label="Copy secret key" data-copy="sk" data-said="Secret key copied"><svg class="i ic-copy" aria-hidden="true"><use href="#i-copy"/></svg><svg class="i ic-done" aria-hidden="true"><use href="#i-check"/></svg></button><span class="ctip" aria-hidden="true"><span class="idle">Copy secret key</span><span class="done">Copied</span></span></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card codes-card">
+              <div class="codes-head">
+                <div><h3>Recovery codes</h3><p class="fhelp">Each code works once. Keep them somewhere safe.</p></div>
+                <button class="btn btn-secondary copy" type="button" data-state="idle" data-copy="codes" data-said="8 recovery codes copied">
+                  <span class="btn-in stack">
+                    <span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Copy codes</span>
+                    <span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Copied</span>
+                    <span class="lbl" data-for="manual">Press <span data-keys>Ctrl+C</span></span>
+                  </span>
+                </button>
+              </div>
+              <ol class="codes num" id="codes" data-full="4821-7730&#10;1196-0452&#10;7305-2218&#10;5640-9913&#10;0287-6641&#10;3958-1027&#10;6612-4389&#10;9074-5536" aria-label="8 recovery codes"><li>4821-7730</li><li>1196-0452</li><li>7305-2218</li><li>5640-9913</li><li>0287-6641</li><li>3958-1027</li><li>6612-4389</li><li>9074-5536</li></ol>
+            </div>
+
+            <div class="code" data-theme="dark">
+              <div class="code-head"><span>Retrieve an order · cURL</span>
+                <button class="btn btn-ghost copy" type="button" data-state="idle" data-copy="snippet" data-said="Code copied" aria-label="Copy code">
+                  <span class="btn-in stack">
+                    <span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Copy</span>
+                    <span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Copied</span>
+                    <span class="lbl" data-for="manual">Press <span data-keys>Ctrl+C</span></span>
+                  </span>
+                </button>
+              </div>
+              <pre id="snippet"><code><span class="tok-k">curl</span> https://api.example.com/v1/orders/SL-1042 \
+  -H <span class="tok-s">"Authorization: Bearer $SORA_SECRET_KEY"</span></code></pre>
+            </div>
+            <p class="visually-hidden" role="status" id="copy-live"></p>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>COP-09</code> <code>COP-04</code> <code>ENG-02</code> <code>ENG-03</code> <code>COL-10</code> <code>CMP-11</code> <code>ICO-04</code> <code>FBK-01</code></p>
+      </section>
+
+      <!-- v10: mobile floating action button and labeled speed dial -->
+      <section class="variant" aria-labelledby="v10-title">
+        <h2 class="variant-label" id="v10-title"><span class="v">v10</span> Floating action button and speed dial</h2>
+        <div class="variant-stage">
+          <div class="stage-fill v10">
+            <div class="phone">
+              <div class="phone-status"><span class="num">9:41</span><span class="icons" aria-hidden="true"><span></span><span></span></span></div>
+              <div class="phone-body dial-root" id="dial-root" data-open="true" data-compact="false">
+                <div class="app" id="app">
+                  <div class="app-head"><div><p class="app-date">Saturday, Oct 24</p><h3 class="app-title">Today</h3></div><span class="avatar" aria-hidden="true">AS</span></div>
+                  <ul class="tasks">
+                    <li><label class="task"><input type="checkbox" checked><span><b>Review Q4 pricing deck</b><small>Done · Sora Shop</small></span></label></li>
+                    <li><label class="task"><input type="checkbox"><span><b>Call Jordan Reyes about launch</b><small class="num">11:30 AM · Sora Shop</small></span></label></li>
+                    <li><label class="task"><input type="checkbox"><span><b>Approve payout batch #SL-1042</b><small class="num">2:00 PM · Finance</small></span></label></li>
+                    <li><label class="task"><input type="checkbox"><span><b>Draft the November newsletter</b><small>No time set · Marketing</small></span></label></li>
+                  </ul>
+                  <p class="grp">Tomorrow</p>
+                  <ul class="tasks">
+                    <li><label class="task"><input type="checkbox"><span><b>Book venue for the team offsite</b><small class="num">Sun, Oct 25 · Ops</small></span></label></li>
+                    <li><label class="task"><input type="checkbox"><span><b>Send recap to Hana Kim</b><small class="num">Sun, Oct 25 · Design</small></span></label></li>
+                  </ul>
+                </div>
+                <nav class="tabbar" aria-label="Main" id="tabbar">
+                  <a href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#i-sun"/></svg>Today</a>
+                  <a href="#"><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg>Upcoming</a>
+                  <a href="#"><svg class="i" aria-hidden="true"><use href="#i-folder"/></svg>Projects</a>
+                  <a href="#"><svg class="i" aria-hidden="true"><use href="#i-inbox"/></svg>Inbox</a>
+                </nav>
+                <div class="scrim" id="scrim" aria-hidden="true"></div>
+                <div class="dial">
+                  <ul class="dial-list" id="dial-list" aria-label="Create">
+                    <li><button class="dial-act" type="button"><span class="dial-lbl">Scan document</span><span class="mini"><svg class="i" aria-hidden="true"><use href="#i-scan"/></svg></span></button></li>
+                    <li><button class="dial-act" type="button"><span class="dial-lbl">Note</span><span class="mini"><svg class="i" aria-hidden="true"><use href="#i-note"/></svg></span></button></li>
+                    <li><button class="dial-act" type="button"><span class="dial-lbl">Event</span><span class="mini"><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg></span></button></li>
+                    <li><button class="dial-act" type="button"><span class="dial-lbl">Task</span><span class="mini"><svg class="i" aria-hidden="true"><use href="#i-task"/></svg></span></button></li>
+                  </ul>
+                  <button class="fab" type="button" id="fab" aria-expanded="true" aria-controls="dial-list"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg><span class="fab-txt">Create</span></button>
+                </div>
+              </div>
+              <div class="phone-home" aria-hidden="true"></div>
+            </div>
+
+            <div class="specs" aria-hidden="true">
+              <figure class="spec">
+                <div class="spec-vis"><span class="fab"><svg class="i"><use href="#i-plus"/></svg>Create</span></div>
+                <figcaption><b>Extended at rest</b>56 px tall, 16 px above the tab bar and clear of the home indicator.</figcaption>
+              </figure>
+              <figure class="spec">
+                <div class="spec-vis"><span class="fab round"><svg class="i" style="transform:none"><use href="#i-plus"/></svg></span></div>
+                <figcaption><b>Collapsed on scroll</b>Shrinks after 24 px of scroll. The name stays “Create”.</figcaption>
+              </figure>
+              <figure class="spec">
+                <div class="spec-vis on-scrim"><span class="dial-lbl">Task</span><span class="mini"><svg class="i"><use href="#i-task"/></svg></span></div>
+                <figcaption><b>Open, labeled</b>Every action shows its word. The 48 px row is the target; Escape or the scrim closes.</figcaption>
+              </figure>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>BTN-11</code> <code>MOB-01</code> <code>MOB-03</code> <code>MOB-04</code> <code>ENG-05</code> <code>ENG-06</code> <code>NAV-15</code> <code>MOT-01</code></p>
+      </section>
+
+      <!-- v11: dialog button pairs in both platform orders, plus a destructive dialog (dark) -->
+      <section class="variant" aria-labelledby="v11-title">
+        <h2 class="variant-label" id="v11-title"><span class="v">v11</span> Dialog button order and a destructive dialog (dark)</h2>
+        <div class="variant-stage dark" data-theme="dark">
+          <div class="stage-fill v11">
+            <div>
+              <p class="cap"><b>Primary last</b><span>Most platforms and the web</span></p>
+              <div class="dlg" inert>
+                <h3>Save changes to “Pricing page”?</h3>
+                <p class="dlg-desc">Edits from the last 12 minutes are lost if you don't save.</p>
+                <div class="dlg-foot"><button class="btn btn-secondary apart" type="button">Don't save</button><button class="btn btn-secondary" type="button">Cancel</button><button class="btn btn-primary" type="button">Save changes</button></div>
+              </div>
+            </div>
+            <div>
+              <p class="cap"><b>Primary first</b><span>Some desktop systems</span></p>
+              <div class="dlg" inert>
+                <h3>Save changes to “Pricing page”?</h3>
+                <p class="dlg-desc">Edits from the last 12 minutes are lost if you don't save.</p>
+                <div class="dlg-foot"><button class="btn btn-primary" type="button">Save changes</button><button class="btn btn-secondary" type="button">Don't save</button><button class="btn btn-secondary" type="button">Cancel</button></div>
+              </div>
+            </div>
+            <div>
+              <p class="cap"><b>Destructive, typed confirmation</b><span>Keeps the product’s chosen order</span></p>
+              <form class="dlg dz" id="dz" role="dialog" aria-labelledby="dz-title" aria-describedby="dz-desc" novalidate>
+                <div class="dz-head">
+                  <span class="warn-ic" aria-hidden="true"><svg class="i"><use href="#i-alert-tri"/></svg></span>
+                  <div>
+                    <h3 id="dz-title">Delete the Sora Analytics workspace?</h3>
+                    <p class="dlg-desc" id="dz-desc">Everything below is deleted for all members. You can't undo this.</p>
+                  </div>
+                </div>
+                <ul class="impact">
+                  <li><b class="num">14</b><span>dashboards</span></li>
+                  <li><b class="num">38</b><span>scheduled reports</span></li>
+                  <li><b class="num">6</b><span>members lose access</span></li>
+                </ul>
+                <div class="dz-field">
+                  <label for="dz-input">Type <b>Sora Analytics</b> to confirm</label>
+                  <input class="dz-input" id="dz-input" autocomplete="off" spellcheck="false" aria-describedby="dz-hint">
+                  <p class="dz-hint" id="dz-hint" aria-live="polite"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg><span>Delete stays off until the name matches.</span></p>
+                </div>
+                <div class="dlg-foot">
+                  <button class="btn btn-secondary" type="button" id="dz-keep">Keep workspace</button>
+                  <button class="btn btn-danger" type="submit" id="dz-delete" aria-disabled="true" aria-describedby="dz-hint"><span class="btn-in"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>Delete workspace</span></button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>BTN-05</code> <code>FBK-08</code> <code>BTN-15</code> <code>BTN-10</code> <code>COP-01</code> <code>CMP-12</code> <code>DRK-05</code> <code>DRK-09</code></p>
+      </section>
+
+      <!-- v12: numbered pagination and load more, both with result counts -->
+      <section class="variant" aria-labelledby="v12-title">
+        <h2 class="variant-label" id="v12-title"><span class="v">v12</span> Pagination and load more with result counts</h2>
+        <div class="variant-stage">
+          <div class="stage-fill v12">
+            <div class="card">
+              <div class="list-head"><h3>Report templates</h3><p class="num" id="tpl-count" tabindex="-1">Showing 13–18 of 84</p></div>
+              <ul class="tpl-grid" id="tpl-grid"></ul>
+              <nav class="pager" aria-label="Report templates pages" id="pager"></nav>
+            </div>
+
+            <div class="card">
+              <div class="list-head"><h3>Recent payouts</h3><p>To Checking <span class="num">•••• 4821</span></p></div>
+              <ul class="po-list" id="po-list"></ul>
+              <div class="po-foot">
+                <p id="po-count" class="num">You've seen 4 of 18 payouts</p>
+                <div class="meter" aria-hidden="true"><span id="po-meter"></span></div>
+                <button class="btn btn-secondary po-more" type="button" id="po-more" data-state="idle">
+                  <span class="btn-in stack">
+                    <span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-chev-d"/></svg><span id="po-more-lbl">Show 4 more</span></span>
+                    <span class="lbl" data-for="working"><svg class="i spin" aria-hidden="true"><use href="#i-spin"/></svg>Loading…</span>
+                  </span>
+                </button>
+              </div>
+              <p class="visually-hidden" role="status" id="po-live"></p>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>NAV-04</code> <code>ENG-07</code> <code>FBK-10</code> <code>ENG-02</code> <code>ENG-03</code> <code>TYP-09</code> <code>COL-07</code> <code>MOT-01</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // CMP-23, ENG-01: a toolbar of aria-pressed toggles with a roving tabindex; list styles are an optional exclusive pair.
+    (() => {
+      const bar = document.getElementById("fmt-bar");
+      const sel = document.getElementById("fmt-sel");
+      const list = document.getElementById("fmt-list");
+      const items = [...bar.querySelectorAll("button")];
+      const pressed = (b) => b.getAttribute("aria-pressed") === "true";
+
+      function apply() {
+        const on = (f) => pressed(bar.querySelector(`[data-fmt="${f}"]`));
+        sel.style.fontWeight = on("bold") ? "700" : "";
+        sel.style.fontStyle = on("italic") ? "italic" : "";
+        sel.style.textDecorationLine = [on("underline") && "underline", on("strike") && "line-through"].filter(Boolean).join(" ") || "none";
+        const active = items.find((b) => b.dataset.list && pressed(b));
+        list.dataset.list = active ? active.dataset.list : "none";
+      }
+
+      bar.addEventListener("click", (e) => {
+        const b = e.target.closest("button[aria-pressed]");
+        if (!b) return;
+        const next = !pressed(b);
+        // Bulleted and numbered lists exclude each other, but both may be off, so they stay toggles, not radios.
+        if (b.dataset.list && next) items.filter((x) => x.dataset.list).forEach((x) => x.setAttribute("aria-pressed", "false"));
+        b.setAttribute("aria-pressed", String(next));
+        apply();
+      });
+      bar.addEventListener("keydown", (e) => {
+        const i = items.indexOf(document.activeElement);
+        const to = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: items.length - 1 }[e.key];
+        if (to === undefined || i < 0) return;
+        e.preventDefault();
+        const t = items[(to + items.length) % items.length];
+        items.forEach((x) => (x.tabIndex = x === t ? 0 : -1));
+        t.focus();
+      });
+      apply();
+
+      // Exclusive button group: exactly one view is pressed; one data-view attribute restyles the list (ENG-06).
+      const group = document.getElementById("view-group");
+      const view = document.getElementById("fview");
+      group.addEventListener("click", (e) => {
+        const b = e.target.closest("button");
+        if (!b) return;
+        group.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+        view.dataset.view = b.dataset.view;
+      });
+    })();
+
+    // CMP-23, COP-09: like and save are aria-pressed toggles with fixed names; follow swaps its label instead.
+    (() => {
+      const fmt = new Intl.NumberFormat("en-US");
+      const live = document.getElementById("social-live");
+      const last = document.getElementById("sr-last");
+      const say = (text) => { live.textContent = text; last.textContent = `“${text}”`; };
+      const plural = (n, unit) => `${fmt.format(n)} ${unit}${n === 1 ? "" : "s"}`;
+
+      document.querySelectorAll(".act[aria-pressed]").forEach((btn) => {
+        const name = btn.id === "like" ? "Like" : "Save";
+        const desc = document.getElementById(btn.getAttribute("aria-describedby"));
+        btn.addEventListener("click", () => {
+          const on = btn.getAttribute("aria-pressed") !== "true";
+          const n = Number(btn.dataset.n) + (on ? 1 : -1);
+          // Example only: replace with a request to your API; roll back the count if it fails.
+          btn.dataset.n = n;
+          btn.setAttribute("aria-pressed", String(on));
+          btn.querySelector(".cnt").textContent = fmt.format(n);
+          desc.textContent = plural(n, btn.dataset.unit);
+          document.getElementById("sr-" + btn.id).textContent = `“${name}, toggle button, ${on ? "pressed" : "not pressed"}, ${desc.textContent}”`;
+          say(btn.id === "like" ? `${on ? "Liked" : "Like removed"}. ${desc.textContent}` : on ? "Saved to your reading list" : "Removed from your reading list");
+        });
+      });
+
+      const follow = document.getElementById("follow");
+      const count = document.getElementById("fol-n");
+      let followers = 2481;
+      follow.addEventListener("click", () => {
+        const on = follow.dataset.on !== "true";
+        // Example only: replace with a request to your API.
+        followers += on ? 1 : -1;
+        follow.dataset.on = String(on);
+        follow.classList.toggle("btn-primary", !on);
+        count.textContent = fmt.format(followers);
+        document.getElementById("sr-follow").textContent = `“${on ? "Following" : "Follow"} Nina Park, button”`;
+        say(on ? "You're following Nina Park" : "You unfollowed Nina Park");
+      });
+    })();
+
+    // ENG-02, COP-09: copy, confirm for 2 s, then revert; if the clipboard is blocked, select the text and say how to copy.
+    (() => {
+      const live = document.getElementById("copy-live");
+      const keys = /Mac|iPhone|iPad/.test(navigator.platform) ? "⌘C" : "Ctrl+C";
+      document.querySelectorAll("[data-keys]").forEach((k) => (k.textContent = keys));
+
+      function setState(btn, state, ms = 2000) {
+        const host = btn.closest(".tipw") || btn;
+        host.dataset.state = state;
+        clearTimeout(btn._revert);
+        if (state !== "idle") btn._revert = setTimeout(() => (host.dataset.state = "idle"), ms);
+      }
+      function selectSource(el) {
+        if (el.select) return el.select();
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        getSelection().removeAllRanges();
+        getSelection().addRange(range);
+      }
+
+      document.querySelectorAll("[data-copy]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const src = document.getElementById(btn.dataset.copy);
+          const text = src.dataset.full || src.value || src.textContent;
+          try {
+            await navigator.clipboard.writeText(text.trim());
+            setState(btn, "done");
+            live.textContent = btn.dataset.said;
+          } catch {
+            selectSource(src);
+            setState(btn, btn.closest(".tipw") ? "idle" : "manual", 4000);
+            live.textContent = `Couldn't copy automatically. The text is selected; press ${keys}.`;
+          }
+        });
+      });
+
+      // Reveal the secret key: a toggle with a fixed name and aria-pressed.
+      const reveal = document.getElementById("sk-reveal");
+      const sk = document.getElementById("sk");
+      const masked = sk.textContent;
+      reveal.addEventListener("click", () => {
+        const on = reveal.getAttribute("aria-pressed") !== "true";
+        reveal.setAttribute("aria-pressed", String(on));
+        sk.textContent = on ? sk.dataset.full : masked;
+      });
+
+      // The sheet opens just after a copy, so the confirmation is visible; it reverts on its own.
+      setState(document.querySelector('[data-copy="pk"]'), "done", 4000);
+    })();
+
+    // ENG-05, ENG-06: the speed dial is a disclosure; while open, the screen behind is inert and Escape closes it.
+    (() => {
+      const root = document.getElementById("dial-root");
+      const fab = document.getElementById("fab");
+      const app = document.getElementById("app");
+      const behind = [app, document.getElementById("tabbar")];
+      const actions = [...root.querySelectorAll(".dial-act")];
+
+      function set(open, focusFab) {
+        root.dataset.open = String(open);
+        fab.setAttribute("aria-expanded", String(open));
+        behind.forEach((el) => (el.inert = open));
+        actions.forEach((a) => (a.tabIndex = open ? 0 : -1));
+        if (focusFab) fab.focus();
+      }
+      fab.addEventListener("click", () => set(root.dataset.open !== "true"));
+      document.getElementById("scrim").addEventListener("click", () => set(false, true));
+      actions.forEach((a) => a.addEventListener("click", () => set(false, true))); // Example only: open the matching composer.
+      root.addEventListener("keydown", (e) => { if (e.key === "Escape" && root.dataset.open === "true") set(false, true); });
+      // Collapse the extended button once the list scrolls past a 24 px threshold.
+      app.addEventListener("scroll", () => { root.dataset.compact = String(app.scrollTop > 24); }, { passive: true });
+      set(true); // the sheet shows the open state
+    })();
+
+    // BTN-10, BTN-15: typed confirmation keeps Delete explained, focusable and inactive until the name matches.
+    (() => {
+      const form = document.getElementById("dz");
+      const input = document.getElementById("dz-input");
+      const del = document.getElementById("dz-delete");
+      const hint = document.getElementById("dz-hint");
+      const msg = hint.querySelector("span");
+      const NAME = "Sora Analytics";
+      const ready = () => input.value.trim() === NAME;
+
+      input.addEventListener("input", () => {
+        del.setAttribute("aria-disabled", String(!ready()));
+        hint.dataset.tone = ready() ? "ok" : "";
+        msg.textContent = ready() ? "Name matches. Delete is ready." : "Delete stays off until the name matches.";
+      });
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (!ready()) {
+          hint.dataset.tone = "error";
+          msg.textContent = `Type ${NAME} exactly to delete this workspace.`;
+          input.focus();
+          return;
+        }
+        // Example only: replace with a request to your API, then close the dialog and return focus to its trigger.
+        msg.textContent = "Example only: the workspace would be deleted now.";
+      });
+      document.getElementById("dz-keep").addEventListener("click", () => { input.value = ""; input.dispatchEvent(new Event("input")); });
+    })();
+
+    // NAV-04, ENG-07: pages rendered from data; the current page is marked with aria-current and focus moves to the count.
+    (() => {
+      const subjects = ["Revenue", "Signups", "Churn", "Refunds", "Orders", "Sessions", "Payouts", "Stock", "Support", "Ad spend", "Retention", "Trials"];
+      const views = [(s) => `${s} overview`, (s) => `${s} by region`, (s) => `${s} by plan`, (s) => `${s} trend`, (s) => `${s} by source`, (s) => `${s} forecast`, (s) => `${s} by cohort`];
+      const kinds = [0, 2, 2, 1, 2, 1, 0]; // chart style per view: bars, donut or line
+      const templates = Array.from({ length: 84 }, (_, i) => ({ id: i + 1, name: views[i % 7](subjects[i % 12]), charts: 3 + (i % 4), kind: kinds[i % 7] }));
+      const PER = 6, pages = Math.ceil(templates.length / PER);
+      const grid = document.getElementById("tpl-grid");
+      const pager = document.getElementById("pager");
+      const count = document.getElementById("tpl-count");
+      const fmt = new Intl.NumberFormat("en-US");
+      const thumbs = [
+        '<rect width="160" height="56" fill="#eef2ff"/><path d="M20 44V30M36 44V22M52 44V34M68 44V16M84 44V26M100 44V20M116 44V30M132 44V24" stroke="#6366f1" stroke-width="7"/>',
+        '<rect width="160" height="56" fill="#f1f3f5"/><path d="M12 42l22-10 20 6 24-18 22 8 22-14 26 8" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
+        '<rect width="160" height="56" fill="#f1f3f5"/><circle cx="80" cy="28" r="15" fill="none" stroke="#c7d2fe" stroke-width="8"/><path d="M80 13a15 15 0 0 1 13 22.5" fill="none" stroke="#4f46e5" stroke-width="8"/>',
+      ];
+      const pageList = (cur) => {
+        if (pages <= 7) return Array.from({ length: pages }, (_, i) => i + 1);
+        if (cur <= 4) return [1, 2, 3, 4, 5, "gap", pages];
+        if (cur >= pages - 3) return [1, "gap", pages - 4, pages - 3, pages - 2, pages - 1, pages];
+        return [1, "gap", cur - 1, cur, cur + 1, "gap", pages];
+      };
+      const step = (to, label, cls, icon) => to
+        ? `<a class="pg-step ${cls}" href="?page=${to}" data-page="${to}">${cls === "next" ? label + icon : icon + label}</a>`
+        : `<a class="pg-step ${cls}" aria-disabled="true">${cls === "next" ? label + icon : icon + label}</a>`;
+
+      function render(page, moveFocus) {
+        const first = (page - 1) * PER;
+        const slice = templates.slice(first, first + PER);
+        grid.innerHTML = slice.map((t) => `<li><a class="tpl" href="#template-${t.id}"><span class="tpl-thumb" aria-hidden="true"><svg viewBox="0 0 160 56" preserveAspectRatio="xMidYMid slice">${thumbs[t.kind]}</svg></span><span class="tpl-body"><span class="tpl-name">${t.name}</span><span class="tpl-meta">Dashboard · ${t.charts} charts</span></span></a></li>`).join("");
+        count.textContent = `Showing ${fmt.format(first + 1)}–${fmt.format(first + slice.length)} of ${fmt.format(templates.length)}`;
+        const nums = pageList(page).map((p) => p === "gap"
+          ? '<li><span class="pg pg-gap" aria-hidden="true">…</span></li>'
+          : `<li><a class="pg num" href="?page=${p}" data-page="${p}" aria-label="Page ${p}"${p === page ? ' aria-current="page"' : ""}>${p}</a></li>`).join("");
+        pager.innerHTML = step(page > 1 && page - 1, "Previous", "prev", '<svg class="i" aria-hidden="true"><use href="#i-chev-l"/></svg>')
+          + `<ul class="pages">${nums}</ul>`
+          + step(page < pages && page + 1, "Next", "next", '<svg class="i" aria-hidden="true"><use href="#i-chev-r"/></svg>');
+        if (moveFocus) count.focus();
+      }
+      pager.addEventListener("click", (e) => {
+        const a = e.target.closest("a[data-page]");
+        if (!a) return;
+        e.preventDefault(); // Example only: a real app also updates the URL (?page=n) so the page can be shared.
+        render(Number(a.dataset.page), true);
+      });
+      render(3, false);
+    })();
+
+    // ENG-02, FBK-10: load more appends rows, keeps the count honest and moves focus to the first new row.
+    (() => {
+      const days = ["Fri, Oct 23", "Thu, Oct 22", "Wed, Oct 21", "Tue, Oct 20", "Mon, Oct 19", "Fri, Oct 16", "Thu, Oct 15", "Wed, Oct 14", "Tue, Oct 13", "Mon, Oct 12",
+        "Fri, Oct 9", "Thu, Oct 8", "Wed, Oct 7", "Tue, Oct 6", "Mon, Oct 5", "Fri, Oct 2", "Thu, Oct 1", "Wed, Sep 30"];
+      const amounts = [2418.6, 1964.25, 2210.8, 1875.4, 3102.15, 2654.9, 1790.35, 2045.7, 2388.1, 2967.45, 1652.2, 2134.85, 2501.3, 1987.6, 2273.95, 3318.4, 2096.15, 1844.7];
+      const payouts = days.map((day, i) => ({ id: 2201 - i, day, amount: amounts[i], status: i === 0 ? "In transit" : "Paid" }));
+      const STEP = 4;
+      const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+      const list = document.getElementById("po-list");
+      const more = document.getElementById("po-more");
+      const label = document.getElementById("po-more-lbl");
+      const countEl = document.getElementById("po-count");
+      const meter = document.getElementById("po-meter");
+      const live = document.getElementById("po-live");
+      let shown = 0, last = 0;
+
+      const row = (p, isNew) => `<li${isNew ? ' class="is-new"' : ""}><a class="po" href="#payout-${p.id}"><span class="po-date num">${p.day}</span><span class="po-dest">Payout #SL-${p.id}</span><span class="pill ${p.status === "Paid" ? "pill-success" : "pill-accent"}">${p.status}</span><span class="po-amt num">${money.format(p.amount)}</span></a></li>`;
+
+      function show(n, isNew) {
+        const batch = payouts.slice(shown, shown + n);
+        list.insertAdjacentHTML("beforeend", batch.map((p) => row(p, isNew)).join(""));
+        const firstNew = list.children[shown];
+        shown += batch.length;
+        last = batch.length;
+        const left = payouts.length - shown;
+        countEl.textContent = left ? `You've seen ${shown} of ${payouts.length} payouts` : `All ${payouts.length} payouts shown`;
+        meter.style.setProperty("--p", (shown / payouts.length).toFixed(3));
+        label.textContent = `Show ${Math.min(STEP, left)} more`;
+        more.hidden = left === 0;
+        return firstNew;
+      }
+
+      // Example only: replace with a request to your API for the next page of payouts.
+      const fetchMore = () => new Promise((r) => setTimeout(r, 700));
+
+      more.addEventListener("click", async () => {
+        if (more.dataset.state !== "idle") return; // ignore presses while a batch is loading
+        more.dataset.state = "working";
+        more.setAttribute("aria-busy", "true");
+        await fetchMore();
+        const firstNew = show(STEP, true);
+        more.dataset.state = "idle";
+        more.removeAttribute("aria-busy");
+        live.textContent = `Loaded ${last} more. ${countEl.textContent}.`;
+        firstNew.querySelector("a").focus();
+      });
+      show(STEP, false);
+    })();
+  </script>
+</body>
+</html>

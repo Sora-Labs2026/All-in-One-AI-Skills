@@ -1,0 +1,722 @@
+<!doctype html>
+<!-- ProductCraft example: dashboard-v7 (property management, "Sora Homes"). Original Sora Labs example, MIT License.
+     Demonstrates: SCR-01, SCR-02, SCR-24, LAY-01, LAY-02, LAY-05, LAY-08, TYP-08, TYP-09, COL-01, COL-02, COL-06,
+     COL-07, CMP-15, CMP-17, CMP-18, CMP-19, CMP-23, NAV-03, NAV-08, NAV-15, BTN-01, BTN-07, ICO-03, ICO-04, ICO-07,
+     FBK-17, FBK-18, COP-08, COP-10 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Property management dashboard</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* Page accent: one ocean blue routed through the accent tokens (COL-02, CMP-26). Warm neutral base. */
+    :root {
+      --bg: #f6f5f2;
+      --surface-2: #f2f0eb;
+      --border: #e4e1da;
+      --accent: #0f5f9e;
+      --accent-hover: #0c4f85;
+      --accent-soft: #e8f1f9;
+      --accent-ink: #0d5590;
+      --focus: #0f5f9e;
+      --sidebar: #efece6;
+      --gauge-track: #dfe9f3;
+      --plan: #4f86b8;     /* payment-plan segment, 3.9:1 on white */
+      --owed: #8b93a1;     /* outstanding bars, 3.1:1 on white */
+    }
+
+    svg.i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* App shell: sidebar + main (NAV-08) */
+    .app { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100vh; }
+
+    .sidebar {
+      display: flex; flex-direction: column; gap: var(--space-6);
+      padding: var(--space-5) var(--space-3) var(--space-4);
+      background: var(--sidebar); border-right: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: var(--space-3); min-height: 40px; padding: 0 var(--space-3); color: var(--text); font-weight: 700; }
+    .brand:hover { text-decoration: none; }
+    .brand svg { width: 32px; height: 32px; flex: none; }
+    .brand .tile { fill: var(--accent); }
+    .brand .sun { fill: none; stroke: var(--on-accent); stroke-width: 2.5; stroke-linecap: round; }
+
+    .nav { display: grid; gap: var(--space-5); }
+    .nav-label { display: block; margin-bottom: var(--space-2); padding: 0 var(--space-3); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+    .nav a {
+      display: flex; align-items: center; gap: var(--space-3);
+      min-height: 40px; padding: 0 var(--space-3); border-radius: var(--radius-sm);
+      color: var(--text-2); font-weight: 500;
+    }
+    .nav a:hover { background: rgba(21, 23, 26, 0.05); color: var(--text); text-decoration: none; }
+    /* Current page: raised white row, accent icon and heavier label (NAV-03) */
+    .nav a[aria-current="page"] { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: var(--shadow-sm); }
+    .nav a[aria-current="page"] svg { color: var(--accent); }
+    .nav .count {
+      margin-left: auto; min-width: 24px; padding: 0 var(--space-2); border-radius: var(--radius-pill);
+      background: var(--surface); color: var(--text-2); font-size: var(--text-xs); font-weight: 600; line-height: 20px; text-align: center;
+    }
+    .sidebar-foot { margin-top: auto; display: grid; gap: var(--space-3); }
+    .account { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border-top: 1px solid var(--border); }
+    .account-name { font-size: var(--text-sm); font-weight: 600; }
+    .account-meta { font-size: var(--text-xs); color: var(--text-2); }
+
+    /* Main */
+    .main { display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-6) var(--space-6) var(--space-7); min-width: 0; }
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-5); flex-wrap: wrap; }
+    .page-head h1 { margin-bottom: var(--space-1); }
+    .eyebrow { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); margin-bottom: var(--space-1); }
+    .head-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+    .btn-secondary[aria-expanded="true"] { background: var(--accent-soft); border-color: transparent; color: var(--accent-ink); }
+
+    /* Data area with the assistant docked beside it, not over it (SCR-24) */
+    .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 336px; gap: var(--space-5); align-items: stretch; }
+    .workspace.is-closed { grid-template-columns: minmax(0, 1fr); }
+    .data { display: flex; flex-direction: column; gap: var(--space-5); min-width: 0; }
+
+    /* Portfolio strip: three KPIs in one card, fixed anatomy (CMP-17) */
+    .strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 0; }
+    .kpi { padding: var(--space-4) var(--space-5); display: grid; gap: var(--space-1); }
+    .kpi + .kpi { border-left: 1px solid var(--border); }
+    .kpi-label { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .kpi-value { font-size: var(--text-xl); font-weight: 700; line-height: 1.25; }
+    .kpi-value small { font-size: var(--text-md); font-weight: 600; color: var(--text-2); }
+    .kpi-foot { display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; }
+
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-3); }
+    .section-head p { font-size: var(--text-sm); color: var(--text-2); }
+
+    /* Building tiles: gauge with the number, name + status word, occupancy line, two follow-up stats (CMP-15) */
+    .buildings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+    .bldg { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: var(--space-5); align-items: center; padding: var(--space-4) var(--space-5); }
+    .bldg-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+    .bldg h3 a { color: var(--text); }
+    .bldg-meta { margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    .gauge { position: relative; width: 96px; }
+    .gauge svg { display: block; width: 96px; height: 54px; overflow: visible; }
+    .gauge .track { fill: none; stroke: var(--gauge-track); stroke-width: 9; stroke-linecap: round; }
+    .gauge .fill { fill: none; stroke: var(--accent); stroke-width: 9; stroke-linecap: round; }
+    .gauge .target { stroke: var(--text); stroke-width: 2.5; stroke-linecap: round; }
+    .bldg[data-status="risk"] .gauge .track { stroke: #f6e3c7; }
+    .bldg[data-status="risk"] .gauge .fill { stroke: var(--warning); }
+    .gauge-value { position: absolute; left: 0; right: 0; top: 30px; text-align: center; font-size: var(--text-lg); font-weight: 700; line-height: 1; }
+    .gauge-caption { margin-top: var(--space-1); text-align: center; font-size: var(--text-xs); color: var(--text-3); }
+    .bldg-stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); margin: var(--space-3) 0 0; padding-top: var(--space-3); border-top: 1px solid var(--border); }
+    .bldg-stats dt { font-size: var(--text-xs); color: var(--text-3); }
+    .bldg-stats dd { margin: 0; font-size: var(--text-md); font-weight: 600; }
+    .bldg-stats dd .warn { color: var(--warning); font-size: var(--text-sm); }
+
+    /* Rent: one stacked meter with a 2px surface gap, legend carries the values (CMP-18) */
+    .rent { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: var(--space-6); }
+    .rent-total { display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap; margin: var(--space-3) 0 var(--space-1); }
+    .rent-total .big { font-size: var(--text-2xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; }
+    .meter { display: flex; gap: 2px; height: 12px; margin: var(--space-4) 0 var(--space-3); }
+    .meter span { border-radius: 3px; }
+    .meter .paid { background: var(--accent); }
+    .meter .plan { background: var(--plan); }
+    .meter .late { background: var(--warning); }
+    .legend { list-style: none; margin: 0; padding: 0; display: grid; }
+    .legend li { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto auto; gap: var(--space-3); align-items: center; min-height: 36px; font-size: var(--text-sm); }
+    .legend li + li { border-top: 1px solid var(--border); }
+    .legend .sw { width: 12px; height: 12px; border-radius: 3px; }
+    .legend .amt { font-weight: 600; text-align: right; }
+    .legend .units { color: var(--text-2); text-align: right; min-width: 64px; }
+    .owed h3 { font-size: var(--text-sm); color: var(--text-2); margin-bottom: var(--space-2); }
+    .owed ol { list-style: none; margin: 0; padding: 0; display: grid; }
+    .owed li { display: grid; grid-template-columns: 104px minmax(0, 1fr) 72px 52px; gap: var(--space-3); align-items: center; min-height: 36px; font-size: var(--text-sm); }
+    .owed li + li { border-top: 1px solid var(--border); }
+    .owed .bar { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+    .owed .bar span { display: block; height: 100%; width: var(--w); background: var(--owed); border-radius: 4px; }
+    .owed .amt { font-weight: 600; text-align: right; }
+    .owed .units { color: var(--text-2); text-align: right; }
+
+    /* Assistant panel (SCR-24): header, polite log, figure card with period + source, chips, labeled composer */
+    .assistant { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+    .assistant[hidden] { display: none; }
+    .as-head { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5); border-bottom: 1px solid var(--border); }
+    .as-head .mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--accent-ink); }
+    .as-head .mark svg { width: 18px; height: 18px; }
+    .as-head h2 { font-size: var(--text-md); }
+    .as-head p { font-size: var(--text-xs); color: var(--text-2); }
+    .as-head .icon-btn { margin-left: auto; }
+    .as-log { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-5); }
+    .bubble-user {
+      align-self: flex-end; max-width: 88%; padding: var(--space-2) var(--space-3);
+      border-radius: var(--radius-md) var(--radius-md) 4px var(--radius-md);
+      background: var(--accent); color: var(--on-accent); font-size: var(--text-sm);
+    }
+    .answer { display: grid; gap: var(--space-3); font-size: var(--text-sm); color: var(--text); }
+    .answer strong { font-weight: 600; }
+    .figure { padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface-2); display: grid; gap: var(--space-3); }
+    .figure-top { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); }
+    .figure-value { font-size: var(--text-xl); font-weight: 700; line-height: 1.2; }
+    .figure-label { font-size: var(--text-xs); color: var(--text-2); }
+    .figure .meter { margin: 0; height: 8px; }
+    .figure .legend .units { min-width: 0; }
+    .figure .legend li { min-height: 30px; grid-template-columns: 10px minmax(0, 1fr) auto 56px; gap: var(--space-2); font-size: var(--text-xs); }
+    .figure .legend li + li { border-top-color: #e2ded5; }
+    .figure .legend .sw { width: 10px; height: 10px; }
+    .provenance { display: grid; gap: var(--space-1); font-size: var(--text-xs); color: var(--text-2); }
+    .provenance span { display: flex; align-items: center; gap: var(--space-2); }
+    .provenance svg.i { width: 16px; height: 16px; color: var(--text-3); }
+    .link-arrow { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-sm); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+    .link-arrow svg.i { width: 16px; height: 16px; }
+    .as-status { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-2); }
+    .as-status svg.i { width: 16px; height: 16px; color: var(--success); }
+    .as-foot { margin-top: auto; display: grid; gap: var(--space-3); padding: var(--space-4) var(--space-5) var(--space-5); border-top: 1px solid var(--border); }
+    .chips-label { margin-bottom: var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+    .chip {
+      min-height: 32px; padding: 0 var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-pill);
+      background: var(--surface); color: var(--text); font-size: var(--text-sm); font-weight: 500; cursor: pointer; text-align: left;
+    }
+    .chip:hover { border-color: var(--accent); color: var(--accent-ink); }
+    .composer { display: grid; gap: var(--space-2); }
+    .composer label { font-size: var(--text-sm); font-weight: 600; }
+    .composer-box { display: flex; align-items: flex-end; gap: var(--space-2); padding: var(--space-2); border: 1px solid #cfcac0; border-radius: var(--radius-md); background: var(--surface); }
+    .composer-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .composer textarea { flex: 1; min-width: 0; width: 100%; min-height: 40px; max-height: 120px; resize: none; border: 0; padding: var(--space-2); font: inherit; font-size: var(--text-sm); color: var(--text); background: transparent; }
+    .composer textarea:focus { outline: none; }
+    .composer .btn { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+    .composer .btn svg { width: 16px; height: 16px; }
+
+    /* Maintenance triage table (CMP-19) */
+    .table-card { padding: 0; overflow: hidden; }
+    .table-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); padding: var(--space-5) var(--space-5) var(--space-3); flex-wrap: wrap; }
+    .table-head p { font-size: var(--text-sm); color: var(--text-2); margin-top: var(--space-1); }
+    .tabs { display: flex; gap: var(--space-5); padding: 0 var(--space-5); border-bottom: 1px solid var(--border); }
+    .tab {
+      display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0;
+      border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: transparent;
+      color: var(--text-2); font-size: var(--text-sm); font-weight: 600; cursor: pointer;
+    }
+    .tab:hover { color: var(--text); }
+    .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+    .tab .count { min-width: 24px; padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-2); font-size: var(--text-xs); line-height: 20px; text-align: center; }
+    .tab[aria-selected="true"] .count { background: var(--accent-soft); color: var(--accent-ink); }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    th { padding: var(--space-3) var(--space-5); text-align: left; white-space: nowrap; font-size: var(--text-xs); font-weight: 600; color: var(--text-2); background: var(--surface-2); }
+    td { padding: var(--space-3) var(--space-5); border-top: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+    tbody tr:hover { background: #faf9f7; }
+    tr[hidden] { display: none; }
+    .prio { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 600; }
+    .prio svg.i { width: 18px; height: 18px; }
+    .prio-urgent { color: var(--danger); }
+    .prio-high { color: var(--warning); }
+    .prio-normal { color: var(--text-2); }
+    .prio-low { color: var(--text-3); }
+    tr.is-urgent td:first-child { box-shadow: inset 3px 0 0 var(--danger); }
+    .req-title { font-weight: 600; color: var(--text); }
+    .sub { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .who { display: inline-flex; align-items: center; gap: var(--space-2); }
+    .who .avatar { width: 24px; height: 24px; font-size: 10px; }
+    .unassigned { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--text-2); }
+    .unassigned .ring { width: 24px; height: 24px; border-radius: 50%; border: 1.5px dashed #a9a39a; }
+    .table-foot { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-5); border-top: 1px solid var(--border); font-size: var(--text-sm); color: var(--text-2); }
+
+    /* Smaller screens */
+    @media (max-width: 1240px) {
+      .workspace { grid-template-columns: minmax(0, 1fr); }
+      .rent { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 960px) {
+      .app { grid-template-columns: minmax(0, 1fr); }
+      .sidebar { gap: var(--space-3); padding: var(--space-3) var(--space-4); border-right: 0; border-bottom: 1px solid var(--border); min-width: 0; }
+      .nav { display: flex; gap: var(--space-1); overflow-x: auto; }
+      .nav-label, .sidebar-foot { display: none; }
+      .nav ul { display: flex; gap: var(--space-1); }
+      .nav a { white-space: nowrap; }
+      .main { padding: var(--space-5) var(--space-4) var(--space-6); }
+      .buildings { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 600px) {
+      .strip { grid-template-columns: minmax(0, 1fr); }
+      .kpi + .kpi { border-left: 0; border-top: 1px solid var(--border); }
+      .buildings { grid-template-columns: minmax(0, 1fr); }
+      .owed li { grid-template-columns: 96px minmax(0, 1fr) 64px; }
+      .owed .units { display: none; }
+      .tabs { gap: var(--space-4); overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+<!-- One icon family: 24px outline, 1.75 stroke, round caps (ICO-01) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-building" viewBox="0 0 24 24"><path d="M4.5 20.5v-15a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v15"/><path d="M14.5 9.5h4a1 1 0 0 1 1 1v10"/><path d="M3 20.5h18M8 8h3M8 11.5h3M8 15h3"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 8.5-8.5M16 7l2.5 2.5M14 9l2 2"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.5"/><path d="M3 19.5c.8-3.2 3.2-5 6-5s5.2 1.8 6 5"/><path d="M15.5 5.2a3.5 3.5 0 0 1 0 6.6"/><path d="M17.5 14.8c1.7.6 3 2.2 3.5 4.7"/></symbol>
+  <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0 5 5L12 19a2.1 2.1 0 0 1-3-3z"/><path d="M14.5 6.5 17 4l3 3-2.5 2.5"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-2.5-1.5-2 1.5-1.5-1.5-1.5 1.5-2-1.5L6 20.5z"/><path d="M9 8h6M9 11.5h6M9 15h3"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3.5h7l4.5 4.5v12a1 1 0 0 1-1 1H6.5a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z"/><path d="M14 3.5V8h4.5M9 13h6M9 17h4"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 0 1 4.8 1c0 1.7-2.4 2-2.4 3.5M12 17h.01"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 5.5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4 3.5v-3.5H5a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1z"/><path d="M8.5 10h7M8.5 13h4"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12 20 4l-4 16-4-6.5z"/><path d="m12 13.5 8-9.5"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7.5" ry="2.5"/><path d="M4.5 6v12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5V6M4.5 12c0 1.4 3.4 2.5 7.5 2.5s7.5-1.1 7.5-2.5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-urgent" viewBox="0 0 24 24"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4M12 16.8h.01"/></symbol>
+  <symbol id="i-high" viewBox="0 0 24 24"><path d="m7 12 5-5 5 5M7 17l5-5 5 5"/></symbol>
+  <symbol id="i-normal" viewBox="0 0 24 24"><path d="M6 10h12M6 14h12"/></symbol>
+  <symbol id="i-low" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+</svg>
+
+<div class="app">
+  <!-- Sidebar top to bottom: brand, grouped nav, support, account (NAV-08) -->
+  <aside class="sidebar">
+    <a class="brand" href="#" aria-label="Sora Homes home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect class="tile" width="32" height="32" rx="8"/><path class="sun" d="M9.5 19.5a6.5 6.5 0 0 1 13 0"/><path class="sun" d="M7.5 23.5h17"/></svg>
+      Sora Homes
+    </a>
+    <nav class="nav" aria-label="Main">
+      <div>
+        <span class="nav-label" id="nav-portfolio">Portfolio</span>
+        <ul aria-labelledby="nav-portfolio">
+          <li><a href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#i-grid"/></svg>Overview</a></li>
+          <li><a href="#"><svg class="i" aria-hidden="true"><use href="#i-building"/></svg>Buildings</a></li>
+          <li><a href="#"><svg class="i" aria-hidden="true"><use href="#i-key"/></svg>Units</a></li>
+          <li><a href="#"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg>Tenants</a></li>
+        </ul>
+      </div>
+      <div>
+        <span class="nav-label" id="nav-ops">Operations</span>
+        <ul aria-labelledby="nav-ops">
+          <li><a href="#"><svg class="i" aria-hidden="true"><use href="#i-wrench"/></svg>Maintenance <span class="count num">23<span class="visually-hidden"> open</span></span></a></li>
+          <li><a href="#"><svg class="i" aria-hidden="true"><use href="#i-receipt"/></svg>Rent and payments</a></li>
+          <li><a href="#"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg>Leases</a></li>
+        </ul>
+      </div>
+    </nav>
+    <div class="sidebar-foot">
+      <nav class="nav" aria-label="Support">
+        <ul>
+          <li><a href="#"><svg class="i" aria-hidden="true"><use href="#i-sliders"/></svg>Settings</a></li>
+          <li><a href="#"><svg class="i" aria-hidden="true"><use href="#i-help"/></svg>Help</a></li>
+        </ul>
+      </nav>
+      <div class="account">
+        <span class="avatar" aria-hidden="true">NP</span>
+        <div>
+          <div class="account-name">Nina Park</div>
+          <div class="account-meta">Property manager</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- Title states the question's answer; one primary action (LAY-05, BTN-01) -->
+    <header class="page-head">
+      <div>
+        <p class="eyebrow">Saturday, Oct 24, 2026</p>
+        <h1>Portfolio overview</h1>
+        <p class="muted">6 buildings, 268 units. Harbor Lofts and Linden House need attention this week.</p>
+      </div>
+      <div class="head-actions">
+        <button class="btn btn-secondary" type="button" id="assistant-toggle" aria-expanded="true" aria-controls="assistant">
+          <svg class="i" aria-hidden="true"><use href="#i-chat"/></svg>Ask Sora
+        </button>
+        <button class="btn btn-primary" type="button">
+          <svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>New work order
+        </button>
+      </div>
+    </header>
+
+    <div class="workspace" id="workspace">
+      <div class="data">
+        <!-- Portfolio KPIs: label, value, signed delta with period (CMP-17, TYP-09) -->
+        <section class="card strip" aria-label="Portfolio this month">
+          <div class="kpi">
+            <h2 class="kpi-label">Occupancy</h2>
+            <p class="kpi-value num">92.2<small>%</small></p>
+            <p class="kpi-foot">
+              <span class="delta delta-bad"><svg class="i" aria-hidden="true"><use href="#i-down"/></svg><span class="num">−0.7 pts</span></span>
+              <span class="subtle">vs September</span>
+            </p>
+          </div>
+          <div class="kpi">
+            <h2 class="kpi-label">Rent collected</h2>
+            <p class="kpi-value num">91.4<small>%</small></p>
+            <p class="kpi-foot">
+              <span class="delta delta-bad"><svg class="i" aria-hidden="true"><use href="#i-down"/></svg><span class="num">−2.1 pts</span></span>
+              <span class="subtle">vs Sep 24</span>
+            </p>
+          </div>
+          <div class="kpi">
+            <h2 class="kpi-label">Open requests</h2>
+            <p class="kpi-value num">23 <small>3 urgent</small></p>
+            <p class="kpi-foot">
+              <span class="delta delta-bad"><svg class="i" aria-hidden="true"><use href="#i-up"/></svg><span class="num">+5</span></span>
+              <span class="subtle">vs last Saturday</span>
+            </p>
+          </div>
+        </section>
+
+        <!-- Buildings sorted by attention: status word + gauge + number, never color alone (COL-07, SCR-02) -->
+        <section aria-labelledby="bldg-title">
+          <div class="section-head">
+            <h2 id="bldg-title">Buildings</h2>
+            <p>Sorted by attention needed. Gauge shows units occupied; the tick marks the 92% target.</p>
+          </div>
+          <div class="buildings">
+            <article class="card bldg" data-status="risk">
+              <div class="gauge">
+                <svg viewBox="0 0 100 56" aria-hidden="true"><path class="track" d="M10 50a40 40 0 0 1 80 0" pathLength="100"/><path class="fill" d="M10 50a40 40 0 0 1 80 0" pathLength="100" stroke-dasharray="86 100"/><path class="target" d="M82.1 41.8 95.4 38.4"/></svg>
+                <span class="gauge-value num">86%</span>
+                <p class="gauge-caption">occupied</p>
+              </div>
+              <div>
+                <div class="bldg-head"><h3><a href="#">Harbor Lofts</a></h3><span class="pill pill-warning">At risk</span></div>
+                <p class="bldg-meta num">55 of 64 units occupied · 9 vacant</p>
+                <dl class="bldg-stats">
+                  <div><dt>Rent collected</dt><dd class="num">79%</dd></div>
+                  <div><dt>Open requests</dt><dd class="num">7 <span class="warn">· 2 urgent</span></dd></div>
+                </dl>
+              </div>
+            </article>
+
+            <article class="card bldg" data-status="risk">
+              <div class="gauge">
+                <svg viewBox="0 0 100 56" aria-hidden="true"><path class="track" d="M10 50a40 40 0 0 1 80 0" pathLength="100"/><path class="fill" d="M10 50a40 40 0 0 1 80 0" pathLength="100" stroke-dasharray="83 100"/><path class="target" d="M82.1 41.8 95.4 38.4"/></svg>
+                <span class="gauge-value num">83%</span>
+                <p class="gauge-caption">occupied</p>
+              </div>
+              <div>
+                <div class="bldg-head"><h3><a href="#">Linden House</a></h3><span class="pill pill-warning">At risk</span></div>
+                <p class="bldg-meta num">30 of 36 units occupied · 6 vacant</p>
+                <dl class="bldg-stats">
+                  <div><dt>Rent collected</dt><dd class="num">86%</dd></div>
+                  <div><dt>Open requests</dt><dd class="num">6 <span class="warn">· 1 urgent</span></dd></div>
+                </dl>
+              </div>
+            </article>
+
+            <article class="card bldg" data-status="watch">
+              <div class="gauge">
+                <svg viewBox="0 0 100 56" aria-hidden="true"><path class="track" d="M10 50a40 40 0 0 1 80 0" pathLength="100"/><path class="fill" d="M10 50a40 40 0 0 1 80 0" pathLength="100" stroke-dasharray="95 100"/><path class="target" d="M82.1 41.8 95.4 38.4"/></svg>
+                <span class="gauge-value num">95%</span>
+                <p class="gauge-caption">occupied</p>
+              </div>
+              <div>
+                <div class="bldg-head"><h3><a href="#">Willow Park</a></h3><span class="pill pill-neutral">Watch</span></div>
+                <p class="bldg-meta num">53 of 56 units occupied · 3 vacant</p>
+                <dl class="bldg-stats">
+                  <div><dt>Rent collected</dt><dd class="num">94%</dd></div>
+                  <div><dt>Open requests</dt><dd class="num">4</dd></div>
+                </dl>
+              </div>
+            </article>
+
+            <article class="card bldg" data-status="ok">
+              <div class="gauge">
+                <svg viewBox="0 0 100 56" aria-hidden="true"><path class="track" d="M10 50a40 40 0 0 1 80 0" pathLength="100"/><path class="fill" d="M10 50a40 40 0 0 1 80 0" pathLength="100" stroke-dasharray="98 100"/><path class="target" d="M82.1 41.8 95.4 38.4"/></svg>
+                <span class="gauge-value num">98%</span>
+                <p class="gauge-caption">occupied</p>
+              </div>
+              <div>
+                <div class="bldg-head"><h3><a href="#">Maple Court</a></h3><span class="pill pill-success">On track</span></div>
+                <p class="bldg-meta num">47 of 48 units occupied · 1 vacant</p>
+                <dl class="bldg-stats">
+                  <div><dt>Rent collected</dt><dd class="num">97%</dd></div>
+                  <div><dt>Open requests</dt><dd class="num">3</dd></div>
+                </dl>
+              </div>
+            </article>
+
+            <article class="card bldg" data-status="ok">
+              <div class="gauge">
+                <svg viewBox="0 0 100 56" aria-hidden="true"><path class="track" d="M10 50a40 40 0 0 1 80 0" pathLength="100"/><path class="fill" d="M10 50a40 40 0 0 1 80 0" pathLength="100" stroke-dasharray="97.5 100"/><path class="target" d="M82.1 41.8 95.4 38.4"/></svg>
+                <span class="gauge-value num">98%</span>
+                <p class="gauge-caption">occupied</p>
+              </div>
+              <div>
+                <div class="bldg-head"><h3><a href="#">Elm Terrace</a></h3><span class="pill pill-success">On track</span></div>
+                <p class="bldg-meta num">39 of 40 units occupied · 1 vacant</p>
+                <dl class="bldg-stats">
+                  <div><dt>Rent collected</dt><dd class="num">98%</dd></div>
+                  <div><dt>Open requests</dt><dd class="num">2</dd></div>
+                </dl>
+              </div>
+            </article>
+
+            <article class="card bldg" data-status="ok">
+              <div class="gauge">
+                <svg viewBox="0 0 100 56" aria-hidden="true"><path class="track" d="M10 50a40 40 0 0 1 80 0" pathLength="100"/><path class="fill" d="M10 50a40 40 0 0 1 80 0" pathLength="100" stroke-dasharray="96 100"/><path class="target" d="M82.1 41.8 95.4 38.4"/></svg>
+                <span class="gauge-value num">96%</span>
+                <p class="gauge-caption">occupied</p>
+              </div>
+              <div>
+                <div class="bldg-head"><h3><a href="#">Cedar Row</a></h3><span class="pill pill-success">On track</span></div>
+                <p class="bldg-meta num">23 of 24 units occupied · 1 vacant</p>
+                <dl class="bldg-stats">
+                  <div><dt>Rent collected</dt><dd class="num">100%</dd></div>
+                  <div><dt>Open requests</dt><dd class="num">1</dd></div>
+                </dl>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- Rent collected vs due: total, stacked meter, legend with values, and where the gap sits (CMP-18, COP-10) -->
+        <section class="card rent" aria-labelledby="rent-title">
+          <div>
+            <h2 id="rent-title">Rent collected vs due</h2>
+            <p class="subtle">October 2026 · due Oct 1, late after Oct 5</p>
+            <p class="rent-total"><span class="big num">$414,650</span><span class="muted">of <span class="num">$453,750</span> due · <span class="num">91.4%</span></span></p>
+            <div class="meter" role="img" aria-label="Collected 91.4%, on payment plans 1.7%, late 6.9%">
+              <span class="paid" style="width: 91.4%"></span><span class="plan" style="width: 1.7%"></span><span class="late" style="width: 6.9%"></span>
+            </div>
+            <ul class="legend">
+              <li><span class="sw" style="background: var(--accent)"></span><span>Collected</span><span class="amt num">$414,650</span><span class="units num">229 units</span></li>
+              <li><span class="sw" style="background: var(--plan)"></span><span>On payment plan</span><span class="amt num">$7,650</span><span class="units num">4 units</span></li>
+              <li><span class="sw" style="background: var(--warning)"></span><span>Late</span><span class="amt num">$31,450</span><span class="units num">14 units</span></li>
+            </ul>
+          </div>
+          <div class="owed">
+            <h3>Outstanding by building, <span class="num">$39,100</span> in total</h3>
+            <ol>
+              <li><span>Harbor Lofts</span><span class="bar" aria-hidden="true"><span style="--w: 100%"></span></span><span class="amt num">$22,150</span><span class="units num">8 units</span></li>
+              <li><span>Linden House</span><span class="bar" aria-hidden="true"><span style="--w: 33.2%"></span></span><span class="amt num">$7,350</span><span class="units num">4 units</span></li>
+              <li><span>Willow Park</span><span class="bar" aria-hidden="true"><span style="--w: 24.8%"></span></span><span class="amt num">$5,500</span><span class="units num">3 units</span></li>
+              <li><span>Maple Court</span><span class="bar" aria-hidden="true"><span style="--w: 10.6%"></span></span><span class="amt num">$2,350</span><span class="units num">2 units</span></li>
+              <li><span>Elm Terrace</span><span class="bar" aria-hidden="true"><span style="--w: 7.9%"></span></span><span class="amt num">$1,750</span><span class="units num">1 unit</span></li>
+              <li><span>Cedar Row</span><span class="bar" aria-hidden="true"><span style="--w: 0%"></span></span><span class="amt num">$0</span><span class="units num">Paid</span></li>
+            </ol>
+          </div>
+        </section>
+      </div>
+
+      <!-- Assistant docked beside the data; every figure carries its period and source (SCR-24) -->
+      <aside class="card assistant" id="assistant" aria-labelledby="as-title">
+        <div class="as-head">
+          <span class="mark" aria-hidden="true"><svg class="i"><use href="#i-chat"/></svg></span>
+          <div>
+            <h2 id="as-title">Ask Sora</h2>
+            <p>Uses rent and work order data</p>
+          </div>
+          <button class="icon-btn" type="button" id="assistant-close" aria-label="Close assistant"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+        </div>
+        <div class="as-log" id="as-log" role="log" aria-live="polite" aria-label="Conversation">
+          <p class="bubble-user">Which building is furthest behind on rent this month?</p>
+          <div class="answer">
+            <p><strong>Harbor Lofts.</strong> It has collected the lowest share of rent due of your 6 buildings.</p>
+            <div class="figure">
+              <div class="figure-top">
+                <div>
+                  <div class="figure-label">Harbor Lofts, collected</div>
+                  <div class="figure-value num">78.6%</div>
+                </div>
+                <div class="figure-label">portfolio <span class="num">91.4%</span></div>
+              </div>
+              <div class="meter" aria-hidden="true"><span class="paid" style="width: 78.6%"></span><span class="plan" style="width: 3.7%"></span><span class="late" style="width: 17.7%"></span></div>
+              <ul class="legend">
+                <li><span class="sw" style="background: var(--accent)"></span><span>Collected</span><span class="amt num">$81,250</span><span class="units num">47 units</span></li>
+                <li><span class="sw" style="background: var(--plan)"></span><span>Payment plan</span><span class="amt num">$3,800</span><span class="units num">2 units</span></li>
+                <li><span class="sw" style="background: var(--warning)"></span><span>Late</span><span class="amt num">$18,350</span><span class="units num">6 units</span></li>
+              </ul>
+              <p class="figure-label">Due: <span class="num">$103,400</span> from 55 occupied units</p>
+            </div>
+            <p>Harbor Lofts holds <span class="num">57%</span> of the <span class="num">$39,100</span> outstanding across the portfolio.</p>
+            <div class="provenance">
+              <span><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg>Period: Oct 1 to Oct 24, 2026</span>
+              <span><svg class="i" aria-hidden="true"><use href="#i-db"/></svg>Source: rent ledger, synced today at 9:40 AM</span>
+            </div>
+            <a class="link-arrow" href="#">Open Harbor Lofts ledger<svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          </div>
+        </div>
+        <div class="as-foot">
+          <p class="as-status" id="as-status"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Answered from 1 source</p>
+          <div>
+            <p class="chips-label" id="chips-label">Try asking</p>
+            <div class="chips" role="group" aria-labelledby="chips-label">
+              <button class="chip" type="button">Compare with September</button>
+              <button class="chip" type="button">List the 6 late units</button>
+              <button class="chip" type="button">Why is Linden House at 83%?</button>
+            </div>
+          </div>
+          <form class="composer" id="composer">
+            <label for="ask">Ask about your portfolio</label>
+            <div class="composer-box">
+              <textarea id="ask" rows="1" placeholder="Oldest open request?"></textarea>
+              <button class="btn btn-secondary" type="submit"><svg class="i" aria-hidden="true"><use href="#i-send"/></svg>Send</button>
+            </div>
+          </form>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Maintenance triage: real table, priority icon + word, age with absolute time, filter tabs with counts (CMP-19) -->
+    <section class="card table-card" aria-labelledby="mx-title">
+      <div class="table-head">
+        <div>
+          <h2 id="mx-title">Maintenance requests</h2>
+          <p>Open requests, most urgent first, oldest first within each priority.</p>
+        </div>
+        <a class="link-arrow" href="#">View all requests<svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+      <div class="tabs" role="tablist" aria-label="Filter requests" id="mx-tabs">
+        <button class="tab" role="tab" type="button" id="tab-all" aria-selected="true" tabindex="0" aria-controls="mx-panel" data-filter="all">All open <span class="count num">23</span></button>
+        <button class="tab" role="tab" type="button" id="tab-urgent" aria-selected="false" tabindex="-1" aria-controls="mx-panel" data-filter="urgent">Urgent <span class="count num">3</span></button>
+        <button class="tab" role="tab" type="button" id="tab-unassigned" aria-selected="false" tabindex="-1" aria-controls="mx-panel" data-filter="unassigned">Unassigned <span class="count num">5</span></button>
+      </div>
+      <div class="table-scroll" role="tabpanel" id="mx-panel" aria-labelledby="tab-all">
+        <table>
+          <caption class="visually-hidden">Open maintenance requests</caption>
+          <thead>
+            <tr><th scope="col">Priority</th><th scope="col">Request</th><th scope="col">Building and unit</th><th scope="col">Age</th><th scope="col">Assignee</th><th scope="col">Status</th></tr>
+          </thead>
+          <tbody id="mx-rows">
+            <tr class="is-urgent" data-priority="urgent">
+              <td><span class="prio prio-urgent"><svg class="i" aria-hidden="true"><use href="#i-urgent"/></svg>Urgent</span></td>
+              <td><span class="req-title">Elevator out of service</span><span class="sub num">#SL-4108</span></td>
+              <td>Harbor Lofts<span class="sub">Lobby</span></td>
+              <td><time datetime="2026-10-22T18:50" class="num">2 d</time><span class="sub">Thu, Oct 22, 6:50 PM</span></td>
+              <td><span class="who"><span class="avatar" aria-hidden="true">MS</span>Mateo Silva</span></td>
+              <td><span class="pill pill-warning">Waiting on vendor</span></td>
+            </tr>
+            <tr class="is-urgent" data-priority="urgent" data-unassigned>
+              <td><span class="prio prio-urgent"><svg class="i" aria-hidden="true"><use href="#i-urgent"/></svg>Urgent</span></td>
+              <td><span class="req-title">Water leak under kitchen sink</span><span class="sub num">#SL-4121</span></td>
+              <td>Linden House<span class="sub">Unit 2A</span></td>
+              <td><time datetime="2026-10-23T08:15" class="num">1 d</time><span class="sub">Fri, Oct 23, 8:15 AM</span></td>
+              <td><span class="unassigned"><span class="ring" aria-hidden="true"></span>Unassigned</span></td>
+              <td><span class="pill pill-accent">New</span></td>
+            </tr>
+            <tr class="is-urgent" data-priority="urgent">
+              <td><span class="prio prio-urgent"><svg class="i" aria-hidden="true"><use href="#i-urgent"/></svg>Urgent</span></td>
+              <td><span class="req-title">No heat in bedroom</span><span class="sub num">#SL-4127</span></td>
+              <td>Harbor Lofts<span class="sub">Unit 4C</span></td>
+              <td><time datetime="2026-10-24T03:40" class="num">6 h</time><span class="sub">Today, 3:40 AM</span></td>
+              <td><span class="who"><span class="avatar" aria-hidden="true">SO</span>Sam Okafor</span></td>
+              <td><span class="pill pill-neutral">In progress</span></td>
+            </tr>
+            <tr data-priority="high" data-unassigned>
+              <td><span class="prio prio-high"><svg class="i" aria-hidden="true"><use href="#i-high"/></svg>High</span></td>
+              <td><span class="req-title">Mold on bathroom ceiling</span><span class="sub num">#SL-4090</span></td>
+              <td>Linden House<span class="sub">Unit 5D</span></td>
+              <td><time datetime="2026-10-20T14:05" class="num">4 d</time><span class="sub">Tue, Oct 20, 2:05 PM</span></td>
+              <td><span class="unassigned"><span class="ring" aria-hidden="true"></span>Unassigned</span></td>
+              <td><span class="pill pill-accent">New</span></td>
+            </tr>
+            <tr data-priority="high">
+              <td><span class="prio prio-high"><svg class="i" aria-hidden="true"><use href="#i-high"/></svg>High</span></td>
+              <td><span class="req-title">Front door lock sticks</span><span class="sub num">#SL-4096</span></td>
+              <td>Willow Park<span class="sub">Unit 7B</span></td>
+              <td><time datetime="2026-10-21T11:30" class="num">3 d</time><span class="sub">Wed, Oct 21, 11:30 AM</span></td>
+              <td><span class="who"><span class="avatar" aria-hidden="true">LB</span>Leo Brandt</span></td>
+              <td><span class="pill pill-neutral">Scheduled Mon</span></td>
+            </tr>
+            <tr data-priority="normal" data-unassigned>
+              <td><span class="prio prio-normal"><svg class="i" aria-hidden="true"><use href="#i-normal"/></svg>Normal</span></td>
+              <td><span class="req-title">Parking gate remote not working</span><span class="sub num">#SL-4071</span></td>
+              <td>Willow Park<span class="sub">Garage</span></td>
+              <td><time datetime="2026-10-18T16:20" class="num">6 d</time><span class="sub">Sun, Oct 18, 4:20 PM</span></td>
+              <td><span class="unassigned"><span class="ring" aria-hidden="true"></span>Unassigned</span></td>
+              <td><span class="pill pill-accent">New</span></td>
+            </tr>
+            <tr data-priority="normal" data-extra hidden>
+              <td><span class="prio prio-normal"><svg class="i" aria-hidden="true"><use href="#i-normal"/></svg>Normal</span></td>
+              <td><span class="req-title">Dishwasher not draining</span><span class="sub num">#SL-4078</span></td>
+              <td>Maple Court<span class="sub">Unit 3F</span></td>
+              <td><time datetime="2026-10-19T09:10" class="num">5 d</time><span class="sub">Mon, Oct 19, 9:10 AM</span></td>
+              <td><span class="who"><span class="avatar" aria-hidden="true">HK</span>Hana Kim</span></td>
+              <td><span class="pill pill-neutral">In progress</span></td>
+            </tr>
+            <tr data-priority="low" data-unassigned data-extra hidden>
+              <td><span class="prio prio-low"><svg class="i" aria-hidden="true"><use href="#i-low"/></svg>Low</span></td>
+              <td><span class="req-title">Balcony door squeaks</span><span class="sub num">#SL-4033</span></td>
+              <td>Harbor Lofts<span class="sub">Unit 9A</span></td>
+              <td><time datetime="2026-10-12T10:00" class="num">12 d</time><span class="sub">Mon, Oct 12, 10:00 AM</span></td>
+              <td><span class="unassigned"><span class="ring" aria-hidden="true"></span>Unassigned</span></td>
+              <td><span class="pill pill-accent">New</span></td>
+            </tr>
+            <tr data-priority="low" data-unassigned data-extra hidden>
+              <td><span class="prio prio-low"><svg class="i" aria-hidden="true"><use href="#i-low"/></svg>Low</span></td>
+              <td><span class="req-title">Hallway light flickers</span><span class="sub num">#SL-4052</span></td>
+              <td>Elm Terrace<span class="sub">Floor 2</span></td>
+              <td><time datetime="2026-10-15T19:45" class="num">9 d</time><span class="sub">Thu, Oct 15, 7:45 PM</span></td>
+              <td><span class="unassigned"><span class="ring" aria-hidden="true"></span>Unassigned</span></td>
+              <td><span class="pill pill-accent">New</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-foot"><span id="mx-count">Showing 6 of 23 open requests</span><span>Updated today at 9:45 AM</span></p>
+    </section>
+  </main>
+</div>
+
+<script>
+  // Filter tabs: click or arrow keys, roving tabindex, panel labelled by the active tab (NAV-15, CMP-19).
+  // Example only: replace with a request to your API that returns the filtered page.
+  (function () {
+    const tabs = [...document.querySelectorAll("#mx-tabs [role=tab]")];
+    const rows = [...document.querySelectorAll("#mx-rows tr")];
+    const totals = { all: 23, urgent: 3, unassigned: 5 };
+    function select(tab) {
+      tabs.forEach((t) => { const on = t === tab; t.setAttribute("aria-selected", String(on)); t.tabIndex = on ? 0 : -1; });
+      const f = tab.dataset.filter;
+      rows.forEach((tr) => {
+        tr.hidden = f === "all" ? tr.hasAttribute("data-extra")
+          : f === "urgent" ? tr.dataset.priority !== "urgent"
+          : !tr.hasAttribute("data-unassigned");
+      });
+      document.getElementById("mx-panel").setAttribute("aria-labelledby", tab.id);
+      const shown = rows.filter((tr) => !tr.hidden).length;
+      document.getElementById("mx-count").textContent = `Showing ${shown} of ${totals[f]} ${f === "all" ? "open" : f} requests`;
+    }
+    tabs.forEach((tab, i) => {
+      tab.addEventListener("click", () => select(tab));
+      tab.addEventListener("keydown", (e) => {
+        const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+        if (!step) return;
+        e.preventDefault();
+        const next = tabs[(i + step + tabs.length) % tabs.length];
+        next.focus();
+        select(next);
+      });
+    });
+  })();
+
+  // Assistant: dismissible panel, chips fill the composer, live status line while it works (SCR-24, FBK-17).
+  (function () {
+    const panel = document.getElementById("assistant");
+    const toggle = document.getElementById("assistant-toggle");
+    const workspace = document.getElementById("workspace");
+    const input = document.getElementById("ask");
+    const status = document.getElementById("as-status");
+    function setOpen(open) {
+      panel.hidden = !open;
+      workspace.classList.toggle("is-closed", !open);
+      toggle.setAttribute("aria-expanded", String(open));
+      (open ? input : toggle).focus();
+    }
+    toggle.addEventListener("click", () => setOpen(panel.hidden));
+    document.getElementById("assistant-close").addEventListener("click", () => setOpen(false));
+    panel.querySelectorAll(".chip").forEach((chip) => chip.addEventListener("click", () => { input.value = chip.textContent; input.focus(); }));
+    document.getElementById("composer").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) { input.focus(); return; }
+      const bubble = document.createElement("p");
+      bubble.className = "bubble-user";
+      bubble.textContent = text;
+      document.getElementById("as-log").append(bubble);
+      input.value = "";
+      status.textContent = "Working: reading the rent ledger and work orders…";
+      // Example only: replace with a request to your API and stream the reply into #as-log.
+    });
+  })();
+</script>
+</body>
+</html>

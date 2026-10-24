@@ -1,0 +1,591 @@
+<!doctype html>
+<!-- ProductCraft example: dashboard-v5 (sales forecast CRM, light, top navigation, ink accent). Original Sora Labs example, MIT License.
+     Demonstrates: SCR-01, LAY-05, LAY-01, LAY-02, LAY-08, TYP-02, TYP-09, COL-01, COL-02, COL-06, COL-07, CMP-13,
+     CMP-17, CMP-18, CMP-19, CMP-26, NAV-03, NAV-06, NAV-07, NAV-15, BTN-01, BTN-07, BTN-09, FBK-06, FBK-18, COP-08,
+     COP-10, ICO-04, ENG-07, SCR-02, FRM-01 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Sales forecast dashboard</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* Page accent: one ink color does the accent's job (primary action, active nav, the highlighted KPI) (COL-02, CMP-26).
+       Measured: #18181b on white 17.7:1; white on #3f3f46 10.4:1; #a1a1aa on #18181b 7.0:1 (COL-01). */
+    :root {
+      --accent: #18181b;
+      --accent-hover: #3f3f46;
+      --accent-soft: #f1f1f3;
+      --accent-ink: #18181b;
+      --focus: #18181b;
+      --ink-2: #a1a1aa;
+      --bar-commit: #71717a;
+      --band-1: #e4e4e7;
+      --band-2: #ececee;
+      --band-3: #f4f4f5;
+      --text-display: 40px;
+    }
+
+    /* Top navigation: logo left, links with an ink pill for the current page, utilities right (NAV-06, NAV-03, NAV-07) */
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); }
+    .topbar-inner { display: flex; align-items: center; gap: var(--space-6); max-width: 1376px; height: 64px; margin: 0 auto; padding: 0 var(--space-6); }
+    .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--text); font-weight: 700; white-space: nowrap; }
+    .brand:hover { text-decoration: none; }
+    .brand svg { width: 32px; height: 32px; }
+    .links { display: flex; gap: var(--space-1); list-style: none; margin: 0; padding: 0; }
+    .links a {
+      display: flex; align-items: center; height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-pill);
+      color: var(--text-2); font-size: var(--text-sm); font-weight: 500; white-space: nowrap;
+    }
+    .links a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    .links a[aria-current="page"] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+    .utils { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; }
+    .search-btn {
+      display: inline-flex; align-items: center; gap: var(--space-2); width: 240px; min-height: 36px; padding: 0 var(--space-2) 0 var(--space-3);
+      border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text-2);
+      font-size: var(--text-sm); cursor: pointer;
+    }
+    .search-btn:hover { border-color: #c9ced6; }
+    .search-btn svg { width: 16px; height: 16px; flex: none; }
+    .kbd { margin-left: auto; padding: 0 var(--space-1); border: 1px solid var(--border); border-radius: 4px; background: var(--surface); font-size: 11px; font-weight: 600; color: var(--text-3); line-height: 18px; }
+    .bell { position: relative; }
+    .bell .dot { position: absolute; top: 8px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 0 2px var(--surface); }
+    .avatar-btn { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; }
+    .avatar-btn .avatar { background: var(--surface-2); color: var(--text); }
+
+    .page { max-width: 1376px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-8); }
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-5); flex-wrap: wrap; margin-bottom: var(--space-5); }
+    .page-head p { margin-top: var(--space-1); color: var(--text-2); }
+    .head-actions { display: flex; align-items: flex-end; gap: var(--space-3); }
+    .field { display: grid; gap: var(--space-1); }
+    .field label { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .select { position: relative; }
+    .select select {
+      appearance: none; min-height: 40px; min-width: 176px; padding: 0 var(--space-7) 0 var(--space-3);
+      border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text);
+      font-size: var(--text-sm); font-weight: 600; cursor: pointer;
+    }
+    .select svg { position: absolute; right: var(--space-3); top: 50%; width: 16px; height: 16px; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-4); }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
+    .card-head .subtle { margin-top: 2px; }
+    .link { font-size: var(--text-sm); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+
+    /* The one highlighted KPI: ink fill, the largest number on the page (LAY-05, CMP-17) */
+    .kpi-hero {
+      grid-column: span 4; display: flex; flex-direction: column;
+      padding: var(--space-5); border-radius: var(--radius-lg); background: var(--accent); color: #fafafa;
+      --focus: #ffffff;
+    }
+    .kpi-hero h2 { font-size: var(--text-sm); font-weight: 600; color: var(--ink-2); }
+    .kpi-hero .value { margin-top: var(--space-3); font-size: var(--text-display); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; }
+    .kpi-hero .value .unit { font-size: var(--text-xl); letter-spacing: 0; color: var(--ink-2); }
+    .kpi-hero .of { margin-top: var(--space-1); font-size: var(--text-sm); color: #d4d4d8; }
+    .kpi-hero .delta-light { display: inline-flex; align-items: center; gap: var(--space-1); color: #86efac; font-size: var(--text-sm); font-weight: 600; }
+    .kpi-hero .delta-light svg { width: 14px; height: 14px; }
+    .kpi-hero .foot { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-3); font-size: var(--text-sm); color: var(--ink-2); }
+    /* Trend of the weekly call against the quota line, so the tile shows direction as well as level (CMP-17) */
+    .trend { margin: var(--space-5) 0 0; }
+    .trend figcaption { font-size: var(--text-xs); font-weight: 600; color: var(--ink-2); }
+    .trend-plot { position: relative; height: 80px; margin-top: var(--space-3); }
+    .trend-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    .trend-plot .line { fill: none; stroke: #fafafa; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .trend-plot .area { fill: rgba(250, 250, 250, 0.08); }
+    .trend-plot .quota-line { stroke: var(--ink-2); stroke-width: 1.5; stroke-dasharray: 3 4; }
+    .trend-plot .pt { position: absolute; left: calc(var(--x) * 1%); bottom: calc(var(--y) * 1%); width: 10px; height: 10px; margin: 0 0 -5px -5px; border-radius: 50%; background: #fafafa; box-shadow: 0 0 0 3px var(--accent); }
+    .trend-plot .q { position: absolute; right: 0; bottom: calc(var(--y) * 1% + var(--space-1)); font-size: var(--text-xs); color: var(--ink-2); }
+    .trend-x { position: relative; height: 20px; margin-top: var(--space-2); font-size: var(--text-xs); color: var(--ink-2); }
+    .trend-x span { position: absolute; left: calc(var(--x) * 1%); transform: translateX(-50%); white-space: nowrap; }
+    .trend-x span:first-child { transform: none; }
+    .trend-x span:last-child { transform: translateX(-100%); color: #fafafa; font-weight: 600; }
+    .verdict { margin-top: auto; padding-top: var(--space-5); border-top: 1px solid rgba(255, 255, 255, 0.12); }
+    .verdict-tag { display: inline-flex; align-items: center; gap: var(--space-2); padding: 2px 10px; border-radius: var(--radius-pill); background: rgba(252, 211, 77, 0.16); color: #fcd34d; font-size: var(--text-xs); font-weight: 700; line-height: 20px; }
+    .verdict-tag svg { width: 14px; height: 14px; }
+    .verdict p { margin-top: var(--space-3); font-size: var(--text-sm); color: #e4e4e7; }
+    .verdict strong { color: #ffffff; font-weight: 600; }
+    .verdict a { color: #ffffff; text-decoration: underline; text-underline-offset: 3px; }
+
+    /* Bullet chart: qualitative bands, stacked measures and a quota marker on one scale (CMP-18, FBK-06) */
+    .quota { grid-column: span 8; display: flex; flex-direction: column; }
+    .bullet { position: relative; margin-top: var(--space-7); }
+    .bands { position: relative; display: flex; height: 48px; border-radius: var(--radius-sm); overflow: hidden; }
+    .bands span { height: 100%; }
+    .bands .b1 { background: var(--band-1); }
+    .bands .b2 { background: var(--band-2); }
+    .bands .b3 { background: var(--band-3); }
+    .measure { position: absolute; top: 14px; height: 20px; left: calc(var(--from) * 1%); width: calc((var(--to) - var(--from)) * 1%); }
+    .m-won { background: var(--accent); border-radius: 4px 0 0 4px; }
+    .m-commit { background: var(--bar-commit); }
+    .m-best { background: repeating-linear-gradient(-45deg, #a1a1aa 0 2px, transparent 2px 6px); box-shadow: inset 0 0 0 1px #a1a1aa; border-radius: 0 4px 4px 0; }
+    .target { position: absolute; top: -6px; bottom: -6px; left: calc(var(--p) * 1%); width: 3px; margin-left: -1.5px; border-radius: 2px; background: var(--accent); }
+    .target-label { position: absolute; bottom: calc(100% + var(--space-2)); left: calc(var(--p) * 1%); transform: translateX(-50%); font-size: var(--text-xs); font-weight: 700; white-space: nowrap; }
+    .pace { position: absolute; top: 100%; left: calc(var(--p) * 1%); margin-top: 2px; transform: translateX(-50%); display: grid; justify-items: center; font-size: var(--text-xs); color: var(--text-2); white-space: nowrap; }
+    .pace::before { content: ""; width: 0; height: 0; border: 5px solid transparent; border-bottom: 6px solid var(--text-2); border-top: 0; }
+    .scale { position: relative; height: 20px; margin-top: var(--space-7); font-size: var(--text-xs); color: var(--text-3); border-top: 1px solid var(--border); }
+    .scale span { position: absolute; top: var(--space-1); left: calc(var(--p) * 1%); transform: translateX(-50%); }
+    .scale span:first-child { transform: none; }
+    .bullet-legend { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); list-style: none; margin: var(--space-5) 0 var(--space-5); padding: 0; }
+    .bullet-legend li { display: grid; gap: 2px; font-size: var(--text-xs); color: var(--text-2); }
+    .bullet-legend .k { display: inline-flex; align-items: center; gap: var(--space-2); }
+    .bullet-legend .k i { width: 12px; height: 12px; border-radius: 3px; }
+    .bullet-legend strong { font-size: var(--text-md); font-weight: 700; color: var(--text); }
+    .bullet-legend small { font-size: var(--text-xs); color: var(--text-3); }
+    .k-won { background: var(--accent); }
+    .k-commit { background: var(--bar-commit); }
+    .k-best { background: repeating-linear-gradient(-45deg, #a1a1aa 0 2px, transparent 2px 5px); box-shadow: inset 0 0 0 1px #a1a1aa; }
+    .k-quota { width: 3px !important; height: 14px !important; border-radius: 2px !important; background: var(--accent); margin: 0 4px; }
+
+    /* Secondary metrics as a quiet strip, not competing tiles (SCR-01, CMP-17) */
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: auto; padding-top: var(--space-4); border-top: 1px solid var(--border); }
+    .stat { padding: 0 var(--space-4); border-left: 1px solid var(--border); }
+    .stat:first-child { padding-left: 0; border-left: 0; }
+    .stat dt { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .stat dd { margin: 0; }
+    .stat .v { font-size: var(--text-lg); font-weight: 700; }
+    .stat .v small { font-size: var(--text-sm); font-weight: 500; color: var(--text-3); }
+    .stat .delta { font-size: var(--text-xs); }
+    .stat .delta + .subtle { font-size: var(--text-xs); }
+
+    /* Funnel: bar width by count, trapezoid connectors carry the stage conversion (CMP-18) */
+    .funnel-card { grid-column: span 7; }
+    .funnel { list-style: none; margin: var(--space-5) 0 0; padding: 0; }
+    .stage-row { display: grid; grid-template-columns: 148px minmax(0, 1fr) 112px; align-items: center; gap: var(--space-4); }
+    .stage-row.is-step { height: 40px; }
+    .stage-name strong { display: block; font-size: var(--text-sm); font-weight: 600; }
+    .stage-name small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .f-bar { justify-self: center; width: calc(var(--w) * 1%); height: 36px; border-radius: 6px; background: #52525b; }
+    .is-won .f-bar { background: var(--accent); }
+    .stage-val { text-align: right; font-size: var(--text-sm); font-weight: 700; }
+    .stage-val small { display: block; font-size: var(--text-xs); font-weight: 500; color: var(--text-3); }
+    .conv { display: grid; grid-template-columns: 148px minmax(0, 1fr) 112px; gap: var(--space-4); height: 28px; }
+    .conv .trap { grid-column: 2; position: relative; display: grid; place-items: center; font-size: var(--text-xs); font-weight: 700; color: var(--text); }
+    /* The shape is clipped; the label is not, so narrow steps still show their rate */
+    .conv .trap::before {
+      content: ""; position: absolute; inset: 0; z-index: -1; background: var(--band-1);
+      clip-path: polygon(calc(50% - var(--a) * 0.5%) 0, calc(50% + var(--a) * 0.5%) 0, calc(50% + var(--b) * 0.5%) 100%, calc(50% - var(--b) * 0.5%) 100%);
+    }
+    .funnel { isolation: isolate; }
+    .conv .lbl { grid-column: 1; align-self: center; font-size: var(--text-xs); color: var(--text-3); }
+    .funnel-note { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border); font-size: var(--text-sm); color: var(--text-2); }
+    .funnel-note svg { width: 16px; height: 16px; flex: none; color: var(--text-3); }
+
+    /* Leaderboard: rank, avatar, name, attainment bar with a pace tick, value (CMP-20) */
+    .leaders-card { grid-column: span 5; }
+    .leaders { list-style: none; margin: var(--space-4) 0 0; padding: 0; }
+    .leader { display: grid; grid-template-columns: 20px 32px minmax(0, 1fr) 72px; align-items: center; gap: var(--space-3); min-height: 60px; border-top: 1px solid var(--border); }
+    .rank { font-size: var(--text-sm); font-weight: 700; color: var(--text-3); text-align: center; }
+    .leader .avatar { background: var(--surface-2); color: var(--text); }
+    .leader-body { min-width: 0; }
+    .leader-top { display: flex; flex-wrap: wrap; justify-content: space-between; column-gap: var(--space-2); font-size: var(--text-sm); white-space: nowrap; }
+    .leader-top strong { font-weight: 600; }
+    .leader-top span { color: var(--text-3); font-size: var(--text-xs); }
+    .l-track { position: relative; height: 6px; margin-top: var(--space-2); border-radius: var(--radius-pill); background: var(--band-1); }
+    .l-fill { display: block; width: calc(var(--v) * 1%); height: 100%; border-radius: inherit; background: var(--accent); }
+    .l-track::after { content: ""; position: absolute; left: calc(var(--pace) * 1%); top: -3px; bottom: -3px; width: 2px; border-radius: 1px; background: var(--text-2); }
+    .leader-val { text-align: right; font-size: var(--text-sm); font-weight: 700; }
+    .leader-val small { display: block; font-size: var(--text-xs); font-weight: 500; color: var(--text-3); }
+    .leaders-key { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-3); font-size: var(--text-xs); color: var(--text-3); }
+    .leaders-key i { width: 2px; height: 12px; border-radius: 1px; background: var(--text-2); }
+
+    /* Deals table: real table, sortable column headers with aria-sort (CMP-19) */
+    .deals-card { grid-column: 1 / -1; padding: 0; overflow: hidden; }
+    .deals-card .card-head { padding: var(--space-5) var(--space-5) var(--space-4); align-items: center; }
+    table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    th { padding: 0 var(--space-4); height: 40px; background: var(--surface-2); color: var(--text-2); font-size: var(--text-xs); font-weight: 600; text-align: left; white-space: nowrap; }
+    th:first-child, td:first-child { padding-left: var(--space-5); }
+    th:last-child, td:last-child { padding-right: var(--space-5); }
+    td { padding: var(--space-3) var(--space-4); border-top: 1px solid var(--border); vertical-align: middle; }
+    .num-col { text-align: right; }
+    .sort {
+      display: inline-flex; align-items: center; gap: var(--space-1); height: 32px; margin: 0 calc(var(--space-2) * -1); padding: 0 var(--space-2);
+      border: 0; border-radius: 6px; background: transparent; color: inherit; font: inherit; font-weight: 600; cursor: pointer;
+    }
+    .sort:hover { background: var(--band-1); color: var(--text); }
+    .sort svg { width: 14px; height: 14px; opacity: 0.45; }
+    th[aria-sort] .sort { color: var(--text); }
+    th[aria-sort] .sort svg { opacity: 1; }
+    th[aria-sort="descending"] .sort svg { transform: rotate(180deg); }
+    tbody tr:hover { background: #fafafa; }
+    .deal strong { display: block; font-weight: 600; }
+    .deal small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .risk { display: inline-flex; align-items: center; gap: var(--space-1); margin-top: 2px; color: var(--warning); font-size: var(--text-xs); font-weight: 600; }
+    .risk svg { width: 14px; height: 14px; }
+    .owner { display: flex; align-items: center; gap: var(--space-2); white-space: nowrap; }
+    .owner .avatar { width: 28px; height: 28px; font-size: 11px; background: var(--surface-2); color: var(--text); }
+    /* Stage pill: the word plus a 5-step position, never color alone (SCR-02, COL-07) */
+    .stage { display: inline-flex; align-items: center; gap: var(--space-2); padding: 2px 10px 2px 8px; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--neutral-ink); font-size: var(--text-xs); font-weight: 600; line-height: 20px; white-space: nowrap; }
+    .steps { display: inline-flex; gap: 2px; }
+    .steps i { width: 4px; height: 10px; border-radius: 1px; background: #c4c4cc; }
+    .steps i.on { background: var(--accent); }
+    .fc { display: inline-flex; align-items: center; padding: 1px 8px; border-radius: var(--radius-pill); font-size: var(--text-xs); font-weight: 600; line-height: 20px; white-space: nowrap; }
+    .fc-commit { background: var(--accent); color: var(--on-accent); border: 1px solid var(--accent); }
+    .fc-best { border: 1px dashed #71717a; color: var(--neutral-ink); }
+    td.date { white-space: nowrap; }
+    td.date small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    td.value { font-weight: 700; white-space: nowrap; }
+    td.next { color: var(--text-2); }
+    td.next small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .table-foot { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-4) var(--space-5); border-top: 1px solid var(--border); font-size: var(--text-sm); color: var(--text-2); }
+    .table-foot strong { color: var(--text); }
+
+    @media (max-width: 1180px) {
+      .kpi-hero, .quota, .funnel-card, .leaders-card { grid-column: 1 / -1; }
+      .links { display: none; }
+      .col-hide-md { display: none; }
+    }
+    @media (max-width: 720px) {
+      .topbar-inner { padding: 0 var(--space-4); gap: var(--space-3); }
+      .search-btn { width: 40px; padding: 0; justify-content: center; }
+      .search-btn .label, .search-btn .kbd { display: none; }
+      .page { padding: var(--space-5) var(--space-4) var(--space-6); }
+      .head-actions { width: 100%; flex-wrap: wrap; }
+      .head-actions .field { flex: 1 1 100%; }
+      .select select { width: 100%; min-width: 0; }
+      .bullet-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stats { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+      .stat { padding: 0; border-left: 0; }
+      .stage-row, .conv { grid-template-columns: 96px minmax(0, 1fr) 72px; gap: var(--space-2); }
+      .col-hide-sm { display: none; }
+      .deals-card { overflow-x: auto; }
+      .deals-card table { min-width: 760px; }
+    }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#18181b"/><path d="M9.5 19.5a6.5 6.5 0 0 1 13 0M7.5 23.5h17" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/></svg>
+      Sora CRM
+    </a>
+    <nav aria-label="Main">
+      <ul class="links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#" aria-current="page">Forecast</a></li>
+        <li><a href="#">Pipeline</a></li>
+        <li><a href="#">Deals</a></li>
+        <li><a href="#">Accounts</a></li>
+        <li><a href="#">Reports</a></li>
+      </ul>
+    </nav>
+    <div class="utils">
+      <!-- Search opens a command palette; the shortcut is shown on the control (BTN-09) -->
+      <button class="search-btn" type="button" aria-label="Search deals, accounts and people" aria-keyshortcuts="Control+K">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/></svg>
+        <span class="label">Search</span>
+        <span class="kbd" aria-hidden="true">Ctrl K</span>
+      </button>
+      <button class="icon-btn bell" type="button" aria-label="Notifications, 3 unread">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>
+        <span class="dot" aria-hidden="true"></span>
+      </button>
+      <button class="avatar-btn" type="button" aria-label="Account menu: Owen Clarke">
+        <span class="avatar" aria-hidden="true">OC</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <header class="page-head">
+    <div>
+      <h1>Q4 forecast</h1>
+      <p>Oct 1 to Dec 31, 2026 · day 24 of 92 · 68 days left in the quarter</p>
+    </div>
+    <div class="head-actions">
+      <div class="field">
+        <label for="team">Team</label>
+        <div class="select">
+          <select id="team">
+            <option>All teams</option>
+            <option>Enterprise</option>
+            <option>Mid-market</option>
+          </select>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+      </div>
+      <button class="btn btn-secondary" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></svg>
+        Export
+      </button>
+      <!-- One primary action (BTN-01) -->
+      <button class="btn btn-primary" type="button">Submit forecast</button>
+    </div>
+  </header>
+
+  <div class="grid">
+    <!-- The answer to "Will we hit the quarter?" (SCR-01, COP-10) -->
+    <section class="kpi-hero" aria-labelledby="fc-title">
+      <h2 id="fc-title">Forecast · closed won plus commit</h2>
+      <p class="value num" id="fc-value">$2.27<span class="unit">M</span></p>
+      <p class="of num" id="fc-of">94.6% of the $2.4M team quota</p>
+      <p class="foot">
+        <span class="delta-light"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span class="num">+$212K</span></span>
+        vs last Saturday
+      </p>
+      <figure class="trend">
+        <figcaption>Weekly forecast call</figcaption>
+        <div class="trend-plot" id="trend" role="img"></div>
+        <div class="trend-x" id="trend-x" aria-hidden="true"></div>
+      </figure>
+      <div class="verdict">
+        <span class="verdict-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4M12 17h.01"/></svg>
+          Short of quota
+        </span>
+        <p id="fc-verdict"></p>
+      </div>
+    </section>
+
+    <section class="card quota" aria-labelledby="quota-title">
+      <div class="card-head">
+        <div>
+          <h2 id="quota-title">Quota attainment</h2>
+          <p class="subtle">Closed won, commit and best case on one scale. Shaded bands end at 80% and 100% of quota.</p>
+        </div>
+        <a class="link" href="#">Forecast history</a>
+      </div>
+      <div class="bullet" id="bullet" role="img"></div>
+      <div class="scale" id="scale" aria-hidden="true"></div>
+      <ul class="bullet-legend" id="bullet-legend"></ul>
+      <dl class="stats">
+        <div class="stat">
+          <dt>Pipeline coverage</dt>
+          <dd><span class="v num">2.9<small>×</small></span> <span class="subtle">target 3×</span></dd>
+        </div>
+        <div class="stat">
+          <dt>Win rate</dt>
+          <dd><span class="v num">27%</span>
+            <span class="delta delta-good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span class="num">+3 pts</span></span>
+            <span class="subtle">vs Q3</span></dd>
+        </div>
+        <div class="stat">
+          <dt>Average deal size</dt>
+          <dd><span class="v num">$48.9K</span>
+            <span class="delta delta-bad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg><span class="num">&minus;4.1%</span></span>
+            <span class="subtle">vs Q3</span></dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="card funnel-card" aria-labelledby="funnel-title">
+      <div class="card-head">
+        <div>
+          <h2 id="funnel-title">Pipeline by stage</h2>
+          <p class="subtle">Deals that reached each stage this quarter and the share that moved on</p>
+        </div>
+        <a class="link" href="#">Open pipeline</a>
+      </div>
+      <ol class="funnel" id="funnel"></ol>
+      <p class="funnel-note" id="funnel-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8h.01"/></svg>
+        <span></span>
+      </p>
+    </section>
+
+    <section class="card leaders-card" aria-labelledby="leaders-title">
+      <div class="card-head">
+        <div>
+          <h2 id="leaders-title">Rep leaderboard</h2>
+          <p class="subtle">Closed won against each rep's $400K quota</p>
+        </div>
+      </div>
+      <ol class="leaders" id="leaders"></ol>
+      <p class="leaders-key"><i aria-hidden="true"></i>Even pace for day 24 of 92: 26% of quota</p>
+    </section>
+
+    <section class="card deals-card" aria-labelledby="deals-title">
+      <div class="card-head">
+        <div>
+          <h2 id="deals-title">Deals in the forecast</h2>
+          <p class="subtle">Open deals set to close this quarter. Select a column to sort.</p>
+        </div>
+        <a class="link" href="#">All 38 open deals</a>
+      </div>
+      <table id="deals">
+        <caption class="visually-hidden">Deals in the Q4 forecast, sortable by column</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-key="name"><button class="sort" type="button">Deal<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M7 14l5 5 5-5"/></svg></button></th>
+            <th scope="col" data-key="owner"><button class="sort" type="button">Owner<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M7 14l5 5 5-5"/></svg></button></th>
+            <th scope="col" data-key="stage"><button class="sort" type="button">Stage<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M7 14l5 5 5-5"/></svg></button></th>
+            <th scope="col" class="col-hide-sm">Forecast</th>
+            <th scope="col" data-key="close" aria-sort="ascending"><button class="sort" type="button">Close date<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M7 14l5 5 5-5"/></svg></button></th>
+            <th scope="col" data-key="value" class="num-col"><button class="sort" type="button">Value<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M7 14l5 5 5-5"/></svg></button></th>
+            <th scope="col" class="col-hide-md">Next step</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p class="table-foot"><span id="deals-sum"></span><span id="deals-sort" role="status"></span></p>
+    </section>
+  </div>
+</main>
+
+<script>
+  // Raw values, formatted at render time with one locale (ENG-07, COP-08).
+  const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  const usdK = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 2 });
+  const usdAvg = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 1 });
+  const pct = new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: 1 });
+  const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+
+  // Quota bullet chart (CMP-18, FBK-06)
+  const quota = 2400000, won = 684500, commit = 1585000, best = 420000, scaleMax = 2800000, dayOf = 24, days = 92;
+  const P = (v) => (v / scaleMax) * 100;
+  const forecast = won + commit, gap = quota - forecast, pace = (quota * dayOf) / days;
+  const bullet = document.getElementById("bullet");
+  bullet.setAttribute("aria-label", `Closed won ${usd.format(won)}, commit ${usd.format(commit)}, best case ${usd.format(best)}, against a quota of ${usd.format(quota)}.`);
+  const bands = el("div", "bands");
+  [[0, 0.8 * quota, "b1"], [0.8 * quota, quota, "b2"], [quota, scaleMax, "b3"]].forEach(([a, b, c]) => { const s = el("span", c); s.style.width = P(b - a) + "%"; bands.append(s); });
+  bullet.append(bands);
+  [[0, won, "m-won"], [won, forecast, "m-commit"], [forecast, forecast + best, "m-best"]].forEach(([a, b, c]) => {
+    const m = el("span", "measure " + c); m.style.setProperty("--from", P(a)); m.style.setProperty("--to", P(b)); bullet.append(m);
+  });
+  const t = el("span", "target"); t.style.setProperty("--p", P(quota)); bullet.append(t);
+  const tl = el("span", "target-label num", "Quota " + usdK.format(quota)); tl.style.setProperty("--p", P(quota)); bullet.append(tl);
+  const pc = el("span", "pace num", "Even pace today " + usdK.format(Math.round(pace / 1000) * 1000)); pc.style.setProperty("--p", P(pace)); bullet.append(pc);
+  document.getElementById("scale").replaceChildren(...[0, 500000, 1000000, 1500000, 2000000, 2500000].map((v) => { const s = el("span", "num", usdK.format(v)); s.style.setProperty("--p", P(v)); return s; }));
+  const legend = [
+    ["k-won", "Closed won", won, pct.format(won / quota) + " of quota"],
+    ["k-commit", "Commit", commit, "21 deals"],
+    ["k-best", "Best case", best, "17 deals, not in forecast"],
+    ["k-quota", "Quota", quota, usdK.format(gap) + " above forecast"],
+  ];
+  document.getElementById("bullet-legend").replaceChildren(...legend.map(([k, label, v, note]) => {
+    const li = el("li"); const key = el("span", "k"); const i = el("i", k); i.setAttribute("aria-hidden", "true"); key.append(i, label);
+    li.append(key, el("strong", "num", usdK.format(v)), el("small", null, note)); return li;
+  }));
+  // Weekly forecast call, Saturdays of the quarter so far (CMP-17)
+  const calls = [["Oct 3", 1880000], ["Oct 10", 1970000], ["Oct 17", 2058000], ["Oct 24", forecast]];
+  const lo = 1800000, hi = 2500000, TX = (i) => (i / (calls.length - 1)) * 100, TY = (v) => ((v - lo) / (hi - lo)) * 100;
+  const tline = calls.map(([, v], i) => `${i ? "L" : "M"}${TX(i)} ${100 - TY(v)}`).join(" ");
+  const trend = document.getElementById("trend");
+  trend.setAttribute("aria-label", "Weekly forecast call: " + calls.map(([d, v]) => `${d} ${usdK.format(v)}`).join(", ") + `. Quota ${usdK.format(quota)}.`);
+  trend.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+      <line class="quota-line" x1="0" x2="100" y1="${100 - TY(quota)}" y2="${100 - TY(quota)}" vector-effect="non-scaling-stroke"/>
+      <path class="area" d="${tline} L100 100 L0 100 Z"/>
+      <path class="line" d="${tline}" vector-effect="non-scaling-stroke"/></svg>`;
+  const q = el("span", "q num", "Quota " + usdK.format(quota)); q.style.setProperty("--y", TY(quota)); q.setAttribute("aria-hidden", "true"); trend.append(q);
+  const last = el("span", "pt"); last.style.setProperty("--x", 100); last.style.setProperty("--y", TY(forecast)); last.setAttribute("aria-hidden", "true"); trend.append(last);
+  document.getElementById("trend-x").replaceChildren(...calls.map(([d], i) => { const sp = el("span", null, d); sp.style.setProperty("--x", TX(i)); return sp; }));
+
+  document.getElementById("fc-verdict").innerHTML =
+    `Forecast is <strong class="num">${usd.format(gap)}</strong> short. Closing <a href="#deals">Westgate Credit Union</a> ($118K) and <a href="#deals">Copperline Studios</a> ($64.8K) from best case would cover it.`;
+
+  // Funnel from stage counts; conversion is computed, never typed in (CMP-18, ENG-07)
+  const stages = [
+    { name: "Qualified", count: 120, value: 5840000 },
+    { name: "Discovery", count: 84, value: 4310000 },
+    { name: "Proposal", count: 51, value: 2960000 },
+    { name: "Negotiation", count: 29, value: 1920000 },
+    { name: "Closed won", count: 14, value: 684500 },
+  ];
+  const maxCount = stages[0].count, funnel = document.getElementById("funnel");
+  let weakest = null;
+  stages.forEach((s, i) => {
+    const w = (s.count / maxCount) * 100;
+    if (i) {
+      const prev = stages[i - 1], rate = s.count / prev.count;
+      if (!weakest || rate < weakest.rate) weakest = { from: prev.name, to: s.name, rate };
+      const conv = el("li", "conv"); conv.setAttribute("aria-label", `${pct.format(rate)} moved from ${prev.name} to ${s.name}`);
+      const trap = el("span", "trap num", Math.round(rate * 100) + "%"); trap.setAttribute("aria-hidden", "true");
+      trap.style.setProperty("--a", (prev.count / maxCount) * 100); trap.style.setProperty("--b", w);
+      conv.append(trap); funnel.append(conv);
+    }
+    const row = el("li", "stage-row" + (i === stages.length - 1 ? " is-won" : ""));
+    const name = el("div", "stage-name"); name.append(el("strong", null, s.name), el("small", "num", s.count + " deals"));
+    const bar = el("span", "f-bar"); bar.style.setProperty("--w", Math.max(w, 6)); bar.setAttribute("aria-hidden", "true");
+    const val = el("div", "stage-val num"); val.append(usdK.format(s.value), el("small", null, "avg " + usdAvg.format(s.value / s.count)));
+    row.append(name, bar, val); funnel.append(row);
+  });
+  document.querySelector("#funnel-note span").textContent =
+    `${pct.format(stages.at(-1).count / maxCount)} of qualified deals closed won. Weakest step: ${weakest.from} to ${weakest.to.toLowerCase()} at ${Math.round(weakest.rate * 100)}%.`;
+
+  // Leaderboard from raw values, ranked by closed won (CMP-20)
+  const reps = [
+    { name: "Priya Nair", initials: "PN", won: 182000, deals: 4 },
+    { name: "Jordan Reyes", initials: "JR", won: 146500, deals: 3 },
+    { name: "Hana Kim", initials: "HK", won: 121000, deals: 3 },
+    { name: "Mateo Silva", initials: "MS", won: 98000, deals: 2 },
+    { name: "Zara Ahmed", initials: "ZA", won: 84500, deals: 1 },
+    { name: "Leo Brandt", initials: "LB", won: 52500, deals: 1 },
+  ].sort((a, b) => b.won - a.won);
+  const repQuota = 400000, pacePct = (dayOf / days) * 100;
+  document.getElementById("leaders").replaceChildren(...reps.map((r, i) => {
+    const li = el("li", "leader");
+    const av = el("span", "avatar", r.initials); av.setAttribute("aria-hidden", "true");
+    const body = el("div", "leader-body"); const top = el("div", "leader-top");
+    top.append(el("strong", null, r.name), el("span", "num", `${r.deals} won · ${usdK.format(r.won)}`));
+    const track = el("div", "l-track"); track.style.setProperty("--pace", pacePct);
+    track.setAttribute("role", "meter"); track.setAttribute("aria-label", r.name + " quota attainment");
+    track.setAttribute("aria-valuemin", "0"); track.setAttribute("aria-valuemax", "100"); track.setAttribute("aria-valuenow", ((r.won / repQuota) * 100).toFixed(1));
+    const fill = el("span", "l-fill"); fill.style.setProperty("--v", (r.won / repQuota) * 100); track.append(fill);
+    body.append(top, track);
+    const val = el("div", "leader-val num"); val.append(pct.format(r.won / repQuota), el("small", null, "of quota"));
+    li.append(el("span", "rank num", String(i + 1)), av, body, val); return li;
+  }));
+
+  // Deals table: render from data, sort from header buttons, keep aria-sort on the sorted column (CMP-19, NAV-15 native semantics)
+  const stageOrder = ["Discovery", "Proposal", "Negotiation"];
+  const deals = [
+    { name: "Harbor Point Logistics", what: "Fleet expansion", owner: "Priya Nair", initials: "PN", stage: "Negotiation", fc: "Commit", close: "2026-11-06", value: 186000, next: "Legal redlines", nextDate: "2026-10-27" },
+    { name: "Bluefin Foods", what: "Annual plan", owner: "Hana Kim", initials: "HK", stage: "Negotiation", fc: "Commit", close: "2026-10-30", value: 96000, next: "Send order form", nextDate: "2026-10-26" },
+    { name: "Alder Health", what: "400 seats", owner: "Jordan Reyes", initials: "JR", stage: "Proposal", fc: "Commit", close: "2026-11-20", value: 142500, next: "Pricing review", nextDate: "2026-10-29", risk: "No reply in 9 days" },
+    { name: "Westgate Credit Union", what: "Platform", owner: "Zara Ahmed", initials: "ZA", stage: "Proposal", fc: "Best case", close: "2026-12-04", value: 118000, next: "Exec sponsor call", nextDate: "2026-11-04" },
+    { name: "Copperline Studios", what: "Team plan", owner: "Mateo Silva", initials: "MS", stage: "Discovery", fc: "Best case", close: "2026-12-11", value: 64800, next: "Security review", nextDate: "2026-11-02" },
+    { name: "Orchid Retail Group", what: "Add-on seats", owner: "Leo Brandt", initials: "LB", stage: "Negotiation", fc: "Commit", close: "2026-11-17", value: 54200, next: "Final pricing", nextDate: "2026-10-27", risk: "Close date moved twice" },
+    { name: "Kestrel Freight", what: "Renewal", owner: "Priya Nair", initials: "PN", stage: "Proposal", fc: "Commit", close: "2026-11-30", value: 72000, next: "Renewal call", nextDate: "2026-11-02" },
+  ];
+  const day = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+  const today = Date.UTC(2026, 9, 24);
+  const daysTo = (iso) => Math.round((Date.parse(iso) - today) / 86400000);
+  const warn = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4M12 17h.01"/></svg>';
+  const sortKeys = {
+    name: (d) => d.name, owner: (d) => d.owner, stage: (d) => stageOrder.indexOf(d.stage), close: (d) => d.close, value: (d) => d.value,
+  };
+  let sort = { key: "close", dir: 1 };
+  const tbody = document.querySelector("#deals tbody");
+  function renderDeals() {
+    const rows = [...deals].sort((a, b) => {
+      const x = sortKeys[sort.key](a), y = sortKeys[sort.key](b);
+      return (x < y ? -1 : x > y ? 1 : 0) * sort.dir;
+    });
+    tbody.replaceChildren(...rows.map((d) => {
+      const tr = el("tr");
+      const deal = el("td", "deal"); deal.append(el("strong", null, d.name), el("small", null, d.what));
+      if (d.risk) { const r = el("span", "risk"); r.innerHTML = warn; r.append(d.risk); deal.append(r); }
+      const owner = el("td"); const o = el("div", "owner"); const av = el("span", "avatar", d.initials); av.setAttribute("aria-hidden", "true"); o.append(av, d.owner); owner.append(o);
+      const stage = el("td"); const pill = el("span", "stage"); const steps = el("span", "steps"); steps.setAttribute("aria-hidden", "true");
+      const pos = stageOrder.indexOf(d.stage) + 2;
+      for (let i = 1; i <= 5; i++) steps.append(el("i", i <= pos ? "on" : null));
+      pill.append(steps, d.stage); stage.append(pill);
+      const fc = el("td", "col-hide-sm"); fc.append(el("span", "fc " + (d.fc === "Commit" ? "fc-commit" : "fc-best"), d.fc));
+      const close = el("td", "date num"); const ct = el("time", null, day.format(Date.parse(d.close))); ct.dateTime = d.close;
+      close.append(ct, el("small", null, `in ${daysTo(d.close)} days`));
+      const value = el("td", "value num num-col", usd.format(d.value));
+      const next = el("td", "next col-hide-md"); const nt = el("time", null, day.format(Date.parse(d.nextDate))); nt.dateTime = d.nextDate;
+      const ns = el("small"); ns.append(nt);
+      next.append(d.next, ns);
+      tr.append(deal, owner, stage, fc, close, value, next); return tr;
+    }));
+    document.querySelectorAll("#deals th[data-key]").forEach((th) => {
+      if (th.dataset.key === sort.key) th.setAttribute("aria-sort", sort.dir === 1 ? "ascending" : "descending");
+      else th.removeAttribute("aria-sort");
+    });
+  }
+  document.querySelectorAll("#deals th[data-key] .sort").forEach((btn) => btn.addEventListener("click", () => {
+    const key = btn.closest("th").dataset.key;
+    sort = { key, dir: sort.key === key ? -sort.dir : key === "value" ? -1 : 1 };
+    renderDeals();
+    document.getElementById("deals-sort").textContent = `Sorted by ${btn.textContent.trim().toLowerCase()}, ${sort.dir === 1 ? "ascending" : "descending"}`;
+  }));
+  renderDeals();
+  const commitSum = deals.filter((d) => d.fc === "Commit").reduce((s, d) => s + d.value, 0);
+  const bestSum = deals.filter((d) => d.fc === "Best case").reduce((s, d) => s + d.value, 0);
+  document.getElementById("deals-sum").innerHTML = `Showing 7 of 38 · <strong class="num">${usd.format(commitSum)}</strong> commit and <strong class="num">${usd.format(bestSum)}</strong> best case`;
+</script>
+</body>
+</html>

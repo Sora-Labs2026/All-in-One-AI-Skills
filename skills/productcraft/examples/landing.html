@@ -1,0 +1,643 @@
+<!doctype html>
+<!-- ProductCraft example: landing. Original Sora Labs example, MIT License.
+     Demonstrates: SCR-22, SCR-11, SCR-17, BTN-01, BTN-06, LAY-05, LAY-07, LAY-08, LAY-10, LAY-14, LAY-15, LAY-09,
+     LAY-02, CMP-05, CMP-13, COL-02, COL-11, COP-01, COP-10, COP-11, COP-12, COP-13, FRM-01, FRM-05, FRM-11, TYP-09,
+     ICO-05, DRK-05, DRK-09, ENG-01, NAV-06 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Landing pages</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    /* Page accent: one blue with a job (COL-02, CMP-26). Every pair below is checked for AA. */
+    :root {
+      --accent: #2563eb; --accent-hover: #1d4ed8; --accent-soft: #eff6ff; --accent-ink: #1d4ed8; --focus: #2563eb;
+      --field-border: #8a919d; --field-bg: var(--surface);
+      --band: #1d4ed8; --on-band: #ffffff; --on-band-2: #dbeafe;
+    }
+    [data-theme="dark"] {
+      --accent: #60a5fa; --accent-hover: #93c5fd; --accent-soft: rgba(96, 165, 250, 0.14); --accent-ink: #93c5fd;
+      --on-accent: #0b1220; --focus: #93c5fd; --field-border: #6b7280; --field-bg: var(--bg);
+      color: var(--text);
+    }
+
+    .variant-stage { grid-template-columns: minmax(0, 1fr); padding: var(--space-5); }
+    .window { color: var(--text); }
+    .window-bar .title { margin-left: var(--space-3); font-size: var(--text-xs); color: var(--text-3); font-weight: 600; }
+    svg.i { width: 20px; height: 20px; flex: none; }
+    h4 { margin: 0; }
+    ul { margin: 0; padding: 0; list-style: none; }
+    a.btn:hover { text-decoration: none; }
+    .btn-lg { min-height: 48px; padding: 0 var(--space-5); }
+    .eyebrow { font-size: var(--text-sm); font-weight: 600; color: var(--accent-ink); }
+    .delta .period { font-weight: 400; color: var(--text-3); }
+    .delta-flat { color: var(--text-2); }
+    .more-link { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-sm); font-weight: 600; white-space: nowrap; }
+    .more-link svg { width: 16px; height: 16px; }
+
+    /* Shared landing parts: logo left, a few links, one action right (SCR-11, NAV-06) */
+    .brand { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 700; color: var(--text); white-space: nowrap; }
+    .brand:hover { text-decoration: none; }
+    .logo { display: inline-grid; place-items: center; width: 28px; height: 28px; flex: none; border-radius: var(--radius-sm); background: var(--accent); color: var(--on-accent); }
+    .logo svg { width: 18px; height: 18px; }
+    .lp-nav { display: flex; align-items: center; gap: var(--space-6); height: 56px; padding: 0 var(--space-6); background: var(--surface); border-bottom: 1px solid var(--border); }
+    .lp-nav ul { display: flex; gap: var(--space-1); }
+    .lp-nav ul a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 var(--space-3); border-radius: var(--radius-sm); color: var(--text-2); font-size: var(--text-sm); font-weight: 500; }
+    .lp-nav ul a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    .nav-actions { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; }
+    .nav-actions .btn { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+
+    /* v1 product hero: one message, one primary action, one trust line, one dominant visual (SCR-11, LAY-05) */
+    .hero { padding: var(--space-6) var(--space-6) 0; text-align: center; background: linear-gradient(var(--surface) 50%, var(--bg)); }
+    .hero-title { font-size: 44px; line-height: 1.1; letter-spacing: -0.02em; font-weight: 700; }
+    .hero-lede { max-width: 700px; margin: var(--space-3) auto 0; font-size: var(--text-lg); line-height: 1.5; color: var(--text-2); }
+    .hero-actions { display: flex; justify-content: center; gap: var(--space-3); margin-top: var(--space-5); }
+    .hero-actions .btn-ghost { color: var(--text); }
+    .trust { display: flex; justify-content: center; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin-top: var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
+    .trust > span { display: inline-flex; align-items: center; gap: var(--space-1); }
+    .trust svg { width: 16px; height: 16px; }
+    .trust .ok { color: var(--success); }
+    .trust .star { color: var(--warning); }
+    .trust a { color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; }
+    .trust strong { color: var(--text); }
+
+    /* The preview is built in HTML so it stays sharp and readable (ICO-05) */
+    .preview-crop { max-width: 1000px; height: 164px; margin: var(--space-5) auto 0; overflow: hidden; }
+    .pv { border: 1px solid var(--border); border-bottom: 0; border-radius: var(--radius-lg) var(--radius-lg) 0 0; background: var(--surface); box-shadow: var(--shadow-lg); text-align: left; }
+    .pv-bar { display: flex; align-items: center; gap: var(--space-2); height: 44px; padding: 0 var(--space-4); border-bottom: 1px solid var(--border); font-size: var(--text-sm); color: var(--text-2); }
+    .pv-bar .logo { width: 22px; height: 22px; border-radius: 6px; }
+    .pv-bar .logo svg { width: 14px; height: 14px; }
+    .pv-bar strong { color: var(--text); font-weight: 600; }
+    .pv-range { display: inline-flex; align-items: center; gap: var(--space-2); margin-left: auto; padding: 2px var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+    .pv-range svg { width: 16px; height: 16px; }
+    .pv-body { display: grid; gap: var(--space-3); padding: var(--space-4); background: var(--bg); }
+    .pv-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); }
+    .pv-kpi { display: grid; gap: 2px; padding: var(--space-3) var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+    .pv-kpi .lbl { font-size: var(--text-xs); color: var(--text-2); }
+    .pv-kpi .val { font-size: var(--text-xl); font-weight: 700; line-height: 1.25; }
+    .pv-kpi .delta { font-size: var(--text-xs); }
+    .pv-cards { display: grid; grid-template-columns: 3fr 2fr; gap: var(--space-3); }
+    .pv-card { padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+    .pv-card h4 { font-size: var(--text-sm); }
+    .bars { display: grid; gap: var(--space-2); margin-top: var(--space-3); }
+    .bar-row { display: grid; grid-template-columns: 88px minmax(0, 1fr) 72px; align-items: center; gap: var(--space-3); font-size: var(--text-xs); color: var(--text-2); }
+    .bar-row b { height: 10px; border-radius: var(--radius-pill); background: var(--accent); }
+    .bar-row .num { text-align: right; color: var(--text); font-weight: 600; }
+
+    /* v2 split hero, dark: text and visual in their own tracks (LAY-10, DRK-09) */
+    .split { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: var(--space-8); align-items: center; padding: var(--space-6) var(--space-7); background: var(--bg); }
+    .split-title { margin-top: var(--space-2); font-size: 34px; line-height: 1.15; letter-spacing: -0.02em; font-weight: 700; }
+    .split-lede { margin-top: var(--space-3); max-width: 520px; font-size: var(--text-lg); color: var(--text-2); }
+    .signup { margin-top: var(--space-5); max-width: 520px; }
+    .signup label { display: block; margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+    .signup-row { display: flex; gap: var(--space-2); }
+    .signup input { flex: 1; min-width: 0; height: 48px; padding: 0 var(--space-4); border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--field-bg); }
+    .signup input::placeholder { color: var(--text-3); }
+    .signup input[aria-invalid="true"] { border-color: var(--danger); }
+    .signup .btn { min-height: 48px; }
+    .field-error { margin-top: var(--space-2); font-size: var(--text-sm); color: var(--danger); }
+    .field-error[hidden], .form-status:empty { display: none; }
+    .form-status { margin-top: var(--space-2); font-size: var(--text-sm); color: var(--success); }
+    .privacy { display: flex; gap: var(--space-2); margin-top: var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
+    .privacy svg { width: 16px; height: 16px; margin-top: 3px; flex: none; color: var(--text-2); }
+    .privacy a { text-decoration: underline; text-underline-offset: 3px; }
+    .facts { display: grid; gap: var(--space-1); max-width: 520px; margin-top: var(--space-4); padding-top: var(--space-3); border-top: 1px solid var(--border); font-size: var(--text-sm); color: var(--text-2); }
+    .facts li { display: flex; gap: var(--space-2); align-items: flex-start; }
+    .facts svg { width: 16px; height: 16px; margin-top: 3px; flex: none; color: var(--success); }
+    .facts strong { color: var(--text); font-weight: 600; }
+
+    .invoice-stack { display: grid; gap: var(--space-3); }
+    .invoice { padding: var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); }
+    .inv-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+    .inv-head p { font-size: var(--text-sm); color: var(--text-2); }
+    .inv-lines { display: grid; gap: var(--space-2); margin: var(--space-4) 0 var(--space-3); padding: var(--space-3) 0; border-block: 1px solid var(--border); font-size: var(--text-sm); }
+    .inv-lines li, .inv-total { display: flex; justify-content: space-between; gap: var(--space-3); }
+    .inv-lines span:first-child { color: var(--text-2); }
+    .inv-total { align-items: baseline; font-weight: 600; }
+    .inv-total .num { font-size: var(--text-xl); font-weight: 700; }
+    .inv-pay { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .inv-pay svg { width: 16px; height: 16px; }
+    .payout { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface-2); }
+    .payout-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-pill); background: var(--success-soft); color: var(--success); }
+    .payout p { font-size: var(--text-sm); color: var(--text-2); }
+    .payout strong { display: block; color: var(--text); font-size: var(--text-md); }
+    .payout .num { font-weight: 700; }
+
+    /* Section card used by v3 to v6 */
+    .lp-section { width: 100%; padding: var(--space-6); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); box-shadow: var(--shadow-sm); }
+    .section-head { margin-bottom: var(--space-4); }
+    .section-head h3 { margin-top: 2px; font-size: var(--text-xl); line-height: 1.25; letter-spacing: -0.01em; font-weight: 700; }
+    .section-head p:not(.eyebrow) { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--text-2); }
+
+    /* v3 bento: one gap, one radius, one padding, exactly one leading tile (LAY-14, CMP-05) */
+    .bento { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-3); }
+    .tile { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface-2); }
+    .tile h4 { font-size: var(--text-md); }
+    .tile p { font-size: var(--text-sm); color: var(--text-2); }
+    .tile-lead { grid-column: 1 / span 7; grid-row: span 2; gap: var(--space-3); background: var(--accent-soft); }
+    .tile-lead h4 { font-size: var(--text-lg); line-height: 1.3; }
+    .tile-side { grid-column: span 5; }
+    .tile-half { grid-column: span 6; flex-direction: row; align-items: flex-start; gap: var(--space-3); }
+    .tile-icon { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: var(--radius-sm); background: var(--surface); color: var(--accent-ink); }
+    .tile-icon svg { width: 20px; height: 20px; }
+    .sources { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .sources li { display: inline-flex; align-items: center; gap: var(--space-1); }
+    .sources svg { width: 16px; height: 16px; color: var(--accent-ink); }
+    .mini-table { width: 100%; margin-top: auto; border-collapse: collapse; background: var(--surface); border-radius: var(--radius-sm); font-size: var(--text-sm); overflow: hidden; }
+    .mini-table th { padding: var(--space-2) var(--space-3); text-align: left; font-size: var(--text-xs); font-weight: 600; color: var(--text-2); border-bottom: 1px solid var(--border); }
+    .mini-table td { padding: 6px var(--space-3); border-bottom: 1px solid var(--border); }
+    .mini-table tr:last-child td { border-bottom: 0; }
+    .mini-table .r { text-align: right; }
+    .mini-table td.r { font-weight: 600; }
+    .cohort { display: grid; grid-template-columns: 30px repeat(4, minmax(0, 1fr)); gap: 3px; margin-top: var(--space-1); font-size: var(--text-xs); }
+    .cohort span { display: grid; place-items: center; height: 24px; border-radius: 4px; }
+    .cohort .h { color: var(--text-2); }
+    .cohort .c4 { background: #93c5fd; color: var(--text); }
+    .cohort .c3 { background: #bfdbfe; color: var(--text); }
+    .cohort .c2 { background: #dbeafe; color: var(--text); }
+    .cohort .c1 { background: var(--surface); color: var(--text-2); }
+    .alert-row { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: var(--space-2); margin-top: var(--space-1); padding: var(--space-3); border-radius: var(--radius-sm); background: var(--surface); }
+    .alert-row .tile-icon { width: 28px; height: 28px; background: var(--warning-soft); color: var(--warning); }
+    .alert-row .tile-icon svg { width: 16px; height: 16px; }
+    .alert-row strong { display: block; font-size: var(--text-sm); line-height: 1.35; }
+    .alert-row .delta { margin-top: 2px; font-size: var(--text-xs); }
+    .alert-cause { display: block; margin-top: 2px; font-size: var(--text-xs); color: var(--text-2); }
+
+    /* v4 honest social proof: named people, roles, scale, sample size and period (COP-13) */
+    .quote { display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-3); margin: 0; padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface-2); }
+    .quote blockquote { margin: 0; }
+    .quote blockquote p { font-size: var(--text-sm); line-height: 1.5; color: var(--text); }
+    .quote.featured blockquote p { font-size: var(--text-md); line-height: 1.5; font-weight: 500; }
+    .quote figcaption { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); line-height: 1.4; color: var(--text-2); }
+    .quote figcaption strong { display: block; font-size: var(--text-sm); color: var(--text); font-weight: 600; }
+    .quote-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); margin-top: var(--space-3); }
+    .avatar.tone-2 { background: var(--success-soft); color: var(--success); }
+    .avatar.tone-3 { background: var(--warning-soft); color: var(--warning); }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: var(--space-4) 0 0; }
+    .stats > div { padding: var(--space-3) var(--space-3) 0; border-top: 1px solid var(--border); }
+    .stats > div + div { border-left: 1px solid var(--border); }
+    .stats > div:first-child { padding-left: 0; }
+    .stats dt { font-size: var(--text-xs); color: var(--text-2); }
+    .stats dd { margin: 0; }
+    .stat-val { display: block; font-size: var(--text-xl); font-weight: 700; line-height: 1.3; }
+    .stat-val small { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .stat-basis { display: block; font-size: var(--text-xs); line-height: 1.4; color: var(--text-2); }
+    .proof-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-4); }
+    .disclosure { font-size: var(--text-xs); color: var(--text-2); }
+
+    /* v5 pricing teaser and FAQ on native details/summary (COP-11, LAY-09, ENG-01) */
+    .plans { display: grid; gap: var(--space-2); }
+    .plan { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-1) var(--space-4); align-items: center; padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+    .plan.reco { border: 2px solid var(--accent); padding: calc(var(--space-4) - 1px); }
+    .plan-name { display: flex; align-items: center; gap: var(--space-2); }
+    .badge { display: inline-flex; align-items: center; min-height: 22px; padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); font-size: var(--text-xs); font-weight: 600; }
+    .price { display: flex; align-items: baseline; gap: var(--space-2); }
+    .price .amt { font-size: var(--text-2xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; }
+    .price s { font-size: var(--text-lg); color: var(--text-2); }
+    .price .per { font-size: var(--text-sm); color: var(--text-2); }
+    .plan .terms { grid-column: 1 / -1; font-size: var(--text-sm); color: var(--text-2); }
+    .plan .terms strong { color: var(--success); font-weight: 600; }
+    .plan-free { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--surface-2); font-size: var(--text-sm); color: var(--text-2); }
+    .plan-free strong { color: var(--text); }
+    .plan-free .btn { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+    .plan-foot { display: flex; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
+    .faq-title { margin: var(--space-5) 0 var(--space-1); font-size: var(--text-md); }
+    .faq { border-top: 1px solid var(--border); }
+    .faq details { border-bottom: 1px solid var(--border); }
+    .faq summary { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-height: 48px; padding: var(--space-2) 0; cursor: pointer; list-style: none; font-size: var(--text-md); font-weight: 600; }
+    .faq summary::-webkit-details-marker { display: none; }
+    .faq summary svg { width: 18px; height: 18px; flex: none; color: var(--text-2); transition: transform var(--dur-fast) var(--ease-out); }
+    .faq details[open] summary svg { transform: rotate(180deg); }
+    .faq summary:hover { color: var(--accent-ink); }
+    .faq details p { padding: 0 var(--space-6) var(--space-3) 0; font-size: var(--text-sm); color: var(--text-2); }
+
+    /* v6 closing call to action on an accent band, then a grouped footer (COL-11, SCR-22) */
+    .cta-band { padding: var(--space-6); border-radius: var(--radius-md); background: var(--band); color: var(--on-band); }
+    .cta-band h3 { font-size: var(--text-xl); line-height: 1.25; letter-spacing: -0.01em; font-weight: 700; }
+    .cta-band p { margin-top: var(--space-2); color: var(--on-band-2); }
+    .cta-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-5); }
+    .btn-inverse { background: var(--on-band); color: var(--band); }
+    .btn-inverse:hover { background: var(--accent-soft); }
+    .btn-on-band { border-color: rgba(255, 255, 255, 0.6); background: transparent; color: var(--on-band); }
+    .btn-on-band:hover { background: rgba(255, 255, 255, 0.12); }
+    .cta-band :focus-visible { outline-color: var(--on-band); }
+    .footer-brand { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-6); }
+    .footer-brand p { font-size: var(--text-sm); color: var(--text-2); }
+    .footer-groups { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-5); }
+    .footer-groups h4 { font-size: var(--text-sm); }
+    .footer-groups ul { display: grid; margin-top: var(--space-1); }
+    .footer-groups ul a { display: inline-flex; align-items: center; min-height: 28px; font-size: var(--text-sm); color: var(--text-2); }
+    .footer-groups ul a:hover { color: var(--text); }
+    .legal { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border); font-size: var(--text-sm); color: var(--text-2); }
+    .legal label { display: inline-flex; align-items: center; gap: var(--space-2); }
+    .legal select { min-height: 36px; padding: 0 var(--space-3); border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--field-bg); }
+
+    /* LAY-14 / LAY-15: below tablet width every grid collapses to one column, lead tile first */
+    @media (max-width: 760px) {
+      .sheet { padding: var(--space-5) var(--space-4); }
+      .variants.cols-2 { grid-template-columns: 1fr; }
+      .lp-nav ul { display: none; }
+      .split, .quote-pair, .stats, .footer-groups { grid-template-columns: 1fr; }
+      .bento > * { grid-column: 1 / -1; grid-row: auto; }
+      .pv-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero-title { font-size: var(--text-2xl); }
+    }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16.5c3.5 0 4.5-9 14-9"/><path d="M5 11.5c2 0 3-3.5 6-4.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M10 8.8v6.4l5-3.2z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/></symbol>
+    <symbol id="i-store" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5V19a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9.5M3 9.5l1.6-5h14.8l1.6 5a2.5 2.5 0 0 1-4.5 1.5 2.9 2.9 0 0 1-4.5 0 2.9 2.9 0 0 1-4.5 0A2.5 2.5 0 0 1 3 9.5zM10 20v-5h4v5"/></symbol>
+    <symbol id="i-megaphone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4a1 1 0 0 0 1 1h2l8 4.5V4.5L7 9H5a1 1 0 0 0-1 1zM7 15l1.5 5M18.5 9.5a3.5 3.5 0 0 1 0 5"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8.5" r="3.5"/><path d="M3 19.5a6 6 0 0 1 12 0M16 5.2a3.5 3.5 0 0 1 0 6.6M18 14.2a6 6 0 0 1 3 5.3"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15zM10 20.5a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3.5 7l8.5 6 8.5-6"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-payout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19.5h14"/></symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="6"/><path d="M8 15.5c2.5 0 3.5-7 8-7"/></svg>
+          ProductCraft · Example screens
+        </span>
+        <h1>Landing pages</h1>
+        <p>Six landing sections in the order visitors evaluate a product: hero, signup, features, proof, pricing with answers, and a closing call to action. Every claim names its period and basis.</p>
+      </div>
+      <p class="subtle">6 versions · light and dark</p>
+    </header>
+
+    <div class="variants cols-2">
+      <!-- v1 -->
+      <section class="variant span-all" aria-labelledby="v1">
+        <h2 class="variant-label" id="v1"><span class="v">v1</span> Product hero with a built-in preview and one primary action</h2>
+        <div class="variant-stage">
+          <div class="window">
+            <div class="window-bar"><i></i><i></i><i></i><span class="title">Sora Analytics</span></div>
+            <header class="lp-nav">
+              <a class="brand" href="#home"><span class="logo"><svg aria-hidden="true"><use href="#i-mark"/></svg></span>Sora Analytics</a>
+              <nav aria-label="Main">
+                <ul>
+                  <li><a href="#product">Product</a></li>
+                  <li><a href="#customers">Customers</a></li>
+                  <li><a href="#pricing">Pricing</a></li>
+                  <li><a href="#docs">Docs</a></li>
+                </ul>
+              </nav>
+              <div class="nav-actions">
+                <a class="btn btn-ghost" href="#sign-in">Sign in</a>
+                <a class="btn btn-secondary" href="#trial">Start free</a>
+              </div>
+            </header>
+
+            <section class="hero" aria-labelledby="hero-title">
+              <h3 class="hero-title" id="hero-title">Know which channels actually pay back</h3>
+              <p class="hero-lede">Sora Analytics joins store orders, ad spend and CRM deals by customer, so revenue and return for every channel sit in one view. Setup takes about 10 minutes.</p>
+              <div class="hero-actions">
+                <a class="btn btn-primary btn-lg" href="#trial">Start free trial</a>
+                <a class="btn btn-ghost btn-lg" href="#tour"><svg aria-hidden="true"><use href="#i-play"/></svg>Watch the 2-minute tour</a>
+              </div>
+              <p class="trust">
+                <span><svg class="ok" aria-hidden="true"><use href="#i-check"/></svg>14 days free, no card needed</span>
+                <span><svg class="star" aria-hidden="true"><use href="#i-star"/></svg><a href="#reviews"><strong class="num">4.7/5</strong> from 312 verified reviews</a></span>
+              </p>
+
+              <div class="preview-crop">
+                <div class="pv" role="img" aria-label="Product preview: revenue by channel for Sora Shop, Sep 24 to Oct 23. Revenue $184,320, up 8.4 percent; blended return 4.4x; paid search earns the most.">
+                  <div class="pv-bar">
+                    <span class="logo"><svg><use href="#i-mark"/></svg></span>
+                    <span>Sora Shop</span><span>/</span><strong>Revenue by channel</strong>
+                    <span class="pv-range"><svg><use href="#i-calendar"/></svg>Sep 24 – Oct 23</span>
+                  </div>
+                  <div class="pv-body">
+                    <div class="pv-kpis">
+                      <div class="pv-kpi"><span class="lbl">Revenue</span><span class="val num">$184,320</span><span class="delta delta-good"><svg><use href="#i-up"/></svg>+8.4% <span class="period">vs prior 30 days</span></span></div>
+                      <div class="pv-kpi"><span class="lbl">Ad spend</span><span class="val num">$41,900</span><span class="delta delta-flat"><svg><use href="#i-up"/></svg>+2.1% <span class="period">vs prior 30 days</span></span></div>
+                      <div class="pv-kpi"><span class="lbl">Blended return</span><span class="val num">4.4x</span><span class="delta delta-good"><svg><use href="#i-up"/></svg>+0.3x <span class="period">vs prior 30 days</span></span></div>
+                      <div class="pv-kpi"><span class="lbl">New customers</span><span class="val num">1,284</span><span class="delta delta-good"><svg><use href="#i-up"/></svg>+5.1% <span class="period">vs prior 30 days</span></span></div>
+                    </div>
+                    <div class="pv-cards">
+                      <div class="pv-card">
+                        <h4>Revenue by channel</h4>
+                        <div class="bars">
+                          <div class="bar-row"><span>Paid search</span><b style="width:100%"></b><span class="num">$61,200</span></div>
+                          <div class="bar-row"><span>Email</span><b style="width:85.8%"></b><span class="num">$52,480</span></div>
+                        </div>
+                      </div>
+                      <div class="pv-card">
+                        <h4>Return per $1 of spend</h4>
+                        <div class="bars">
+                          <div class="bar-row"><span>Email</span><b style="width:100%"></b><span class="num">12.8x</span></div>
+                          <div class="bar-row"><span>Affiliates</span><b style="width:47.7%"></b><span class="num">6.1x</span></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>SCR-11</code> <code>SCR-22</code> <code>BTN-01</code> <code>LAY-05</code> <code>COP-01</code> <code>COP-13</code> <code>ICO-05</code> <code>TYP-09</code></p>
+      </section>
+
+      <!-- v2 -->
+      <section class="variant span-all" aria-labelledby="v2">
+        <h2 class="variant-label" id="v2"><span class="v">v2</span> Split hero with email signup, dark theme</h2>
+        <div class="variant-stage">
+          <div class="window" data-theme="dark">
+            <div class="window-bar"><i></i><i></i><i></i><span class="title">Sora Pay</span></div>
+            <header class="lp-nav">
+              <a class="brand" href="#pay"><span class="logo"><svg aria-hidden="true"><use href="#i-mark"/></svg></span>Sora Pay</a>
+              <nav aria-label="Sora Pay">
+                <ul>
+                  <li><a href="#invoices">Invoices</a></li>
+                  <li><a href="#payouts">Payouts</a></li>
+                  <li><a href="#fees">Fees</a></li>
+                  <li><a href="#help">Help</a></li>
+                </ul>
+              </nav>
+              <div class="nav-actions"><a class="btn btn-secondary" href="#sign-in">Sign in</a></div>
+            </header>
+
+            <section class="split" aria-labelledby="split-title">
+              <div>
+                <p class="eyebrow">For freelancers and small studios</p>
+                <h3 class="split-title" id="split-title">Send the invoice today.<br>Get paid in days, not weeks.</h3>
+                <p class="split-lede">Every invoice carries a pay link. Sora Pay matches each card or bank payment to its invoice for you.</p>
+
+                <form class="signup" novalidate data-signup>
+                  <label for="su-email">Work email</label>
+                  <div class="signup-row">
+                    <input id="su-email" name="email" type="email" autocomplete="email" inputmode="email" enterkeyhint="go" placeholder="name@example.com" required aria-describedby="su-error su-note">
+                    <button class="btn btn-primary" type="submit">Create free account</button>
+                  </div>
+                  <p class="field-error" id="su-error" hidden></p>
+                  <p class="form-status" role="status" aria-live="polite"></p>
+                  <p class="privacy" id="su-note"><svg aria-hidden="true"><use href="#i-lock"/></svg><span>We use this email for your account and receipts only. No newsletter unless you opt in. <a href="#privacy">Privacy notice</a></span></p>
+                </form>
+
+                <ul class="facts">
+                  <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><strong>No monthly fee.</strong> Cards 1.9% + $0.30, bank transfers $0.50 per payment.</span></li>
+                  <li><svg aria-hidden="true"><use href="#i-check"/></svg><span><strong class="num">1,900</strong> freelancers and studios sent invoices with Sora Pay in September 2026.</span></li>
+                </ul>
+              </div>
+
+              <div class="invoice-stack" role="img" aria-label="Example invoice #SL-1042 for $2,400.00, paid by card on Oct 22, with a payout of $2,354.10 arriving Monday, Oct 26">
+                <div class="invoice">
+                  <div class="inv-head">
+                    <div><h4>Invoice #SL-1042</h4><p>To Mateo Silva · due Oct 30</p></div>
+                    <span class="pill pill-success">Paid Oct 22</span>
+                  </div>
+                  <ul class="inv-lines">
+                    <li><span>Brand workshop, 2 days</span><span class="num">$1,800.00</span></li>
+                    <li><span>Illustration set, 6 pieces</span><span class="num">$600.00</span></li>
+                  </ul>
+                  <div class="inv-total"><span>Total</span><span class="num">$2,400.00</span></div>
+                  <p class="inv-pay"><svg><use href="#i-card"/></svg>Paid by card •••• 4821</p>
+                </div>
+                <div class="payout">
+                  <span class="payout-icon"><svg class="i"><use href="#i-payout"/></svg></span>
+                  <p><strong>Payout on its way</strong>Arrives Mon, Oct 26 · after the $45.90 card fee</p>
+                  <span class="num">$2,354.10</span>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-01</code> <code>FRM-05</code> <code>FRM-11</code> <code>COP-12</code> <code>COP-11</code> <code>LAY-10</code> <code>BTN-01</code> <code>DRK-05</code> <code>DRK-09</code></p>
+      </section>
+
+      <!-- v3 -->
+      <section class="variant" aria-labelledby="v3">
+        <h2 class="variant-label" id="v3"><span class="v">v3</span> Bento feature grid with one leading tile</h2>
+        <div class="variant-stage">
+          <section class="lp-section" aria-labelledby="feat-title">
+            <header class="section-head">
+              <p class="eyebrow">Features</p>
+              <h3 id="feat-title">One place to see what drives revenue</h3>
+              <p>Connect your sources once. Reports refresh hourly on Pro and daily on Free.</p>
+            </header>
+            <div class="bento">
+              <article class="tile tile-lead">
+                <h4>Revenue and return for every channel</h4>
+                <p>Sora joins orders, ad spend and CRM deals by customer, so each channel shows what it earned and what it cost.</p>
+                <ul class="sources" aria-label="Joined sources">
+                  <li><svg aria-hidden="true"><use href="#i-store"/></svg>Orders</li>
+                  <li><svg aria-hidden="true"><use href="#i-megaphone"/></svg>Ad spend</li>
+                  <li><svg aria-hidden="true"><use href="#i-users"/></svg>CRM</li>
+                </ul>
+                <table class="mini-table">
+                  <caption class="visually-hidden">Revenue and return by channel, Sep 24 to Oct 23</caption>
+                  <thead><tr><th scope="col">Channel</th><th scope="col" class="r">Revenue</th><th scope="col" class="r">Return</th></tr></thead>
+                  <tbody>
+                    <tr><td>Paid search</td><td class="r num">$61,200</td><td class="r num">3.3x</td></tr>
+                    <tr><td>Email</td><td class="r num">$52,480</td><td class="r num">12.8x</td></tr>
+                    <tr><td>Social</td><td class="r num">$38,940</td><td class="r num">2.7x</td></tr>
+                    <tr><td>Affiliates</td><td class="r num">$31,700</td><td class="r num">6.1x</td></tr>
+                  </tbody>
+                </table>
+              </article>
+
+              <article class="tile tile-side">
+                <h4>Cohort retention</h4>
+                <p>Customers who ordered again, by first-order month.</p>
+                <div class="cohort num" role="img" aria-label="Repeat rate by first-order month. June: 41, 30, 26 and 24 percent in months 1 to 4. July: 44, 33 and 28 percent. August: 47 and 35 percent.">
+                  <span class="h"></span><span class="h">M1</span><span class="h">M2</span><span class="h">M3</span><span class="h">M4</span>
+                  <span class="h">Jun</span><span class="c3">41%</span><span class="c2">30%</span><span class="c2">26%</span><span class="c2">24%</span>
+                  <span class="h">Jul</span><span class="c3">44%</span><span class="c2">33%</span><span class="c2">28%</span><span class="c1">–</span>
+                  <span class="h">Aug</span><span class="c4">47%</span><span class="c3">35%</span><span class="c1">–</span><span class="c1">–</span>
+                </div>
+              </article>
+
+              <article class="tile tile-side">
+                <h4>Alerts that say why</h4>
+                <div class="alert-row">
+                  <span class="tile-icon"><svg aria-hidden="true"><use href="#i-bell"/></svg></span>
+                  <div>
+                    <strong>Paid search return fell to 2.9x</strong>
+                    <span class="delta delta-bad"><svg aria-hidden="true"><use href="#i-down"/></svg>&minus;0.4x <span class="period">vs last week</span></span>
+                    <span class="alert-cause">Likely cause: cost per click up 12% on 3 campaigns</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="tile tile-half">
+                <span class="tile-icon"><svg aria-hidden="true"><use href="#i-mail"/></svg></span>
+                <div><h4>Monday reports</h4><p>A summary in your team's inbox at 8:00 AM.</p></div>
+              </article>
+
+              <article class="tile tile-half">
+                <span class="tile-icon"><svg aria-hidden="true"><use href="#i-link"/></svg></span>
+                <div><h4>View-only links</h4><p>Share a dashboard without adding a seat.</p></div>
+              </article>
+            </div>
+          </section>
+        </div>
+        <p class="rule-ids">Rules: <code>LAY-14</code> <code>LAY-08</code> <code>CMP-05</code> <code>COL-02</code> <code>LAY-15</code> <code>TYP-09</code></p>
+      </section>
+
+      <!-- v4 -->
+      <section class="variant" aria-labelledby="v4">
+        <h2 class="variant-label" id="v4"><span class="v">v4</span> Social proof with named sources and stated basis</h2>
+        <div class="variant-stage">
+          <section class="lp-section" aria-labelledby="proof-title">
+            <header class="section-head">
+              <p class="eyebrow">Customers</p>
+              <h3 id="proof-title">What changed after teams switched</h3>
+            </header>
+            <figure class="quote featured">
+              <blockquote><p>“Weekly reporting went from about four hours to twenty minutes. Seeing return per channel side by side is why we moved 15% of our social budget into email.”</p></blockquote>
+              <figcaption><span class="avatar" aria-hidden="true">PN</span><span><strong>Priya Nair</strong>Head of Growth, Tidewell Coffee · customer since Mar 2025</span></figcaption>
+            </figure>
+            <div class="quote-pair">
+              <figure class="quote">
+                <blockquote><p>“Our agency report and Sora disagreed by $9,000 a month. Sora showed the double-counted orders before we renewed.”</p></blockquote>
+                <figcaption><span class="avatar tone-2" aria-hidden="true">LB</span><span><strong>Leo Brandt</strong>Founder, Kestrel Bikes</span></figcaption>
+              </figure>
+              <figure class="quote">
+                <blockquote><p>“I send the Monday report to our two founders. Nobody asks me for a spreadsheet anymore.”</p></blockquote>
+                <figcaption><span class="avatar tone-3" aria-hidden="true">ZA</span><span><strong>Zara Ahmed</strong>Marketing Lead, Orchard Lane Books</span></figcaption>
+              </figure>
+            </div>
+            <dl class="stats">
+              <div><dt>Reporting time saved</dt><dd><span class="stat-val num">3.2 <small>h / week</small></span><span class="stat-basis">Median of 418 survey answers, Sep 2026</span></dd></div>
+              <div><dt>Stores connected</dt><dd><span class="stat-val num">1,240</span><span class="stat-basis">Active in the 30 days to Oct 23, 2026</span></dd></div>
+              <div><dt>Average rating</dt><dd><span class="stat-val num">4.7 <small>/ 5</small></span><span class="stat-basis">312 verified reviews, Jan–Sep 2026</span></dd></div>
+            </dl>
+            <div class="proof-foot">
+              <p class="disclosure">Quotes from paying customers, shared with permission and shortened only for length. Results vary by store.</p>
+              <a class="more-link" href="#reviews">Read all 312 reviews<svg aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            </div>
+          </section>
+        </div>
+        <p class="rule-ids">Rules: <code>COP-13</code> <code>COP-10</code> <code>CMP-13</code> <code>TYP-09</code> <code>LAY-07</code></p>
+      </section>
+
+      <!-- v5 -->
+      <section class="variant" aria-labelledby="v5">
+        <h2 class="variant-label" id="v5"><span class="v">v5</span> Pricing teaser and FAQ accordion</h2>
+        <div class="variant-stage">
+          <section class="lp-section" aria-labelledby="pf-title">
+            <header class="section-head">
+              <p class="eyebrow">Pricing</p>
+              <h3 id="pf-title">Two plans, stated up front</h3>
+            </header>
+            <div class="plans">
+              <article class="plan reco" aria-labelledby="plan-pro">
+                <div>
+                  <h4 class="plan-name" id="plan-pro">Pro <span class="badge">Recommended</span></h4>
+                  <p class="price"><s class="num">$25</s><span class="amt num">$20</span><span class="per">/ month, billed yearly</span></p>
+                </div>
+                <a class="btn btn-primary" href="#trial">Start 14-day trial</a>
+                <p class="terms">$240 a year, <strong>you save $60</strong>. Unlimited dashboards, 12 months of history, hourly refresh. No card needed for the trial.</p>
+              </article>
+              <div class="plan-free">
+                <span><strong>Free, $0 forever:</strong> 3 dashboards, 7 days of history</span>
+                <a class="btn btn-secondary" href="#free">Start for free</a>
+              </div>
+            </div>
+            <p class="plan-foot"><span>USD before tax · Team plan from $48 / month</span><a class="more-link" href="#pricing">Compare all plans<svg aria-hidden="true"><use href="#i-arrow"/></svg></a></p>
+
+            <h4 class="faq-title" id="faq-title">Questions before you start</h4>
+            <div class="faq" role="group" aria-labelledby="faq-title">
+              <details open>
+                <summary>Do I need a card to start the trial?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+                <p>No. The 14-day Pro trial starts without a payment method. When it ends, your workspace moves to Free unless you pick a plan, so nothing is charged by surprise.</p>
+              </details>
+              <details>
+                <summary>Which data sources can I connect?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+                <p>Store platforms, ad accounts and CRMs through built-in connectors, plus CSV uploads. Free includes 2 sources and Pro includes 10.</p>
+              </details>
+              <details>
+                <summary>Who can see my data?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+                <p>Only members you invite. Connections are read-only, data is encrypted in transit and at rest, and deleting a source deletes its data.</p>
+              </details>
+              <details>
+                <summary>Can I cancel or switch plans anytime?<svg aria-hidden="true"><use href="#i-chevron"/></svg></summary>
+                <p>Yes, from Settings. Yearly plans are refunded for unused full months, and dashboards above the Free limit become view-only.</p>
+              </details>
+            </div>
+          </section>
+        </div>
+        <p class="rule-ids">Rules: <code>COP-11</code> <code>SCR-17</code> <code>BTN-06</code> <code>LAY-09</code> <code>ENG-01</code> <code>BTN-01</code></p>
+      </section>
+
+      <!-- v6 -->
+      <section class="variant" aria-labelledby="v6">
+        <h2 class="variant-label" id="v6"><span class="v">v6</span> Closing call to action and grouped footer</h2>
+        <div class="variant-stage">
+          <section class="lp-section" aria-labelledby="cta-title">
+            <div class="cta-band">
+              <h3 id="cta-title">See your first channel report this week</h3>
+              <p>Connect a store and one ad account, and Sora builds the report while you watch. 14-day Pro trial, no card needed.</p>
+              <div class="cta-actions">
+                <a class="btn btn-inverse btn-lg" href="#trial">Start free trial</a>
+                <a class="btn btn-on-band btn-lg" href="#demo">Book a 20-minute demo</a>
+              </div>
+            </div>
+
+            <footer>
+              <div class="footer-brand">
+                <a class="brand" href="#home"><span class="logo"><svg aria-hidden="true"><use href="#i-mark"/></svg></span>Sora Analytics</a>
+                <p>Revenue and return by channel for online stores.</p>
+              </div>
+              <div class="footer-groups">
+                <nav aria-labelledby="f-product"><h4 id="f-product">Product</h4><ul><li><a href="#overview">Overview</a></li><li><a href="#integrations">Integrations</a></li><li><a href="#pricing">Pricing</a></li><li><a href="#changelog">Changelog</a></li></ul></nav>
+                <nav aria-labelledby="f-resources"><h4 id="f-resources">Resources</h4><ul><li><a href="#docs">Docs</a></li><li><a href="#guides">Guides</a></li><li><a href="#api">API reference</a></li><li><a href="#status">System status</a></li></ul></nav>
+                <nav aria-labelledby="f-company"><h4 id="f-company">Company</h4><ul><li><a href="#about">About</a></li><li><a href="#careers">Careers</a></li><li><a href="#contact">Contact</a></li><li><a href="#press">Press kit</a></li></ul></nav>
+                <nav aria-labelledby="f-legal"><h4 id="f-legal">Legal</h4><ul><li><a href="#privacy">Privacy</a></li><li><a href="#terms">Terms</a></li><li><a href="#security">Security</a></li><li><a href="#cookies">Cookie settings</a></li></ul></nav>
+              </div>
+              <div class="legal">
+                <span>© 2026 Sora Analytics</span>
+                <label for="lang">Language
+                  <select id="lang"><option>English (US)</option><option>Deutsch</option><option>Español</option><option>Português</option></select>
+                </label>
+              </div>
+            </footer>
+          </section>
+        </div>
+        <p class="rule-ids">Rules: <code>SCR-22</code> <code>BTN-01</code> <code>COL-11</code> <code>NAV-06</code> <code>LAY-02</code> <code>COP-01</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // FRM-11: check the email on submit and show a specific error next to the field, not a generic banner.
+    const form = document.querySelector('[data-signup]');
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const input = form.elements.email;
+      const error = form.querySelector('#su-error');
+      const status = form.querySelector('.form-status');
+      const value = input.value.trim();
+      const valid = value !== '' && input.checkValidity();
+      input.setAttribute('aria-invalid', String(!valid));
+      error.hidden = valid;
+      status.textContent = '';
+      if (!valid) {
+        error.textContent = value ? 'Enter an email address like name@example.com.' : 'Enter your work email to create an account.';
+        input.focus();
+        return;
+      }
+      // Example only: replace with a request to your API, and show this message after it confirms.
+      status.textContent = `Check ${value} for a link to finish setting up your account.`;
+    });
+  </script>
+</body>
+</html>

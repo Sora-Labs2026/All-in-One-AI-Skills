@@ -1,0 +1,659 @@
+<!doctype html>
+<!-- ProductCraft example: dashboard-v13 (logistics dispatch, "Sora Freight"). Original Sora Labs example, MIT License.
+     Demonstrates: SCR-01, SCR-02, LAY-01, LAY-02, LAY-05, LAY-08, TYP-09, COL-01, COL-02, COL-06, COL-07, CMP-10,
+     CMP-15, CMP-17, CMP-18, CMP-19, CMP-20, CMP-23, CMP-26, FBK-06, FBK-18, NAV-03, NAV-15, BTN-01, BTN-08, ICO-04,
+     COP-01, COP-10, ENG-07 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Logistics dispatch dashboard</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* Page accent: cobalt, routed through the accent tokens (CMP-26). White on #1d5fd6 is 5.7:1, ink on soft 5.2:1 (COL-01) */
+    :root {
+      --accent: #1d5fd6;
+      --accent-hover: #174eb4;
+      --accent-soft: #edf3fd;
+      --accent-ink: #174eb4;
+      --focus: #1d5fd6;
+      /* Map palette: land, blocks, water and roads stay quiet so only status markers are loud (COL-02) */
+      --map-land: #e9edf2;
+      --map-block: #dfe5ec;
+      --map-park: #dbe8df;
+      --map-water: #d3e2f3;
+      --map-road: #ffffff;
+      --route: #7b8697;
+      --route-done: #b9c1cc;
+    }
+
+    body { background: var(--bg); }
+
+    /* Top bar: brand, sections as links, depot switcher and account (NAV-03, NAV-15) */
+    .topbar { position: sticky; top: 0; z-index: 2; background: var(--surface); border-bottom: 1px solid var(--border); }
+    .topbar-inner { display: flex; align-items: center; gap: var(--space-6); height: 60px; padding: 0 var(--space-6); }
+    .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--text); font-weight: 700; }
+    .brand:hover { text-decoration: none; }
+    .brand svg { width: 30px; height: 30px; flex: none; }
+    .brand .tile { fill: var(--accent); }
+    .brand .sun { fill: none; stroke: var(--on-accent); stroke-width: 2.5; stroke-linecap: round; }
+    .sections { align-self: stretch; }
+    .sections ul { display: flex; gap: var(--space-1); height: 100%; margin: 0; padding: 0; list-style: none; }
+    .sections a {
+      position: relative; display: flex; align-items: center; height: 100%; padding: 0 var(--space-3);
+      color: var(--text-2); font-size: var(--text-sm); font-weight: 600;
+    }
+    .sections a:hover { color: var(--text); text-decoration: none; }
+    .sections a[aria-current="page"] { color: var(--accent-ink); }
+    .sections a[aria-current="page"]::after {
+      content: ""; position: absolute; left: var(--space-3); right: var(--space-3); bottom: -1px; height: 2px;
+      border-radius: 2px 2px 0 0; background: var(--accent);
+    }
+    .top-actions { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; }
+    .depot-btn {
+      display: inline-flex; align-items: center; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-3);
+      border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface);
+      font-size: var(--text-sm); font-weight: 600; cursor: pointer;
+    }
+    .depot-btn:hover { background: var(--surface-2); }
+    .depot-btn svg { width: 16px; height: 16px; color: var(--text-3); }
+    .depot-btn .label { color: var(--text-3); font-weight: 500; }
+    .icon-btn { position: relative; }
+    .icon-btn .dot { position: absolute; top: 9px; right: 9px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); box-shadow: 0 0 0 2px var(--surface); }
+
+    /* Page */
+    .page { display: grid; gap: var(--space-4); padding: var(--space-5) var(--space-6) var(--space-7); }
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-5); flex-wrap: wrap; padding-bottom: var(--space-2); }
+    .title-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-1); }
+    .live { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 3px var(--success-soft); }
+    .head-actions { display: flex; gap: var(--space-3); }
+
+    /* Status strip: one band, four cells; the late count leads (LAY-05, CMP-17) */
+    .strip {
+      display: grid; grid-template-columns: 1.15fr 1fr 1fr 1fr;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .stat { display: grid; gap: var(--space-1); align-content: start; padding: var(--space-4) var(--space-5); }
+    .stat + .stat { border-left: 1px solid var(--border); }
+    .stat-label { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .stat-label svg { width: 16px; height: 16px; }
+    .stat-value { font-size: var(--text-2xl); font-weight: 700; line-height: 1.2; }
+    .stat-value .unit { font-size: var(--text-md); font-weight: 600; color: var(--text-2); }
+    .stat-foot { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; font-size: var(--text-sm); }
+    .stat-lead { background: var(--danger-soft); }
+    .stat-lead .stat-label { color: var(--danger); }
+    .progress { height: 6px; margin-top: var(--space-1); border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; }
+    .progress span { display: block; height: 100%; width: var(--v); border-radius: inherit; background: var(--accent); }
+
+    /* Two-column board: map and table on the left, exceptions and fleet on the right (LAY-08) */
+    .board { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: var(--space-4); align-items: start; }
+    .col { display: grid; gap: var(--space-4); min-width: 0; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-4); }
+    .card-head h2 { margin-bottom: 2px; }
+
+    /* Map card */
+    .map-card { padding: var(--space-5) var(--space-5) var(--space-4); }
+    .map-wrap { position: relative; border-radius: var(--radius-md); overflow: hidden; background: var(--map-land); }
+    .map { display: block; width: 100%; height: auto; }
+    .map .zone { font-size: 12px; font-weight: 600; fill: var(--text-2); }
+    .map .road { fill: none; stroke: var(--map-road); stroke-width: 9; stroke-linecap: round; }
+    .map .water { fill: none; stroke: var(--map-water); stroke-width: 48; stroke-linecap: round; }
+    .map .bridge { fill: none; stroke: #f7f9fb; stroke-width: 12; }
+    .map .route-done { fill: none; stroke: var(--route-done); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 2 6; }
+    .map .route-todo { fill: none; stroke: var(--route); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    .map .route { transition: opacity var(--dur-fast); }
+    .map[data-route] .route { opacity: 0.25; }
+    .map[data-route="A"] .route[data-route="A"], .map[data-route="B"] .route[data-route="B"],
+    .map[data-route="C"] .route[data-route="C"], .map[data-route="D"] .route[data-route="D"] { opacity: 1; }
+    .map[data-route] .route .route-todo { stroke: var(--accent); }
+    .map .label { font-size: 11px; font-weight: 600; fill: var(--text); paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+    .map .label-muted { font-size: 11px; font-weight: 500; fill: var(--text-2); paint-order: stroke; stroke: #fff; stroke-width: 4px; stroke-linejoin: round; }
+    .map-overlay {
+      position: absolute; right: var(--space-3); top: var(--space-3);
+      display: flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill);
+      background: var(--surface); box-shadow: var(--shadow-sm); font-size: var(--text-xs); color: var(--text-2);
+    }
+    .legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin: var(--space-4) 0 0; padding: 0; list-style: none; font-size: var(--text-xs); color: var(--text-2); }
+    .legend li { display: inline-flex; align-items: center; gap: var(--space-2); }
+    .legend svg { width: 18px; height: 18px; flex: none; }
+
+    /* Exceptions grouped by cause: icon + words, never color alone (FBK-18, COL-07) */
+    .late-card { padding: var(--space-5) 0 var(--space-2); }
+    .late-card .card-head { padding: 0 var(--space-5); margin-bottom: var(--space-3); }
+    .count-pill { display: inline-flex; align-items: baseline; gap: var(--space-1); font-size: var(--text-sm); color: var(--text-2); }
+    .count-pill strong { font-size: var(--text-lg); color: var(--danger); }
+    .causes { display: grid; margin: 0; padding: 0; list-style: none; }
+    .cause { padding: var(--space-3) var(--space-5) var(--space-2); border-top: 1px solid var(--border); }
+    .cause-head { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-1); }
+    .cause-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text); flex: none; }
+    .cause-icon svg { width: 16px; height: 16px; }
+    .cause-name { font-size: var(--text-sm); font-weight: 700; }
+    .cause-count { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .cause-note { margin: 0 0 var(--space-1) 36px; font-size: var(--text-xs); color: var(--text-2); }
+    .cause-action { margin-left: auto; font-size: var(--text-xs); font-weight: 600; white-space: nowrap; }
+    .late-list { display: grid; margin: 0; padding: 0; list-style: none; }
+    .late-item { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; min-height: 48px; padding: var(--space-1) 0 var(--space-1) var(--space-1); }
+    .badge-late {
+      display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%;
+      background: var(--danger); color: #fff; font-size: var(--text-xs); font-weight: 700;
+    }
+    .late-main { min-width: 0; }
+    .late-id { font-size: var(--text-sm); font-weight: 600; }
+    .late-id span { font-weight: 500; color: var(--text-2); }
+    .late-meta { font-size: var(--text-xs); color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .late-by { text-align: right; font-size: var(--text-sm); font-weight: 700; color: var(--danger); white-space: nowrap; }
+    .late-by small { display: block; font-size: var(--text-xs); font-weight: 500; color: var(--text-3); }
+
+    /* Shipments table (CMP-19): tabs with counts, real th scope, right-aligned numbers, worded pills */
+    .table-card { padding: 0; overflow: hidden; }
+    .table-card .card-head { padding: var(--space-5) var(--space-5) 0; margin-bottom: var(--space-3); align-items: center; }
+    .tabs { display: flex; gap: var(--space-5); padding: 0 var(--space-5); border-bottom: 1px solid var(--border); }
+    .tab {
+      display: inline-flex; align-items: center; gap: var(--space-2); min-height: 40px; padding: 0;
+      border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; background: transparent;
+      color: var(--text-2); font-size: var(--text-sm); font-weight: 600; cursor: pointer;
+    }
+    .tab:hover { color: var(--text); }
+    .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+    .tab .count { min-width: 24px; padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-2); font-size: var(--text-xs); line-height: 20px; text-align: center; }
+    .tab[aria-selected="true"] .count { background: var(--accent-soft); color: var(--accent-ink); }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    th { padding: var(--space-2) var(--space-3); background: var(--surface-2); color: var(--text-3); font-size: var(--text-xs); font-weight: 600; text-align: left; white-space: nowrap; }
+    td { padding: var(--space-2) var(--space-3); border-top: 1px solid var(--border); white-space: nowrap; vertical-align: middle; height: 56px; }
+    th:first-child, td:first-child { padding-left: var(--space-5); }
+    th:last-child, td:last-child { padding-right: var(--space-5); }
+    tbody tr:hover { background: var(--surface-2); }
+    .t-right { text-align: right; }
+    .ship-id { font-weight: 600; }
+    .ship-to { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .route-chip { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--text-2); }
+    .route-chip b {
+      display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px;
+      background: var(--accent-soft); color: var(--accent-ink); font-size: var(--text-xs);
+    }
+    .is-late { color: var(--danger); font-weight: 700; }
+    .spare { color: var(--text-2); }
+    /* ETA vs promised window on a shared 10:00 to 18:00 track */
+    .track { position: relative; width: 120px; height: 16px; }
+    .track::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 2px; border-radius: 2px; background: var(--surface-2); }
+    .track .win { position: absolute; top: 4px; height: 8px; border-radius: 4px; background: #c9d2de; }
+    .track .eta { position: absolute; top: 1px; width: 4px; height: 14px; margin-left: -2px; border-radius: 2px; background: var(--text); box-shadow: 0 0 0 2px var(--surface); }
+    .track .eta.over { background: var(--danger); }
+    .table-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) var(--space-5); border-top: 1px solid var(--border); background: var(--surface-2); font-size: var(--text-sm); color: var(--text-2); }
+    .table-foot a { display: inline-flex; align-items: center; gap: var(--space-1); font-weight: 600; }
+    .table-foot svg { width: 16px; height: 16px; }
+
+    /* Fleet list: leading tile, two lines, trailing load meter (CMP-20, FBK-06) */
+    .fleet { display: grid; margin: 0; padding: 0; list-style: none; }
+    .vehicle { display: grid; grid-template-columns: 36px minmax(0, 1fr) 84px; gap: var(--space-3); align-items: center; padding: var(--space-4) 0; }
+    .vehicle + .vehicle { border-top: 1px solid var(--border); }
+    .v-tile { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--accent); color: var(--on-accent); font-weight: 700; font-size: var(--text-sm); }
+    .v-tile.is-idle { background: var(--surface-2); color: var(--text); }
+    .v-name { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; flex-wrap: wrap; }
+    .v-meta { font-size: var(--text-xs); color: var(--text-3); }
+    .load { display: grid; gap: var(--space-1); text-align: right; }
+    .load-val { font-size: var(--text-sm); font-weight: 700; }
+    .load-val span { font-size: var(--text-xs); font-weight: 500; color: var(--text-3); }
+    .meter { height: 6px; border-radius: var(--radius-pill); background: var(--accent-soft); overflow: hidden; }
+    .meter span { display: block; width: var(--v); height: 100%; border-radius: inherit; background: var(--accent); }
+
+    .fleet-link { display: inline-flex; align-items: center; gap: var(--space-1); margin-top: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+    .fleet-link svg { width: 16px; height: 16px; }
+
+    /* Narrow screens */
+    @media (max-width: 1180px) {
+      .board { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 860px) {
+      .topbar-inner { gap: var(--space-3); padding: 0 var(--space-4); }
+      .sections, .depot-btn .label { display: none; }
+      .page { padding: var(--space-4) var(--space-4) var(--space-6); }
+      .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stat:nth-child(3) { border-left: 0; }
+      .stat:nth-child(n + 3) { border-top: 1px solid var(--border); }
+      .head-actions { width: 100%; }
+      .head-actions .btn { flex: 1; }
+    }
+    @media (max-width: 520px) {
+      .strip { grid-template-columns: minmax(0, 1fr); }
+      .stat + .stat { border-left: 0; border-top: 1px solid var(--border); }
+      .card-head { flex-wrap: wrap; }
+      .map-card .segmented { width: 100%; overflow-x: auto; }
+      .legend { gap: var(--space-2) var(--space-4); }
+      .brand-name { display: none; }
+    }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#" aria-label="Sora Freight home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect class="tile" width="32" height="32" rx="8"/><path class="sun" d="M9.5 19.5a6.5 6.5 0 0 1 13 0"/><path class="sun" d="M7.5 23.5h17"/></svg>
+      <span class="brand-name">Sora Freight</span>
+    </a>
+    <nav class="sections" aria-label="Main">
+      <ul>
+        <li><a href="#" aria-current="page">Dispatch</a></li>
+        <li><a href="#">Shipments</a></li>
+        <li><a href="#">Fleet</a></li>
+        <li><a href="#">Drivers</a></li>
+        <li><a href="#">Reports</a></li>
+      </ul>
+    </nav>
+    <div class="top-actions">
+      <button class="depot-btn" type="button" aria-haspopup="listbox">
+        <span class="label">Depot</span> Eastgate
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <button class="icon-btn" type="button" aria-label="Notifications, 3 unread">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>
+        <span class="dot" aria-hidden="true"></span>
+      </button>
+      <span class="avatar" role="img" aria-label="Jordan Reyes, dispatcher">JR</span>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <!-- One title, a plain-language answer, one primary action (LAY-05, COP-10, BTN-01) -->
+  <div class="page-head">
+    <div>
+      <div class="title-row">
+        <h1>Dispatch board</h1>
+        <span class="live">Live · updated <time datetime="2026-10-24T14:20">14:20</time></span>
+      </div>
+      <p class="muted">Saturday, Oct 24. 7 of 70 open deliveries are late; a lane closure on Harbor bridge accounts for 3 of them.</p>
+    </div>
+    <div class="head-actions">
+      <button class="btn btn-secondary" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h12l-3-3M20 17H8l3 3"/></svg>
+        Reassign stops
+      </button>
+      <button class="btn btn-primary" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 6.5h15v10h-9l-4 3.5v-3.5h-2z"/><path d="M8.5 11.5h7"/></svg>
+        Send new ETAs to 7 customers
+      </button>
+    </div>
+  </div>
+
+  <!-- Status strip: label, value, signed delta with period (CMP-17) -->
+  <section class="strip" aria-label="Today's delivery status">
+    <div class="stat stat-lead">
+      <h2 class="stat-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+        Late now
+      </h2>
+      <p class="stat-value num">7 <span class="unit">deliveries</span></p>
+      <p class="stat-foot">
+        <span class="delta delta-bad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span class="num">+3</span></span>
+        <span class="muted">since 13:00</span>
+      </p>
+    </div>
+    <div class="stat">
+      <h2 class="stat-label">On-time rate</h2>
+      <p class="stat-value num">94.0<span class="unit">%</span></p>
+      <p class="stat-foot">
+        <span class="delta delta-bad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg><span class="num">&minus;1.6 pts</span></span>
+        <span class="subtle">vs last Saturday</span>
+      </p>
+    </div>
+    <div class="stat">
+      <h2 class="stat-label">Delivered</h2>
+      <p class="stat-value num">116 <span class="unit">of 186</span></p>
+      <div class="progress" role="progressbar" aria-label="Delivered today" aria-valuemin="0" aria-valuemax="186" aria-valuenow="116" aria-valuetext="116 of 186, 62%"><span style="--v: 62.4%"></span></div>
+      <p class="stat-foot subtle">62% done · 70 open on 5 vehicles</p>
+    </div>
+    <div class="stat">
+      <h2 class="stat-label">Average delay</h2>
+      <p class="stat-value num">57 <span class="unit">min</span></p>
+      <p class="stat-foot subtle">Across the 7 late stops · longest 2 h 30 min</p>
+    </div>
+  </section>
+
+  <div class="board">
+    <div class="col">
+      <!-- Map: one question (where are the late stops), status by shape + number + color, routes muted until chosen (CMP-18, COL-07) -->
+      <section class="card map-card" aria-labelledby="map-title">
+        <div class="card-head">
+          <div>
+            <h2 id="map-title">Live routes</h2>
+            <p class="subtle">Next stops per route. Numbered markers match the late list.</p>
+          </div>
+          <div class="segmented" role="radiogroup" aria-label="Highlight a route" id="route-filter" data-roving>
+            <button type="button" role="radio" aria-checked="true" tabindex="0" data-route="">All</button>
+            <button type="button" role="radio" aria-checked="false" tabindex="-1" data-route="A">A<span class="visually-hidden"> (Owen Clarke)</span></button>
+            <button type="button" role="radio" aria-checked="false" tabindex="-1" data-route="B">B<span class="visually-hidden"> (Priya Nair)</span></button>
+            <button type="button" role="radio" aria-checked="false" tabindex="-1" data-route="C">C<span class="visually-hidden"> (Mateo Silva)</span></button>
+            <button type="button" role="radio" aria-checked="false" tabindex="-1" data-route="D">D<span class="visually-hidden"> (Zara Ahmed)</span></button>
+          </div>
+        </div>
+        <div class="map-wrap">
+          <svg class="map" id="map" viewBox="0 0 820 440" role="img" aria-labelledby="map-title map-desc">
+            <desc id="map-desc">Abstract map of four routes leaving Eastgate depot. Route B is held at Harbor bridge with late stops 1 to 3 beyond it. Truck C is stopped past Mill bridge near late stop 6. Late stops 4 and 7 are on route A, late stop 5 on route D.</desc>
+            <g id="map-base"></g>
+            <g id="map-routes"></g>
+            <g id="map-marks"></g>
+          </svg>
+          <p class="map-overlay">Abstract map · not to scale</p>
+        </div>
+        <ul class="legend" aria-label="Map key">
+          <li><svg viewBox="0 0 18 18" aria-hidden="true"><rect x="2" y="2" width="14" height="14" rx="4" fill="#15171a"/></svg>Depot</li>
+          <li><svg viewBox="0 0 18 18" aria-hidden="true"><rect x="2" y="2" width="14" height="14" rx="4" fill="#1d5fd6"/></svg>Vehicle</li>
+          <li><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="3.5" fill="#9aa3af"/></svg>Delivered</li>
+          <li><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="5" fill="#fff" stroke="#5b6676" stroke-width="2"/></svg>Next stop, on time</li>
+          <li><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="6.5" fill="#fff" stroke="#b45309" stroke-width="2.5"/><path d="M9 6v3.5l2 1.2" stroke="#b45309" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>At risk</li>
+          <li><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="8" fill="#b91c1c"/><text x="9" y="12.5" text-anchor="middle" font-size="10" font-weight="700" fill="#fff">1</text></svg>Late, numbered</li>
+          <li><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M2 9h14" stroke="#b91c1c" stroke-width="4" stroke-dasharray="3 2"/></svg>Traffic</li>
+        </ul>
+      </section>
+
+      <!-- Shipments: ETA against the promised window, sorted by lateness (CMP-19, TYP-09) -->
+      <section class="card table-card" aria-labelledby="ship-title">
+        <div class="card-head">
+          <div>
+            <h2 id="ship-title">Open shipments</h2>
+            <p class="subtle">ETA against the promised window, most late first</p>
+          </div>
+        </div>
+        <div class="tabs" role="tablist" aria-label="Filter shipments" id="ship-tabs" data-roving>
+          <button class="tab" type="button" role="tab" id="tab-all" aria-selected="true" aria-controls="ship-panel" tabindex="0" data-filter="all">All open <span class="count num">70</span></button>
+          <button class="tab" type="button" role="tab" id="tab-late" aria-selected="false" aria-controls="ship-panel" tabindex="-1" data-filter="late">Late <span class="count num">7</span></button>
+          <button class="tab" type="button" role="tab" id="tab-risk" aria-selected="false" aria-controls="ship-panel" tabindex="-1" data-filter="risk">At risk <span class="count num">5</span></button>
+          <button class="tab" type="button" role="tab" id="tab-ok" aria-selected="false" aria-controls="ship-panel" tabindex="-1" data-filter="ok">On time <span class="count num">58</span></button>
+        </div>
+        <div class="table-scroll" id="ship-panel" role="tabpanel" aria-labelledby="tab-all">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Shipment</th>
+                <th scope="col">Route</th>
+                <th scope="col">Promised</th>
+                <th scope="col" class="t-right">ETA</th>
+                <th scope="col"><span aria-hidden="true">10:00 to 18:00</span><span class="visually-hidden">Window and ETA on a 10:00 to 18:00 scale</span></th>
+                <th scope="col" class="t-right">Vs promised</th>
+                <th scope="col">Status</th>
+              </tr>
+            </thead>
+            <tbody id="ship-rows"></tbody>
+          </table>
+        </div>
+        <div class="table-foot">
+          <span id="ship-foot">Showing 8 of 70 open shipments</span>
+          <a href="#">View all shipments <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <!-- Late deliveries grouped by cause: the "why" next to the "where" (SCR-01, FBK-18) -->
+      <section class="card late-card" aria-labelledby="late-title">
+        <div class="card-head">
+          <div>
+            <h2 id="late-title">Why deliveries are late</h2>
+            <p class="subtle">Grouped by cause, worst first</p>
+          </div>
+          <p class="count-pill"><strong class="num">7</strong> late</p>
+        </div>
+        <ul class="causes">
+          <li class="cause">
+            <div class="cause-head">
+              <span class="cause-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3.5 6 16h-12z"/><path d="M8.2 13.5h7.6M9.7 9.5h4.6M4 19.5h16"/></svg></span>
+              <h3 class="cause-name">Traffic</h3><span class="cause-count num">3 stops</span>
+              <a class="cause-action" href="#">Reroute via Mill bridge</a>
+            </div>
+            <p class="cause-note">Lane closure on Harbor bridge since 12:50. Van B is held at the east ramp.</p>
+            <ol class="late-list">
+              <li class="late-item"><span class="badge-late num"><span class="visually-hidden">Map marker </span>1</span><div class="late-main"><div class="late-id num">#SL-4127 <span>Harbor Market</span></div><div class="late-meta num">Promised by 14:00 · ETA 14:42</div></div><div class="late-by num">+42 min</div></li>
+              <li class="late-item"><span class="badge-late num"><span class="visually-hidden">Map marker </span>2</span><div class="late-main"><div class="late-id num">#SL-4131 <span>Pier Nine Coffee</span></div><div class="late-meta num">Promised by 14:30 · ETA 15:05</div></div><div class="late-by num">+35 min</div></li>
+              <li class="late-item"><span class="badge-late num"><span class="visually-hidden">Map marker </span>3</span><div class="late-main"><div class="late-id num">#SL-4140 <span>Lantern Books</span></div><div class="late-meta num">Promised by 15:00 · ETA 15:28</div></div><div class="late-by num">+28 min</div></li>
+            </ol>
+          </li>
+          <li class="cause">
+            <div class="cause-head">
+              <span class="cause-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="3.5"/><path d="M3.5 19.5c.8-3.3 3.3-5 6.5-5 1.3 0 2.5.3 3.5.8"/><path d="m16 15 4 4M20 15l-4 4"/></svg></span>
+              <h3 class="cause-name">Recipient unavailable</h3><span class="cause-count num">2 stops</span>
+              <a class="cause-action" href="#">Text recipients</a>
+            </div>
+            <ol class="late-list">
+              <li class="late-item"><span class="badge-late num"><span class="visually-hidden">Map marker </span>4</span><div class="late-main"><div class="late-id num">#SL-4102 <span>Hana Kim</span></div><div class="late-meta num">No answer at 13:40 · retry 15:10</div></div><div class="late-by num">+1 h 10 min</div></li>
+              <li class="late-item"><span class="badge-late num"><span class="visually-hidden">Map marker </span>5</span><div class="late-main"><div class="late-id num">#SL-4118 <span>Nina Park</span></div><div class="late-meta num">Asked for after 15:00 · ETA 15:20</div></div><div class="late-by num">+20 min</div></li>
+            </ol>
+          </li>
+          <li class="cause">
+            <div class="cause-head">
+              <span class="cause-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5a4 4 0 0 0-5.3 5.3l-5 5a1.6 1.6 0 0 0 2.3 2.3l5-5a4 4 0 0 0 5.3-5.3l-2.4 2.4-2.3-.3-.3-2.3z"/></svg></span>
+              <h3 class="cause-name">Vehicle issue</h3><span class="cause-count num">1 stop</span>
+              <a class="cause-action" href="#">Track handover</a>
+            </div>
+            <p class="cause-note">Truck C has a flat tire since 13:05. Van E takes over its stops at 15:00.</p>
+            <ol class="late-list">
+              <li class="late-item"><span class="badge-late num"><span class="visually-hidden">Map marker </span>6</span><div class="late-main"><div class="late-id num">#SL-4096 <span>Northline Studio</span></div><div class="late-meta num">Promised by 13:00 · ETA 15:30</div></div><div class="late-by num">+2 h 30 min</div></li>
+            </ol>
+          </li>
+          <li class="cause">
+            <div class="cause-head">
+              <span class="cause-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-6.5-5.6-6.5-10.5a6.5 6.5 0 0 1 13 0c0 4.9-6.5 10.5-6.5 10.5z"/><path d="M10.4 8.6a1.7 1.7 0 0 1 3.2.8c0 1.2-1.6 1.4-1.6 2.4M12 13.8h.01"/></svg></span>
+              <h3 class="cause-name">Address issue</h3><span class="cause-count num">1 stop</span>
+              <a class="cause-action" href="#">Call recipient</a>
+            </div>
+            <ol class="late-list">
+              <li class="late-item"><span class="badge-late num"><span class="visually-hidden">Map marker </span>7</span><div class="late-main"><div class="late-id num">#SL-4109 <span>Sam Okafor</span></div><div class="late-meta num">Gate code missing · asked 13:52</div></div><div class="late-by num">+55 min</div></li>
+            </ol>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Vehicles: leading tile, name and status, trailing load meter with a value (CMP-20, FBK-06) -->
+      <section class="card" aria-labelledby="fleet-title">
+        <div class="card-head">
+          <div>
+            <h2 id="fleet-title">Vehicles</h2>
+            <p class="subtle">Load is cargo on board as a share of capacity</p>
+          </div>
+        </div>
+        <ul class="fleet" id="fleet"></ul>
+        <a class="fleet-link" href="#">Open fleet view <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </section>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Single-choice groups (radiogroup or tablist): click or arrow keys move selection with a roving tabindex (CMP-23, NAV-15).
+  document.querySelectorAll("[data-roving]").forEach((group) => {
+    const items = [...group.querySelectorAll('[role="radio"], [role="tab"]')];
+    const attr = items[0].getAttribute("role") === "tab" ? "aria-selected" : "aria-checked";
+    const select = (item) => {
+      items.forEach((el) => { el.setAttribute(attr, String(el === item)); el.tabIndex = el === item ? 0 : -1; });
+      group.dispatchEvent(new CustomEvent("select", { detail: item }));
+    };
+    items.forEach((item, i) => {
+      item.addEventListener("click", () => select(item));
+      item.addEventListener("keydown", (e) => {
+        const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+        if (!step) return;
+        e.preventDefault();
+        const next = items[(i + step + items.length) % items.length];
+        next.focus();
+        select(next);
+      });
+    });
+  });
+
+  // Map rendered from route data with SVG-namespace nodes (ENG-07). Example only: replace with positions from your telematics API.
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent) => {
+    const n = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v));
+    if (parent) parent.append(n);
+    return n;
+  };
+  const pts = (list) => list.map((p) => p.join(",")).join(" ");
+
+  const base = document.getElementById("map-base");
+  // Blocks between roads, two parks and a channel: quiet context only
+  [[0, 0, 820, 440]].forEach(([x, y, w, h]) => el("rect", { x, y, width: w, height: h, fill: "var(--map-land)" }, base));
+  [[20, 330, 120, 50], [480, 260, 70, 40]].forEach(([x, y, w, h]) => el("rect", { x, y, width: w, height: h, rx: 8, fill: "var(--map-park)" }, base));
+  el("path", { class: "water", d: "M350 -30 C 370 80, 330 170, 352 240 S 372 380, 346 470" }, base);
+  const roadsX = [60, 170, 280, 440, 550, 660, 760];
+  const roadsY = [50, 140, 230, 320, 400];
+  roadsX.forEach((x) => el("line", { class: "road", x1: x, y1: -10, x2: x, y2: 450 }, base));
+  roadsY.forEach((y) => {
+    // Only y=140 (Harbor bridge) and y=320 (Mill bridge) cross the channel
+    if (y === 140 || y === 320) el("line", { class: "road", x1: -10, y1: y, x2: 830, y2: y }, base);
+    else { el("line", { class: "road", x1: -10, y1: y, x2: 316, y2: y }, base); el("line", { class: "road", x1: 388, y1: y, x2: 830, y2: y }, base); }
+  });
+  [["North yards", 74, 30], ["Old town", 192, 214], ["Harbor district", 454, 30], ["Mill quarter", 74, 304], ["Eastgate", 676, 120]].forEach(([t, x, y]) => {
+    const s = el("text", { class: "zone", x, y }, base); s.textContent = t;
+  });
+  [["Harbor bridge", 316, 126], ["Mill bridge", 320, 346]].forEach(([t, x, y]) => {
+    const s = el("text", { class: "label-muted", x, y }, base); s.textContent = t;
+  });
+
+  const routes = [
+    { id: "A", done: [[660, 230], [660, 50], [540, 50]], todo: [[540, 50], [440, 50], [440, 100]], vehicle: [540, 50] },
+    { id: "B", done: [[660, 230], [440, 230], [440, 140], [404, 140]], todo: [[404, 140], [170, 140], [170, 50], [60, 50], [60, 110]], vehicle: [404, 140] },
+    { id: "C", done: [[660, 230], [660, 320], [250, 320]], todo: [[250, 320], [170, 320], [170, 400], [60, 400]], vehicle: [250, 320], note: "Stopped" },
+    { id: "D", done: [[660, 230], [760, 230], [760, 400], [610, 400]], todo: [[610, 400], [440, 400], [440, 360]], vehicle: [610, 400] }
+  ];
+  const stops = [
+    // Delivered
+    ...[[660, 170], [660, 105], [610, 50], [600, 230], [500, 230], [440, 185], [660, 275], [580, 320], [480, 320], [380, 320], [760, 290], [760, 360], [700, 400]].map(([x, y]) => ({ x, y, kind: "done" })),
+    // Next, on time
+    { x: 490, y: 50, kind: "next" }, { x: 520, y: 400, kind: "next" }, { x: 440, y: 360, kind: "next" },
+    // At risk
+    { x: 60, y: 50, kind: "risk" }, { x: 60, y: 104, kind: "risk" }, { x: 120, y: 400, kind: "risk" }, { x: 206, y: 320, kind: "risk" }, { x: 60, y: 400, kind: "risk" },
+    // Late, numbered to match the list
+    { x: 250, y: 140, kind: "late", n: 1 }, { x: 170, y: 95, kind: "late", n: 2 }, { x: 116, y: 50, kind: "late", n: 3 },
+    { x: 440, y: 92, kind: "late", n: 4, route: "A" }, { x: 474, y: 400, kind: "late", n: 5 },
+    { x: 170, y: 352, kind: "late", n: 6 }, { x: 610, y: 50, kind: "late", n: 7 }
+  ];
+
+  const routeLayer = document.getElementById("map-routes");
+  routes.forEach((r) => {
+    const g = el("g", { class: "route", "data-route": r.id }, routeLayer);
+    el("polyline", { class: "route-done", points: pts(r.done) }, g);
+    el("polyline", { class: "route-todo", points: pts(r.todo) }, g);
+  });
+  // Traffic on Harbor bridge
+  el("line", { x1: 322, y1: 140, x2: 386, y2: 140, stroke: "#b91c1c", "stroke-width": 6, "stroke-dasharray": "6 4" }, routeLayer);
+  const tl = el("text", { class: "label", x: 290, y: 166 }, routeLayer); tl.textContent = "Lane closure";
+
+  const marks = document.getElementById("map-marks");
+  stops.forEach((s) => {
+    if (s.kind === "done") el("circle", { cx: s.x, cy: s.y, r: 3.5, fill: "#9aa3af" }, marks);
+    if (s.kind === "next") el("circle", { cx: s.x, cy: s.y, r: 5, fill: "#fff", stroke: "#5b6676", "stroke-width": 2 }, marks);
+    if (s.kind === "risk") {
+      el("circle", { cx: s.x, cy: s.y, r: 7.5, fill: "#fff", stroke: "#b45309", "stroke-width": 2.5 }, marks);
+      el("path", { d: `M${s.x} ${s.y - 3.5}v4l2.2 1.3`, stroke: "#b45309", "stroke-width": 1.75, fill: "none", "stroke-linecap": "round" }, marks);
+    }
+  });
+  // Depot
+  el("rect", { x: 646, y: 216, width: 28, height: 28, rx: 7, fill: "#15171a", stroke: "#fff", "stroke-width": 2 }, marks);
+  el("path", { d: "M653 236v-8l7-4 7 4v8M657 236v-5h6v5", stroke: "#fff", "stroke-width": 1.6, fill: "none", "stroke-linejoin": "round", "stroke-linecap": "round" }, marks);
+  const dl = el("text", { class: "label", x: 660, y: 264, "text-anchor": "middle" }, marks); dl.textContent = "Eastgate depot";
+  const el2 = el("text", { class: "label-muted", x: 660, y: 279, "text-anchor": "middle" }, marks); el2.textContent = "Van E loading, leaves 15:00";
+  // Vehicles
+  routes.forEach((r) => {
+    const [x, y] = r.vehicle;
+    el("rect", { x: x - 12, y: y - 12, width: 24, height: 24, rx: 6, fill: "#1d5fd6", stroke: "#fff", "stroke-width": 2 }, marks);
+    const t = el("text", { x, y: y + 4.5, "text-anchor": "middle", "font-size": 12, "font-weight": 700, fill: "#fff" }, marks);
+    t.textContent = r.id;
+    if (r.note) { const n = el("text", { class: "label", x: x - 16, y: y - 18 }, marks); n.textContent = "Truck C stopped · flat tire"; }
+  });
+  // Late markers last, so they sit on top
+  stops.filter((s) => s.kind === "late").forEach((s) => {
+    el("circle", { cx: s.x, cy: s.y, r: 11, fill: "#b91c1c", stroke: "#fff", "stroke-width": 2 }, marks);
+    const t = el("text", { x: s.x, y: s.y + 4, "text-anchor": "middle", "font-size": 12, "font-weight": 700, fill: "#fff" }, marks);
+    t.textContent = s.n;
+  });
+
+  // Route filter highlights one route and dims the rest (CMP-23)
+  document.getElementById("route-filter").addEventListener("select", (e) => {
+    const map = document.getElementById("map");
+    const id = e.detail.dataset.route;
+    if (id) map.dataset.route = id; else delete map.dataset.route;
+  });
+
+  // Shipments rendered from raw minutes and formatted at render (ENG-07, COP-08)
+  const shipments = [
+    { id: "#SL-4096", to: "Northline Studio", route: "C", driver: "Mateo Silva", from: 660, until: 780, eta: 930 },
+    { id: "#SL-4102", to: "Hana Kim", route: "A", driver: "Owen Clarke", from: 720, until: 840, eta: 910 },
+    { id: "#SL-4109", to: "Sam Okafor", route: "A", driver: "Owen Clarke", from: 720, until: 840, eta: 895 },
+    { id: "#SL-4127", to: "Harbor Market", route: "B", driver: "Priya Nair", from: 720, until: 840, eta: 882 },
+    { id: "#SL-4131", to: "Pier Nine Coffee", route: "B", driver: "Priya Nair", from: 780, until: 870, eta: 905 },
+    { id: "#SL-4140", to: "Lantern Books", route: "B", driver: "Priya Nair", from: 840, until: 900, eta: 928 },
+    { id: "#SL-4118", to: "Nina Park", route: "D", driver: "Zara Ahmed", from: 780, until: 900, eta: 920 },
+    { id: "#SL-4105", to: "Dockside Hardware", route: "C", driver: "Mateo Silva", from: 840, until: 960, eta: 956 },
+    { id: "#SL-4144", to: "Willow Bakery", route: "B", driver: "Priya Nair", from: 840, until: 960, eta: 952 },
+    { id: "#SL-4098", to: "Copperleaf Florist", route: "C", driver: "Mateo Silva", from: 780, until: 930, eta: 922 },
+    { id: "#SL-4146", to: "Avery Stone", route: "B", driver: "Priya Nair", from: 900, until: 1020, eta: 1011 },
+    { id: "#SL-4101", to: "Mill Quarter Gym", route: "C", driver: "Mateo Silva", from: 840, until: 960, eta: 948 },
+    { id: "#SL-4139", to: "Saltmarsh Deli", route: "A", driver: "Owen Clarke", from: 840, until: 960, eta: 888 },
+    { id: "#SL-4152", to: "Bramble Tea House", route: "D", driver: "Zara Ahmed", from: 840, until: 960, eta: 876 },
+    { id: "#SL-4157", to: "Kiln and Clay Studio", route: "D", driver: "Zara Ahmed", from: 900, until: 1020, eta: 905 },
+    { id: "#SL-4160", to: "Harborview Cycles", route: "A", driver: "Owen Clarke", from: 900, until: 1080, eta: 940 }
+  ];
+  const AT_RISK_MIN = 15;
+  const statusOf = (s) => (s.eta > s.until ? "late" : s.until - s.eta < AT_RISK_MIN ? "risk" : "ok");
+  const clock = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+  const dur = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ""}` : `${m} min`);
+  const pos = (m) => ((m - 600) / 480) * 100; // 10:00 to 18:00 track
+  const pills = { late: ["pill-danger", "Late"], risk: ["pill-warning", "At risk"], ok: ["pill-success", "On time"] };
+  const totals = { all: 70, late: 7, risk: 5, ok: 58 };
+  const SHOW_ALL = 8;
+
+  function renderShipments(filter) {
+    const sorted = [...shipments].sort((a, b) => (b.eta - b.until) - (a.eta - a.until));
+    let rows = filter === "all" ? sorted.slice(0, SHOW_ALL) : sorted.filter((s) => statusOf(s) === filter);
+    if (filter === "ok") rows = rows.sort((a, b) => a.eta - b.eta);
+    document.getElementById("ship-rows").replaceChildren(...rows.map((s) => {
+      const st = statusOf(s);
+      const diff = s.eta - s.until;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td><span class="ship-id num">${s.id}</span><span class="ship-to">${s.to}</span></td>
+        <td><span class="route-chip"><b aria-hidden="true">${s.route}</b><span><span class="visually-hidden">Route ${s.route}, </span>${s.driver}</span></span></td>
+        <td class="num">${clock(s.from)}–${clock(s.until)}</td>
+        <td class="t-right num ${st === "late" ? "is-late" : ""}">${clock(s.eta)}</td>
+        <td><div class="track" aria-hidden="true"><span class="win" style="left:${pos(s.from)}%;width:${pos(s.until) - pos(s.from)}%"></span><span class="eta ${st === "late" ? "over" : ""}" style="left:${pos(s.eta)}%"></span></div></td>
+        <td class="t-right num ${st === "late" ? "is-late" : "spare"}">${diff > 0 ? `${dur(diff)} late` : `${dur(-diff)} to spare`}</td>
+        <td><span class="pill ${pills[st][0]}">${pills[st][1]}</span></td>`;
+      return tr;
+    }));
+    document.getElementById("ship-foot").textContent = `Showing ${rows.length} of ${totals[filter]} ${filter === "all" ? "open shipments" : filter === "ok" ? "on-time shipments" : filter === "late" ? "late shipments" : "at-risk shipments"}`;
+  }
+  // Filter tabs keep the panel labelled by the active tab (CMP-19). Example only: replace with a request to your API.
+  document.getElementById("ship-tabs").addEventListener("select", (e) => {
+    document.getElementById("ship-panel").setAttribute("aria-labelledby", e.detail.id);
+    renderShipments(e.detail.dataset.filter);
+  });
+  renderShipments("all");
+
+  // Fleet list from data (ENG-07)
+  const fleet = [
+    { id: "A", name: "Van A", driver: "Owen Clarke", left: 14, total: 46, load: 31, status: ["pill-warning", "2 late"] },
+    { id: "B", name: "Van B", driver: "Priya Nair", left: 18, total: 44, load: 44, status: ["pill-danger", "Held in traffic"] },
+    { id: "C", name: "Truck C", driver: "Mateo Silva", left: 14, total: 38, load: 52, status: ["pill-danger", "Stopped"] },
+    { id: "D", name: "Van D", driver: "Zara Ahmed", left: 8, total: 42, load: 18, status: ["pill-warning", "1 late"] },
+    { id: "E", name: "Van E", driver: "Leo Brandt", left: 16, total: 16, load: 72, status: ["pill-neutral", "Loading"], idle: true, meta: "at depot, leaves 15:00" }
+  ];
+  document.getElementById("fleet").replaceChildren(...fleet.map((v) => {
+    const li = document.createElement("li");
+    li.className = "vehicle";
+    li.innerHTML = `
+      <span class="v-tile ${v.idle ? "is-idle" : ""}" aria-hidden="true">${v.id}</span>
+      <div><div class="v-name">${v.name} <span class="pill ${v.status[0]}">${v.status[1]}</span></div>
+      <div class="v-meta num">${v.driver} · ${v.meta || `${v.left} of ${v.total} stops left`}</div></div>
+      <div class="load"><span class="load-val num">${v.load}% <span>load</span></span>
+      <div class="meter" role="meter" aria-label="${v.name} load" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${v.load}"><span style="--v:${v.load}%"></span></div></div>`;
+    return li;
+  }));
+</script>
+</body>
+</html>

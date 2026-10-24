@@ -1,0 +1,805 @@
+<!doctype html>
+<!-- ProductCraft example: onboarding-2. Original Sora Labs example, MIT License.
+     Demonstrates: CMP-31, FBK-06, SCR-09, SCR-14, BTN-01, COP-01, CMP-12, CMP-11, FBK-05, BTN-09, FRM-06, FRM-05,
+     FRM-12, FRM-27, SCR-02, COP-10, CMP-19, MOB-08, BTN-16, BTN-04, MOB-03, ICO-05, COP-03, FBK-07, FBK-03,
+     BTN-06, LAY-05 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Onboarding, continued</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    /* Field boundary tokens reach 3:1 against the surface (COL-01). */
+    :root {
+      --field-border: #8a919d;
+      --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+      --av-1-bg: #e0e7ff; --av-1-ink: #3730a3;
+      --av-2-bg: #ccfbf1; --av-2-ink: #115e59;
+      --av-3-bg: #fce7f3; --av-3-ink: #9d174d;
+    }
+    [data-theme="dark"] { --field-border: #6b7280; }
+
+    .i { width: 20px; height: 20px; flex: none; }
+    .i-sm { width: 16px; height: 16px; flex: none; }
+
+    /* 12-column sheet grid; stages in one row share a height. */
+    .variants.onb-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
+    .span-7 { grid-column: span 7; }
+    .span-8 { grid-column: span 8; }
+    .onb-grid .variant-stage { flex: 1; }
+    .variant-stage.tight { padding: var(--space-5); }
+    .variant-stage.fill { place-items: stretch; }
+
+    .btn-sm { min-height: 32px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+    .btn-sm svg { width: 16px; height: 16px; }
+    a.btn:hover { text-decoration: none; }
+    .panel { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+    .eyebrow { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .progress { height: 6px; border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; }
+    .progress > span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: transform var(--dur-med) var(--ease-out); transform-origin: left; }
+    .window.fill { display: flex; flex-direction: column; height: 100%; }
+    .window.fill .window-bar { flex: none; }
+
+    /* v7: in-app setup checklist (CMP-31, FBK-06, SCR-09). */
+    .checklist { max-width: 440px; padding: var(--space-5); }
+    .cl-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+    .cl-head h2 { font-size: var(--text-lg); }
+    .cl-count { margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    .cl-count strong { color: var(--text); font-weight: 600; }
+    .cl-head .btn { margin: -4px -8px 0 0; }
+    .checklist > .progress { margin-top: var(--space-3); }
+    .tasks { list-style: none; margin: var(--space-4) 0 0; padding: 0; display: grid; gap: var(--space-1); }
+    .task { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 2px var(--space-3); align-items: center; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); }
+    .task input {
+      appearance: none; width: 22px; height: 22px; margin: 0; border-radius: 50%; border: 1.5px solid var(--field-border);
+      background: var(--surface); display: grid; place-items: center; cursor: pointer;
+    }
+    .task input:checked { background: var(--success); border-color: var(--success); }
+    .task input:checked::after { content: ""; width: 9px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: translateY(-1px) rotate(-45deg); }
+    .task input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 50%; }
+    .task label { font-size: var(--text-md); font-weight: 500; cursor: pointer; }
+    .task .meta { font-size: var(--text-xs); color: var(--text-2); }
+    .task[data-state="done"] label { text-decoration: line-through; color: var(--text-3); font-weight: 400; }
+    .task[data-state="skipped"] label { color: var(--text-2); font-weight: 400; }
+    .task .opt { font-weight: 400; color: var(--text-3); font-size: var(--text-sm); }
+    .task.current { background: var(--accent-soft); padding: var(--space-3); margin: var(--space-1) 0; }
+    .task.current label { font-weight: 600; }
+    .task .detail { grid-column: 2 / -1; display: grid; gap: var(--space-3); }
+    .task .detail p { font-size: var(--text-sm); color: var(--text-2); }
+    .task .detail .row { display: flex; gap: var(--space-2); }
+    .task .btn-ghost.btn-sm { color: var(--text-2); }
+    .task.current .btn-ghost:hover { background: var(--surface); }
+    .cl-foot { margin-top: var(--space-4); padding-top: var(--space-3); border-top: 1px solid var(--border); font-size: var(--text-xs); color: var(--text-2); }
+
+    /* v8: product tour step as a non-blocking popover (CMP-12, CMP-11). */
+    .tour-app { position: relative; flex: 1; display: flex; flex-direction: column; background: var(--surface); padding: var(--space-4) var(--space-5) var(--space-5); }
+    .app-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+    .app-head .crumb { font-size: var(--text-xs); color: var(--text-2); }
+    .app-head h3 { font-size: var(--text-lg); line-height: 1.3; }
+    .app-head .icon-btn { width: 36px; height: 36px; }
+    .toolbar { display: flex; justify-content: space-between; gap: var(--space-2); margin-top: var(--space-3); padding-bottom: var(--space-4); border-bottom: 1px solid var(--border); }
+    .toolbar > div { display: flex; gap: var(--space-2); }
+    .toolbar .btn svg { color: var(--text-2); }
+    [data-tour-active] { position: relative; z-index: 1; box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
+    .report { flex: 1; display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: var(--space-5); margin-top: var(--space-4); }
+    .kpi .lbl { font-size: var(--text-sm); color: var(--text-2); }
+    .kpi .val { margin-top: var(--space-1); font-size: var(--text-2xl); font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; }
+    .kpi .delta { margin-top: var(--space-2); }
+    .kpi .vs { display: block; margin-top: 2px; font-size: var(--text-xs); color: var(--text-2); }
+    .bars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-2); min-height: 212px; padding-top: var(--space-5); }
+    /* Bars start at zero; heights are value / $8,000 axis maximum. */
+    .bar { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); }
+    .bar .track { position: relative; flex: 1; width: 100%; }
+    .bar b { position: absolute; left: 0; right: 0; bottom: calc(var(--h) + 4px); text-align: center; font-size: 11px; font-weight: 600; color: var(--text-2); }
+    .bar i { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 40px; height: var(--h); border-radius: 6px 6px 2px 2px; background: #c7d2fe; }
+    .bar.today i { background: var(--accent); }
+    .bar span { font-size: var(--text-xs); color: var(--text-2); white-space: nowrap; }
+    .tour {
+      position: absolute; top: 0; left: 0; width: 300px; padding: var(--space-4);
+      background: var(--surface); color: var(--text); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); z-index: 2;
+    }
+    .tour[hidden] { display: none; }
+    .tour-arrow { position: absolute; top: -6px; width: 12px; height: 12px; background: var(--surface); transform: rotate(45deg); border-radius: 2px; }
+    .tour-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+    .tour-top .step { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .tour-top .btn { min-height: 32px; padding: 0 var(--space-2); font-size: var(--text-sm); color: var(--text-2); gap: var(--space-2); }
+    kbd { font-family: var(--font); font-size: 11px; font-weight: 600; line-height: 18px; padding: 0 5px; border-radius: 4px; border: 1px solid var(--border); color: var(--text-2); background: var(--surface-2); }
+    .tour h4 { margin: var(--space-2) 0 0; font-size: var(--text-md); line-height: 1.35; }
+    .tour h4:focus { outline: none; }
+    .tour p.body { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--text-2); }
+    .tour-foot { display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-4); }
+    .tour-dots { display: flex; gap: 6px; }
+    .tour-dots i { width: 6px; height: 6px; border-radius: var(--radius-pill); background: var(--border); }
+    .tour-dots i.on { width: 16px; background: var(--accent); }
+    .tour-foot > div:last-child { display: flex; gap: var(--space-2); }
+
+    /* v9: CSV import with column mapping preview (FRM-06, CMP-19). */
+    .import { padding: 0; overflow: hidden; }
+    .imp-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--border); }
+    .imp-head h2 { font-size: var(--text-lg); }
+    .stepper { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .stepper li { display: inline-flex; align-items: center; gap: 6px; }
+    .stepper li + li::before { content: ""; width: 16px; height: 1px; background: var(--border); margin-right: 2px; }
+    .stepper b { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); font-size: 11px; }
+    .stepper b svg { width: 12px; height: 12px; }
+    .stepper .done b { background: var(--success-soft); border-color: transparent; color: var(--success); }
+    .stepper [aria-current="step"] { color: var(--text); }
+    .stepper [aria-current="step"] b { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+    .imp-body { padding: var(--space-4) var(--space-5); }
+    .file-row { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--surface-2); }
+    .file-row .ic { width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--surface); color: var(--success); display: grid; place-items: center; }
+    .file-row strong { display: block; font-size: var(--text-sm); }
+    .file-row span { font-size: var(--text-xs); color: var(--text-2); }
+    .file-row .btn { color: var(--accent-ink); }
+    .map { width: 100%; margin-top: var(--space-3); border-collapse: collapse; font-size: var(--text-sm); table-layout: fixed; }
+    .map th[scope="col"] { text-align: left; font-size: var(--text-xs); font-weight: 600; color: var(--text-2); padding: var(--space-2) var(--space-2); border-bottom: 1px solid var(--border); }
+    .map td, .map th[scope="row"] { padding: 6px var(--space-2); border-bottom: 1px solid var(--border); vertical-align: middle; text-align: left; }
+    .map tbody tr:last-child > * { border-bottom: 0; }
+    .map th[scope="row"] { font-weight: 600; }
+    .map .raw { display: block; font-family: var(--mono); font-size: 11px; font-weight: 400; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .map .preview { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .map .preview.none { color: var(--text-3); }
+    .map col.c1 { width: 28%; } .map col.c2 { width: 24%; } .map col.c3 { width: 32%; } .map col.c4 { width: 16%; }
+    .select-wrap { position: relative; display: block; }
+    .select-wrap select {
+      appearance: none; width: 100%; min-height: 34px; padding: 0 28px 0 var(--space-2);
+      border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text); font-size: var(--text-sm); cursor: pointer;
+    }
+    .select-wrap svg { position: absolute; right: 8px; top: 50%; width: 16px; height: 16px; margin-top: -8px; color: var(--text-2); pointer-events: none; }
+    .imp-summary { display: flex; gap: var(--space-2); align-items: flex-start; margin-top: var(--space-3); padding: var(--space-3); border-radius: var(--radius-sm); background: var(--accent-soft); font-size: var(--text-sm); color: var(--text); }
+    .imp-summary svg { color: var(--accent-ink); margin-top: 2px; }
+    .imp-summary a { font-weight: 600; }
+    .imp-summary[data-tone="error"] { background: var(--danger-soft); }
+    .imp-summary[data-tone="error"] svg { color: var(--danger); }
+    .imp-foot { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-5); border-top: 1px solid var(--border); background: var(--bg); }
+
+    /* v10: invite teammates step (SCR-14, FRM-06). */
+    .invite { max-width: 440px; padding: var(--space-3) var(--space-5) var(--space-5); }
+    .wiz-top { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; align-items: center; gap: var(--space-2); margin: 0 calc(var(--space-3) * -1); }
+    .wiz-top .icon-btn { width: 44px; height: 44px; }
+    .progress-wrap { display: grid; gap: var(--space-1); justify-items: center; }
+    .progress-wrap .progress { width: 100%; }
+    .step-text { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .skip { min-height: 44px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--accent-ink); font-weight: 600; cursor: pointer; }
+    .skip:hover { background: var(--accent-soft); }
+    .invite h2 { margin-top: var(--space-4); font-size: 22px; line-height: 1.3; letter-spacing: -0.01em; }
+    .invite .lede { margin-top: var(--space-1); color: var(--text-2); font-size: var(--text-sm); }
+    .inv-grid { display: grid; grid-template-columns: minmax(0, 1fr) 112px 36px; gap: var(--space-2); align-items: center; margin-top: var(--space-5); }
+    .inv-grid .col-label { font-size: var(--text-sm); font-weight: 600; }
+    .inv-grid input[type="email"] { width: 100%; min-height: 44px; padding: 0 var(--space-3); border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--surface); font-size: var(--text-sm); }
+    .inv-grid input::placeholder { color: var(--text-3); }
+    .inv-grid input:focus-visible, .select-wrap select:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--accent); border-radius: var(--radius-sm); }
+    .inv-grid .select-wrap select { min-height: 44px; }
+    .inv-grid .icon-btn { width: 36px; height: 36px; }
+    .inv-grid .icon-btn svg { width: 18px; height: 18px; }
+    .add-row { margin-top: var(--space-2); color: var(--accent-ink); padding: 0 var(--space-2); }
+    .add-row:hover { color: var(--accent-ink); }
+    .roles { margin: var(--space-4) 0 0; padding: var(--space-3); border-radius: var(--radius-md); background: var(--surface-2); display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: var(--space-1) var(--space-3); font-size: var(--text-sm); }
+    .roles dt { font-weight: 600; }
+    .roles dd { margin: 0; color: var(--text-2); }
+    .invite .btn-block { margin-top: var(--space-5); }
+    .invite .note { margin-top: var(--space-2); text-align: center; font-size: var(--text-xs); color: var(--text-2); min-height: 18px; }
+
+    /* v11: notification priming on a phone (MOB-08, BTN-16). */
+    .phone { background: var(--surface); }
+    .screen { flex: 1; display: flex; flex-direction: column; padding: 0 var(--space-5) var(--space-4); }
+    .top-row { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: var(--space-2); height: 52px; margin: 0 calc(var(--space-3) * -1); }
+    .top-row .icon-btn { width: 44px; height: 44px; }
+    .prime-art { margin-top: var(--space-3); padding: var(--space-5) var(--space-4); border-radius: 24px; background: var(--accent-soft); display: grid; gap: var(--space-2); }
+    .notif { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: var(--space-2) var(--space-3); padding: var(--space-3); border-radius: var(--radius-md); background: var(--surface); box-shadow: 0 6px 16px -8px rgba(15, 23, 42, 0.25); }
+    .notif.back { margin: 0 var(--space-3); opacity: 1; }
+    .notif .app-ic { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; }
+    .notif .app-ic svg { width: 18px; height: 18px; }
+    .notif .meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-2); line-height: 1.4; }
+    .notif strong { display: block; font-size: var(--text-sm); line-height: 1.35; }
+    .notif p { font-size: var(--text-xs); color: var(--text-2); line-height: 1.4; }
+    .screen h2 { margin-top: var(--space-5); font-size: 26px; line-height: 1.2; letter-spacing: -0.01em; font-weight: 700; }
+    .screen .lede { margin-top: var(--space-2); color: var(--text-2); }
+    .screen .bottom { margin-top: auto; display: grid; gap: var(--space-2); }
+    .screen .bottom .btn-block { min-height: 52px; }
+    .screen .fine { text-align: center; font-size: var(--text-xs); color: var(--text-2); margin-bottom: var(--space-1); }
+
+    /* v12: first success with one next step (FBK-07). */
+    .shop { flex: 1; display: flex; flex-direction: column; background: var(--bg); }
+    .shop-bar { display: flex; align-items: center; gap: var(--space-5); height: 56px; padding: 0 var(--space-5); background: var(--surface); border-bottom: 1px solid var(--border); }
+    .wordmark { display: inline-flex; align-items: center; gap: var(--space-2); font-weight: 700; }
+    .wordmark .tile { width: 26px; height: 26px; border-radius: var(--radius-sm); background: var(--accent); color: var(--on-accent); display: grid; place-items: center; }
+    .wordmark .tile svg { width: 16px; height: 16px; }
+    .shop-nav { display: flex; gap: var(--space-1); flex: 1; }
+    .shop-nav a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-sm); font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .shop-nav a:hover { background: var(--surface-2); text-decoration: none; color: var(--text); }
+    .shop-nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent-ink); }
+    .shop-bar .avatar { background: var(--av-1-bg); color: var(--av-1-ink); }
+    .success { flex: 1; display: grid; place-items: center; padding: var(--space-6) var(--space-5); }
+    .success-inner { width: 100%; max-width: 560px; }
+    .ok-badge { width: 48px; height: 48px; border-radius: var(--radius-md); background: var(--success-soft); color: var(--success); display: grid; place-items: center; }
+    .ok-badge svg { width: 24px; height: 24px; }
+    .success h2 { margin-top: var(--space-4); font-size: 28px; line-height: 1.2; letter-spacing: -0.01em; }
+    .success .lede { margin-top: var(--space-2); color: var(--text-2); max-width: 520px; }
+    .stats { margin: var(--space-5) 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+    .stats > div { padding: var(--space-3) var(--space-4); }
+    .stats > div + div { border-left: 1px solid var(--border); }
+    .stats dt { font-size: var(--text-xs); color: var(--text-2); font-weight: 600; }
+    .stats dd { margin: 2px 0 0; font-size: var(--text-xl); font-weight: 700; line-height: 1.3; }
+    .stats dd small { font-size: var(--text-xs); font-weight: 500; color: var(--text-2); margin-left: var(--space-1); }
+    .next-card { margin-top: var(--space-4); padding: var(--space-5); border-radius: var(--radius-lg); background: var(--surface); border: 1.5px solid var(--accent); box-shadow: var(--shadow-sm); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-4); align-items: end; }
+    .next-card .eyebrow { color: var(--accent-ink); }
+    .next-card h3 { margin-top: var(--space-1); font-size: var(--text-lg); line-height: 1.3; }
+    .next-card p { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--text-2); }
+    .stack-av { display: flex; align-items: center; gap: var(--space-1); margin-top: var(--space-3); }
+    .stack-av .avatar { width: 28px; height: 28px; font-size: 11px; }
+    .stack-av span.more { margin-left: var(--space-2); font-size: var(--text-xs); color: var(--text-2); font-weight: 600; }
+    .av-1 { background: var(--av-1-bg); color: var(--av-1-ink); }
+    .av-2 { background: var(--av-2-bg); color: var(--av-2-ink); }
+    .av-3 { background: var(--av-3-bg); color: var(--av-3-ink); }
+    .later { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-5); margin-top: var(--space-4); font-size: var(--text-sm); }
+    .later a, .later button { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 36px; font-weight: 600; }
+    .later button { border: 0; background: transparent; padding: 0; color: var(--text-2); cursor: pointer; font-size: var(--text-sm); }
+    .later button:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-chev-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-chev-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16l-6 7.5V19l-4 1.5v-8z"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v16l-6-4-6 4z"/></symbol>
+  <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5.5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="18.5" r="2.5"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .9-1 1.6v.4M12 17h.01"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M8.5 13h7M8.5 17h7M12 11v8"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 20h14"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 20a6 6 0 0 1 12 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6 6 0 0 1 3 5.5"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></symbol>
+  <symbol id="i-coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M14.5 9.5c-.4-.9-1.4-1.5-2.5-1.5-1.5 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1 2-2.5 2c-1.1 0-2.1-.6-2.5-1.5M12 6.5V8M12 16v1.5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+</svg>
+
+<main class="sheet">
+  <header class="sheet-header">
+    <div>
+      <span class="sheet-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="m8 12.5 2.8 2.8L16 10"/></svg>
+        ProductCraft &middot; Example screens
+      </span>
+      <h1>Onboarding, continued</h1>
+      <p>A setup checklist, one product tour step, CSV import with column mapping, team invites, notification priming and a first success that points to the next step.</p>
+    </div>
+  </header>
+
+  <div class="variants onb-grid">
+    <!-- v7 -->
+    <div class="variant span-5">
+      <div class="variant-label"><span class="v">v7</span> In-app setup checklist with progress and skip</div>
+      <div class="variant-stage tight">
+        <section class="panel checklist" aria-labelledby="v7-title" id="v7">
+          <div class="cl-head">
+            <div>
+              <h2 id="v7-title">Set up Sora Analytics</h2>
+              <p class="cl-count" id="v7-count" aria-live="polite"><strong class="num">3 of 5</strong> done &middot; about 4 min left</p>
+            </div>
+            <button class="btn btn-ghost btn-sm" type="button" id="v7-skip-all">Skip setup</button>
+          </div>
+          <div class="progress" role="progressbar" aria-labelledby="v7-title" aria-valuemin="0" aria-valuemax="5" aria-valuenow="3" aria-valuetext="3 of 5 done" id="v7-bar"><span style="transform: scaleX(0.6)"></span></div>
+          <!-- Real checkboxes: people can tick off steps they finished elsewhere (CMP-31). -->
+          <ol class="tasks" id="v7-tasks">
+            <li class="task" data-state="done">
+              <input type="checkbox" id="v7-t1" checked data-min="0"><label for="v7-t1">Create your workspace</label><span class="meta">Done</span>
+            </li>
+            <li class="task" data-state="done">
+              <input type="checkbox" id="v7-t2" checked data-min="0"><label for="v7-t2">Connect your store data</label><span class="meta">Done</span>
+            </li>
+            <li class="task" data-state="done">
+              <input type="checkbox" id="v7-t3" checked data-min="0"><label for="v7-t3">Invite a teammate</label><span class="meta">Done</span>
+            </li>
+            <li class="task current" data-state="todo">
+              <input type="checkbox" id="v7-t4" data-min="2"><label for="v7-t4">Build your first dashboard</label><span class="meta">2 min</span>
+              <div class="detail">
+                <p>Start from the Revenue template. It already uses the orders you connected.</p>
+                <div class="row">
+                  <a class="btn btn-primary btn-sm" href="/dashboards/new?template=revenue">Build dashboard</a>
+                  <button class="btn btn-ghost btn-sm" type="button" data-skip>Skip</button>
+                </div>
+              </div>
+            </li>
+            <li class="task" data-state="todo">
+              <input type="checkbox" id="v7-t5" data-min="2"><label for="v7-t5">Schedule a weekly report <span class="opt">(optional)</span></label><span class="meta">2 min</span>
+            </li>
+          </ol>
+          <p class="cl-foot">Skipped steps stay in Help &rsaquo; Setup checklist, so you can finish them later.</p>
+        </section>
+      </div>
+      <p class="rule-ids">Rules: <code>CMP-31</code> <code>FBK-06</code> <code>SCR-09</code> <code>BTN-01</code> <code>COP-01</code></p>
+    </div>
+
+    <!-- v8 -->
+    <div class="variant span-7">
+      <div class="variant-label"><span class="v">v8</span> Product tour step: dismissible popover with step count</div>
+      <div class="variant-stage tight fill">
+        <div class="window fill">
+          <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="tour-app" id="tour-app">
+            <div class="app-head">
+              <div>
+                <p class="crumb">Reports</p>
+                <h3>Weekly revenue</h3>
+              </div>
+              <button class="icon-btn" type="button" id="tour-help" aria-label="Take the tour again"><svg aria-hidden="true"><use href="#i-help"/></svg></button>
+            </div>
+            <div class="toolbar">
+              <div>
+                <button class="btn btn-secondary btn-sm" type="button" id="tour-filters"><svg aria-hidden="true"><use href="#i-filter"/></svg>Filters</button>
+                <button class="btn btn-secondary btn-sm" type="button"><svg aria-hidden="true"><use href="#i-calendar"/></svg><span class="num">Oct 18 &ndash; 24</span></button>
+              </div>
+              <div>
+                <button class="btn btn-secondary btn-sm" type="button" id="tour-save"><svg aria-hidden="true"><use href="#i-bookmark"/></svg>Save view</button>
+                <button class="btn btn-secondary btn-sm" type="button" id="tour-share"><svg aria-hidden="true"><use href="#i-share"/></svg>Share</button>
+              </div>
+            </div>
+            <div class="report">
+              <div class="kpi">
+                <p class="lbl">Revenue, 7 days</p>
+                <p class="val num">$48,210</p>
+                <span class="delta delta-good"><svg aria-hidden="true"><use href="#i-arrow-up"/></svg><span class="num">+6.4%</span></span>
+                <span class="vs">vs Oct 11&ndash;17 ($45,310)</span>
+              </div>
+              <div class="bars" role="img" aria-label="Daily revenue from Sunday Oct 18 to Saturday Oct 24: $6,240, $6,980, $7,105, $6,850, $7,420, $7,015 and $6,600.">
+                <div class="bar" style="--h: 78.0%"><span class="track"><b class="num">$6.2k</b><i></i></span><span>Sun 18</span></div>
+                <div class="bar" style="--h: 87.2%"><span class="track"><b class="num">$7.0k</b><i></i></span><span>Mon 19</span></div>
+                <div class="bar" style="--h: 88.8%"><span class="track"><b class="num">$7.1k</b><i></i></span><span>Tue 20</span></div>
+                <div class="bar" style="--h: 85.6%"><span class="track"><b class="num">$6.9k</b><i></i></span><span>Wed 21</span></div>
+                <div class="bar" style="--h: 92.8%"><span class="track"><b class="num">$7.4k</b><i></i></span><span>Thu 22</span></div>
+                <div class="bar" style="--h: 87.7%"><span class="track"><b class="num">$7.0k</b><i></i></span><span>Fri 23</span></div>
+                <div class="bar today" style="--h: 82.5%"><span class="track"><b class="num">$6.6k</b><i></i></span><span>Sat 24</span></div>
+              </div>
+            </div>
+
+            <!-- Non-blocking popover: no scrim, Escape or "Skip tour" closes it and focus returns to the trigger (CMP-12). -->
+            <div class="tour" id="tour" role="dialog" aria-modal="false" aria-labelledby="tour-title" aria-describedby="tour-body" data-theme="dark">
+              <span class="tour-arrow" id="tour-arrow" aria-hidden="true"></span>
+              <div class="tour-top">
+                <span class="step num" id="tour-step">Step 2 of 4</span>
+                <button class="btn btn-ghost" type="button" id="tour-close" aria-keyshortcuts="Escape">Skip tour <kbd>Esc</kbd></button>
+              </div>
+              <h4 id="tour-title" tabindex="-1">Save this view</h4>
+              <p class="body" id="tour-body">Keeps your filters and date range, so this report opens the same way next time.</p>
+              <div class="tour-foot">
+                <span class="tour-dots" id="tour-dots" aria-hidden="true"><i></i><i class="on"></i><i></i><i></i></span>
+                <div>
+                  <button class="btn btn-secondary btn-sm" type="button" id="tour-back">Back</button>
+                  <button class="btn btn-primary btn-sm" type="button" id="tour-next">Next</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="rule-ids">Rules: <code>CMP-12</code> <code>CMP-11</code> <code>FBK-05</code> <code>BTN-09</code> <code>SCR-09</code></p>
+    </div>
+
+    <!-- v9 -->
+    <div class="variant span-7">
+      <div class="variant-label"><span class="v">v9</span> Import from CSV with a column mapping preview</div>
+      <div class="variant-stage tight">
+        <form class="panel import" aria-labelledby="v9-title" action="/imports" method="post" id="v9-form">
+          <div class="imp-head">
+            <h2 id="v9-title">Import customers</h2>
+            <ol class="stepper" aria-label="Import steps">
+              <li class="done"><b><svg aria-hidden="true"><use href="#i-check"/></svg></b>Upload<span class="visually-hidden">, done</span></li>
+              <li aria-current="step"><b>2</b>Map columns</li>
+              <li><b>3</b>Review</li>
+            </ol>
+          </div>
+          <div class="imp-body">
+            <div class="file-row">
+              <span class="ic"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg></span>
+              <div><strong>customers-oct-2026.csv</strong><span class="num">248 rows &middot; 6 columns &middot; 41 KB</span></div>
+              <button class="btn btn-ghost btn-sm" type="button">Replace file</button>
+            </div>
+            <table class="map" id="v9-map">
+              <caption class="visually-hidden">Columns in your file and the Sora Shop field each one imports into, with the first row as a preview</caption>
+              <colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"></colgroup>
+              <thead>
+                <tr><th scope="col">Column in your file</th><th scope="col">Import as</th><th scope="col">Preview in Sora</th><th scope="col">Status</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div class="imp-summary" id="v9-summary" role="status">
+              <svg class="i-sm" aria-hidden="true"><use href="#i-info"/></svg>
+              <p id="v9-summary-text"></p>
+            </div>
+          </div>
+          <div class="imp-foot">
+            <button class="btn btn-secondary" type="button">Back</button>
+            <button class="btn btn-primary" type="submit" id="v9-import" aria-describedby="v9-summary-text">Import 245 customers</button>
+          </div>
+        </form>
+      </div>
+      <p class="rule-ids">Rules: <code>FBK-05</code> <code>FRM-06</code> <code>SCR-02</code> <code>COP-10</code> <code>COP-01</code> <code>CMP-19</code></p>
+    </div>
+
+    <!-- v10 -->
+    <div class="variant span-5">
+      <div class="variant-label"><span class="v">v10</span> Invite teammates with roles, skippable</div>
+      <div class="variant-stage plain tight">
+        <form class="panel invite" action="/invites" method="post" id="v10-form" novalidate>
+          <div class="wiz-top">
+            <button class="icon-btn" type="button" aria-label="Back to step 2"><svg aria-hidden="true"><use href="#i-chev-left"/></svg></button>
+            <div class="progress-wrap">
+              <div class="progress" role="progressbar" aria-label="Setup progress" aria-valuemin="1" aria-valuemax="4" aria-valuenow="3" aria-valuetext="Step 3 of 4"><span style="transform: scaleX(0.75)"></span></div>
+              <span class="step-text" aria-hidden="true">Step 3 of 4</span>
+            </div>
+            <button class="skip" type="button">Skip</button>
+          </div>
+          <h2>Invite your team</h2>
+          <p class="lede">Dashboards work best with the people who act on them. You can invite more later.</p>
+          <div class="inv-grid" id="v10-rows">
+            <span class="col-label" aria-hidden="true">Email</span><span class="col-label" aria-hidden="true">Role</span><span></span>
+          </div>
+          <button class="btn btn-ghost btn-sm add-row" type="button" id="v10-add"><svg aria-hidden="true"><use href="#i-plus"/></svg>Add another</button>
+          <dl class="roles">
+            <dt>Admin</dt><dd>Members, billing and every dashboard</dd>
+            <dt>Editor</dt><dd>Builds and edits dashboards</dd>
+            <dt>Viewer</dt><dd>Views and comments</dd>
+          </dl>
+          <button class="btn btn-primary btn-block" type="submit" id="v10-send">Send 2 invites</button>
+          <p class="note" id="v10-note" aria-live="polite">Invites expire in 7 days.</p>
+        </form>
+      </div>
+      <p class="rule-ids">Rules: <code>SCR-14</code> <code>SCR-09</code> <code>FRM-05</code> <code>FRM-06</code> <code>COP-01</code></p>
+    </div>
+
+    <!-- v11 -->
+    <div class="variant span-4">
+      <div class="variant-label"><span class="v">v11</span> Notification priming before the system prompt</div>
+      <div class="variant-stage tight">
+        <div class="phone">
+          <div class="phone-status"><span class="num">9:41</span><span class="icons" aria-hidden="true"><span></span><span></span></span></div>
+          <div class="phone-body">
+            <div class="screen">
+              <div class="top-row">
+                <button class="icon-btn" type="button" aria-label="Back to step 3"><svg aria-hidden="true"><use href="#i-chev-left"/></svg></button>
+                <div class="progress-wrap">
+                  <div class="progress" role="progressbar" aria-label="Setup progress" aria-valuemin="1" aria-valuemax="4" aria-valuenow="4" aria-valuetext="Step 4 of 4"><span style="transform: scaleX(1)"></span></div>
+                  <span class="step-text" aria-hidden="true">Step 4 of 4</span>
+                </div>
+                <span></span>
+              </div>
+              <!-- The art is a real preview of the two alerts this switch turns on (ICO-05). -->
+              <div class="prime-art" role="img" aria-label="Example notifications: a payment received and an overdue invoice">
+                <div class="notif">
+                  <span class="app-ic"><svg aria-hidden="true"><use href="#i-coin"/></svg></span>
+                  <div>
+                    <div class="meta"><span>Sora Pay</span><span>now</span></div>
+                    <strong>Payment received</strong>
+                    <p><span class="num">$240.00</span> from Jordan Reyes for invoice <span class="num">#SL-1042</span></p>
+                  </div>
+                </div>
+                <div class="notif back">
+                  <span class="app-ic"><svg aria-hidden="true"><use href="#i-clock"/></svg></span>
+                  <div>
+                    <div class="meta"><span>Sora Pay</span><span class="num">9:00 AM</span></div>
+                    <strong>Invoice <span class="num">#SL-1038</span> is 3 days overdue</strong>
+                    <p><span class="num">$1,180.00</span> from Owen Clarke, due Wed, Oct 21</p>
+                  </div>
+                </div>
+              </div>
+              <h2>Know the moment you get paid</h2>
+              <p class="lede">We'll only notify you about payments and overdue invoices. No promotions.</p>
+              <div class="bottom">
+                <p class="fine" id="v11-status" aria-live="polite">Next, your phone asks to allow notifications.</p>
+                <button class="btn btn-primary btn-block" type="button" id="v11-allow"><svg aria-hidden="true"><use href="#i-bell"/></svg>Turn on notifications</button>
+                <!-- Same size and position as the accept button; it only differs in emphasis (BTN-16). -->
+                <button class="btn btn-secondary btn-block" type="button" id="v11-later">Not now</button>
+              </div>
+            </div>
+          </div>
+          <div class="phone-home" aria-hidden="true"></div>
+        </div>
+      </div>
+      <p class="rule-ids">Rules: <code>MOB-08</code> <code>BTN-16</code> <code>BTN-04</code> <code>MOB-03</code> <code>ICO-05</code></p>
+    </div>
+
+    <!-- v12 -->
+    <div class="variant span-8">
+      <div class="variant-label"><span class="v">v12</span> First success that points to the next useful action</div>
+      <div class="variant-stage tight fill">
+        <div class="window fill">
+          <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="shop">
+            <header class="shop-bar">
+              <span class="wordmark"><span class="tile"><svg aria-hidden="true"><use href="#i-bag"/></svg></span>Sora Shop</span>
+              <nav class="shop-nav" aria-label="Main">
+                <a href="/orders">Orders</a>
+                <a href="/customers" aria-current="page">Customers</a>
+                <a href="/products">Products</a>
+                <a href="/reports">Reports</a>
+              </nav>
+              <span class="avatar" aria-hidden="true">MS</span>
+            </header>
+            <div class="success">
+              <div class="success-inner" role="status" aria-labelledby="v12-title">
+                <span class="ok-badge" aria-hidden="true"><svg><use href="#i-check"/></svg></span>
+                <h2 id="v12-title"><span class="num">245</span> customers imported</h2>
+                <p class="lede">From customers-oct-2026.csv, just now. They're in your Customers list with their contact details and lifetime spend.</p>
+                <dl class="stats">
+                  <div><dt>Imported</dt><dd class="num">245</dd></div>
+                  <div><dt>Skipped</dt><dd class="num">3<small>no email</small></dd></div>
+                  <div><dt>Rows in file</dt><dd class="num">248</dd></div>
+                </dl>
+                <div class="next-card">
+                  <div>
+                    <p class="eyebrow">Suggested next step</p>
+                    <h3>Thank your <span class="num">38</span> top customers</h3>
+                    <p>They each spent over <span class="num">$500</span>. Save them as a segment, then send a thank-you.</p>
+                    <div class="stack-av" aria-hidden="true">
+                      <span class="avatar av-1">PN</span><span class="avatar av-2">SO</span><span class="avatar av-3">ZA</span>
+                      <span class="more num">+35 more</span>
+                    </div>
+                  </div>
+                  <a class="btn btn-primary" href="/segments/new?min_spend=500">Create segment<svg aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+                </div>
+                <div class="later">
+                  <a href="/customers">View all customers</a>
+                  <a href="/imports/latest/skipped.csv"><svg class="i-sm" aria-hidden="true"><use href="#i-download"/></svg>Download 3 skipped rows</a>
+                  <button type="button"><svg class="i-sm" aria-hidden="true"><use href="#i-undo"/></svg>Undo import</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="rule-ids">Rules: <code>FBK-07</code> <code>FBK-03</code> <code>BTN-01</code> <code>BTN-06</code> <code>LAY-05</code></p>
+    </div>
+  </div>
+</main>
+
+<script>
+  // CMP-31, FBK-06: real checkboxes drive the count, the time left and the progress bar; Skip is honest, never counted as done.
+  (() => {
+    const list = document.getElementById("v7-tasks");
+    const count = document.getElementById("v7-count");
+    const bar = document.getElementById("v7-bar");
+    const tasks = [...list.querySelectorAll(".task")];
+    const sync = () => {
+      tasks.forEach((task) => {
+        const box = task.querySelector("input");
+        if (box.checked) task.dataset.state = "done";
+        else if (task.dataset.state === "done") task.dataset.state = "todo";
+        task.querySelector(".meta").textContent =
+          task.dataset.state === "done" ? "Done" : task.dataset.state === "skipped" ? "Skipped" : `${box.dataset.min} min`;
+      });
+      const done = tasks.filter((t) => t.dataset.state === "done").length;
+      const skipped = tasks.filter((t) => t.dataset.state === "skipped").length;
+      const minutes = tasks.filter((t) => t.dataset.state === "todo").reduce((sum, t) => sum + Number(t.querySelector("input").dataset.min), 0);
+      const rest = minutes ? `about ${minutes} min left` : "all set";
+      count.innerHTML = `<strong class="num">${done} of ${tasks.length}</strong> done${skipped ? ` &middot; ${skipped} skipped` : ""} &middot; ${rest}`;
+      bar.setAttribute("aria-valuenow", String(done));
+      bar.setAttribute("aria-valuetext", `${done} of ${tasks.length} done`);
+      bar.firstElementChild.style.transform = `scaleX(${done / tasks.length})`;
+    };
+    list.addEventListener("change", sync);
+    list.addEventListener("click", (event) => {
+      if (!event.target.closest("[data-skip]")) return;
+      const task = event.target.closest(".task");
+      task.dataset.state = "skipped";
+      task.classList.remove("current");
+      task.querySelector(".detail").hidden = true;
+      // Example only: replace with a request to your API that saves the skipped step.
+      sync();
+    });
+    document.getElementById("v7-skip-all").addEventListener("click", () => {
+      // Example only: hide the checklist and keep it reachable from Help (SCR-09).
+    });
+  })();
+
+  // CMP-12, CMP-11: a non-modal tour popover; arrows step through it, Escape closes it and focus returns to the trigger.
+  (() => {
+    const STEPS = [
+      { target: "tour-filters", title: "Filter by channel", body: "Narrow the report to one store, region or campaign." },
+      { target: "tour-save", title: "Save this view", body: "Keeps your filters and date range, so this report opens the same way next time." },
+      { target: "tour-share", title: "Share with your team", body: "Send a link, or email this report every Monday." },
+      { target: "tour-help", title: "Replay the tour", body: "Open this tour again any time from Help." },
+    ];
+    const app = document.getElementById("tour-app");
+    const tour = document.getElementById("tour");
+    const arrow = document.getElementById("tour-arrow");
+    const next = document.getElementById("tour-next");
+    const back = document.getElementById("tour-back");
+    const help = document.getElementById("tour-help");
+    let index = 1;
+
+    const place = () => {
+      const target = document.getElementById(STEPS[index].target);
+      const a = app.getBoundingClientRect();
+      const t = target.getBoundingClientRect();
+      const width = tour.offsetWidth;
+      const center = t.left - a.left + t.width / 2;
+      const left = Math.max(16, Math.min(center - width / 2, a.width - width - 16));
+      tour.style.left = `${left}px`;
+      tour.style.top = `${t.bottom - a.top + 12}px`;
+      arrow.style.left = `${center - left - 6}px`;
+    };
+    const render = (moveFocus) => {
+      const step = STEPS[index];
+      app.querySelectorAll("[data-tour-active]").forEach((el) => el.removeAttribute("data-tour-active"));
+      document.getElementById(step.target).setAttribute("data-tour-active", "");
+      document.getElementById("tour-step").textContent = `Step ${index + 1} of ${STEPS.length}`;
+      document.getElementById("tour-title").textContent = step.title;
+      document.getElementById("tour-body").textContent = step.body;
+      document.querySelectorAll("#tour-dots i").forEach((dot, i) => dot.classList.toggle("on", i === index));
+      back.hidden = index === 0;
+      next.textContent = index === STEPS.length - 1 ? "Finish tour" : "Next";
+      place();
+      if (moveFocus) document.getElementById("tour-title").focus();
+    };
+    const close = () => {
+      tour.hidden = true;
+      app.querySelectorAll("[data-tour-active]").forEach((el) => el.removeAttribute("data-tour-active"));
+      help.focus();
+      // Example only: replace with a request to your API that stores "tour dismissed" for this person.
+    };
+    next.addEventListener("click", () => { if (index === STEPS.length - 1) close(); else { index += 1; render(true); } });
+    back.addEventListener("click", () => { if (index > 0) { index -= 1; render(true); } });
+    document.getElementById("tour-close").addEventListener("click", close);
+    help.addEventListener("click", () => { index = 0; tour.hidden = false; render(true); });
+    document.addEventListener("keydown", (event) => {
+      if (tour.hidden) return;
+      if (event.key === "Escape") close();
+      if (!tour.contains(document.activeElement)) return;
+      if (event.key === "ArrowRight" && index < STEPS.length - 1) { index += 1; render(true); }
+      if (event.key === "ArrowLeft" && index > 0) { index -= 1; render(true); }
+    });
+    window.addEventListener("resize", () => { if (!tour.hidden) place(); });
+    render(false);
+  })();
+
+  // FRM-06, COP-10, ENG-07: mapping rows render from data; each choice updates its preview, status and the import count.
+  (() => {
+    const FIELDS = [
+      { value: "name", label: "Name" },
+      { value: "email", label: "Email" },
+      { value: "phone", label: "Phone" },
+      { value: "since", label: "Customer since" },
+      { value: "spend", label: "Lifetime spend" },
+      { value: "notes", label: "Notes" },
+      { value: "skip", label: "Don't import" },
+    ];
+    // Example only: your API parses the file and suggests a field for each column.
+    const COLUMNS = [
+      { header: "Full name", raw: "Jordan Reyes", field: "name" },
+      { header: "E-mail", raw: "jordan.reyes@example.com", field: "email" },
+      { header: "Phone #", raw: "5550123", field: "phone" },
+      { header: "Signup date", raw: "03/14/2025", field: "since" },
+      { header: "Total spent", raw: "1240.5", field: "spend" },
+      { header: "Fav store", raw: "Downtown", field: "skip" },
+    ];
+    const ROWS = 248, ROWS_WITHOUT_EMAIL = 3;
+    const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+    const dates = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
+    const preview = (field, raw) => {
+      if (field === "skip") return null;
+      if (field === "spend") return money.format(Number(raw));
+      if (field === "since") { const [m, d, y] = raw.split("/").map(Number); return dates.format(new Date(y, m - 1, d)); }
+      if (field === "phone") return `+1 ${raw.slice(0, 3)}-${raw.slice(3)}`;
+      return raw;
+    };
+    const tbody = document.querySelector("#v9-map tbody");
+    COLUMNS.forEach((col, i) => {
+      const row = document.createElement("tr");
+      const options = FIELDS.map((f) => `<option value="${f.value}"${f.value === col.field ? " selected" : ""}>${f.label}</option>`).join("");
+      row.innerHTML = `
+        <th scope="row">${col.header}<span class="raw">${col.raw}</span></th>
+        <td><span class="select-wrap"><select id="v9-col-${i}" aria-label="Import ${col.header} as">${options}</select><svg aria-hidden="true"><use href="#i-chev-down"/></svg></span></td>
+        <td class="preview"></td>
+        <td class="status"></td>`;
+      tbody.append(row);
+    });
+    const summary = document.getElementById("v9-summary");
+    const text = document.getElementById("v9-summary-text");
+    const importBtn = document.getElementById("v9-import");
+    const sync = () => {
+      const chosen = [...tbody.querySelectorAll("select")].map((s) => s.value);
+      tbody.querySelectorAll("tr").forEach((row, i) => {
+        const value = preview(chosen[i], COLUMNS[i].raw);
+        const cell = row.querySelector(".preview");
+        cell.textContent = value ?? "Not imported";
+        cell.classList.toggle("none", value === null);
+        row.querySelector(".status").innerHTML = value === null
+          ? '<span class="pill pill-neutral">Skipped</span>'
+          : '<span class="pill pill-success">Matched</span>';
+      });
+      const mapped = chosen.filter((v) => v !== "skip").length;
+      const hasEmail = chosen.includes("email");
+      const count = ROWS - ROWS_WITHOUT_EMAIL;
+      summary.dataset.tone = hasEmail ? "info" : "error";
+      text.innerHTML = hasEmail
+        ? `<strong>${mapped} of ${COLUMNS.length} columns</strong> will be imported. <strong>${ROWS_WITHOUT_EMAIL} rows</strong> have no email and will be skipped. <a href="/imports/draft/skipped.csv">Download them</a>`
+        : "<strong>Choose a column for Email.</strong> Sora Shop needs it to tell customers apart.";
+      importBtn.setAttribute("aria-disabled", String(!hasEmail));
+      importBtn.textContent = `Import ${count} customers`;
+    };
+    tbody.addEventListener("change", sync);
+    document.getElementById("v9-form").addEventListener("submit", (event) => {
+      if (importBtn.getAttribute("aria-disabled") === "true") { event.preventDefault(); tbody.querySelector("select").focus(); }
+      // Example only: replace with a request to your API that starts the import.
+    });
+    sync();
+  })();
+
+  // SCR-14, COP-01: invite rows render from data; the button counts valid emails, and each remove button names its row.
+  (() => {
+    const ROLES = ["Admin", "Editor", "Viewer"];
+    const rows = document.getElementById("v10-rows");
+    const send = document.getElementById("v10-send");
+    const note = document.getElementById("v10-note");
+    let n = 0;
+    const valid = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+    const sync = () => {
+      const count = [...rows.querySelectorAll('input[type="email"]')].filter((i) => valid(i.value)).length;
+      send.textContent = count ? `Send ${count} invite${count === 1 ? "" : "s"}` : "Send invites";
+      send.setAttribute("aria-disabled", String(count === 0));
+      rows.querySelectorAll("[data-remove]").forEach((btn) => {
+        const email = btn.closest("[data-row]").querySelector("input").value.trim();
+        btn.setAttribute("aria-label", email ? `Remove ${email}` : `Remove teammate ${btn.dataset.remove}`);
+      });
+    };
+    const addRow = (email = "", role = "Viewer") => {
+      n += 1;
+      const wrap = document.createElement("div");
+      wrap.dataset.row = "";
+      wrap.style.display = "contents";
+      wrap.innerHTML = `
+        <input type="email" id="v10-email-${n}" name="email" autocomplete="off" placeholder="name@example.com" value="${email}" aria-label="Teammate ${n} email">
+        <span class="select-wrap"><select name="role" aria-label="Teammate ${n} role">${ROLES.map((r) => `<option${r === role ? " selected" : ""}>${r}</option>`).join("")}</select><svg aria-hidden="true"><use href="#i-chev-down"/></svg></span>
+        <button class="icon-btn" type="button" data-remove="${n}"><svg aria-hidden="true"><use href="#i-x"/></svg></button>`;
+      rows.append(wrap);
+      sync();
+      return wrap;
+    };
+    rows.addEventListener("input", sync);
+    rows.addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-remove]");
+      if (!btn) return;
+      btn.closest("[data-row]").remove();
+      document.getElementById("v10-add").focus();
+      sync();
+    });
+    document.getElementById("v10-add").addEventListener("click", () => addRow().querySelector("input").focus());
+    document.getElementById("v10-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (send.getAttribute("aria-disabled") === "true") { note.textContent = "Add at least one email, or skip this step."; return; }
+      // Example only: replace with a request to your API that sends the invites.
+    });
+    addRow("jordan.reyes@example.com", "Editor");
+    addRow("hana.kim@example.com", "Viewer");
+    addRow();
+  })();
+
+  // MOB-08, BTN-16: ask the system only after the person chose to; "Not now" is just as easy and is respected.
+  document.getElementById("v11-allow").addEventListener("click", async () => {
+    const status = document.getElementById("v11-status");
+    if (!("Notification" in window)) { status.textContent = "This device can't show notifications."; return; }
+    // Example only: on a phone, call your platform's permission API, then register the device with your API.
+    const result = await Notification.requestPermission();
+    status.textContent = result === "granted" ? "Notifications are on. Change them in Settings." : "Notifications stay off. You can turn them on in Settings.";
+  });
+  document.getElementById("v11-later").addEventListener("click", () => {
+    document.getElementById("v11-status").textContent = "No problem. You can turn them on later in Settings.";
+  });
+</script>
+</body>
+</html>
