@@ -38,6 +38,12 @@ Use this module together with [product-design.md](product-design.md) (what to sh
 
 When a change touches a screen and nothing narrower applies, check at least: `LAY-01` spacing scale, `LAY-02` grouping by spacing, `LAY-05` one focal point, `TYP-02` type scale, `TYP-04` readable sizes, `COL-01` contrast, `COL-07` no color-only meaning, `BTN-01` one primary action, `BTN-02` button states, `MOB-01` touch targets, `FRM-01` visible labels, `FRM-11` inline errors, `FBK-01` immediate feedback, `COP-01` outcome labels, `MOT-04` reduced motion and `ENG-01` native elements.
 
+## Reference screens
+
+`../examples/` shows the rules applied in 21 original pages with 92 screens: dashboards, sign-in and account access, verification codes and PINs, settings, navigation, tab bars, charts, cards, calendars, buttons, form controls, feedback, commerce, pricing, mobile apps, messaging and assistants, onboarding and error states, and brand guidelines. `../examples/README.md` lists every version and its main rule IDs.
+
+When building a surface that matches one of them, open that page and read the versions that fit. Take the structure, semantics, states and rule-driven details, then express them through the project's own components and tokens. Do not copy the sample brand, sample data or the example token values into the product.
+
 ## Precedence
 
 1. Accessibility (contrast, target size, focus visibility, reduced motion, semantics) and the target platform's guidelines.

@@ -1,0 +1,616 @@
+<!doctype html>
+<!-- ProductCraft example: otp. Original Sora Labs example, MIT License.
+     Demonstrates: FRM-17, FRM-20, FBK-13, COP-07, COL-10, COL-07, ENG-01, ENG-02, ENG-09, FRM-01, FRM-28,
+     FBK-02, FBK-03, FBK-05, COP-09, BTN-01, BTN-10, MOB-01, MOB-05, MOB-09, MOB-10, ICO-04, LAY-01, SCR-12 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440,focus=#otp-live-input">
+  <title>ProductCraft example: Verification codes and PINs</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    /* Field boundary tokens reach 3:1 against the surface (COL-01). */
+    :root { --field-border: #8a919d; --field-bg: var(--surface); }
+
+    .variants.cols-3 .variant-stage { flex: 1; padding: var(--space-5); } /* one height per row; a phone fits a third */
+    .variant-stage.top { align-items: start; } /* cards in one row share a top edge */
+    .phone.on-surface { background: var(--surface); }
+
+    /* Card shell, the same for every step of the flow (SCR-12). */
+    .otp-card {
+      width: 100%; max-width: 360px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm); padding: var(--space-6) var(--space-5) var(--space-5);
+    }
+    .icon-tile {
+      display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: var(--space-4);
+      border-radius: var(--radius-md); background: var(--accent-soft); color: var(--accent-ink);
+    }
+    .icon-tile svg { width: 22px; height: 22px; }
+    .icon-tile.ok { background: var(--success-soft); color: var(--success); }
+    .otp-card h2 { font-size: 22px; line-height: 1.3; font-weight: 700; letter-spacing: -0.01em; }
+    .dest { margin-top: var(--space-1); color: var(--text-2); }
+    .dest strong { color: var(--text); font-weight: 600; white-space: nowrap; }
+    .dest a { font-weight: 600; }
+
+    .otp-form { margin-top: var(--space-5); }
+    .otp-label { display: block; margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+
+    /* One real input drawn as boxes (FRM-17). Without JS it stays a normal text field. */
+    .otp { position: relative; }
+    .otp-input { width: 100%; min-height: 48px; padding: 0 var(--space-4); border: 1px solid var(--field-border); border-radius: var(--radius-sm); font-size: var(--text-lg); letter-spacing: 0.3em; background: var(--field-bg); }
+    .is-enhanced .otp-input, .otp.static .otp-input {
+      position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0;
+      opacity: 0; border: 0; padding: 0; font-size: 16px; cursor: text;
+    }
+    .otp-boxes { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--space-2); }
+    .otp-boxes:empty { display: none; }
+    .otp-boxes > span {
+      position: relative; height: 56px; display: grid; place-items: center;
+      border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--field-bg);
+      font-size: var(--text-xl); font-weight: 600; font-variant-numeric: tabular-nums;
+      transition: border-color var(--dur-fast), background-color var(--dur-fast);
+    }
+    /* Focus is brand-colored, never a verdict color (COL-10). */
+    .otp:focus-within .is-active, .otp.show-focus .is-active { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--accent); }
+    .otp:focus-within .is-active:empty::after, .otp.show-focus .is-active:empty::after {
+      content: ""; width: 2px; height: 24px; border-radius: 1px; background: var(--text);
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* States (FBK-13): checking is neutral, verified and error get their verdict colors. */
+    [data-state="checking"] .otp-boxes > span { background: var(--surface-2); border-color: var(--border); color: var(--text-2); }
+    [data-state="verified"] .otp-boxes > span { background: var(--success-soft); border-color: var(--success); color: var(--success); }
+    [data-state="error"] .otp-boxes > span { background: var(--danger-soft); border-color: var(--danger); }
+
+    .help { margin-top: var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    [data-state="verified"] .help, [data-state="checking"] .help, [data-state="error"] .help { display: none; }
+
+    .msg { margin-top: var(--space-3); font-size: var(--text-sm); }
+    .msg-status { display: flex; align-items: center; gap: var(--space-2); color: var(--text-2); }
+    .msg svg { width: 18px; height: 18px; flex: none; }
+    .msg .spinner, .msg .i-ok, .msg .i-err { display: none; }
+    [data-state="checking"] .msg .spinner { display: block; }
+    [data-state="verified"] .msg-status { color: var(--success); font-weight: 600; }
+    [data-state="verified"] .msg .i-ok { display: block; }
+    [data-state="error"] .msg-alert {
+      display: flex; gap: var(--space-3); align-items: flex-start;
+      padding: var(--space-3); border-radius: var(--radius-sm); background: var(--danger-soft); color: var(--text);
+    }
+    [data-state="error"] .msg .i-err { display: block; color: var(--danger); margin-top: 1px; }
+    .msg-alert strong { display: block; color: var(--danger); }
+
+    .spinner {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid currentColor; border-right-color: transparent;
+      animation: spin 700ms linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .next { margin-top: var(--space-5); }
+    .otp-card:not([data-state="verified"]) [data-when="verified"] { display: none; }
+    .is-enhanced [data-nojs] { display: none; }
+
+    /* Resend: visibly unavailable during the cooldown, then a real button (COP-07, BTN-10, MOB-10). */
+    .otp-foot {
+      display: flex; align-items: center; flex-wrap: wrap; gap: 0 var(--space-1);
+      margin-top: var(--space-5); padding-top: var(--space-3); border-top: 1px solid var(--border);
+      font-size: var(--text-sm); color: var(--text-2);
+    }
+    [data-state="verified"] .otp-foot { display: none; }
+    .link-btn {
+      display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--space-1);
+      border: 0; background: none; cursor: pointer; font-weight: 600; color: var(--accent-ink); font-size: inherit;
+    }
+    .link-btn:hover { text-decoration: underline; }
+    .link-btn[aria-disabled="true"] { color: var(--text-3); cursor: not-allowed; text-decoration: none; }
+
+    /* v4: the card inside its page shell, so the error reads in context (SCR-12). */
+    .shell { width: 100%; max-width: 360px; display: grid; gap: var(--space-5); justify-items: center; }
+    .shell-brand { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-lg); font-weight: 700; }
+    .shell-brand svg { width: 28px; height: 28px; color: var(--accent); }
+    .shell-foot { font-size: var(--text-sm); color: var(--text-2); }
+    .shell-foot a { font-weight: 600; }
+
+    /* v5: SMS code on a phone with the system number pad (MOB-09: content stays above the keyboard). */
+    .sms { flex: 1; display: flex; flex-direction: column; }
+    .sms-top { padding: var(--space-2) var(--space-3) 0; }
+    .sms-content { padding: var(--space-3) var(--space-5) 0; }
+    .sms h2 { font-size: var(--text-xl); line-height: 1.25; font-weight: 700; letter-spacing: -0.01em; }
+    .sms .otp-boxes > span { height: 52px; }
+    .sms .otp-foot { border-top: 0; margin-top: var(--space-1); padding-top: 0; }
+    .kb { margin-top: auto; background: var(--surface-2); border-top: 1px solid var(--border); padding: var(--space-2) var(--space-2) var(--space-1); }
+    .kb-suggest {
+      display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+      height: 40px; margin-bottom: var(--space-2); border-radius: var(--radius-sm);
+      font-size: var(--text-sm); color: var(--text-2);
+    }
+    .kb-suggest b { color: var(--text); font-weight: 600; letter-spacing: 0.04em; }
+    .kb-suggest svg { width: 16px; height: 16px; }
+    .kb-keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .kb-keys span { height: 46px; display: grid; place-items: center; border-radius: 6px; background: var(--surface); box-shadow: 0 1px 0 rgba(15, 23, 42, 0.18); font-size: 22px; font-weight: 500; }
+    .kb-keys span.blank { background: transparent; box-shadow: none; }
+    .kb-keys span.fn { background: transparent; box-shadow: none; color: var(--text-2); }
+    .kb-keys svg { width: 24px; height: 24px; }
+
+    /* v6: create PIN with dots and a keypad of real 56px buttons (FRM-20, MOB-01). */
+    .pin { flex: 1; display: flex; flex-direction: column; padding: var(--space-2) var(--space-5) var(--space-4); }
+    .pin-top { display: flex; align-items: center; justify-content: space-between; margin: 0 calc(-1 * var(--space-3)); }
+    .steps { list-style: none; margin: var(--space-3) 0 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .steps li::before { content: ""; display: block; height: 4px; margin-bottom: var(--space-2); border-radius: var(--radius-pill); background: var(--border); }
+    .steps li[aria-current="step"] { color: var(--accent-ink); }
+    .steps li[aria-current="step"]::before, .steps li.is-done::before { background: var(--accent); }
+    .steps li.is-done { color: var(--text-2); }
+    .pin-icon { margin: var(--space-6) 0 0; }
+    .pin h2 { margin-top: var(--space-4); font-size: var(--text-xl); line-height: 1.25; font-weight: 700; letter-spacing: -0.01em; }
+    .pin .dest { margin-top: var(--space-2); }
+    .pin-field { position: relative; width: max-content; margin: var(--space-6) auto 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-pill); }
+    .pin-field:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .dots { display: flex; gap: var(--space-5); }
+    .dots i { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--text-3); transition: background-color var(--dur-fast), border-color var(--dur-fast); }
+    .dots i.is-filled { background: var(--accent); border-color: var(--accent); }
+    [data-step="done"] .dots i { background: var(--success); border-color: var(--success); }
+    .pin-input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; font-size: 16px; cursor: text; }
+    .pin-msg { min-height: 40px; margin-top: var(--space-2); text-align: center; font-size: var(--text-sm); color: var(--text-2); }
+    .pin-msg .err { color: var(--danger); font-weight: 600; }
+    .pin-msg .err:empty { display: none; }
+    .pin-msg .ok { display: none; align-items: center; justify-content: center; gap: var(--space-2); color: var(--success); font-weight: 600; }
+    .pin-msg .ok svg { width: 18px; height: 18px; }
+    [data-step="done"] .pin-msg .ok { display: flex; }
+    .keypad { margin-top: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+    .keypad button {
+      min-height: 56px; border: 0; border-radius: var(--radius-md); background: var(--surface-2);
+      font-size: var(--text-xl); font-weight: 600; cursor: pointer; transition: background-color var(--dur-fast);
+    }
+    .keypad button:hover { background: var(--border); }
+    .keypad button:active { background: var(--accent-soft); }
+    .keypad button.fn { background: transparent; color: var(--text-2); display: grid; place-items: center; }
+    .keypad button.fn svg { width: 24px; height: 24px; }
+    .keypad button:disabled { opacity: 0.55; cursor: not-allowed; }
+    .keypad .blank { min-height: 56px; }
+  </style>
+</head>
+<body>
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M7.5 15.5l3-3.5 2.5 2.5 3.5-4.5"/></svg>
+          ProductCraft &middot; Example screens
+        </span>
+        <h1>Verification codes and PINs</h1>
+        <p>One live code input, each state it moves through, an SMS layout and PIN creation.</p>
+      </div>
+    </header>
+
+    <div class="variants cols-3">
+      <!-- v1: the interactive implementation -->
+      <div class="variant">
+        <div class="variant-label"><span class="v">v1</span> Code entry (interactive)</div>
+        <div class="variant-stage plain top">
+          <section class="otp-card" id="otp-live" data-state="entering" aria-labelledby="otp-live-title">
+            <span class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
+            <h2 id="otp-live-title">Check your email</h2>
+            <p class="dest">Enter the <span data-code-length>6</span>-digit code we sent to <strong>a•••••@example.com</strong>. <a href="/sign-in">Change<span class="visually-hidden"> email address</span></a></p>
+            <form class="otp-form" action="/verify" method="post">
+              <label class="otp-label" for="otp-live-input">Verification code</label>
+              <div class="otp">
+                <input class="otp-input" id="otp-live-input" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" required aria-describedby="otp-live-help">
+                <div class="otp-boxes" aria-hidden="true"></div>
+              </div>
+              <p class="help" id="otp-live-help">We'll check it automatically when you enter the last digit.</p>
+              <div class="msg">
+                <p class="msg-status" role="status"><span class="spinner" aria-hidden="true"></span><svg class="i-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16 10"/></svg><span data-otp-status></span></p>
+                <div class="msg-alert" role="alert"><svg class="i-err" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg><span data-otp-alert></span></div>
+              </div>
+              <button class="btn btn-primary btn-block next" type="submit" data-nojs>Verify code</button>
+              <a class="btn btn-primary btn-block next" href="/workspace" data-when="verified">Continue to workspace</a>
+            </form>
+            <div class="otp-foot">
+              Didn't get it?
+              <button class="link-btn" type="button" aria-disabled="true" data-resend>
+                <span data-resend-wait>Resend code in&nbsp;<time class="num" datetime="PT24S">0:24</time></span>
+                <span data-resend-ready hidden>Resend code</span>
+              </button>
+            </div>
+            <p class="visually-hidden" aria-live="polite" data-resend-announce></p>
+          </section>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-17</code> <code>FBK-13</code> <code>COP-07</code> <code>ENG-02</code> <code>ENG-09</code> <code>FRM-28</code></p>
+      </div>
+
+      <!-- v2: static snapshot of the checking state -->
+      <div class="variant">
+        <div class="variant-label"><span class="v">v2</span> Checking</div>
+        <div class="variant-stage plain top" inert>
+          <section class="otp-card" data-state="checking" aria-busy="true" aria-labelledby="v2-title">
+            <span class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
+            <h2 id="v2-title">Check your email</h2>
+            <p class="dest">Enter the 6-digit code we sent to <strong>a•••••@example.com</strong>. <a href="/sign-in">Change<span class="visually-hidden"> email address</span></a></p>
+            <form class="otp-form" action="/verify" method="post">
+              <label class="otp-label" for="v2-input">Verification code</label>
+              <div class="otp static">
+                <!-- Locked while the request runs. -->
+                <input class="otp-input" id="v2-input" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" value="482913" readonly>
+                <div class="otp-boxes num" aria-hidden="true"><span>4</span><span>8</span><span>2</span><span>9</span><span>1</span><span>3</span></div>
+              </div>
+              <div class="msg">
+                <p class="msg-status" role="status"><span class="spinner" aria-hidden="true"></span><span>Checking code...</span></p>
+              </div>
+            </form>
+            <div class="otp-foot">
+              Didn't get it?
+              <button class="link-btn" type="button" aria-disabled="true">Resend code in&nbsp;<time class="num" datetime="PT19S">0:19</time></button>
+            </div>
+          </section>
+        </div>
+        <p class="rule-ids">Rules: <code>FBK-13</code> <code>FBK-02</code> <code>COL-10</code> <code>FBK-01</code> <code>ENG-02</code></p>
+      </div>
+
+      <!-- v3: static snapshot of the verified state -->
+      <div class="variant">
+        <div class="variant-label"><span class="v">v3</span> Verified, with the next step</div>
+        <div class="variant-stage plain top" inert>
+          <section class="otp-card" data-state="verified" aria-labelledby="v3-title">
+            <span class="icon-tile ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v6c0 4.5 3 7.8 7 9 4-1.2 7-4.5 7-9V6z"/><path d="m9 12 2 2 4-4"/></svg></span>
+            <h2 id="v3-title">Email verified</h2>
+            <p class="dest"><strong>a•••••@example.com</strong> is confirmed. Next, open your workspace.</p>
+            <form class="otp-form" action="/verify" method="post">
+              <label class="otp-label" for="v3-input">Verification code</label>
+              <div class="otp static">
+                <input class="otp-input" id="v3-input" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" value="482913" readonly>
+                <div class="otp-boxes num" aria-hidden="true"><span>4</span><span>8</span><span>2</span><span>9</span><span>1</span><span>3</span></div>
+              </div>
+              <div class="msg">
+                <p class="msg-status" role="status"><svg class="i-ok" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16 10"/></svg><span>Code verified</span></p>
+              </div>
+              <!-- The resend countdown has stopped; the next step is the only action. -->
+              <a class="btn btn-primary btn-block next" href="/workspace">Continue to workspace</a>
+            </form>
+          </section>
+        </div>
+        <p class="rule-ids">Rules: <code>FBK-13</code> <code>COP-09</code> <code>COL-07</code> <code>BTN-01</code> <code>FBK-03</code></p>
+      </div>
+
+      <!-- v4: static snapshot of the error state -->
+      <div class="variant">
+        <div class="variant-label"><span class="v">v4</span> Wrong code</div>
+        <div class="variant-stage plain" inert>
+          <div class="shell">
+          <p class="shell-brand"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="currentColor"/><path d="M9.5 19.5a6.5 6.5 0 0 1 13 0" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M7.5 23.5h17" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>Sora</p>
+          <section class="otp-card" data-state="error" aria-labelledby="v4-title">
+            <span class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
+            <h2 id="v4-title">Check your email</h2>
+            <p class="dest">Enter the 6-digit code we sent to <strong>a•••••@example.com</strong>. <a href="/sign-in">Change<span class="visually-hidden"> email address</span></a></p>
+            <form class="otp-form" action="/verify" method="post">
+              <label class="otp-label" for="v4-input">Verification code</label>
+              <!-- Digits cleared, focus back in the first box. -->
+              <div class="otp static show-focus">
+                <input class="otp-input" id="v4-input" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" aria-invalid="true" aria-describedby="v4-error">
+                <div class="otp-boxes" aria-hidden="true"><span class="is-active"></span><span></span><span></span><span></span><span></span><span></span></div>
+              </div>
+              <div class="msg">
+                <div class="msg-alert" role="alert" id="v4-error"><svg class="i-err" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg><span><strong>That code didn't match.</strong> Type the code from the latest email, or resend a new one. 2 attempts left.</span></div>
+              </div>
+            </form>
+            <div class="otp-foot">
+              Didn't get it?
+              <button class="link-btn" type="button" aria-disabled="false">Resend code</button>
+            </div>
+          </section>
+          <p class="shell-foot">Still stuck? <a href="/sign-in/options">Sign in another way</a></p>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FBK-13</code> <code>FRM-11</code> <code>COL-07</code> <code>FBK-18</code> <code>COP-07</code></p>
+      </div>
+
+      <!-- v5: static snapshot, SMS code on mobile -->
+      <div class="variant">
+        <div class="variant-label"><span class="v">v5</span> Mobile SMS code</div>
+        <div class="variant-stage" inert>
+          <div class="phone on-surface">
+            <div class="phone-status"><span class="num">9:41</span><span class="icons"><span></span><span></span></span></div>
+            <div class="phone-body">
+              <section class="sms" data-state="entering" aria-labelledby="v5-title">
+                <div class="sms-top">
+                  <button class="icon-btn" type="button" aria-label="Back" style="width: 44px; height: 44px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+                </div>
+                <div class="sms-content">
+                  <h2 id="v5-title">Check your messages</h2>
+                  <p class="dest">6-digit code sent to <strong class="num">+1 •••-0142</strong>. <a href="/phone">Change number</a></p>
+                  <form class="otp-form" action="/verify" method="post">
+                    <label class="otp-label" for="v5-input">Text message code</label>
+                    <div class="otp static show-focus">
+                      <input class="otp-input" id="v5-input" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" maxlength="6" value="381" aria-describedby="v5-help">
+                      <div class="otp-boxes num" aria-hidden="true"><span>3</span><span>8</span><span>1</span><span class="is-active"></span><span></span><span></span></div>
+                    </div>
+                    <p class="help" id="v5-help">We'll check it as soon as you enter the last digit.</p>
+                  </form>
+                  <div class="otp-foot">
+                    Didn't get it?
+                    <button class="link-btn" type="button" aria-disabled="true">Resend in&nbsp;<time class="num" datetime="PT18S">0:18</time></button>
+                  </div>
+                </div>
+                <!-- Represents the system number pad with the code suggestion that autocomplete="one-time-code" unlocks. -->
+                <div class="kb" aria-hidden="true">
+                  <div class="kb-suggest">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg>
+                    From SMS <b class="num">381 520</b>
+                  </div>
+                  <div class="kb-keys num">
+                    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+                    <span class="blank"></span><span>0</span>
+                    <span class="fn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="m16 9-5 5M11 9l5 5"/></svg></span>
+                  </div>
+                </div>
+              </section>
+            </div>
+            <div class="phone-home"></div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-17</code> <code>COP-07</code> <code>MOB-05</code> <code>MOB-09</code> <code>MOB-10</code> <code>LAY-13</code></p>
+      </div>
+
+      <!-- v6: interactive PIN creation -->
+      <div class="variant">
+        <div class="variant-label"><span class="v">v6</span> Create PIN, then confirm (interactive)</div>
+        <div class="variant-stage">
+          <div class="phone on-surface">
+            <div class="phone-status"><span class="num">9:41</span><span class="icons"><span></span><span></span></span></div>
+            <div class="phone-body">
+              <form class="pin" id="pin-live" data-step="create" action="/pin" method="post" aria-labelledby="pin-title">
+                <div class="pin-top">
+                  <button class="icon-btn" type="button" aria-label="Back" style="width: 44px; height: 44px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+                </div>
+                <ol class="steps" aria-label="PIN setup steps">
+                  <li aria-current="step">Create PIN</li>
+                  <li>Confirm PIN</li>
+                </ol>
+                <span class="icon-tile pin-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><path d="M12 15v2"/></svg></span>
+                <h2 id="pin-title">Create a PIN</h2>
+                <p class="dest" data-pin-hint>Choose 4 digits to approve payments in Sora Pay.</p>
+                <div class="pin-field">
+                  <!-- Demo state: two digits already entered so the filling dots show. Ship with an empty value. -->
+                  <input class="pin-input" name="pin" type="password" inputmode="numeric" autocomplete="new-password" pattern="[0-9]*" maxlength="4" value="47" aria-labelledby="pin-title" aria-describedby="pin-count">
+                  <div class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+                </div>
+                <div class="pin-msg">
+                  <p class="visually-hidden" id="pin-count" aria-live="polite" data-pin-status></p>
+                  <p class="err" role="alert" data-pin-alert></p>
+                  <p class="ok" role="status"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16 10"/></svg><span data-pin-done></span></p>
+                </div>
+                <div class="keypad" role="group" aria-label="Number pad">
+                  <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button>
+                  <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button>
+                  <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button>
+                  <span class="blank"></span>
+                  <button type="button" data-key="0">0</button>
+                  <button type="button" class="fn" data-key="delete" aria-label="Delete last digit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 5H9l-6 7 6 7h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1z"/><path d="m16 9-5 5M11 9l5 5"/></svg></button>
+                </div>
+              </form>
+            </div>
+            <div class="phone-home"></div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-20</code> <code>MOB-01</code> <code>FBK-05</code> <code>ICO-04</code> <code>ENG-01</code> <code>BTN-03</code></p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // FRM-17, FBK-13, COP-07: one real input drawn as boxes; typing, paste and autofill all land in it.
+    (() => {
+      const CODE_LENGTH = 6; // one constant drives the boxes, maxlength and the copy
+      const RESEND_SECONDS = 24;
+      const card = document.getElementById("otp-live");
+      const form = card.querySelector("form");
+      const input = card.querySelector(".otp-input");
+      const status = card.querySelector("[data-otp-status]");
+      const alertText = card.querySelector("[data-otp-alert]");
+      const resend = card.querySelector("[data-resend]");
+      const wait = resend.querySelector("[data-resend-wait]");
+      const ready = resend.querySelector("[data-resend-ready]");
+      const time = resend.querySelector("time");
+      const announce = card.querySelector("[data-resend-announce]");
+
+      input.maxLength = CODE_LENGTH;
+      card.querySelectorAll("[data-code-length]").forEach((el) => (el.textContent = CODE_LENGTH));
+      const row = card.querySelector(".otp-boxes");
+      const boxes = Array.from({ length: CODE_LENGTH }, () => row.appendChild(document.createElement("span")));
+      card.classList.add("is-enhanced");
+
+      function render() {
+        const active = Math.min(input.value.length, CODE_LENGTH - 1);
+        boxes.forEach((box, i) => {
+          box.textContent = input.value[i] || "";
+          box.classList.toggle("is-active", i === active);
+        });
+      }
+
+      // ENG-02: entering -> checking -> verified, or -> error -> entering.
+      const transitions = { entering: ["checking"], checking: ["verified", "error"], error: ["entering", "checking"], verified: [] };
+      function setState(next) {
+        if (!transitions[card.dataset.state].includes(next)) return false;
+        card.dataset.state = next;
+        return true;
+      }
+
+      input.addEventListener("input", () => {
+        input.value = input.value.replace(/\D/g, "").slice(0, CODE_LENGTH);
+        if (card.dataset.state === "error" && setState("entering")) alertText.textContent = "";
+        render();
+        if (input.value.length === CODE_LENGTH) verify(input.value);
+      });
+      // A pasted code may contain spaces or dashes; spread its digits across every box.
+      input.addEventListener("paste", (event) => {
+        if (input.readOnly) return;
+        event.preventDefault();
+        input.value = event.clipboardData.getData("text").replace(/\D/g, "").slice(0, CODE_LENGTH);
+        input.dispatchEvent(new Event("input"));
+      });
+      // Keep the caret at the end so the next digit lands in the next box.
+      ["focus", "click", "keyup"].forEach((type) =>
+        input.addEventListener(type, () => input.setSelectionRange(input.value.length, input.value.length))
+      );
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (input.value.length === CODE_LENGTH) verify(input.value);
+      });
+
+      async function verify(code) {
+        if (!setState("checking")) return;
+        input.readOnly = true;
+        card.setAttribute("aria-busy", "true");
+        status.textContent = "Checking code...";
+        const { ok } = await verifyCode(code);
+        card.setAttribute("aria-busy", "false");
+        if (ok) {
+          setState("verified");
+          clearTimeout(timer); // FBK-13: stop the resend countdown once verified
+          status.textContent = "Code verified";
+          card.querySelector('[data-when="verified"]').focus(); // the next step is the only action left
+        } else {
+          setState("error");
+          status.textContent = "";
+          input.readOnly = false;
+          input.value = "";
+          render();
+          alertText.innerHTML = "<strong>That code didn't match.</strong> Type the code from the latest email, or resend a new one.";
+          input.focus();
+        }
+      }
+
+      // Example only: replace with a request to your API. Codes must be checked on the server (FRM-28).
+      // This stub accepts any code except 000000, so you can try the error state.
+      function verifyCode(code) {
+        return new Promise((resolve) => setTimeout(() => resolve({ ok: code !== "000000" }), 900));
+      }
+
+      // ENG-09: the countdown reads the clock on every tick and announces only when resend becomes available.
+      let resendAt = 0;
+      let timer = 0;
+      function startCountdown() {
+        resendAt = Date.now() + RESEND_SECONDS * 1000;
+        resend.setAttribute("aria-disabled", "true");
+        wait.hidden = false;
+        ready.hidden = true;
+        tick();
+      }
+      function tick() {
+        const left = Math.max(0, Math.ceil((resendAt - Date.now()) / 1000));
+        if (left === 0) {
+          resend.setAttribute("aria-disabled", "false");
+          wait.hidden = true;
+          ready.hidden = false;
+          announce.textContent = "You can resend the code now.";
+          return;
+        }
+        time.textContent = Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0");
+        time.dateTime = "PT" + left + "S";
+        timer = setTimeout(tick, (resendAt - Date.now()) % 1000 || 1000);
+      }
+      resend.addEventListener("click", () => {
+        if (resend.getAttribute("aria-disabled") === "true") return;
+        // Example only: replace with a request to your API.
+        announce.textContent = "";
+        status.textContent = "We sent a new code to a•••••@example.com.";
+        startCountdown();
+      });
+
+      render();
+      startCountdown();
+    })();
+
+    // FRM-20: PIN entry with filling dots, a native input (hardware keys) and a keypad of real buttons.
+    (() => {
+      const PIN_LENGTH = 4;
+      const pin = document.getElementById("pin-live");
+      const input = pin.querySelector(".pin-input");
+      const dots = pin.querySelectorAll(".dots i");
+      const title = pin.querySelector("#pin-title");
+      const hint = pin.querySelector("[data-pin-hint]");
+      const count = pin.querySelector("[data-pin-status]");
+      const alertText = pin.querySelector("[data-pin-alert]");
+      const doneText = pin.querySelector("[data-pin-done]");
+      const steps = pin.querySelectorAll(".steps li");
+      const keys = pin.querySelectorAll(".keypad button");
+      const COPY = {
+        create: ["Create a PIN", "Choose 4 digits to approve payments in Sora Pay."],
+        confirm: ["Confirm PIN", "Enter the same 4 digits again."],
+        done: ["PIN created", "Use it to approve payments in Sora Pay."],
+      };
+      let firstPin = "";
+      let pending = 0;
+
+      function render() {
+        dots.forEach((dot, i) => dot.classList.toggle("is-filled", i < input.value.length));
+        count.textContent = input.value.length + " of " + PIN_LENGTH + " digits entered";
+      }
+
+      function setPin(value) {
+        if (pin.dataset.step === "done") return;
+        input.value = value.replace(/\D/g, "").slice(0, PIN_LENGTH);
+        if (input.value) alertText.textContent = "";
+        render();
+        clearTimeout(pending);
+        if (input.value.length === PIN_LENGTH) pending = setTimeout(completeStep, 200); // let the last dot fill first
+      }
+
+      function goTo(step) {
+        pin.dataset.step = step;
+        input.value = "";
+        render();
+        [title.textContent, hint.textContent] = COPY[step];
+        steps[0].toggleAttribute("aria-current", step === "create");
+        steps[0].classList.toggle("is-done", step !== "create");
+        steps[1].toggleAttribute("aria-current", step === "confirm");
+        steps[1].classList.toggle("is-done", step === "done");
+        if (step === "create") steps[0].setAttribute("aria-current", "step");
+        if (step === "confirm") steps[1].setAttribute("aria-current", "step");
+        keys.forEach((key) => (key.disabled = step === "done"));
+      }
+
+      function completeStep() {
+        if (input.value.length !== PIN_LENGTH) return;
+        if (pin.dataset.step === "create") {
+          firstPin = input.value;
+          goTo("confirm");
+          count.textContent = "Now enter the same PIN again to confirm it.";
+        } else if (input.value === firstPin) {
+          goTo("done");
+          doneText.textContent = "Your PIN is set";
+          // Example only: replace with a request to your API.
+        } else {
+          firstPin = ""; // FRM-20: clear both entries and explain on mismatch
+          goTo("create");
+          alertText.textContent = "PINs didn't match. Create it again.";
+        }
+      }
+
+      pin.querySelector(".keypad").addEventListener("click", (event) => {
+        const key = event.target.closest("button");
+        if (!key) return;
+        setPin(key.dataset.key === "delete" ? input.value.slice(0, -1) : input.value + key.dataset.key);
+      });
+      input.addEventListener("input", () => setPin(input.value));
+      // Hardware keyboards work even while focus is on a keypad button.
+      pin.addEventListener("keydown", (event) => {
+        if (event.target === input) return;
+        if (/^\d$/.test(event.key)) setPin(input.value + event.key);
+        else if (event.key === "Backspace") setPin(input.value.slice(0, -1));
+        else return;
+        event.preventDefault();
+      });
+      pin.addEventListener("submit", (event) => event.preventDefault());
+
+      render();
+    })();
+
+    // Example only: static snapshots in this sheet do not submit anywhere.
+    document.querySelectorAll("[inert] form").forEach((form) => form.addEventListener("submit", (event) => event.preventDefault()));
+  </script>
+</body>
+</html>

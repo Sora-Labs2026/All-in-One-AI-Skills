@@ -1,0 +1,589 @@
+<!doctype html>
+<!-- ProductCraft example: dashboard-v2 (dark operations). Original Sora Labs example, MIT License.
+     Demonstrates: SCR-01, LAY-01, LAY-02, LAY-05, LAY-08, TYP-02, TYP-09, COL-01, COL-06, COL-07, COL-10,
+     DRK-01, DRK-02, DRK-03, DRK-04, DRK-06, DRK-09, CMP-11, CMP-17, CMP-18, CMP-20, NAV-02, NAV-03, NAV-08, NAV-13,
+     FBK-18, FRM-22, ICO-04, ICO-07, ENG-09, BTN-01, SCR-02 -->
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440,scheme=dark,focus=#rail-ops">
+  <title>ProductCraft example: Dark operations dashboard</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* Dark elevation steps (DRK-03): base < card < raised < overlay, separated by 8% white hairlines (DRK-09) */
+    :root {
+      --raised: #232833;
+      --overlay: #2a2f3a;
+      --line-muted: #5b6372;
+    }
+
+    .app { display: grid; grid-template-columns: 72px minmax(0, 1fr); min-height: 100vh; }
+
+    /* Icon rail: every icon has an aria-label and a tooltip on hover and keyboard focus (NAV-02, NAV-08, CMP-11) */
+    .rail {
+      display: flex; flex-direction: column; align-items: center; gap: var(--space-5);
+      padding: var(--space-4) 0; border-right: 1px solid var(--border); background: var(--bg);
+    }
+    .rail-logo { display: grid; place-items: center; width: 40px; height: 40px; }
+    .rail-logo svg { width: 32px; height: 32px; }
+    .rail-logo .tile { fill: var(--accent); }
+    .rail-logo .sun { fill: none; stroke: var(--on-accent); stroke-width: 2.5; stroke-linecap: round; }
+    .rail ul { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+    .rail-foot { margin-top: auto; display: grid; justify-items: center; gap: var(--space-4); }
+    .rail a {
+      position: relative; display: grid; place-items: center;
+      width: 48px; height: 48px; border-radius: var(--radius-md); color: var(--text-3);
+    }
+    .rail a svg { width: 22px; height: 22px; }
+    .rail a:hover { background: var(--surface-2); color: var(--text); }
+    /* Active: tint, accent icon and an edge indicator (NAV-03) */
+    .rail a[aria-current="page"] { background: var(--accent-soft); color: var(--accent-ink); }
+    .rail a[aria-current="page"]::before {
+      content: ""; position: absolute; left: -12px; top: 12px; bottom: 12px; width: 3px;
+      border-radius: 0 var(--radius-pill) var(--radius-pill) 0; background: var(--accent);
+    }
+    .rail .tip {
+      position: absolute; left: calc(100% + var(--space-3)); top: 50%; z-index: 2;
+      padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm);
+      background: var(--overlay); border: 1px solid var(--border); box-shadow: var(--shadow-lg);
+      color: var(--text); font-size: var(--text-sm); font-weight: 600; white-space: nowrap;
+      opacity: 0; transform: translate(-4px, -50%); pointer-events: none;
+      transition: opacity var(--dur-fast), transform var(--dur-fast) var(--ease-out);
+    }
+    .rail a:hover .tip, .rail a:focus-visible .tip { opacity: 1; transform: translate(0, -50%); }
+    .rail .dot-badge {
+      position: absolute; top: 6px; right: 6px; min-width: 18px; padding: 0 var(--space-1);
+      border-radius: var(--radius-pill); background: var(--danger); color: var(--on-accent);
+      font-size: var(--text-xs); font-weight: 700; line-height: 18px; text-align: center;
+      box-shadow: 0 0 0 2px var(--bg);
+    }
+    .rail .avatar { width: 36px; height: 36px; }
+
+    /* Main */
+    .main { display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-6) var(--space-7) var(--space-7); min-width: 0; }
+
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-5); flex-wrap: wrap; margin-bottom: var(--space-2); }
+    .title-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-1); }
+    .updated { font-size: var(--text-sm); color: var(--text-3); }
+    .live::before { animation: live-pulse 2s ease-in-out infinite; }
+    @keyframes live-pulse { 50% { opacity: 0.35; transform: scale(0.7); } }
+    .head-actions { display: flex; align-items: flex-end; gap: var(--space-3); }
+    .field { display: grid; gap: var(--space-1); }
+    .field label { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .select { position: relative; }
+    .select select {
+      appearance: none; min-height: 40px; min-width: 184px; padding: 0 var(--space-7) 0 var(--space-3);
+      border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text);
+      font-size: var(--text-sm); font-weight: 600; cursor: pointer;
+    }
+    .select svg { position: absolute; right: var(--space-3); top: 50%; width: 16px; height: 16px; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+
+    /* Cards: lighter surface plus a hairline (DRK-02, DRK-09) */
+    .card { box-shadow: none; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
+    .card-head h2 { margin-bottom: var(--space-1); }
+
+    /* KPI tiles (CMP-17) */
+    .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); }
+    .kpi { display: grid; grid-template-columns: minmax(0, 1fr) 96px; grid-template-rows: auto auto auto; column-gap: var(--space-3); row-gap: var(--space-2); }
+    .kpi-label { grid-column: 1 / -1; display: flex; align-items: center; min-height: 20px; font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .kpi-value { font-size: var(--text-2xl); font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+    .kpi-value .unit { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); letter-spacing: 0; }
+    .kpi-foot { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+    .spark { width: 96px; height: 40px; align-self: end; overflow: visible; }
+    .spark path { fill: none; stroke: var(--line-muted); stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .spark circle { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+    .kpi.is-alert .spark circle { fill: var(--danger); }
+    .kpi-flag { display: inline-flex; align-items: center; gap: var(--space-1); margin-left: var(--space-2); color: var(--danger); font-size: var(--text-xs); font-weight: 700; }
+    .kpi-flag svg { width: 14px; height: 14px; }
+
+    .row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--space-4); }
+
+    /* Throughput line chart: scaled SVG with non-scaling strokes, HTML axes and crosshair (CMP-18, ICO-07) */
+    .chart-card { display: flex; flex-direction: column; }
+    .legend { display: flex; gap: var(--space-4); list-style: none; margin: 0; padding: 0; font-size: var(--text-xs); color: var(--text-2); white-space: nowrap; }
+    .legend li { display: inline-flex; align-items: center; gap: var(--space-2); }
+    .key { width: 16px; height: 2px; border-radius: 2px; background: var(--accent); }
+    .key-yesterday { background: var(--line-muted); }
+    .key-target { height: 0; border-top: 2px dotted var(--text-3); background: none; }
+    .line-chart { flex: 1; display: grid; grid-template-columns: 48px minmax(0, 1fr); grid-template-rows: minmax(240px, 1fr) auto; margin-top: var(--space-6); }
+    .y-axis, .x-axis { position: relative; font-size: var(--text-xs); color: var(--text-3); }
+    .y-axis span { position: absolute; right: var(--space-3); bottom: calc(var(--p) * 1% - 8px); line-height: 16px; }
+    .x-axis { grid-column: 2; height: 32px; }
+    .x-axis span { position: absolute; top: var(--space-2); left: calc(var(--p) * 1%); transform: translateX(-50%); white-space: nowrap; }
+    .plot {
+      position: relative; border-bottom: 1px solid var(--border); outline-offset: 4px;
+      background: linear-gradient(var(--border) 1px, transparent 1px) 0 0 / 100% 20%;
+    }
+    .plot svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    .plot .area { fill: url(#area-fill); }
+    .plot .today { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .plot .yesterday { fill: none; stroke: var(--line-muted); stroke-width: 1.5; stroke-linejoin: round; }
+    .plot .target { stroke: var(--text-3); stroke-width: 1.5; stroke-dasharray: 2 4; }
+    .target-label {
+      position: absolute; right: 0; bottom: calc(var(--p) * 1% + var(--space-1));
+      font-size: var(--text-xs); font-weight: 600; color: var(--text-2);
+    }
+    .crosshair { position: absolute; top: 0; bottom: 0; left: calc(var(--x) * 1%); width: 1px; background: var(--text-3); opacity: 0.6; pointer-events: none; }
+    .point {
+      position: absolute; left: calc(var(--x) * 1%); bottom: calc(var(--y) * 1%);
+      width: 12px; height: 12px; margin: 0 0 -6px -6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 0 2px var(--surface); pointer-events: none;
+    }
+    .point.is-yesterday { width: 10px; height: 10px; margin: 0 0 -5px -5px; background: var(--line-muted); }
+    .readout {
+      position: absolute; bottom: var(--space-3); left: calc(var(--x) * 1%); z-index: 1; pointer-events: none;
+      min-width: 160px; padding: var(--space-2) var(--space-3);
+      background: var(--overlay); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg);
+      transform: translateX(calc(-100% - var(--space-3)));
+    }
+    .readout[data-side="right"] { transform: translateX(var(--space-3)); }
+    .readout .time { font-size: var(--text-xs); color: var(--text-2); margin-bottom: var(--space-1); }
+    .readout .r { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-2); }
+    .readout .r strong { margin-left: auto; padding-left: var(--space-4); font-size: var(--text-sm); color: var(--text); }
+
+    /* Zone capacity: labeled meters with % and a worded level (COL-07, TYP-09) */
+    .zones { list-style: none; margin: var(--space-5) 0 0; padding: 0; display: grid; gap: var(--space-5); }
+    .zone-top { display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-2); font-size: var(--text-sm); }
+    .zone-name { font-weight: 600; }
+    .zone-sub { color: var(--text-3); }
+    .zone-val { margin-left: auto; font-weight: 700; }
+    .level { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-xs); font-weight: 700; }
+    .level svg { width: 14px; height: 14px; }
+    .level-high { color: var(--warning); }
+    .level-critical { color: var(--danger); }
+    .meter { position: relative; height: 8px; border-radius: var(--radius-pill); background: var(--neutral-soft); }
+    .meter-fill { display: block; width: calc(var(--v) * 1%); height: 100%; border-radius: var(--radius-pill); background: var(--accent); }
+    .meter.is-high .meter-fill { background: var(--warning); }
+    .meter.is-critical .meter-fill { background: var(--danger); }
+    .meter::after {
+      content: ""; position: absolute; left: 90%; top: -4px; bottom: -4px; width: 2px; border-radius: 2px; background: var(--text-3);
+    }
+    .zones-note { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--border); }
+    .zones-note .tick { width: 2px; height: 12px; border-radius: 2px; background: var(--text-3); }
+
+    /* Exceptions list: flagged rows get a marker icon, a word and an edge bar, not color alone (FBK-18, CMP-20) */
+    .list-card { padding: 0; }
+    .list-card .card-head { padding: var(--space-5); align-items: center; }
+    .switch-row { display: flex; align-items: center; gap: var(--space-3); cursor: pointer; font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .switch {
+      position: relative; width: 40px; height: 24px; flex: none; padding: 0; cursor: pointer;
+      border: 1px solid rgba(255, 255, 255, 0.24); border-radius: var(--radius-pill); background: var(--surface-2);
+      transition: background-color var(--dur-fast);
+    }
+    .switch::after {
+      content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%;
+      background: var(--text-2); transition: transform var(--dur-fast) var(--ease-out);
+    }
+    .switch[aria-checked="true"] { background: var(--accent); border-color: var(--accent); }
+    .switch[aria-checked="true"]::after { transform: translateX(16px); background: var(--on-accent); }
+    .exceptions { list-style: none; margin: 0; padding: 0; }
+    .ex {
+      position: relative;
+      display: grid; grid-template-columns: 40px minmax(0, 2.4fr) minmax(0, 1fr) minmax(0, 1fr) 96px 120px 40px; align-items: center; gap: var(--space-4);
+      min-height: 72px; padding: var(--space-3) var(--space-5); border-top: 1px solid var(--border);
+    }
+    .ex:hover { background: rgba(255, 255, 255, 0.02); }
+    .ex.is-flagged::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--warning); }
+    .ex.is-critical::before { background: var(--danger); }
+    .ex.is-new { background: var(--danger-soft); }
+    .ex.is-new .pill-danger { color: #fca5a5; } /* COL-12: tint on tint drops below 4.5:1, so lighten the text */
+    .marker { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--neutral-soft); color: var(--text-2); }
+    .marker svg { width: 20px; height: 20px; }
+    .is-flagged .marker { background: var(--warning-soft); color: var(--warning); }
+    .is-critical .marker { background: var(--danger-soft); color: var(--danger); }
+    .ex-title { display: flex; align-items: center; flex-wrap: wrap; column-gap: var(--space-2); font-weight: 600; font-size: var(--text-md); }
+    .ex-title .id { color: var(--text-2); font-weight: 600; white-space: nowrap; }
+    .ex-sub { font-size: var(--text-sm); color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .new-tag { padding: 0 var(--space-2); border-radius: var(--radius-pill); border: 1px solid var(--danger); color: var(--danger); font-size: var(--text-xs); font-weight: 700; line-height: 18px; }
+    .meta { font-size: var(--text-sm); color: var(--text-2); }
+    .meta small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .who { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .who .avatar { width: 28px; height: 28px; }
+    .age { font-size: var(--text-sm); color: var(--text-2); text-align: right; }
+    .ex .icon-btn { width: 40px; height: 40px; }
+    .ex > .pill { justify-self: start; }
+    .ex[hidden] { display: none; }
+    .list-foot { padding: var(--space-4) var(--space-5); border-top: 1px solid var(--border); font-size: var(--text-sm); color: var(--text-3); }
+
+    @media (max-width: 1180px) {
+      .row { grid-template-columns: minmax(0, 1fr); }
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .ex { grid-template-columns: 40px minmax(0, 1fr) 120px 40px; }
+      .ex .meta, .ex .who, .ex .age { display: none; }
+    }
+    @media (max-width: 720px) {
+      .app { grid-template-columns: minmax(0, 1fr); }
+      .rail { flex-direction: row; justify-content: space-between; padding: var(--space-2) var(--space-4); border-right: 0; border-bottom: 1px solid var(--border); min-width: 0; }
+      .rail ul { display: flex; gap: var(--space-1); }
+      .rail-foot { margin: 0; display: none; }
+      .rail a[aria-current="page"]::before { display: none; }
+      .rail .tip { display: none; }
+      .main { padding: var(--space-5) var(--space-4) var(--space-6); }
+      .kpis { grid-template-columns: minmax(0, 1fr); }
+      .head-actions { width: 100%; }
+      .head-actions .field { flex: 1; }
+      .select select { width: 100%; min-width: 0; }
+      .card-head { flex-wrap: wrap; }
+      .legend { flex-wrap: wrap; }
+      .ex { grid-template-columns: 40px minmax(0, 1fr) auto; gap: var(--space-3); padding: var(--space-3) var(--space-4); }
+      .ex .icon-btn { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <nav class="rail" aria-label="Main">
+    <a class="rail-logo" href="#" aria-label="Sora Ops home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect class="tile" width="32" height="32" rx="8"/><path class="sun" d="M9.5 19.5a6.5 6.5 0 0 1 13 0"/><path class="sun" d="M7.5 23.5h17"/></svg>
+    </a>
+    <ul>
+      <li><a href="#" aria-label="Operations" aria-current="page" id="rail-ops">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12h4l2.5-6 4 12 2.5-6h4"/></svg>
+        <span class="tip" aria-hidden="true">Operations</span></a></li>
+      <li><a href="#" aria-label="Orders">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8h13l-1 12.5h-11z"/><path d="M9 10V7a3 3 0 0 1 6 0v3"/></svg>
+        <span class="tip" aria-hidden="true">Orders</span></a></li>
+      <li><a href="#" aria-label="Inventory">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg>
+        <span class="tip" aria-hidden="true">Inventory</span></a></li>
+      <li><a href="#" aria-label="Shipping">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6.5h10v10h-10z"/><path d="M13.5 9.5h4l3 3.5v3.5h-7"/><circle cx="7.5" cy="17.5" r="1.75"/><circle cx="17" cy="17.5" r="1.75"/></svg>
+        <span class="tip" aria-hidden="true">Shipping</span></a></li>
+      <li><a href="#" aria-label="Exceptions, 4 open">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 20.5V4M5 4.5h11.5l-2 4 2 4H5"/></svg>
+        <span class="dot-badge num" aria-hidden="true">4</span>
+        <span class="tip" aria-hidden="true">Exceptions · 4 open</span></a></li>
+      <li><a href="#" aria-label="Team">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8.5" r="3.5"/><path d="M3 19.5c.8-3.2 3.2-5 6-5s5.2 1.8 6 5"/><path d="M15.5 5.2a3.5 3.5 0 0 1 0 6.6"/><path d="M17.5 14.8c1.7.6 3 2.2 3.5 4.7"/></svg>
+        <span class="tip" aria-hidden="true">Team</span></a></li>
+    </ul>
+    <div class="rail-foot">
+      <ul>
+        <li><a href="#" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+          <span class="tip" aria-hidden="true">Settings</span></a></li>
+        <li><a href="#" aria-label="Account: Owen Clarke">
+          <span class="avatar" aria-hidden="true">OC</span>
+          <span class="tip" aria-hidden="true">Owen Clarke</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="main">
+    <header class="page-head">
+      <div>
+        <div class="title-row">
+          <h1>Operations</h1>
+          <span class="pill pill-success live">Live</span>
+          <span class="updated">Updated <time id="updated" datetime="2026-10-24T14:21:48">12 s ago</time></span>
+        </div>
+        <p class="muted">Riverside fulfillment center · Shift B, 06:00 to 18:00 · 42 pickers on the floor</p>
+      </div>
+      <div class="head-actions">
+        <div class="field">
+          <label for="site">Site</label>
+          <div class="select">
+            <select id="site">
+              <option>Riverside</option>
+              <option>Harbor Point</option>
+              <option>North Yard</option>
+            </select>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+        <!-- One bright primary on the dark screen (DRK-09, BTN-01) -->
+        <button class="btn btn-primary" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>
+          Release wave 15
+        </button>
+      </div>
+    </header>
+
+    <!-- KPI tiles: label, value with unit, signed delta with arrow and period, sparkline (CMP-17) -->
+    <section class="kpis" aria-label="Shift metrics">
+      <article class="card kpi">
+        <h2 class="kpi-label">Orders in queue</h2>
+        <p class="kpi-value num">1,482</p>
+        <svg class="spark" viewBox="0 0 96 40" aria-hidden="true"><path d="M2 10 15 8l13 6 13-2 13 8 13 4 13 6 12 4"/><circle cx="94" cy="34" r="4"/></svg>
+        <p class="kpi-foot">
+          <span class="delta delta-good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg><span class="num">&minus;8.2%</span></span>
+          <span class="subtle">vs this hour yesterday</span>
+        </p>
+      </article>
+      <article class="card kpi">
+        <h2 class="kpi-label">Pick rate</h2>
+        <p class="kpi-value num">1,936 <span class="unit">units/h</span></p>
+        <svg class="spark" viewBox="0 0 96 40" aria-hidden="true"><path d="M2 32 14 24l12-8 12-4 12-2 12 6 12 8 12-6 6 0"/><circle cx="94" cy="18" r="4"/></svg>
+        <p class="kpi-foot">
+          <span class="delta delta-good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span class="num">+4.1%</span></span>
+          <span class="subtle">vs this hour yesterday</span>
+        </p>
+      </article>
+      <article class="card kpi">
+        <h2 class="kpi-label">On-time dispatch</h2>
+        <p class="kpi-value num">97.2<span class="unit">%</span></p>
+        <svg class="spark" viewBox="0 0 96 40" aria-hidden="true"><path d="M2 22 15 20l13 4 13-6 13 2 13-6 13 0 12-4"/><circle cx="94" cy="12" r="4"/></svg>
+        <p class="kpi-foot">
+          <span class="delta delta-good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span class="num">+0.8 pts</span></span>
+          <span class="subtle">vs yesterday</span>
+        </p>
+      </article>
+      <article class="card kpi is-alert">
+        <h2 class="kpi-label">Open exceptions
+          <span class="kpi-flag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4M12 17h.01"/></svg>2 critical</span>
+        </h2>
+        <p class="kpi-value num">4</p>
+        <svg class="spark" viewBox="0 0 96 40" aria-hidden="true"><path d="M2 32 15 32l13-6 13 6 13-6 13 0 13-12 12-6"/><circle cx="94" cy="14" r="4"/></svg>
+        <p class="kpi-foot">
+          <span class="delta delta-bad"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span class="num">+2</span></span>
+          <span class="subtle">vs 1 hour ago</span>
+        </p>
+      </article>
+    </section>
+
+    <div class="row">
+      <section class="card chart-card" aria-labelledby="tp-title">
+        <div class="card-head">
+          <div>
+            <h2 id="tp-title">Throughput</h2>
+            <p class="subtle">Units picked per hour. 1,936 in the last hour, 3% under target; peak 2,110 at 10:00.</p>
+          </div>
+          <ul class="legend" aria-label="Series">
+            <li><span class="key" aria-hidden="true"></span>Today</li>
+            <li><span class="key key-yesterday" aria-hidden="true"></span>Yesterday</li>
+            <li><span class="key key-target" aria-hidden="true"></span>Target</li>
+          </ul>
+        </div>
+        <div class="line-chart">
+          <div class="y-axis" id="tp-y" aria-hidden="true"></div>
+          <div class="plot" id="tp-plot" tabindex="0" role="group" aria-label="Throughput by hour. Use the left and right arrow keys to move between hours.">
+            <svg viewBox="0 0 120 100" preserveAspectRatio="none" aria-hidden="true">
+              <defs>
+                <linearGradient id="area-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#818cf8" stop-opacity="0.22"/>
+                  <stop offset="1" stop-color="#818cf8" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <line class="target" x1="0" x2="120" y1="20" y2="20" vector-effect="non-scaling-stroke"/>
+              <path class="yesterday" id="tp-yesterday" vector-effect="non-scaling-stroke"/>
+              <path class="area" id="tp-area"/>
+              <path class="today" id="tp-today" vector-effect="non-scaling-stroke"/>
+            </svg>
+            <span class="target-label" style="--p: 80">Target 2,000/h</span>
+            <span class="crosshair" id="tp-cross"></span>
+            <span class="point is-yesterday" id="tp-dot-y"></span>
+            <span class="point" id="tp-dot"></span>
+            <div class="readout" id="tp-readout" aria-hidden="true"></div>
+          </div>
+          <div class="x-axis" id="tp-x" aria-hidden="true"></div>
+        </div>
+        <table class="visually-hidden" id="tp-table">
+          <caption>Units picked per hour, today and yesterday</caption>
+          <thead><tr><th scope="col">Hour</th><th scope="col">Today</th><th scope="col">Yesterday</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <section class="card" aria-labelledby="zones-title">
+        <h2 id="zones-title">Zone capacity</h2>
+        <p class="subtle">Share of storage slots in use</p>
+        <ul class="zones">
+          <li>
+            <div class="zone-top"><span class="zone-name">Zone A</span><span class="zone-sub">Ambient</span><span class="zone-val num">72%</span></div>
+            <div class="meter" role="meter" aria-label="Zone A, ambient" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72"><span class="meter-fill" style="--v: 72"></span></div>
+          </li>
+          <li>
+            <div class="zone-top"><span class="zone-name">Zone B</span><span class="zone-sub">Bulk</span>
+              <span class="zone-val num"><span class="level level-high"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>High</span> 84%</span></div>
+            <div class="meter is-high" role="meter" aria-label="Zone B, bulk, high" aria-valuemin="0" aria-valuemax="100" aria-valuenow="84"><span class="meter-fill" style="--v: 84"></span></div>
+          </li>
+          <li>
+            <div class="zone-top"><span class="zone-name">Zone C</span><span class="zone-sub">Chilled</span><span class="zone-val num">54%</span></div>
+            <div class="meter" role="meter" aria-label="Zone C, chilled" aria-valuemin="0" aria-valuemax="100" aria-valuenow="54"><span class="meter-fill" style="--v: 54"></span></div>
+          </li>
+          <li>
+            <div class="zone-top"><span class="zone-name">Zone D</span><span class="zone-sub">Returns</span><span class="zone-val num">31%</span></div>
+            <div class="meter" role="meter" aria-label="Zone D, returns" aria-valuemin="0" aria-valuemax="100" aria-valuenow="31"><span class="meter-fill" style="--v: 31"></span></div>
+          </li>
+          <li>
+            <div class="zone-top"><span class="zone-name">Zone E</span><span class="zone-sub">Pack-out</span>
+              <span class="zone-val num"><span class="level level-critical"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4M12 17h.01"/></svg>Critical</span> 93%</span></div>
+            <div class="meter is-critical" role="meter" aria-label="Zone E, pack-out, critical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="93"><span class="meter-fill" style="--v: 93"></span></div>
+          </li>
+        </ul>
+        <p class="zones-note subtle"><span class="tick" aria-hidden="true"></span>Limit at 90%. High from 80%.</p>
+      </section>
+    </div>
+
+    <section class="card list-card" aria-labelledby="ex-title">
+      <div class="card-head">
+        <div>
+          <h2 id="ex-title">Exceptions</h2>
+          <p class="subtle">Flagged orders first, sorted by time to carrier cutoff · 4 flagged, 2 monitoring</p>
+        </div>
+        <!-- Switch with a visible label that applies immediately (FRM-22) -->
+        <label class="switch-row" for="ex-only">
+          <button class="switch" id="ex-only" type="button" role="switch" aria-checked="false" aria-controls="ex-list"></button>
+          Show exceptions only
+        </label>
+      </div>
+      <ul class="exceptions" id="ex-list">
+        <li class="ex is-flagged is-critical is-new">
+          <span class="marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 1.5M9.5 3h5"/></svg></span>
+          <div>
+            <div class="ex-title">Carrier cutoff at risk <span class="id num">#SL-2219</span> <span class="new-tag">New</span></div>
+            <div class="ex-sub">Truck leaves at 15:00 · 38 orders still to pack</div>
+          </div>
+          <div class="meta">Zone E<small>Pack-out</small></div>
+          <div class="who"><span class="avatar" aria-hidden="true">OC</span>Owen Clarke</div>
+          <div class="age"><time datetime="2026-10-24T14:18">4 min ago</time></div>
+          <span class="pill pill-danger">Critical</span>
+          <button class="icon-btn" type="button" aria-label="Open exception #SL-2219"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        </li>
+        <li class="ex is-flagged is-critical">
+          <span class="marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4M12 17h.01"/></svg></span>
+          <div>
+            <div class="ex-title">Not scanned at dock <span class="id num">#SL-2198</span></div>
+            <div class="ex-sub">Picked 47 min ago · last seen at pack station 6</div>
+          </div>
+          <div class="meta">Zone E<small>Pack-out</small></div>
+          <div class="who"><span class="avatar" aria-hidden="true">LB</span>Leo Brandt</div>
+          <div class="age"><time datetime="2026-10-24T13:35">47 min ago</time></div>
+          <span class="pill pill-danger">Critical</span>
+          <button class="icon-btn" type="button" aria-label="Open exception #SL-2198"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        </li>
+        <li class="ex is-flagged">
+          <span class="marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9z"/><path d="M12 9v4M12 16h.01"/></svg></span>
+          <div>
+            <div class="ex-title">Short pick <span class="id num">#SL-2214</span></div>
+            <div class="ex-sub">Aisle 14, bay 3 · 2 of 3 units found</div>
+          </div>
+          <div class="meta">Zone B<small>Bulk</small></div>
+          <div class="who"><span class="avatar" aria-hidden="true">PN</span>Priya Nair</div>
+          <div class="age"><time datetime="2026-10-24T14:11">11 min ago</time></div>
+          <span class="pill pill-warning">High</span>
+          <button class="icon-btn" type="button" aria-label="Open exception #SL-2214"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        </li>
+        <li class="ex is-flagged">
+          <span class="marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5 12 3l8 4.5v9L12 21l-8-4.5z"/><path d="m9 10 6 6M15 10l-6 6"/></svg></span>
+          <div>
+            <div class="ex-title">Damaged item <span class="id num">#SL-2207</span></div>
+            <div class="ex-sub">Moved to QA bay 2 · photo attached</div>
+          </div>
+          <div class="meta">Zone A<small>Ambient</small></div>
+          <div class="who"><span class="avatar" aria-hidden="true">JR</span>Jordan Reyes</div>
+          <div class="age"><time datetime="2026-10-24T13:56">26 min ago</time></div>
+          <span class="pill pill-warning">High</span>
+          <button class="icon-btn" type="button" aria-label="Open exception #SL-2207"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        </li>
+        <li class="ex" data-monitoring>
+          <span class="marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.5-6.5-11a6.5 6.5 0 0 1 13 0c0 5.5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.25"/></svg></span>
+          <div>
+            <div class="ex-title">Address updated <span class="id num">#SL-2221</span></div>
+            <div class="ex-sub">Customer confirmed the new address · label reprinted</div>
+          </div>
+          <div class="meta">Zone A<small>Ambient</small></div>
+          <div class="who"><span class="avatar" aria-hidden="true">ZA</span>Zara Ahmed</div>
+          <div class="age"><time datetime="2026-10-24T14:20">2 min ago</time></div>
+          <span class="pill pill-neutral">Monitoring</span>
+          <button class="icon-btn" type="button" aria-label="Open order #SL-2221"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        </li>
+        <li class="ex" data-monitoring>
+          <span class="marker" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="7" width="8" height="10" rx="1.5"/><rect x="12.5" y="7" width="8" height="10" rx="1.5"/></svg></span>
+          <div>
+            <div class="ex-title">Split shipment <span class="id num">#SL-2190</span></div>
+            <div class="ex-sub">2 parcels · second parcel ships tomorrow morning</div>
+          </div>
+          <div class="meta">Zone C<small>Chilled</small></div>
+          <div class="who"><span class="avatar" aria-hidden="true">MS</span>Mateo Silva</div>
+          <div class="age"><time datetime="2026-10-24T13:20">1 hr ago</time></div>
+          <span class="pill pill-neutral">Monitoring</span>
+          <button class="icon-btn" type="button" aria-label="Open order #SL-2190"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
+        </li>
+      </ul>
+      <p class="list-foot">Resolved exceptions move to the shift log after 15 minutes.</p>
+    </section>
+  </main>
+</div>
+
+<script>
+  // "Updated N s ago" computed from a real timestamp each second, so it never drifts (FBK-18, ENG-09).
+  // Example only: replace with the time of your last successful API refresh.
+  const lastRefresh = Date.now() - 12000;
+  const updated = document.getElementById("updated");
+  setInterval(() => { updated.textContent = Math.round((Date.now() - lastRefresh) / 1000) + " s ago"; }, 1000);
+
+  // "Show exceptions only" switch: role="switch" + aria-checked, applies immediately (FRM-22, FBK-18).
+  const exOnly = document.getElementById("ex-only");
+  exOnly.addEventListener("click", () => {
+    const on = exOnly.getAttribute("aria-checked") !== "true";
+    exOnly.setAttribute("aria-checked", String(on));
+    document.querySelectorAll("#ex-list [data-monitoring]").forEach((li) => { li.hidden = on; });
+  });
+
+  // Throughput chart from raw values: paths in a 0-120 x 0-100 viewBox with non-scaling strokes,
+  // HTML axes, and a crosshair readout on hover and arrow keys (CMP-18, ICO-07, COP-08).
+  const hours = Array.from({ length: 13 }, (_, i) => String(6 + i).padStart(2, "0") + ":00");
+  const today = [1240, 1610, 1880, 2040, 2110, 1960, 1720, 1890, 1936];
+  const yesterday = [1180, 1520, 1790, 1950, 2010, 1880, 1650, 1820, 1860, 1900, 1780, 1540, 1210];
+  const max = 2500;
+  const fmt = new Intl.NumberFormat("en-US");
+  const tick = new Intl.NumberFormat("en-US", { notation: "compact" });
+  const x = (i) => (i / (hours.length - 1)) * 100;
+  const y = (v) => (v / max) * 100;
+  const line = (vals) => vals.map((v, i) => `${i ? "L" : "M"}${x(i) * 1.2} ${100 - y(v)}`).join(" ");
+  document.getElementById("tp-today").setAttribute("d", line(today));
+  document.getElementById("tp-yesterday").setAttribute("d", line(yesterday));
+  document.getElementById("tp-area").setAttribute("d", line(today) + ` L${x(today.length - 1) * 1.2} 100 L0 100 Z`);
+  document.getElementById("tp-y").replaceChildren(...[0, 500, 1000, 1500, 2000, 2500].map((v) => {
+    const s = document.createElement("span"); s.style.setProperty("--p", y(v)); s.textContent = tick.format(v); return s;
+  }));
+  document.getElementById("tp-x").replaceChildren(...hours.map((h, i) => {
+    if (i % 2) return document.createComment("");
+    const s = document.createElement("span"); s.style.setProperty("--p", x(i)); s.textContent = h; return s;
+  }));
+  document.querySelector("#tp-table tbody").replaceChildren(...hours.map((h, i) => {
+    const tr = document.createElement("tr");
+    [h, today[i] != null ? fmt.format(today[i]) : "Not yet", fmt.format(yesterday[i])].forEach((t, j) => {
+      const c = document.createElement(j ? "td" : "th"); if (!j) c.scope = "row"; c.textContent = t; tr.append(c);
+    });
+    return tr;
+  }));
+
+  const plot = document.getElementById("tp-plot");
+  let index = today.length - 1;
+  function readout(i) {
+    index = Math.max(0, Math.min(hours.length - 1, i));
+    const px = x(index);
+    const box = document.getElementById("tp-readout");
+    ["tp-cross", "tp-dot", "tp-dot-y", "tp-readout"].forEach((id) => document.getElementById(id).style.setProperty("--x", px));
+    const dot = document.getElementById("tp-dot");
+    dot.hidden = today[index] == null;
+    if (!dot.hidden) dot.style.setProperty("--y", y(today[index]));
+    document.getElementById("tp-dot-y").style.setProperty("--y", y(yesterday[index]));
+    box.dataset.side = px < 30 ? "right" : "left";
+    const rows = [["key", "Today", today[index] != null ? fmt.format(today[index]) : "Not yet"], ["key key-yesterday", "Yesterday", fmt.format(yesterday[index])]];
+    const time = document.createElement("div"); time.className = "time"; time.textContent = `${hours[index]} to ${String(7 + index).padStart(2, "0")}:00`;
+    box.replaceChildren(time, ...rows.map(([cls, label, value]) => {
+      const r = document.createElement("div"); r.className = "r";
+      const k = document.createElement("span"); k.className = cls;
+      const v = document.createElement("strong"); v.className = "num"; v.textContent = value;
+      r.append(k, label, v);
+      return r;
+    }));
+  }
+  plot.addEventListener("pointermove", (e) => {
+    const r = plot.getBoundingClientRect();
+    readout(Math.round(((e.clientX - r.left) / r.width) * (hours.length - 1)));
+  });
+  plot.addEventListener("pointerleave", () => readout(today.length - 1));
+  plot.addEventListener("keydown", (e) => {
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+    if (step) { e.preventDefault(); readout(index + step); }
+  });
+  readout(index);
+</script>
+</body>
+</html>

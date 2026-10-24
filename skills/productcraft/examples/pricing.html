@@ -1,0 +1,404 @@
+<!doctype html>
+<!-- ProductCraft example: Pricing. Original Sora Labs example, MIT License.
+     Demonstrates: SCR-17, BTN-01, BTN-04, BTN-06, CMP-10, CMP-15, CMP-16, CMP-19, CMP-23, CMP-27, COP-01, COP-10,
+     COP-11, COL-07, FBK-06, FRM-09, MOB-01, MOB-03, MOB-04, NAV-10, TYP-09, ENG-06, ICO-04 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Pricing screens</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    .sheet-header h1 { margin-top: var(--space-2); }
+    .variant-stage { flex: 1; }
+    .variant.tall { grid-row: span 2; }
+    .ico { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .phone { color: var(--text); }
+    .variant-stage.dark .phone { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), var(--shadow-lg); }
+
+    /* Billing period swaps prices through one root attribute (ENG-06) */
+    [data-period="monthly"] .y, [data-period="yearly"] .m { display: none; }
+
+    /* v1 three-tier pricing */
+    .pricing { width: 100%; max-width: 1060px; }
+    .pricing-head { text-align: center; }
+    .pricing-head h2 { font-size: var(--text-2xl); letter-spacing: -0.02em; line-height: 1.2; }
+    .pricing-head p { margin-top: var(--space-2); color: var(--text-2); }
+    .period { display: flex; justify-content: center; margin-top: var(--space-5); }
+    .segmented button { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-4); }
+    .save {
+      padding: 0 var(--space-2); border-radius: var(--radius-pill);
+      background: var(--success-soft); color: var(--success); font-size: var(--text-xs); line-height: 20px; font-weight: 600;
+    }
+    .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); margin-top: var(--space-6); align-items: stretch; }
+    .tier {
+      display: flex; flex-direction: column; padding: var(--space-5);
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+    }
+    /* One recommended plan: border, badge and the only filled button (BTN-06) */
+    .tier.recommended { border: 2px solid var(--accent); box-shadow: var(--shadow-lg); padding: calc(var(--space-5) - 1px); }
+    .tier-name { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+    .tier-name h3 { font-size: var(--text-lg); }
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px; padding: 0 10px; border-radius: var(--radius-pill);
+      background: var(--accent); color: var(--on-accent); font-size: var(--text-xs); font-weight: 600; line-height: 24px;
+    }
+    .badge .ico { width: 14px; height: 14px; }
+    .tier-desc { margin-top: var(--space-1); min-height: 40px; color: var(--text-2); font-size: var(--text-sm); }
+    .tier-price { display: flex; align-items: baseline; gap: var(--space-1); margin-top: var(--space-4); }
+    .tier-price .amount { font-size: 40px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+    .tier-price s { margin-right: var(--space-1); font-size: var(--text-lg); color: var(--text-3); font-weight: 500; }
+    .tier-price .per { color: var(--text-2); font-size: var(--text-sm); }
+    .bill { margin-top: var(--space-1); min-height: 20px; font-size: var(--text-sm); color: var(--text-3); }
+    .bill strong { color: var(--success); font-weight: 600; }
+    .tier .btn { margin-top: var(--space-5); width: 100%; min-height: 44px; }
+    .features { list-style: none; margin: var(--space-5) 0 0; padding: var(--space-5) 0 0; border-top: 1px solid var(--border); display: grid; gap: var(--space-3); font-size: var(--text-sm); }
+    .features .lead { font-weight: 600; color: var(--text); }
+    .features li { display: flex; gap: var(--space-2); align-items: flex-start; color: var(--text-2); }
+    .features .ico { width: 18px; height: 18px; color: var(--accent); margin-top: 1px; stroke-width: 2; }
+    .pricing-foot { margin-top: var(--space-5); text-align: center; font-size: var(--text-sm); color: var(--text-3); }
+
+    /* v2 mobile paywall (SCR-17) */
+    .paywall { padding: 0 var(--space-5); padding-bottom: env(safe-area-inset-bottom); }
+    .pw-top { display: flex; justify-content: flex-end; margin-right: calc(var(--space-2) * -1); }
+    .pw-top .icon-btn { width: 44px; height: 44px; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text); }
+    .pw-hero { text-align: center; }
+    .pw-mark {
+      display: inline-grid; place-items: center; width: 64px; height: 64px; border-radius: 20px;
+      background: linear-gradient(140deg, #6366f1, #8b5cf6 60%, #c084fc); color: #fff;
+      box-shadow: 0 12px 28px -10px rgba(129, 140, 248, 0.6);
+    }
+    .pw-mark .ico { width: 30px; height: 30px; }
+    .pw-hero h2 { margin-top: var(--space-4); font-size: var(--text-xl); letter-spacing: -0.01em; }
+    .pw-hero p { margin-top: var(--space-1); color: var(--text-2); font-size: var(--text-sm); }
+    .pw-benefits { list-style: none; margin: var(--space-5) 0 0; padding: 0; display: grid; gap: var(--space-3); font-size: var(--text-sm); }
+    .pw-benefits li { display: flex; gap: var(--space-3); align-items: center; }
+    .pw-benefits .tick { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); flex: none; }
+    .pw-benefits .tick .ico { width: 14px; height: 14px; stroke-width: 2.25; }
+    .plans { border: 0; margin: var(--space-5) 0 0; padding: 0; display: grid; gap: var(--space-2); }
+    .plan {
+      position: relative; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--space-3);
+      min-height: 64px; padding: var(--space-3) var(--space-4);
+      border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); cursor: pointer;
+    }
+    .plan input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+    .plan b { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-md); }
+    .plan small { display: block; font-size: var(--text-sm); color: var(--text-2); }
+    .plan .mark { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; border: 1.75px solid var(--text-3); }
+    .plan .mark .ico { width: 14px; height: 14px; stroke-width: 2.5; opacity: 0; }
+    /* Selected plan: whole card changes plus a check, not color alone (CMP-16, FRM-09) */
+    .plan:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+    .plan:has(input:checked) .mark { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+    .plan:has(input:checked) .mark .ico { opacity: 1; }
+    .plan:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .plan .save { font-size: 11px; }
+    .pw-cta { margin-top: var(--space-5); }
+    .pw-cta .btn { width: 100%; min-height: 52px; border-radius: var(--radius-md); }
+    .terms { margin-top: var(--space-2); text-align: center; font-size: var(--text-xs); color: var(--text-2); }
+    .pw-links { display: flex; justify-content: center; gap: var(--space-1); margin-top: var(--space-1); }
+    .pw-links a, .pw-links button {
+      display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--space-2);
+      border: 0; background: none; color: var(--text-2); font-size: var(--text-xs); font-weight: 600; cursor: pointer;
+    }
+
+    /* v3 comparison table (CMP-19) */
+    .compare-wrap {
+      width: 100%; max-height: min(70vh, 600px); overflow: auto;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+    }
+    .compare { width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--text-sm); }
+    .compare caption { text-align: left; }
+    /* Sticky header keeps plan names visible while scrolling */
+    .compare thead th {
+      position: sticky; top: 0; z-index: 1; background: var(--surface);
+      padding: var(--space-4) var(--space-4) var(--space-3); border-bottom: 1px solid var(--border);
+      text-align: center; vertical-align: bottom; font-weight: 600;
+    }
+    .compare thead th:first-child { text-align: left; color: var(--text-2); font-weight: 500; }
+    .compare thead .plan-name { display: block; font-size: var(--text-md); color: var(--text); }
+    .compare thead .plan-price { display: block; font-weight: 500; color: var(--text-2); }
+    .compare thead .badge { margin-bottom: var(--space-1); line-height: 20px; }
+    .compare tbody .group td { height: auto; border-top: 0; }
+    .compare tbody th[scope="rowgroup"] {
+      padding: var(--space-4) var(--space-4) var(--space-2); text-align: left;
+      font-size: var(--text-xs); font-weight: 600; color: var(--text-3); letter-spacing: 0.02em;
+    }
+    .compare tbody th[scope="row"] { text-align: left; font-weight: 500; color: var(--text); padding: 0 var(--space-4); height: 40px; border-top: 1px solid var(--border); }
+    .compare td { text-align: center; height: 40px; padding: 0 var(--space-3); border-top: 1px solid var(--border); color: var(--text); }
+    .compare tbody tr:first-child th, .compare tbody tr:first-child td { border-top: 0; }
+    .compare tbody tr:nth-child(2) th[scope="row"], .compare tbody tr:nth-child(2) td { border-top: 0; }
+    .compare .pro { background: var(--accent-soft); }
+    .compare thead th.pro { background: var(--accent-soft); box-shadow: inset 0 3px 0 var(--accent), inset 0 -1px 0 var(--border); }
+    .compare .yes { color: var(--accent-ink); }
+    .compare .no { color: var(--text-3); }
+    .compare td .ico { width: 18px; height: 18px; vertical-align: middle; stroke-width: 2; }
+    .compare col.feature { width: 34%; }
+
+    /* v4 in-app upgrade card (NAV-10, FBK-06) */
+    .upgrade {
+      position: relative; width: 100%; max-width: 680px;
+      display: grid; grid-template-columns: auto 1fr auto; gap: var(--space-4); align-items: center;
+      padding: var(--space-5); padding-right: var(--space-6);
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+    }
+    .up-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-md); background: var(--accent-soft); color: var(--accent-ink); align-self: start; }
+    .upgrade h3 { font-size: var(--text-md); }
+    .upgrade p { margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    .meter { margin-top: var(--space-3); }
+    .meter-top { display: flex; justify-content: space-between; font-size: var(--text-xs); color: var(--text-2); }
+    .meter-top b { color: var(--text); font-weight: 600; }
+    .meter-track { height: 8px; margin-top: 6px; border-radius: var(--radius-pill); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--border); overflow: hidden; }
+    .meter-track span { display: block; height: 100%; width: 80%; border-radius: inherit; background: var(--warning); }
+    .up-side { display: grid; justify-items: end; gap: var(--space-1); align-self: end; }
+    .up-side small { font-size: var(--text-xs); color: var(--text-3); }
+    .dismiss { position: absolute; top: var(--space-1); right: var(--space-1); }
+    .dismiss .ico { width: 18px; height: 18px; }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-dash" viewBox="0 0 24 24"><path d="M7 12h10"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3.5l1.9 5.1 5.1 1.9-5.1 1.9L12 17.5l-1.9-5.1L5 10.5l5.1-1.9z"/><path d="M18.5 16v4M16.5 18h4"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19.5h16"/><path d="M6.5 15.5l4-4.5 3 2.5 5-6"/><path d="M15.5 7.5h3v3"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><rect x="13.5" y="13.5" width="7" height="7" rx="2"/></symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 7.5l4.5 4.5-4.5 4.5L7.5 12z"/></svg>
+          ProductCraft · Example screens
+        </span>
+        <h1>Pricing</h1>
+        <p>Sora Analytics plans on the web and in the app: tiers, a fair paywall, a comparison table and an in-app upgrade.</p>
+      </div>
+    </header>
+
+    <div class="variants cols-3">
+      <!-- v1 -->
+      <section class="variant span-all" aria-labelledby="v1-label">
+        <div class="variant-label" id="v1-label"><span class="v">v1</span> Three-tier web pricing</div>
+        <div class="variant-stage">
+          <div class="pricing" id="pricing" data-period="yearly">
+            <div class="pricing-head">
+              <h2>Plans that grow with your team</h2>
+              <p>Start free. Upgrade when you need more dashboards and longer history.</p>
+            </div>
+            <div class="period">
+              <!-- Segmented control with radio semantics and arrow keys (CMP-10, CMP-23) -->
+              <div class="segmented" role="radiogroup" aria-label="Billing period" id="period">
+                <button type="button" role="radio" aria-checked="false" tabindex="-1" data-value="monthly">Monthly</button>
+                <button type="button" role="radio" aria-checked="true" tabindex="0" data-value="yearly">Yearly <span class="save">Save 20%</span></button>
+              </div>
+            </div>
+            <div class="tiers">
+              <article class="tier" aria-labelledby="t-free">
+                <div class="tier-name"><h3 id="t-free">Free</h3></div>
+                <p class="tier-desc">For trying Sora with your own data.</p>
+                <p class="tier-price"><span class="amount num">$0</span><span class="per">/ month</span></p>
+                <p class="bill">Free forever, no card needed</p>
+                <a class="btn btn-secondary" href="#">Start for free</a>
+                <ul class="features">
+                  <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>3 dashboards</li>
+                  <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>7 days of history</li>
+                  <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>2 data sources</li>
+                  <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>1 member</li>
+                </ul>
+              </article>
+              <article class="tier recommended" aria-labelledby="t-pro">
+                <div class="tier-name"><h3 id="t-pro">Pro</h3><span class="badge"><svg class="ico" aria-hidden="true"><use href="#i-spark"/></svg>Recommended</span></div>
+                <p class="tier-desc">For small teams who report every week.</p>
+                <p class="tier-price">
+                  <s class="y num"><span class="visually-hidden">was </span>$25</s>
+                  <span class="amount num"><span class="m">$25</span><span class="y">$20</span></span><span class="per">/ month</span>
+                </p>
+                <p class="bill"><span class="m">Billed monthly</span><span class="y">Billed $240 yearly, <strong>you save $60</strong></span></p>
+                <a class="btn btn-primary" href="#">Start 14-day Pro trial</a>
+                <ul class="features">
+                  <li class="lead">Everything in Free, plus:</li>
+                  <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Unlimited dashboards</li>
+                  <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>12 months of history</li>
+                  <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Scheduled email reports</li>
+                  <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Up to 3 members</li>
+                </ul>
+              </article>
+              <article class="tier" aria-labelledby="t-team">
+                <div class="tier-name"><h3 id="t-team">Team</h3></div>
+                <p class="tier-desc">For departments that share one source of truth.</p>
+                <p class="tier-price">
+                  <s class="y num"><span class="visually-hidden">was </span>$60</s>
+                  <span class="amount num"><span class="m">$60</span><span class="y">$48</span></span><span class="per">/ month</span>
+                </p>
+                <p class="bill"><span class="m">Billed monthly</span><span class="y">Billed $576 yearly, <strong>you save $144</strong></span></p>
+                <a class="btn btn-secondary" href="#">Choose Team</a>
+                <ul class="features">
+                  <li class="lead">Everything in Pro, plus:</li>
+                  <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>36 months of history</li>
+                  <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>SSO and audit log</li>
+                  <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Up to 15 members</li>
+                </ul>
+              </article>
+            </div>
+            <p class="pricing-foot">Prices in USD, before tax. Cancel or switch plans anytime from Settings.</p>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>BTN-06</code> <code>BTN-01</code> <code>CMP-23</code> <code>CMP-10</code> <code>COP-11</code> <code>COP-01</code> <code>CMP-15</code> <code>ENG-06</code></p>
+      </section>
+
+      <!-- v2 -->
+      <section class="variant tall" aria-labelledby="v2-label">
+        <div class="variant-label" id="v2-label"><span class="v">v2</span> Mobile paywall</div>
+        <div class="variant-stage dark">
+          <div class="phone" data-theme="dark">
+            <div class="phone-status"><span>9:30</span><span class="icons" aria-hidden="true"><span></span><span></span></span></div>
+            <div class="phone-body paywall">
+              <!-- Close stays visible from the first frame (SCR-17, MOB-01) -->
+              <div class="pw-top"><button class="icon-btn" type="button" aria-label="Close"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+              <div class="pw-hero">
+                <span class="pw-mark" aria-hidden="true"><svg class="ico"><use href="#i-chart"/></svg></span>
+                <h2>Unlock Sora Pro</h2>
+                <p>Every dashboard and alert, on every device.</p>
+              </div>
+              <ul class="pw-benefits">
+                <li><span class="tick"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span>Unlimited dashboards</li>
+                <li><span class="tick"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span>12 months of history</li>
+                <li><span class="tick"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span>Alerts when a metric moves</li>
+              </ul>
+              <fieldset class="plans" id="plans">
+                <legend class="visually-hidden">Choose a plan</legend>
+                <label class="plan"><input type="radio" name="plan" value="$59.99/year" checked>
+                  <span><b>Yearly <span class="save">Save 37%</span></b><small><span class="num">$59.99</span> / year, <span class="num">$5.00</span> / month</small></span>
+                  <span class="mark"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span></label>
+                <label class="plan"><input type="radio" name="plan" value="$7.99/month">
+                  <span><b>Monthly</b><small><span class="num">$7.99</span> / month</small></span>
+                  <span class="mark"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span></label>
+              </fieldset>
+              <!-- Action names the trial; terms sit directly under it, in the thumb zone (SCR-17, MOB-03) -->
+              <div class="pw-cta">
+                <button class="btn btn-primary" type="button">Start 7-day free trial</button>
+                <p class="terms" id="pw-terms">Cancel anytime, charged after 7 days. Then <span class="num" id="pw-price">$59.99/year</span>.</p>
+                <div class="pw-links"><button type="button">Restore purchases</button><a href="#">Terms</a><a href="#">Privacy</a></div>
+              </div>
+            </div>
+            <div class="phone-home" aria-hidden="true"></div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>SCR-17</code> <code>FRM-09</code> <code>CMP-16</code> <code>BTN-04</code> <code>MOB-03</code> <code>MOB-01</code></p>
+      </section>
+
+      <!-- v3 -->
+      <section class="variant span-2" aria-labelledby="v3-label">
+        <div class="variant-label" id="v3-label"><span class="v">v3</span> Plan comparison table</div>
+        <div class="variant-stage">
+          <div class="compare-wrap" tabindex="0" role="region" aria-labelledby="cmp-caption">
+            <table class="compare">
+              <caption class="visually-hidden" id="cmp-caption">Compare Free, Pro and Team plans</caption>
+              <colgroup><col class="feature"><col><col><col></colgroup>
+              <thead>
+                <tr>
+                  <th scope="col">Billed yearly</th>
+                  <th scope="col"><span class="plan-name">Free</span><span class="plan-price num">$0</span></th>
+                  <th scope="col" class="pro"><span class="badge">Recommended</span><span class="plan-name">Pro</span><span class="plan-price num">$20 / month</span></th>
+                  <th scope="col"><span class="plan-name">Team</span><span class="plan-price num">$48 / month</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="group"><th scope="rowgroup">Dashboards</th><td></td><td class="pro"></td><td></td></tr>
+                <tr><th scope="row">Dashboards</th><td class="num">3</td><td class="pro">Unlimited</td><td>Unlimited</td></tr>
+                <tr><th scope="row">Scheduled reports</th>
+                  <td class="no"><svg class="ico" aria-hidden="true"><use href="#i-dash"/></svg><span class="visually-hidden">Not included</span></td>
+                  <td class="pro yes"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span class="visually-hidden">Included</span></td>
+                  <td class="yes"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span class="visually-hidden">Included</span></td></tr>
+                <tr><th scope="row">Custom metrics</th>
+                  <td class="no"><svg class="ico" aria-hidden="true"><use href="#i-dash"/></svg><span class="visually-hidden">Not included</span></td>
+                  <td class="pro yes"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span class="visually-hidden">Included</span></td>
+                  <td class="yes"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span class="visually-hidden">Included</span></td></tr>
+              </tbody>
+              <tbody>
+                <tr class="group"><th scope="rowgroup">Data</th><td></td><td class="pro"></td><td></td></tr>
+                <tr><th scope="row">History</th><td>7 days</td><td class="pro">12 months</td><td>36 months</td></tr>
+                <tr><th scope="row">Data sources</th><td class="num">2</td><td class="pro num">10</td><td>Unlimited</td></tr>
+                <tr><th scope="row">Hourly refresh</th>
+                  <td class="no"><svg class="ico" aria-hidden="true"><use href="#i-dash"/></svg><span class="visually-hidden">Not included</span></td>
+                  <td class="pro yes"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span class="visually-hidden">Included</span></td>
+                  <td class="yes"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span class="visually-hidden">Included</span></td></tr>
+              </tbody>
+              <tbody>
+                <tr class="group"><th scope="rowgroup">Collaboration</th><td></td><td class="pro"></td><td></td></tr>
+                <tr><th scope="row">Members</th><td class="num">1</td><td class="pro num">3</td><td class="num">15</td></tr>
+                <tr><th scope="row">Shared links</th>
+                  <td class="yes"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span class="visually-hidden">Included</span></td>
+                  <td class="pro yes"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span class="visually-hidden">Included</span></td>
+                  <td class="yes"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span class="visually-hidden">Included</span></td></tr>
+                <tr><th scope="row">SSO and audit log</th>
+                  <td class="no"><svg class="ico" aria-hidden="true"><use href="#i-dash"/></svg><span class="visually-hidden">Not included</span></td>
+                  <td class="pro no"><svg class="ico" aria-hidden="true"><use href="#i-dash"/></svg><span class="visually-hidden">Not included</span></td>
+                  <td class="yes"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg><span class="visually-hidden">Included</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-19</code> <code>COL-07</code> <code>BTN-06</code> <code>TYP-09</code> <code>CMP-27</code> <code>LAY-07</code></p>
+      </section>
+
+      <!-- v4 -->
+      <section class="variant span-2" aria-labelledby="v4-label">
+        <div class="variant-label" id="v4-label"><span class="v">v4</span> In-app upgrade card</div>
+        <div class="variant-stage">
+          <aside class="upgrade" aria-labelledby="up-title">
+            <span class="up-icon" aria-hidden="true"><svg class="ico"><use href="#i-grid"/></svg></span>
+            <div>
+              <h3 id="up-title">2 dashboards left on Free</h3>
+              <p>Pro removes the limit and keeps 12 months of history. From $20 a month, billed yearly.</p>
+              <div class="meter">
+                <div class="meter-top"><span id="meter-label">Dashboards</span><b class="num">8 of 10 used</b></div>
+                <!-- Usage as a meter with a text value, not a bar alone (FBK-06, COP-10) -->
+                <div class="meter-track" role="meter" aria-labelledby="meter-label" aria-valuemin="0" aria-valuemax="10" aria-valuenow="8" aria-valuetext="8 of 10 dashboards used"><span></span></div>
+              </div>
+            </div>
+            <div class="up-side">
+              <a class="btn btn-primary" href="#v1-label">Upgrade to Pro</a>
+            </div>
+            <button class="icon-btn dismiss" type="button" aria-label="Dismiss upgrade card"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button>
+          </aside>
+        </div>
+        <p class="rule-ids">Rules: <code>NAV-10</code> <code>FBK-06</code> <code>COP-10</code> <code>BTN-01</code> <code>ICO-04</code> <code>SCR-17</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // v1: billing period as a radio group with roving tabindex and arrow keys (CMP-23)
+    const pricing = document.getElementById("pricing");
+    const options = [...document.querySelectorAll("#period [role=radio]")];
+    function selectPeriod(btn) {
+      options.forEach((o) => {
+        const on = o === btn;
+        o.setAttribute("aria-checked", String(on));
+        o.tabIndex = on ? 0 : -1;
+      });
+      pricing.dataset.period = btn.dataset.value;
+    }
+    options.forEach((btn, i) => {
+      btn.addEventListener("click", () => selectPeriod(btn));
+      btn.addEventListener("keydown", (e) => {
+        if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) return;
+        e.preventDefault();
+        const next = options[(i + (e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 1) + options.length) % options.length];
+        selectPeriod(next);
+        next.focus();
+      });
+    });
+
+    // v2: the terms under the button always name the selected plan's price (SCR-17)
+    document.querySelectorAll('#plans input[name="plan"]').forEach((radio) => {
+      radio.addEventListener("change", () => { document.getElementById("pw-price").textContent = radio.value; });
+    });
+  </script>
+</body>
+</html>

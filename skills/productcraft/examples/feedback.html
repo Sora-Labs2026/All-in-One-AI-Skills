@@ -1,0 +1,557 @@
+<!doctype html>
+<!-- ProductCraft example: feedback. Original Sora Labs example, MIT License.
+     Demonstrates: FBK-01, FBK-02, FBK-03, FBK-04, FBK-06, FBK-09, FBK-12, FBK-14, FBK-15, FBK-16, FBK-17,
+     FRM-21, CMP-13, CMP-17, CMP-29, COL-07, COL-10, COP-04, COP-09, ICO-04, ENG-05, MOT-01, MOT-04, BTN-01, BTN-07 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Feedback</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    :root { --field-border: #8a909c; --skeleton: #e6e9ed; }
+    [hidden] { display: none !important; }
+    .sheet-header h1 { margin-top: var(--space-2); }
+    .variant > .variant-stage { flex: 1 0 auto; }
+    .stage-fill { width: 100%; }
+    .i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .btn .i { width: 18px; height: 18px; }
+    .btn-sm { min-height: 36px; padding: 0 var(--space-3); }
+    .card h3 { font-size: var(--text-md); }
+    .spin { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* v1 banners: tint + icon + plain words, actions inside when a choice is needed (FBK-03) */
+    .banners { display: grid; gap: var(--space-3); }
+    .banner { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: start; gap: var(--space-3); padding: var(--space-4); border: 1px solid; border-radius: var(--radius-md); }
+    .banner .b-ic { width: 24px; height: 24px; }
+    .banner h3 { font-size: var(--text-md); line-height: 24px; }
+    .banner p { font-size: var(--text-sm); color: var(--text-2); }
+    .banner .icon-btn { width: 32px; height: 32px; margin: -4px -4px 0 0; color: var(--text-2); }
+    .banner .icon-btn .i { width: 18px; height: 18px; }
+    .banner-actions { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-3); }
+    .banner-success { background: var(--success-soft); border-color: color-mix(in srgb, var(--success) 28%, transparent); }
+    .banner-success .b-ic { color: var(--success); }
+    .banner-warning { background: var(--warning-soft); border-color: color-mix(in srgb, var(--warning) 30%, transparent); }
+    .banner-warning .b-ic { color: var(--warning); }
+    .banner-error { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 28%, transparent); }
+    .banner-error .b-ic { color: var(--danger); }
+    .banner a { font-size: var(--text-sm); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+
+    /* v2 toasts in a small shop frame (FBK-04, FBK-16) */
+    .shop { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--bg); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .shop-bar { display: flex; align-items: center; justify-content: space-between; height: 52px; padding: 0 var(--space-4); background: var(--surface); border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: var(--space-2); font-weight: 700; }
+    .brand-mark { width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(135deg, var(--accent), #7c3aed); }
+    .cart-link { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-sm); color: var(--text); font-size: var(--text-sm); font-weight: 600; }
+    .cart-link:hover { background: var(--surface-2); text-decoration: none; }
+    .count-badge { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); font-size: var(--text-xs); font-weight: 700; }
+    .shop-body { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: var(--space-4); align-items: end; padding: var(--space-4); }
+    .mini-product { padding: var(--space-3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); }
+    .thumb { display: grid; place-items: center; border-radius: var(--radius-sm); background: radial-gradient(110% 90% at 50% 15%, #ffffff 0, #e8ecef 75%); }
+    .mini-product .thumb { height: 112px; margin-bottom: var(--space-3); }
+    .mini-product b { display: block; font-size: var(--text-sm); }
+    .mini-product small { display: block; margin-bottom: var(--space-3); font-size: var(--text-xs); color: var(--text-2); }
+    .added { width: 100%; background: var(--success-soft); color: var(--success); }
+    .toasts { display: grid; gap: var(--space-3); }
+    .toast { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-2) var(--space-3); padding: var(--space-3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); overflow: hidden; }
+    .toast b { display: block; font-size: var(--text-sm); }
+    .toast small { display: block; font-size: var(--text-xs); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .toast .t-ic { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--neutral-soft); color: var(--neutral-ink); }
+    .toast .t-ic .i { width: 18px; height: 18px; }
+    .toast .icon-btn { margin-left: calc(-1 * var(--space-1)); }
+    .toast .thumb { width: 40px; height: 40px; }
+    .toast .icon-btn { width: 32px; height: 32px; }
+    .toast .icon-btn .i { width: 16px; height: 16px; }
+    .toast-undo { min-height: 32px; padding: 0 var(--space-2); color: var(--accent-ink); }
+    .toast-undo:hover { background: var(--accent-soft); color: var(--accent-ink); }
+    /* Time left before auto-dismiss; it pauses on hover and focus (FBK-04) */
+    .toast-timer { position: absolute; left: 0; bottom: 0; width: 100%; height: 3px; background: var(--accent); opacity: 0.6; transform-origin: left center; transform: scaleX(var(--left, 1)); }
+
+    /* v3 upload (FRM-21) */
+    .drop { display: grid; justify-items: center; gap: var(--space-2); padding: var(--space-5) var(--space-4); border: 2px dashed var(--field-border); border-radius: var(--radius-md); background: var(--surface-2); text-align: center; transition-property: background-color, border-color; transition-duration: var(--dur-fast); }
+    .drop[data-over="true"] { border-color: var(--accent); background: var(--accent-soft); }
+    .drop-ic { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--surface); color: var(--accent-ink); box-shadow: var(--shadow-sm); }
+    .drop p { font-size: var(--text-md); font-weight: 600; }
+    .drop small { font-size: var(--text-xs); color: var(--text-2); }
+    .drop input:focus-visible + label { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .up-summary { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin: var(--space-4) 0 var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .up-summary b { color: var(--text); }
+    .up-list { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2); }
+    .up-row { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+    .up-row.failed { border-color: color-mix(in srgb, var(--danger) 35%, transparent); background: var(--danger-soft); }
+    .file-ic { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--accent-ink); }
+    .file-ic .i { width: 18px; height: 18px; }
+    .up-name { display: flex; justify-content: space-between; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+    .up-name span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .up-meta { display: flex; align-items: center; gap: 4px; font-size: var(--text-xs); color: var(--text-2); }
+    .up-meta .i { width: 14px; height: 14px; }
+    .up-meta.ok { color: var(--success); font-weight: 600; }
+    .up-meta.err { color: var(--danger); font-weight: 600; }
+    .up-bar { height: 4px; margin: 6px 0 4px; border-radius: var(--radius-pill); background: var(--border); overflow: hidden; }
+    .up-bar span { display: block; height: 100%; background: var(--accent); transform-origin: left center; transform: scaleX(var(--p)); }
+    .up-actions { display: flex; align-items: center; gap: var(--space-1); }
+    .up-actions .icon-btn { width: 36px; height: 36px; }
+    .up-actions .icon-btn .i { width: 18px; height: 18px; }
+
+    /* v4 progress and loaders (FBK-02, FBK-12, FBK-17) */
+    .loaders { padding: 0; }
+    .ld { padding: var(--space-4) var(--space-5); }
+    .ld + .ld { border-top: 1px solid var(--border); }
+    .ld-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .ld-title { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+    .ld-title .i { width: 18px; height: 18px; color: var(--text-3); }
+    .ld-pct { font-size: var(--text-md); font-weight: 700; }
+    .ld-sub { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-2); font-size: var(--text-xs); color: var(--text-2); }
+    .bar { position: relative; height: 8px; margin-top: var(--space-3); border-radius: var(--radius-pill); background: var(--border); overflow: hidden; }
+    .bar-fill { position: absolute; inset: 0; border-radius: inherit; background: var(--accent); transform-origin: left center; transform: scaleX(var(--p, 0)); transition: transform var(--dur-med) var(--ease-out); }
+    .bar-indet::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; border-radius: inherit; background: var(--accent); animation: indet 1.6s var(--ease-out) infinite; }
+    @keyframes indet { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+    .bar-stalled .bar-fill { background: var(--text-3); }
+    .stalled-note { display: flex; align-items: center; gap: 6px; color: var(--warning); font-weight: 600; }
+    .stalled-note .i { width: 14px; height: 14px; }
+    .ld-actions { display: flex; gap: var(--space-2); }
+    .spinner-row { display: flex; align-items: center; gap: var(--space-3); }
+    .spinner-row .spin { width: 22px; height: 22px; color: var(--accent); }
+    .spinner-row p { font-size: var(--text-sm); font-weight: 600; }
+    .spinner-row small { display: block; font-size: var(--text-xs); color: var(--text-2); font-weight: 400; }
+    .step-dots { display: flex; gap: 4px; }
+    .step-dots i { width: 18px; height: 4px; border-radius: 2px; background: var(--border); }
+    .step-dots i.done { background: var(--accent); }
+    .step-dots i.now { background: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+    /* Reduced motion keeps the meaning: a static striped bar still reads as "working, total unknown" (MOT-04) */
+    @media (prefers-reduced-motion: reduce) {
+      .bar-indet::after { animation: none; width: 100%; opacity: 0.55;
+        background: repeating-linear-gradient(-45deg, var(--accent) 0 8px, color-mix(in srgb, var(--accent) 40%, var(--surface)) 8px 16px); }
+    }
+
+    /* v5 skeleton next to the loaded card, same anatomy and sizes (FBK-14) */
+    .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+    .pair-label { margin-bottom: var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .rev { padding: var(--space-4); }
+    .rev-head { display: flex; align-items: center; justify-content: space-between; height: 24px; }
+    .rev-head span { font-size: var(--text-xs); color: var(--text-3); }
+    .rev-big { margin-top: var(--space-3); height: 36px; font-size: var(--text-2xl); font-weight: 700; line-height: 36px; letter-spacing: -0.01em; }
+    .rev-delta { height: 20px; margin-top: var(--space-1); }
+    .rev-delta .muted { font-weight: 400; font-size: var(--text-xs); }
+    .rev-chart { height: 120px; margin-top: var(--space-4); }
+    .rev-chart svg { display: block; width: 100%; height: 100%; }
+    .rev-list { margin: var(--space-4) 0 0; padding: var(--space-3) 0 0; list-style: none; display: grid; gap: var(--space-3); border-top: 1px solid var(--border); }
+    .rev-list li { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); height: 32px; font-size: var(--text-sm); }
+    .rev-list .thumb { width: 32px; height: 32px; }
+    .rev-list .thumb svg { width: 14px; height: 24px; }
+    .rev-foot { display: flex; align-items: center; height: 24px; margin-top: var(--space-4); font-size: var(--text-sm); font-weight: 600; }
+    .rev-foot .i { width: 16px; height: 16px; margin-left: 4px; }
+    .sk { position: relative; display: block; overflow: hidden; border-radius: 6px; background: var(--skeleton); }
+    .sk::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent); animation: shimmer 1.4s ease-in-out infinite; }
+    @keyframes shimmer { to { transform: translateX(100%); } }
+
+    /* v6 notifications (CMP-29) */
+    .notif-panel { width: 100%; max-width: 480px; margin: 0 auto; padding: 0; overflow: hidden; box-shadow: var(--shadow-lg); }
+    .np-head { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5); border-bottom: 1px solid var(--border); }
+    .np-head h3 { font-size: var(--text-lg); }
+    .np-head .unread-count { font-size: var(--text-sm); color: var(--text-2); }
+    .np-head .spacer { flex: 1; }
+    .text-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 var(--space-2); border: 0; border-radius: 6px; background: transparent; color: var(--accent-ink); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .text-btn:hover { background: var(--accent-soft); }
+    .text-btn .i { width: 16px; height: 16px; }
+    .text-btn[aria-disabled="true"] { color: var(--text-3); cursor: default; background: transparent; }
+    .np-group { margin: 0; padding: var(--space-3) var(--space-5) var(--space-1); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .np-list { margin: 0; padding: 0; list-style: none; }
+    .notif { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: var(--space-3); padding: var(--space-3) var(--space-5); }
+    .notif.unread { background: var(--accent-soft); }
+    .notif .avatar { width: 36px; height: 36px; }
+    .notif p { font-size: var(--text-sm); color: var(--text-2); }
+    .notif p b, .notif p a { color: var(--text); font-weight: 600; }
+    .notif p a:hover { text-decoration: underline; }
+    .notif blockquote { margin: var(--space-1) 0 0; padding-left: var(--space-2); border-left: 2px solid var(--border); font-size: var(--text-sm); color: var(--text-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .notif-meta { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-1); font-size: var(--text-xs); color: var(--text-3); }
+    .notif:not(.unread) .pill { display: none; }
+    .notif-actions { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
+    .sys-ic { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--neutral-soft); color: var(--neutral-ink); }
+    .sys-ic .i { width: 18px; height: 18px; }
+    .np-foot { display: flex; justify-content: center; padding: var(--space-2); border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M10.3 4.3L2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6"/><circle cx="10" cy="20.5" r="1"/><circle cx="17" cy="20.5" r="1"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7.5 3c0 5.4-7.5 10-7.5 10z"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4"/><path d="M7 9l5-5 5 5"/><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></symbol>
+    <symbol id="i-retry" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/></symbol>
+    <symbol id="i-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" opacity="0.25"/><path d="M20.5 12A8.5 8.5 0 0 0 12 3.5"/></symbol>
+    <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-check-all" viewBox="0 0 24 24"><path d="M2.5 12.5l4.5 4.5L17 7"/><path d="M12 16l1 1L22 7.5"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+    <!-- Product silhouette reused for thumbnails -->
+    <symbol id="bottle" viewBox="0 0 104 200"><rect x="38" y="6" width="28" height="20" rx="5" fill="#2b2f36"/><rect x="18" y="30" width="68" height="164" rx="24" style="fill: var(--c, #5e7d55)"/><rect x="28" y="50" width="8" height="118" rx="4" fill="#ffffff" opacity="0.3"/></symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="6"/><circle cx="12" cy="12" r="3.5"/></svg>ProductCraft · Example screens</span>
+        <h1>Feedback</h1>
+        <p>Banners, toasts, uploads, progress and loaders, skeletons and a notifications panel: every message says what happened and what to do next.</p>
+      </div>
+    </header>
+
+    <div class="variants cols-2">
+      <!-- v1: status banners -->
+      <section class="variant" aria-labelledby="v1-title">
+        <h2 class="variant-label" id="v1-title"><span class="v">v1</span> Status banners</h2>
+        <div class="variant-stage">
+          <div class="stage-fill banners">
+            <div class="banner banner-success" role="status">
+              <svg class="i b-ic" aria-hidden="true"><use href="#i-check-circle"/></svg>
+              <div><h3>Payment method updated</h3><p>Card <span class="num">•••• 4821</span> will be charged on Nov 1 for Sora Analytics Team.</p></div>
+              <button class="icon-btn" type="button" aria-label="Dismiss message" data-dismiss><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+            </div>
+            <div class="banner banner-warning" role="status">
+              <svg class="i b-ic" aria-hidden="true"><use href="#i-warn"/></svg>
+              <div>
+                <h3>Your trial ends in 3 days</h3>
+                <p>Add a payment method to keep your 4 dashboards and 12 shared reports. Nothing is charged until Nov 1.</p>
+                <div class="banner-actions">
+                  <button class="btn btn-primary btn-sm" type="button">Add payment method</button>
+                  <button class="btn btn-ghost btn-sm" type="button">Remind me tomorrow</button>
+                </div>
+              </div>
+              <button class="icon-btn" type="button" aria-label="Dismiss message" data-dismiss><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+            </div>
+            <div class="banner banner-error" role="alert">
+              <svg class="i b-ic" aria-hidden="true"><use href="#i-alert"/></svg>
+              <div>
+                <h3>Couldn't sync 3 invoices</h3>
+                <p>Sora Pay didn't respond at 14:02, so <span class="num">#SL-1042</span> to <span class="num">#SL-1044</span> are still drafts. Your data is safe. Try again, or sync them later from Billing.</p>
+                <div class="banner-actions">
+                  <button class="btn btn-secondary btn-sm" type="button"><svg class="i" aria-hidden="true"><use href="#i-retry"/></svg>Try again</button>
+                  <a href="#">View sync log</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FBK-03</code> <code>COL-07</code> <code>COP-04</code> <code>BTN-01</code> <code>BTN-07</code> <code>ICO-04</code></p>
+      </section>
+
+      <!-- v2: toasts: confirmation with Undo and add-to-cart -->
+      <section class="variant" aria-labelledby="v2-title">
+        <h2 class="variant-label" id="v2-title"><span class="v">v2</span> Toasts: undo and add to cart</h2>
+        <div class="variant-stage">
+          <div class="shop">
+            <div class="shop-bar">
+              <span class="brand"><span class="brand-mark" aria-hidden="true"></span>Sora Shop</span>
+              <a class="cart-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-cart"/></svg>Cart <span class="count-badge num" id="cart-count" aria-label="3 items">3</span></a>
+            </div>
+            <div class="shop-body">
+              <article class="mini-product">
+                <div class="thumb" aria-hidden="true"><svg width="40" height="78"><use href="#bottle"/></svg></div>
+                <b>Trail bottle, 750 ml</b>
+                <small>Moss · <span class="num">$28.00</span></small>
+                <button class="btn btn-sm added" type="button" id="add-btn" data-state="done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg><span>Added</span></button>
+              </article>
+              <div class="toasts" id="toasts">
+                <div class="toast" data-toast>
+                  <span class="t-ic" aria-hidden="true"><svg class="i"><use href="#i-heart"/></svg></span>
+                  <div><b>Removed from wishlist</b><small>Canvas tote, Sand</small></div>
+                  <button class="btn btn-ghost toast-undo" type="button" data-undo>Undo</button>
+                  <button class="icon-btn" type="button" aria-label="Dismiss notification" data-close><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+                  <span class="toast-timer" style="--left: 0.35" aria-hidden="true"></span>
+                </div>
+                <div class="toast" data-toast>
+                  <span class="thumb" aria-hidden="true"><svg width="16" height="30"><use href="#bottle"/></svg></span>
+                  <div><b>Added to cart</b><small>Trail bottle · Qty 2</small></div>
+                  <a class="btn btn-secondary btn-sm" href="#">View cart</a>
+                  <button class="icon-btn" type="button" aria-label="Dismiss notification" data-close><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+                  <span class="toast-timer" style="--left: 0.8" aria-hidden="true"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="visually-hidden" role="status" id="toast-live">Added Trail bottle to cart. 3 items in cart.</p>
+        </div>
+        <p class="rule-ids">Rules: <code>FBK-04</code> <code>FBK-16</code> <code>FBK-15</code> <code>COP-09</code> <code>ICO-04</code> <code>BTN-07</code></p>
+      </section>
+
+      <!-- v3: upload dropzone and per-file states -->
+      <section class="variant" aria-labelledby="v3-title">
+        <h2 class="variant-label" id="v3-title"><span class="v">v3</span> Upload with per-file states</h2>
+        <div class="variant-stage">
+          <div class="stage-fill card">
+            <div class="drop" id="drop">
+              <span class="drop-ic" aria-hidden="true"><svg class="i"><use href="#i-upload"/></svg></span>
+              <p>Drag files here or paste them</p>
+              <input class="visually-hidden" type="file" id="file-input" multiple accept=".png,.jpg,.jpeg,.pdf">
+              <label class="btn btn-secondary btn-sm" for="file-input">Browse files</label>
+              <small>PNG, JPG or PDF · up to 25 MB each · 10 files max</small>
+            </div>
+            <div class="up-summary"><p role="status" id="up-summary"><b class="num">2 of 4</b> uploaded · 1 uploading · 1 failed</p><button class="text-btn" type="button" id="up-clear">Clear finished</button></div>
+            <ul class="up-list" id="up-list">
+              <li class="up-row">
+                <span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg></span>
+                <div><p class="up-name"><span>site-plan.pdf</span></p><p class="up-meta ok"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Uploaded · <span class="num">2.1 MB</span></p></div>
+                <div class="up-actions"><button class="icon-btn" type="button" aria-label="Remove site-plan.pdf" data-remove><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg></button></div>
+              </li>
+              <li class="up-row">
+                <span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-image"/></svg></span>
+                <div>
+                  <p class="up-name"><span>lobby-render.png</span><span class="num">64%</span></p>
+                  <div class="up-bar" role="progressbar" aria-label="Uploading lobby-render.png" aria-valuemin="0" aria-valuemax="100" aria-valuenow="64"><span style="--p: 0.64"></span></div>
+                  <p class="up-meta num">5.4 of 8.4 MB · about 4 s left</p>
+                </div>
+                <div class="up-actions"><button class="icon-btn" type="button" aria-label="Cancel upload of lobby-render.png" data-remove><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+              </li>
+              <li class="up-row failed">
+                <span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-image"/></svg></span>
+                <div><p class="up-name"><span>facade-photo.jpg</span></p><p class="up-meta err"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>Failed: connection lost at 38%</p></div>
+                <div class="up-actions">
+                  <button class="btn btn-secondary btn-sm" type="button" data-retry><svg class="i" aria-hidden="true"><use href="#i-retry"/></svg>Retry</button>
+                  <button class="icon-btn" type="button" aria-label="Remove facade-photo.jpg" data-remove><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg></button>
+                </div>
+              </li>
+              <li class="up-row">
+                <span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg></span>
+                <div><p class="up-name"><span>budget-2026.pdf</span></p><p class="up-meta ok"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Uploaded · <span class="num">1.2 MB</span></p></div>
+                <div class="up-actions"><button class="icon-btn" type="button" aria-label="Remove budget-2026.pdf" data-remove><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg></button></div>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-21</code> <code>FBK-02</code> <code>FBK-12</code> <code>FBK-03</code> <code>ICO-04</code> <code>COL-07</code></p>
+      </section>
+
+      <!-- v4: progress and loaders -->
+      <section class="variant" aria-labelledby="v4-title">
+        <h2 class="variant-label" id="v4-title"><span class="v">v4</span> Progress and loaders</h2>
+        <div class="variant-stage">
+          <div class="stage-fill card loaders">
+            <div class="ld">
+              <div class="ld-head"><p class="ld-title"><svg class="i" aria-hidden="true"><use href="#i-table"/></svg>Exporting October orders</p><span class="ld-pct num">68%</span></div>
+              <div class="bar" role="progressbar" aria-label="Exporting October orders" aria-valuemin="0" aria-valuemax="100" aria-valuenow="68"><span class="bar-fill" style="--p: 0.68"></span></div>
+              <div class="ld-sub"><span class="num">843 of 1,240 rows · about 20 s left</span><button class="btn btn-ghost btn-sm" type="button">Cancel</button></div>
+            </div>
+            <div class="ld">
+              <div class="ld-head"><p class="ld-title"><svg class="i" aria-hidden="true"><use href="#i-layers"/></svg>Preparing your workspace</p><span class="step-dots" aria-hidden="true"><i class="done"></i><i class="now"></i><i></i><i></i></span></div>
+              <div class="bar bar-indet" role="progressbar" aria-label="Preparing your workspace" aria-valuetext="Step 2 of 4: importing contacts" aria-busy="true"></div>
+              <div class="ld-sub"><span>Step 2 of 4: importing contacts from <span class="num">contacts.csv</span></span></div>
+            </div>
+            <div class="ld">
+              <div class="spinner-row" role="status">
+                <svg class="i spin" aria-hidden="true"><use href="#i-spin"/></svg>
+                <p>Loading invoices…<small>Waits over a second get a spinner and a label.</small></p>
+              </div>
+            </div>
+            <div class="ld">
+              <div class="ld-head"><p class="ld-title"><svg class="i" aria-hidden="true"><use href="#i-upload"/></svg><span>Uploading field-survey.zip</span></p><span class="ld-pct num">41%</span></div>
+              <div class="bar bar-stalled" role="progressbar" aria-label="Uploading field-survey.zip" aria-valuemin="0" aria-valuemax="100" aria-valuenow="41" aria-valuetext="41%, stalled"><span class="bar-fill" style="--p: 0.41"></span></div>
+              <div class="ld-sub">
+                <span class="stalled-note" role="status"><svg class="i" aria-hidden="true"><use href="#i-pause"/></svg>Stalled: no data for 12 s. Still trying.</span>
+                <span class="ld-actions"><button class="btn btn-secondary btn-sm" type="button">Retry now</button><button class="btn btn-ghost btn-sm" type="button">Cancel</button></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FBK-02</code> <code>FBK-12</code> <code>FBK-17</code> <code>FBK-06</code> <code>COL-10</code> <code>MOT-04</code></p>
+      </section>
+
+      <!-- v5: skeleton beside the loaded card -->
+      <section class="variant" aria-labelledby="v5-title">
+        <h2 class="variant-label" id="v5-title"><span class="v">v5</span> Skeleton beside its loaded card</h2>
+        <div class="variant-stage">
+          <div class="stage-fill pair">
+            <div>
+              <p class="pair-label">Loading · aria-busy</p>
+              <div class="card rev" aria-busy="true" aria-label="Weekly revenue, loading">
+                <span class="visually-hidden" role="status">Loading weekly revenue</span>
+                <div class="rev-head"><span class="sk" style="width: 72px; height: 14px"></span><span class="sk" style="width: 56px; height: 12px"></span></div>
+                <div class="rev-big"><span class="sk" style="width: 128px; height: 30px; margin-top: 3px"></span></div>
+                <div class="rev-delta"><span class="sk" style="width: 150px; height: 12px; margin-top: 4px"></span></div>
+                <div class="rev-chart"><span class="sk" style="width: 100%; height: 120px; border-radius: 8px"></span></div>
+                <ul class="rev-list" aria-hidden="true">
+                  <li><span class="sk" style="width: 32px; height: 32px; border-radius: 8px"></span><span class="sk" style="width: 70%; height: 12px"></span><span class="sk" style="width: 52px; height: 12px"></span></li>
+                  <li><span class="sk" style="width: 32px; height: 32px; border-radius: 8px"></span><span class="sk" style="width: 58%; height: 12px"></span><span class="sk" style="width: 48px; height: 12px"></span></li>
+                  <li><span class="sk" style="width: 32px; height: 32px; border-radius: 8px"></span><span class="sk" style="width: 64%; height: 12px"></span><span class="sk" style="width: 44px; height: 12px"></span></li>
+                  <li><span class="sk" style="width: 32px; height: 32px; border-radius: 8px"></span><span class="sk" style="width: 52%; height: 12px"></span><span class="sk" style="width: 44px; height: 12px"></span></li>
+                </ul>
+                <div class="rev-foot"><span class="sk" style="width: 112px; height: 12px"></span></div>
+              </div>
+            </div>
+            <div>
+              <p class="pair-label">Loaded</p>
+              <div class="card rev">
+                <div class="rev-head"><h3>Weekly revenue</h3><span>Oct 13 to 19</span></div>
+                <p class="rev-big num">$48,210</p>
+                <p class="rev-delta"><span class="delta delta-good"><svg class="i" aria-hidden="true"><use href="#i-arrow-up"/></svg><span class="num">+12.4%</span> <span class="muted">vs previous week</span></span></p>
+                <div class="rev-chart">
+                  <svg viewBox="0 0 224 120" preserveAspectRatio="none" role="img" aria-label="Daily revenue, Monday to Sunday, highest on Saturday at $9,800">
+                    <rect x="4" y="48" width="24" height="72" rx="4" fill="var(--accent-soft)"/>
+                    <rect x="36" y="58" width="24" height="62" rx="4" fill="var(--accent-soft)"/>
+                    <rect x="68" y="38" width="24" height="82" rx="4" fill="var(--accent-soft)"/>
+                    <rect x="100" y="52" width="24" height="68" rx="4" fill="var(--accent-soft)"/>
+                    <rect x="132" y="28" width="24" height="92" rx="4" fill="var(--accent-soft)"/>
+                    <rect x="164" y="8" width="24" height="112" rx="4" fill="var(--accent)"/>
+                    <rect x="196" y="42" width="24" height="78" rx="4" fill="var(--accent-soft)"/>
+                  </svg>
+                </div>
+                <ul class="rev-list">
+                  <li><span class="thumb" aria-hidden="true"><svg><use href="#bottle"/></svg></span><span>Trail bottle</span><span class="num">$12,480</span></li>
+                  <li><span class="thumb" aria-hidden="true" style="--c:#d8c7a4"><svg><use href="#bottle"/></svg></span><span>Canvas tote</span><span class="num">$9,320</span></li>
+                  <li><span class="thumb" aria-hidden="true" style="--c:#c8553d"><svg><use href="#bottle"/></svg></span><span>Camp mug</span><span class="num">$6,140</span></li>
+                  <li><span class="thumb" aria-hidden="true" style="--c:#8fb8d9"><svg><use href="#bottle"/></svg></span><span>Rain shell</span><span class="num">$5,870</span></li>
+                </ul>
+                <a class="rev-foot" href="#">Open full report<svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FBK-14</code> <code>FBK-02</code> <code>CMP-17</code> <code>MOT-04</code> <code>TYP-09</code></p>
+      </section>
+
+      <!-- v6: notifications panel -->
+      <section class="variant" aria-labelledby="v6-title">
+        <h2 class="variant-label" id="v6-title"><span class="v">v6</span> Notifications panel</h2>
+        <div class="variant-stage">
+          <section class="card notif-panel" aria-labelledby="np-title">
+            <div class="np-head">
+              <h3 id="np-title">Notifications</h3>
+              <span class="unread-count num" id="unread-count">3 unread</span>
+              <span class="spacer"></span>
+              <button class="text-btn" type="button" id="mark-all"><svg class="i" aria-hidden="true"><use href="#i-check-all"/></svg>Mark all as read</button>
+              <button class="icon-btn" type="button" aria-label="Notification settings"><svg class="i" aria-hidden="true"><use href="#i-gear"/></svg></button>
+            </div>
+            <h4 class="np-group">Today</h4>
+            <ul class="np-list">
+              <li class="notif unread">
+                <span class="avatar" aria-hidden="true" style="background:var(--accent);color:var(--on-accent)">PN</span>
+                <div>
+                  <p><b>Priya Nair</b> commented on <a href="#">Q3 revenue report</a></p>
+                  <blockquote>Can we split the EMEA numbers by month before Thursday's review?</blockquote>
+                  <p class="notif-meta"><span>12 min ago</span><span class="pill pill-accent">New</span></p>
+                </div>
+              </li>
+              <li class="notif unread">
+                <span class="avatar" aria-hidden="true" style="background:var(--success-soft);color:var(--success)">JR</span>
+                <div>
+                  <p><b>Jordan Reyes</b> invited you to the <b>Growth</b> workspace</p>
+                  <div class="notif-actions"><button class="btn btn-secondary btn-sm" type="button">Accept</button><button class="btn btn-ghost btn-sm" type="button">Decline</button></div>
+                  <p class="notif-meta"><span>1 h ago</span><span class="pill pill-accent">New</span></p>
+                </div>
+              </li>
+              <li class="notif unread">
+                <span class="sys-ic" aria-hidden="true"><svg class="i"><use href="#i-download"/></svg></span>
+                <div>
+                  <p>Your export <a href="#">orders-october.csv</a> is ready to download</p>
+                  <p class="notif-meta"><span>3 h ago</span><span class="pill pill-accent">New</span></p>
+                </div>
+              </li>
+            </ul>
+            <h4 class="np-group">Earlier</h4>
+            <ul class="np-list">
+              <li class="notif">
+                <span class="avatar" aria-hidden="true" style="background:var(--warning-soft);color:var(--warning)">SO</span>
+                <div>
+                  <p><b>Sam Okafor</b> mentioned you in <a href="#">Launch checklist</a></p>
+                  <p class="notif-meta"><span>Yesterday</span><span class="pill pill-accent">New</span></p>
+                </div>
+              </li>
+            </ul>
+            <div class="np-foot"><a class="text-btn" href="#">See all notifications</a></div>
+          </section>
+          <p class="visually-hidden" role="status" id="np-live"></p>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-29</code> <code>COL-07</code> <code>CMP-13</code> <code>BTN-01</code> <code>BTN-07</code> <code>ICO-04</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // FBK-03: banners close with a named button.
+    document.querySelectorAll("[data-dismiss]").forEach((b) => b.addEventListener("click", () => b.closest(".banner").remove()));
+
+    // FBK-04, FBK-16: toasts close, Undo restores, and the timer bar pauses while hovered or focused.
+    (() => {
+      const live = document.getElementById("toast-live");
+      document.querySelectorAll("[data-toast]").forEach((t) => {
+        t.querySelector("[data-close]").addEventListener("click", () => t.remove());
+        const undo = t.querySelector("[data-undo]");
+        if (undo) undo.addEventListener("click", () => {
+          // Example only: replace with a request to your API that restores the wishlist item.
+          t.querySelector("b").textContent = "Back in your wishlist";
+          undo.remove();
+          live.textContent = "Canvas tote is back in your wishlist.";
+        });
+      });
+    })();
+
+    // FRM-21: highlight the zone while dragging and list dropped or chosen files.
+    (() => {
+      const drop = document.getElementById("drop");
+      const input = document.getElementById("file-input");
+      const list = document.getElementById("up-list");
+      const summary = document.getElementById("up-summary");
+      const set = (on) => (e) => { e.preventDefault(); drop.dataset.over = String(on); };
+      ["dragenter", "dragover"].forEach((n) => drop.addEventListener(n, set(true)));
+      ["dragleave", "drop"].forEach((n) => drop.addEventListener(n, set(false)));
+      const add = (files) => {
+        [...files].forEach((f) => {
+          const li = document.createElement("li");
+          li.className = "up-row";
+          li.innerHTML = `<span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg></span>
+            <div><p class="up-name"><span></span></p><p class="up-meta num">Waiting · ${(f.size / 1e6).toFixed(1)} MB</p></div>
+            <div class="up-actions"><button class="icon-btn" type="button" data-remove><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div>`;
+          li.querySelector(".up-name span").textContent = f.name;
+          li.querySelector("[data-remove]").setAttribute("aria-label", "Remove " + f.name);
+          list.prepend(li);
+          // Example only: replace with a request to your API that uploads f and reports progress.
+        });
+        summary.textContent = `${files.length} file${files.length === 1 ? "" : "s"} added`;
+      };
+      drop.addEventListener("drop", (e) => add(e.dataTransfer.files));
+      input.addEventListener("change", () => add(input.files));
+      document.addEventListener("paste", (e) => { if (e.clipboardData.files.length) add(e.clipboardData.files); });
+      list.addEventListener("click", (e) => { const b = e.target.closest("[data-remove]"); if (b) b.closest("li").remove(); });
+      document.getElementById("up-clear").addEventListener("click", () => {
+        list.querySelectorAll(".up-meta.ok").forEach((m) => m.closest("li").remove());
+        summary.textContent = "Finished uploads cleared";
+      });
+    })();
+
+    // CMP-29: mark one or all notifications as read and keep the count in words.
+    (() => {
+      const count = document.getElementById("unread-count");
+      const all = document.getElementById("mark-all");
+      const live = document.getElementById("np-live");
+      const update = () => {
+        const n = document.querySelectorAll(".notif.unread").length;
+        count.textContent = n ? `${n} unread` : "All caught up";
+        all.setAttribute("aria-disabled", String(n === 0));
+      };
+      document.querySelectorAll(".notif a").forEach((a) => a.addEventListener("click", () => { a.closest(".notif").classList.remove("unread"); update(); }));
+      all.addEventListener("click", () => {
+        if (all.getAttribute("aria-disabled") === "true") return;
+        // Example only: replace with a request to your API that marks these notifications read.
+        document.querySelectorAll(".notif.unread").forEach((n) => n.classList.remove("unread"));
+        update();
+        live.textContent = "All notifications marked as read";
+      });
+    })();
+  </script>
+</body>
+</html>

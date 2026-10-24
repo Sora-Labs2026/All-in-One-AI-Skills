@@ -1,0 +1,589 @@
+<!doctype html>
+<!-- ProductCraft example: charts. Original Sora Labs example, MIT License.
+     Demonstrates: CMP-18, CMP-17, CMP-11, CMP-10, CMP-23, CMP-15, CMP-27, ICO-07, TYP-09, COL-07,
+     COP-08, COP-10, ENG-07, MOB-01, LAY-01, LAY-08, DRK-05 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Charts</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    /* Chart colors. Series 1 is always --accent; the others are a validated categorical set (CMP-18, DRK-05). */
+    :root {
+      --chart-muted: #c7d2fe;
+      --chart-muted-hover: #a5b4fc;
+      --gauge-track: #e0e7ff;
+      --cat-2: #eb6834;
+      --cat-3: #1baf7a;
+      --cat-4: #eda100;
+    }
+    [data-theme="dark"] {
+      --chart-muted: rgba(129, 140, 248, 0.32);
+      --chart-muted-hover: rgba(129, 140, 248, 0.5);
+      --gauge-track: rgba(129, 140, 248, 0.18);
+      --cat-2: #d95926;
+      --cat-3: #199e70;
+      --cat-4: #c98500;
+    }
+
+    /* Six-track sheet grid so wide and compact charts share one rhythm (LAY-08) */
+    .variants.chart-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .span-2 { grid-column: span 2; }
+    .span-3 { grid-column: span 3; }
+    .variant-stage { flex: 1; }
+    .variant-stage > * { width: 100%; }
+    .theme-scope { color: var(--text); }
+
+    /* Chart card: title, one-line answer, then the plot (CMP-15, CMP-18) */
+    .chart-card { display: flex; flex-direction: column; gap: var(--space-5); height: 100%; }
+    .chart-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
+    .chart-head h3 { font-size: var(--text-md); }
+    .chart-summary { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--text-2); }
+    .chart-foot { margin-top: auto; font-size: var(--text-xs); color: var(--text-3); }
+
+    .legend { display: flex; gap: var(--space-4); margin: 0; padding: 0; list-style: none; font-size: var(--text-xs); color: var(--text-2); white-space: nowrap; }
+    .legend li { display: inline-flex; align-items: center; gap: var(--space-2); }
+    .key { width: 10px; height: 10px; border-radius: 3px; background: var(--chart-muted); }
+    .key.is-current { background: var(--accent); }
+
+    /* Shared cartesian frame: y ticks, plot, x labels and axis titles */
+    .cartesian { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: var(--space-2); }
+    .axis-title { font-size: var(--text-xs); color: var(--text-3); }
+    .axis-title.y { grid-column: 1 / -1; margin-bottom: var(--space-3); }
+    .axis-title.x { grid-column: 2; margin-top: var(--space-2); text-align: center; }
+    .y-ticks { position: relative; height: 220px; }
+    .y-ticks span { position: absolute; right: 0; transform: translateY(50%); font-size: var(--text-xs); color: var(--text-3); }
+    .plot { position: relative; height: 220px; }
+    .gridline { position: absolute; left: 0; right: 0; border-top: 1px solid var(--border); }
+    .x-labels { position: relative; grid-column: 2; height: 20px; margin-top: var(--space-2); font-size: var(--text-xs); color: var(--text-3); }
+
+    /* v1 bars: the whole column is the hit target, the painted bar stays thin (MOB-01, CMP-18) */
+    .bars { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .bar { display: flex; align-items: flex-end; justify-content: center; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; }
+    .bar:focus-visible { outline-offset: -2px; }
+    .bar-fill { width: min(24px, 64%); height: var(--h); border-radius: 4px 4px 0 0; background: var(--chart-muted); transition: background-color var(--dur-fast); }
+    .bar:hover .bar-fill, .bar.is-active .bar-fill { background: var(--chart-muted-hover); }
+    .bar.is-current .bar-fill { background: var(--accent); }
+    .x-labels.bands { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .x-labels.bands span { text-align: center; }
+    .x-labels .is-current { color: var(--text); font-weight: 700; }
+
+    /* Tooltip: value leads, label follows (CMP-11) */
+    .tooltip {
+      position: absolute; z-index: 2; top: 0; left: 0; pointer-events: none;
+      padding: var(--space-2) var(--space-3); min-width: 136px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-lg); font-size: var(--text-xs); color: var(--text-2); white-space: nowrap;
+    }
+    .tooltip strong { display: block; margin: var(--space-1) 0; font-size: var(--text-md); color: var(--text); }
+    .tooltip .delta { font-size: var(--text-xs); }
+
+    /* v2 line and area */
+    .plot.line { cursor: crosshair; }
+    .plot > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+    .series-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .crosshair { position: absolute; top: 0; bottom: 0; width: 0; border-left: 1px solid var(--text-3); opacity: 0.5; }
+    .dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: var(--radius-pill); background: var(--accent); box-shadow: 0 0 0 2px var(--surface); }
+    .x-labels:not(.bands) span { position: absolute; top: 0; white-space: nowrap; }
+
+    /* v3 donut: pathLength="1" segments with a surface gap, total in the center (ICO-07, CMP-18) */
+    .donut { position: relative; width: 168px; margin: 0 auto; }
+    .donut svg { display: block; width: 100%; height: auto; transform: rotate(-90deg); }
+    .donut circle { fill: none; stroke-width: 16; }
+    .donut-center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+    .donut-center strong { font-size: var(--text-xl); line-height: 1.2; }
+    .donut-center span { font-size: var(--text-xs); color: var(--text-3); }
+    .legend-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    .legend-table th, .legend-table td { padding: var(--space-2) 0; text-align: left; font-weight: 400; }
+    .legend-table thead th { padding-top: 0; font-size: var(--text-xs); color: var(--text-3); }
+    .legend-table tbody tr + tr { border-top: 1px solid var(--border); }
+    .legend-table tbody th { color: var(--text); font-weight: 600; }
+    .legend-table .num { text-align: right; }
+    .legend-table td.num { color: var(--text-2); }
+    .legend-table td.share { width: 56px; color: var(--text); font-weight: 600; }
+    .swatch { display: inline-block; width: 10px; height: 10px; margin-right: var(--space-2); border-radius: 3px; background: var(--c); vertical-align: 0; }
+
+    /* v4 gauge: value with its scale and a plain-language meaning (TYP-09, COP-10, ICO-07) */
+    .gauge { position: relative; width: 224px; margin: 0 auto; }
+    .gauge svg { display: block; width: 100%; height: auto; }
+    .gauge path { fill: none; stroke-width: 14; stroke-linecap: round; }
+    .gauge .track { stroke: var(--gauge-track); }
+    .gauge .value { stroke: var(--accent); stroke-dasharray: 0.72 1; }
+    .gauge .threshold { stroke: var(--text); stroke-width: 2.5; }
+    .gauge-readout { position: absolute; left: 0; right: 0; top: 30%; display: grid; justify-items: center; gap: var(--space-2); }
+    .gauge-readout .score { font-size: var(--text-2xl); font-weight: 700; line-height: 1; }
+    .gauge-readout .score span { font-size: var(--text-md); font-weight: 600; color: var(--text-3); }
+    .gauge-scale { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; padding: 0 var(--space-6); font-size: var(--text-xs); color: var(--text-3); }
+    .gauge-meaning { text-align: center; font-size: var(--text-sm); color: var(--text-2); }
+    .gauge-meaning .delta { margin-left: var(--space-1); }
+    .gauge-tick { position: absolute; left: 73.6%; top: 4.3%; transform: translate(-50%, -50%); font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .factors { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); margin: auto 0 0; padding: var(--space-3); list-style: none; border-radius: var(--radius-md); background: var(--surface-2); }
+    .factors li { display: grid; gap: var(--space-1); text-align: center; }
+    .factors span { font-size: var(--text-xs); color: var(--text-2); }
+    .factors strong { font-size: var(--text-md); }
+
+    /* v5 ranked bars: rank, label, share and count in aligned tabular columns (TYP-09) */
+    .rank-list { display: grid; gap: var(--space-5); margin: 0; padding: 0; list-style: none; }
+    .rank-list li { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: var(--space-3); align-items: start; }
+    .rank { display: grid; place-items: center; width: 24px; height: 24px; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-2); font-size: var(--text-xs); font-weight: 700; }
+    .rank-line { display: flex; align-items: baseline; gap: var(--space-2); font-size: var(--text-sm); }
+    .rank-label { flex: 1; min-width: 0; font-weight: 600; }
+    .rank-pct { width: 40px; text-align: right; font-weight: 700; }
+    .rank-count { width: 48px; text-align: right; color: var(--text-3); }
+    .rank-track { height: 8px; margin-top: var(--space-2); border-radius: var(--radius-pill); background: var(--surface-2); }
+    .rank-track span { display: block; width: var(--w); height: 100%; border-radius: var(--radius-pill); background: var(--chart-muted); }
+    .rank-list li:first-child .rank { background: var(--accent-soft); color: var(--accent-ink); }
+    .rank-list li:first-child .rank-track span { background: var(--accent); }
+
+    /* v6 KPI tiles with sparklines (CMP-17) */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); }
+    .kpi { display: flex; flex-direction: column; gap: var(--space-1); }
+    .kpi-label { font-size: var(--text-sm); color: var(--text-2); }
+    .kpi-value { font-size: var(--text-xl); font-weight: 700; line-height: 1.25; color: var(--text); }
+    .kpi-value small { font-size: var(--text-md); font-weight: 600; color: var(--text-2); }
+    .kpi .delta span { font-weight: 400; color: var(--text-3); }
+    .spark { position: relative; height: 48px; margin-top: var(--space-4); }
+    .spark svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .spark-line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .spark .dot { width: 8px; height: 8px; margin: -4px 0 0 -4px; }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <defs>
+      <linearGradient id="area-wash" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" style="stop-color: var(--accent); stop-opacity: 0.18"/>
+        <stop offset="1" style="stop-color: var(--accent); stop-opacity: 0.01"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="6"/><path d="M8 15.5c2.5 0 3.5-7 8-7"/></svg>
+          ProductCraft · Example screens
+        </span>
+        <h1>Charts</h1>
+        <p>Six chart cards for Sora Analytics. Each answers one question in its title and summary, highlights the key series, and shows exact values on hover and keyboard focus.</p>
+      </div>
+      <p class="subtle">6 versions · light and dark</p>
+    </header>
+
+    <div class="variants chart-grid">
+      <!-- v1 -->
+      <section class="variant span-3" aria-labelledby="v1">
+        <h2 class="variant-label" id="v1"><span class="v">v1</span> Bar chart, current period highlighted</h2>
+        <div class="variant-stage">
+          <article class="card chart-card" aria-labelledby="rev-title" aria-describedby="rev-summary">
+            <header class="chart-head">
+              <div>
+                <h3 id="rev-title">Monthly revenue</h3>
+                <p class="chart-summary" id="rev-summary">October is the best month of the last 12: $48.2K, up 12.4% on September.</p>
+              </div>
+              <ul class="legend" aria-label="Legend">
+                <li><span class="key is-current"></span>This month</li>
+                <li><span class="key"></span>Earlier months</li>
+              </ul>
+            </header>
+            <div class="cartesian" id="rev-chart">
+              <div class="axis-title y">Revenue, USD</div>
+              <div class="y-ticks" aria-hidden="true"></div>
+              <div class="plot">
+                <div class="grid" aria-hidden="true"></div>
+                <div class="bars" role="group" aria-label="Revenue by month. Select a bar to read its value."></div>
+                <div class="tooltip" aria-hidden="true"></div>
+              </div>
+              <div class="x-labels bands" aria-hidden="true"></div>
+              <div class="axis-title x">Month, Nov 2025 to Oct 2026</div>
+            </div>
+          </article>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-18</code> <code>CMP-11</code> <code>COL-07</code> <code>COP-08</code> <code>MOB-01</code> <code>ENG-07</code></p>
+      </section>
+
+      <!-- v2 -->
+      <section class="variant span-3" aria-labelledby="v2">
+        <h2 class="variant-label" id="v2"><span class="v">v2</span> Area chart with time range and crosshair</h2>
+        <div class="variant-stage">
+          <article class="card chart-card" aria-labelledby="dau-title">
+            <header class="chart-head">
+              <div>
+                <h3 id="dau-title">Daily active users</h3>
+                <p class="chart-summary" id="dau-summary"></p>
+              </div>
+              <div class="segmented" role="radiogroup" aria-label="Time range" id="dau-range">
+                <button type="button" role="radio" aria-checked="false" tabindex="-1" data-days="7">7D</button>
+                <button type="button" role="radio" aria-checked="true" tabindex="0" data-days="30">30D</button>
+                <button type="button" role="radio" aria-checked="false" tabindex="-1" data-days="90">90D</button>
+              </div>
+            </header>
+            <div class="cartesian" id="dau-chart">
+              <div class="axis-title y">Users per day</div>
+              <div class="y-ticks" aria-hidden="true"></div>
+              <div class="plot line" tabindex="0" aria-label="Daily active users. Use the left and right arrow keys to read each day." aria-describedby="dau-summary">
+                <div class="grid" aria-hidden="true"></div>
+                <svg viewBox="0 0 600 220" preserveAspectRatio="none" aria-hidden="true">
+                  <path class="series-area" fill="url(#area-wash)"/>
+                  <path class="series-line" vector-effect="non-scaling-stroke"/>
+                </svg>
+                <div class="crosshair" aria-hidden="true"></div>
+                <div class="dot" aria-hidden="true"></div>
+                <div class="tooltip" aria-hidden="true"></div>
+              </div>
+              <div class="x-labels" aria-hidden="true"></div>
+              <div class="axis-title x">Date</div>
+            </div>
+            <table class="visually-hidden" id="dau-table"></table>
+          </article>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-18</code> <code>CMP-10</code> <code>CMP-23</code> <code>CMP-11</code> <code>ICO-07</code> <code>COP-08</code></p>
+      </section>
+
+      <!-- v3 -->
+      <section class="variant span-2" aria-labelledby="v3">
+        <h2 class="variant-label" id="v3"><span class="v">v3</span> Donut with total and value legend</h2>
+        <div class="variant-stage">
+          <article class="card chart-card" aria-labelledby="plan-title">
+            <header>
+              <h3 id="plan-title">Revenue by plan</h3>
+              <p class="chart-summary">Business plans bring in just over half of October revenue.</p>
+            </header>
+            <div class="donut">
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <!-- Segment = share minus a 0.006 surface gap; offset = minus the running total -->
+                <circle cx="60" cy="60" r="48" pathLength="1" stroke="var(--accent)" stroke-dasharray="0.5147 1" stroke-dashoffset="0"/>
+                <circle cx="60" cy="60" r="48" pathLength="1" stroke="var(--cat-2)" stroke-dasharray="0.2741 1" stroke-dashoffset="-0.5207"/>
+                <circle cx="60" cy="60" r="48" pathLength="1" stroke="var(--cat-3)" stroke-dasharray="0.1330 1" stroke-dashoffset="-0.8008"/>
+                <circle cx="60" cy="60" r="48" pathLength="1" stroke="var(--cat-4)" stroke-dasharray="0.0542 1" stroke-dashoffset="-0.9398"/>
+              </svg>
+              <div class="donut-center"><strong class="num">$48.2K</strong><span>Total, October</span></div>
+            </div>
+            <table class="legend-table">
+              <caption class="visually-hidden">Revenue by plan, October 2026</caption>
+              <thead><tr><th scope="col">Plan</th><th scope="col" class="num">Revenue</th><th scope="col" class="num">Share</th></tr></thead>
+              <tbody>
+                <tr><th scope="row"><span class="swatch" style="--c: var(--accent)"></span>Business</th><td class="num">$25.1K</td><td class="num share">52%</td></tr>
+                <tr><th scope="row"><span class="swatch" style="--c: var(--cat-2)"></span>Team</th><td class="num">$13.5K</td><td class="num share">28%</td></tr>
+                <tr><th scope="row"><span class="swatch" style="--c: var(--cat-3)"></span>Starter</th><td class="num">$6.7K</td><td class="num share">14%</td></tr>
+                <tr><th scope="row"><span class="swatch" style="--c: var(--cat-4)"></span>Add-ons</th><td class="num">$2.9K</td><td class="num share">6%</td></tr>
+              </tbody>
+            </table>
+          </article>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-18</code> <code>ICO-07</code> <code>COL-07</code> <code>TYP-09</code></p>
+      </section>
+
+      <!-- v4 -->
+      <section class="variant span-2" aria-labelledby="v4">
+        <h2 class="variant-label" id="v4"><span class="v">v4</span> Score gauge with scale and meaning</h2>
+        <div class="variant-stage">
+          <article class="card chart-card" aria-labelledby="health-title">
+            <header>
+              <h3 id="health-title">Workspace health</h3>
+              <p class="chart-summary">Healthy and improving since September.</p>
+            </header>
+            <div class="gauge" role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="72" aria-valuetext="72 out of 100, good" aria-labelledby="health-title">
+              <svg viewBox="0 0 200 172" aria-hidden="true">
+                <!-- 270-degree arc; pathLength="1" lets the dash equal the score as a fraction (ICO-07) -->
+                <path class="track" pathLength="1" d="M 43.43 156.57 A 80 80 0 1 1 156.57 156.57"/>
+                <path class="value" pathLength="1" d="M 43.43 156.57 A 80 80 0 1 1 156.57 156.57"/>
+                <!-- Renewal threshold at 60: angle 135 + 0.6 x 270 = 297 degrees -->
+                <line class="threshold" x1="131.78" y1="37.63" x2="141.77" y2="18.03" stroke-linecap="round"/>
+              </svg>
+              <div class="gauge-readout">
+                <div class="score num">72<span> / 100</span></div>
+                <span class="pill pill-success">Good</span>
+              </div>
+              <div class="gauge-scale" aria-hidden="true"><span>0</span><span>100</span></div>
+              <span class="gauge-tick num" aria-hidden="true">60</span>
+            </div>
+            <p class="gauge-meaning">
+              Good means above the renewal line at 60.<br>
+              <span class="delta delta-good"><svg aria-hidden="true"><use href="#i-up"/></svg>+6 pts vs Sep</span>
+            </p>
+            <ul class="factors" aria-label="Score factors">
+              <li><span>Adoption</span><strong class="num">81</strong></li>
+              <li><span>Engagement</span><strong class="num">70</strong></li>
+              <li><span>Support load</span><strong class="num">64</strong></li>
+            </ul>
+          </article>
+        </div>
+        <p class="rule-ids">Rules: <code>ICO-07</code> <code>TYP-09</code> <code>COP-10</code> <code>COL-07</code> <code>CMP-17</code></p>
+      </section>
+
+      <!-- v5 -->
+      <section class="variant span-2" aria-labelledby="v5">
+        <h2 class="variant-label" id="v5"><span class="v">v5</span> Ranked horizontal bars</h2>
+        <div class="variant-stage">
+          <article class="card chart-card" aria-labelledby="chan-title">
+            <header>
+              <h3 id="chan-title">Signups by channel</h3>
+              <p class="chart-summary">Organic search brings in 38% of October signups.</p>
+            </header>
+            <ol class="rank-list">
+              <li><span class="rank num" aria-hidden="true">1</span><div><div class="rank-line"><span class="rank-label">Organic search</span><span class="rank-pct num">38%</span><span class="rank-count num">1,842<span class="visually-hidden"> signups</span></span></div><div class="rank-track" aria-hidden="true"><span style="--w: 100%"></span></div></div></li>
+              <li><span class="rank num" aria-hidden="true">2</span><div><div class="rank-line"><span class="rank-label">Referrals</span><span class="rank-pct num">24%</span><span class="rank-count num">1,163<span class="visually-hidden"> signups</span></span></div><div class="rank-track" aria-hidden="true"><span style="--w: 63.2%"></span></div></div></li>
+              <li><span class="rank num" aria-hidden="true">3</span><div><div class="rank-line"><span class="rank-label">Paid social</span><span class="rank-pct num">17%</span><span class="rank-count num">824<span class="visually-hidden"> signups</span></span></div><div class="rank-track" aria-hidden="true"><span style="--w: 44.7%"></span></div></div></li>
+              <li><span class="rank num" aria-hidden="true">4</span><div><div class="rank-line"><span class="rank-label">Newsletter</span><span class="rank-pct num">12%</span><span class="rank-count num">582<span class="visually-hidden"> signups</span></span></div><div class="rank-track" aria-hidden="true"><span style="--w: 31.6%"></span></div></div></li>
+              <li><span class="rank num" aria-hidden="true">5</span><div><div class="rank-line"><span class="rank-label">Partners</span><span class="rank-pct num">9%</span><span class="rank-count num">436<span class="visually-hidden"> signups</span></span></div><div class="rank-track" aria-hidden="true"><span style="--w: 23.7%"></span></div></div></li>
+            </ol>
+            <p class="chart-foot num">4,847 signups in total · Oct 1 to 24, 2026</p>
+          </article>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-18</code> <code>TYP-09</code> <code>CMP-27</code> <code>COL-07</code></p>
+      </section>
+
+      <!-- v6 -->
+      <section class="variant span-all" aria-labelledby="v6">
+        <h2 class="variant-label" id="v6"><span class="v">v6</span> KPI tiles with sparklines, dark theme</h2>
+        <div class="variant-stage dark">
+          <div class="theme-scope" data-theme="dark">
+            <div class="kpi-grid" id="kpi-grid"></div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-17</code> <code>ENG-07</code> <code>COP-08</code> <code>ICO-07</code> <code>COL-07</code> <code>DRK-05</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // One locale and one set of formatters for axes, tooltips and tiles (COP-08)
+    const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+    const usdCompact = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 1 });
+    const count = new Intl.NumberFormat("en-US");
+    const compact = new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 });
+    const pct = new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: 1, signDisplay: "exceptZero" });
+    const minus = (s) => s.replace("-", "−");
+
+    function deltaHTML(change, text, goodWhenUp = true) {
+      const up = change > 0;
+      const good = up === goodWhenUp;
+      return `<span class="delta ${good ? "delta-good" : "delta-bad"}"><svg aria-hidden="true"><use href="#i-${up ? "up" : "down"}"/></svg>${text}</span>`;
+    }
+
+    function drawYAxis(root, max, step, format) {
+      const ticks = root.querySelector(".y-ticks");
+      const grid = root.querySelector(".grid");
+      ticks.textContent = "";
+      grid.textContent = "";
+      for (let v = 0; v <= max; v += step) {
+        const pos = (v / max) * 100 + "%";
+        const label = document.createElement("span");
+        label.style.bottom = pos;
+        label.textContent = format(v);
+        ticks.append(label);
+        const line = document.createElement("div");
+        line.className = "gridline";
+        line.style.bottom = pos;
+        grid.append(line);
+      }
+    }
+
+    // Keep a tooltip inside the plot, beside the point it describes (CMP-11)
+    function placeTip(tip, plot, x, y) {
+      const w = tip.offsetWidth, h = tip.offsetHeight, pw = plot.clientWidth, ph = plot.clientHeight;
+      const left = x + 12 + w <= pw ? x + 12 : x - 12 - w;
+      const top = Math.min(Math.max(y - h / 2, 0), ph - h);
+      tip.style.transform = `translate(${left}px, ${top}px)`;
+    }
+
+    // v1: bars rendered from raw values; exact value on hover and keyboard focus (CMP-18, ENG-07)
+    (function () {
+      const values = [31200, 34800, 29600, 32100, 35400, 37900, 36200, 39800, 41500, 40200, 42900, 48200];
+      const first = new Date(2025, 10, 1);
+      const max = 50000;
+      const root = document.getElementById("rev-chart");
+      const plot = root.querySelector(".plot");
+      const bars = root.querySelector(".bars");
+      const labels = root.querySelector(".x-labels");
+      const tip = root.querySelector(".tooltip");
+      const monthShort = new Intl.DateTimeFormat("en-US", { month: "short" });
+      const monthYear = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" });
+      const last = values.length - 1;
+      drawYAxis(root, max, 10000, (v) => usdCompact.format(v));
+
+      const months = values.map((_, i) => new Date(first.getFullYear(), first.getMonth() + i, 1));
+      values.forEach((value, i) => {
+        const bar = document.createElement("button");
+        bar.type = "button";
+        bar.className = "bar" + (i === last ? " is-current" : "");
+        bar.setAttribute("aria-label", `${monthYear.format(months[i])}: ${usd.format(value)}`);
+        bar.innerHTML = `<span class="bar-fill" style="--h: ${(value / max) * 100}%"></span>`;
+        bar.addEventListener("pointerenter", () => show(i));
+        bar.addEventListener("focus", () => show(i));
+        bars.append(bar);
+        const label = document.createElement("span");
+        label.textContent = monthShort.format(months[i]);
+        if (i === last) label.className = "is-current";
+        labels.append(label);
+      });
+      plot.addEventListener("pointerleave", () => show(last));
+
+      function show(i) {
+        bars.querySelectorAll(".bar").forEach((b, k) => b.classList.toggle("is-active", k === i));
+        const prev = values[i - 1];
+        const change = prev ? values[i] / prev - 1 : 0;
+        tip.innerHTML = `${monthYear.format(months[i])}<strong class="num">${usd.format(values[i])}</strong>` +
+          (prev ? deltaHTML(change, minus(pct.format(change)) + " vs " + monthShort.format(months[i - 1])) : "First month shown");
+        const fill = bars.children[i].firstElementChild.getBoundingClientRect();
+        const box = plot.getBoundingClientRect();
+        placeTip(tip, plot, fill.left - box.left + (i > 5 ? 0 : fill.width), fill.top - box.top + 24);
+      }
+      show(last);
+    })();
+
+    // v2: range control re-renders the series; crosshair tooltip on hover, focus and arrow keys (CMP-18, CMP-23)
+    (function () {
+      const end = new Date(2026, 9, 23);
+      const all = Array.from({ length: 90 }, (_, k) => {
+        const date = new Date(end.getFullYear(), end.getMonth(), end.getDate() - (89 - k));
+        const weekend = date.getDay() === 0 || date.getDay() === 6;
+        const base = 9300 + k * 38 + Math.sin(k * 1.3) * 160 + Math.cos(k * 0.45) * 220;
+        return { date, value: Math.round(base * (weekend ? 0.88 : 1)) };
+      });
+      const root = document.getElementById("dau-chart");
+      const plot = root.querySelector(".plot");
+      const area = root.querySelector(".series-area");
+      const line = root.querySelector(".series-line");
+      const cross = root.querySelector(".crosshair");
+      const dot = root.querySelector(".dot");
+      const tip = root.querySelector(".tooltip");
+      const labels = root.querySelector(".x-labels");
+      const summary = document.getElementById("dau-summary");
+      const table = document.getElementById("dau-table");
+      const dayLong = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric" });
+      const dayShort = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" });
+      const max = 16000;
+      let data = [], offset = 0, active = 0;
+      drawYAxis(root, max, 4000, (v) => compact.format(v));
+
+      function render(days) {
+        offset = all.length - days;
+        data = all.slice(offset);
+        const x = (i) => (i / (data.length - 1)) * 600;
+        const y = (v) => 220 - (v / max) * 220;
+        const d = data.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(" ");
+        line.setAttribute("d", d);
+        area.setAttribute("d", `${d} L600,220 L0,220 Z`);
+
+        const step = days <= 7 ? 1 : Math.round((days - 1) / 4);
+        labels.textContent = "";
+        for (let i = data.length - 1; i >= 0; i -= step) {
+          const label = document.createElement("span");
+          const left = (i / (data.length - 1)) * 100;
+          label.style.left = left + "%";
+          label.style.transform = left > 92 ? "translateX(-100%)" : left < 8 ? "none" : "translateX(-50%)";
+          label.textContent = dayShort.format(data[i].date);
+          labels.append(label);
+        }
+
+        const peak = data.reduce((a, b) => (b.value > a.value ? b : a));
+        const growth = data[data.length - 1].value / data[0].value - 1;
+        summary.textContent = `${growth >= 0 ? "Up" : "Down"} ${pct.format(Math.abs(growth)).replace("+", "")} in ${days} days, peaking at ${compact.format(peak.value)} on ${dayShort.format(peak.date)}.`;
+
+        table.innerHTML = `<caption>Daily active users, last ${days} days</caption><thead><tr><th scope="col">Date</th><th scope="col">Users</th></tr></thead>`;
+        const body = document.createElement("tbody");
+        data.forEach((p) => {
+          const row = body.insertRow();
+          row.insertCell().textContent = dayLong.format(p.date);
+          row.insertCell().textContent = count.format(p.value);
+        });
+        table.append(body);
+        show(data.indexOf(peak));
+      }
+
+      function show(i) {
+        active = Math.max(0, Math.min(data.length - 1, i));
+        const p = data[active];
+        const prev = all[offset + active - 1];
+        const left = (active / (data.length - 1)) * 100;
+        const top = 100 - (p.value / max) * 100;
+        cross.style.left = left + "%";
+        dot.style.left = left + "%";
+        dot.style.top = top + "%";
+        const change = prev ? p.value / prev.value - 1 : 0;
+        tip.innerHTML = `${dayLong.format(p.date)}<strong class="num">${count.format(p.value)} users</strong>` +
+          (prev ? deltaHTML(change, minus(pct.format(change)) + " vs day before") : "First day shown");
+        placeTip(tip, plot, (left / 100) * plot.clientWidth, (top / 100) * plot.clientHeight);
+      }
+
+      plot.addEventListener("pointermove", (e) => {
+        const box = plot.getBoundingClientRect();
+        show(Math.round(((e.clientX - box.left) / box.width) * (data.length - 1)));
+      });
+      plot.addEventListener("keydown", (e) => {
+        const moves = { ArrowLeft: active - 1, ArrowRight: active + 1, Home: 0, End: data.length - 1 };
+        if (e.key in moves) { e.preventDefault(); show(moves[e.key]); }
+      });
+
+      // Segmented control as a radio group with roving tabindex and arrow keys (CMP-10, CMP-23)
+      const group = document.getElementById("dau-range");
+      const options = [...group.querySelectorAll('[role="radio"]')];
+      function select(option) {
+        options.forEach((o) => {
+          const on = o === option;
+          o.setAttribute("aria-checked", on);
+          o.tabIndex = on ? 0 : -1;
+        });
+        render(Number(option.dataset.days));
+      }
+      options.forEach((o, i) => {
+        o.addEventListener("click", () => select(o));
+        o.addEventListener("keydown", (e) => {
+          const next = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+          if (!next) return;
+          e.preventDefault();
+          const target = options[(i + next + options.length) % options.length];
+          target.focus();
+          select(target);
+        });
+      });
+      render(30);
+    })();
+
+    // v6: KPI tiles mapped from raw values, formatted at render time (CMP-17, ENG-07)
+    (function () {
+      const kpis = [
+        { label: "Revenue", value: 48200, format: (v) => usdCompact.format(v), change: 0.124, delta: (c) => pct.format(c), goodWhenUp: true,
+          series: [31200, 34800, 29600, 32100, 35400, 37900, 36200, 39800, 41500, 40200, 42900, 48200] },
+        { label: "Monthly active users", value: 21460, format: (v) => compact.format(v), change: 0.081, delta: (c) => pct.format(c), goodWhenUp: true,
+          series: [15100, 15600, 15900, 16800, 17200, 17000, 18100, 18900, 19300, 19100, 19850, 21460] },
+        { label: "Churn rate", value: 0.021, format: (v) => (v * 100).toFixed(1), unit: "%", change: -0.4, delta: (c) => c.toFixed(1) + " pts", goodWhenUp: false,
+          series: [3.4, 3.3, 3.1, 3.2, 2.9, 2.8, 2.7, 2.6, 2.7, 2.4, 2.5, 2.1] },
+        { label: "First response time", value: 1.8, format: (v) => v.toFixed(1), unit: "h", change: 0.3, delta: (c) => (c > 0 ? "+" : "") + c.toFixed(1) + " h", goodWhenUp: false,
+          series: [2.4, 2.2, 2.1, 1.9, 1.7, 1.6, 1.5, 1.6, 1.4, 1.5, 1.5, 1.8] },
+      ];
+      const grid = document.getElementById("kpi-grid");
+      kpis.forEach((k, idx) => {
+        const lo = Math.min(...k.series), hi = Math.max(...k.series);
+        const x = (i) => (i / (k.series.length - 1)) * 100;
+        const y = (v) => 40 - ((v - lo) / (hi - lo)) * 34;
+        const d = k.series.map((v, i) => `${i ? "L" : "M"}${x(i).toFixed(2)},${y(v).toFixed(2)}`).join(" ");
+        const lastY = (y(k.series[k.series.length - 1]) / 48) * 100;
+        const tile = document.createElement("article");
+        tile.className = "card kpi";
+        tile.innerHTML = `
+          <h3 class="kpi-label" id="kpi-${idx}">${k.label}</h3>
+          <p class="kpi-value num">${k.format(k.value)}${k.unit ? `<small>${k.unit}</small>` : ""}</p>
+          ${deltaHTML(k.change, minus(k.delta(k.change)) + ' <span>vs last month</span>', k.goodWhenUp)}
+          <div class="spark" aria-hidden="true">
+            <svg viewBox="0 0 100 48" preserveAspectRatio="none">
+              <path d="${d} L100,48 L0,48 Z" fill="url(#area-wash)"/>
+              <path class="spark-line" d="${d}" vector-effect="non-scaling-stroke"/>
+            </svg>
+            <span class="dot" style="left: 100%; top: ${lastY}%"></span>
+          </div>
+          <p class="visually-hidden">Trend over the last 12 months, from ${k.format(k.series[0] * (k.unit === "%" ? 0.01 : 1))}${k.unit || ""} to ${k.format(k.value)}${k.unit || ""}.</p>`;
+        grid.append(tile);
+      });
+    })();
+  </script>
+</body>
+</html>

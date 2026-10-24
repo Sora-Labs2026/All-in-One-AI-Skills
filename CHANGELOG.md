@@ -1,5 +1,12 @@
 # Changelog
 
+## ProductCraft 1.4.0 (2026-10-24)
+
+- Added reference screens in `examples/`: 21 original pages with 92 screens covering dashboards (three versions), sign-in and account access, verification codes and PINs, security settings, navigation, tab bars, charts, cards, calendars, buttons, form controls, feedback, commerce, pricing, mobile apps, messaging and assistants, onboarding and error states, and brand guidelines. Each page is self-contained HTML and CSS with shared `tokens.css`, cites the rule IDs it applies and passes a WCAG AA contrast check. `examples/README.md` indexes every version.
+- The router and `modules/ui-rules.md` point agents at the matching reference screen as code to adapt with the project's own components and tokens, not as a theme to copy.
+- `check_package.py` and a new test verify that every page is listed in the index, has `lang`, a title and a viewport, loads nothing external and cites only real rule IDs.
+- The repository README and the ProductCraft README show a gallery of the screens. `scripts/screenshots.cjs` regenerates the screenshots in `docs/screens/`.
+
 ## ProductCraft 1.3.0 (2026-10-24)
 
 - Expanded the UI rulebook to 285 rules in 18 categories. New categories: `MOT` motion and animation, `ENG` front-end engineering and `BRD` brand identity. Existing categories gained rules for one-time codes, sign-in fields, uploads, async button states, honest progress, KPI tiles, charts, tables, carousels, expandable search, collapsible sidebars, checkout, paywalls, error pages and more. Existing rule IDs are unchanged.

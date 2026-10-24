@@ -54,6 +54,7 @@ def check(root):
         for r in ui_rules:
             missing=[f for f in UI_RULE_FIELDS if not r.get(f)]
             if missing: failures.append(f"UI rule {r.get('id')} missing {', '.join(missing)}")
+    examples=check_examples(root,{r.get('id') for r in ui_rules},failures)
     for p in ['WORKSPACE-SETUP-PROMPT.txt','README.md','LICENSE','modules/product-design.md','modules/interaction-feedback.md','modules/forms-conversion.md','modules/data-and-product-surfaces.md','modules/responsive-accessibility.md','modules/ethical-persuasion.md','assets/review-template.md','modules/launchguard/references/security-baseline.md','modules/ui-rules.md','modules/language-choice.md']:
         if not (root/p).is_file(): failures.append('missing '+p)
     for slug in ['ui-distiller','credential-shield','launchguard']:
@@ -67,8 +68,28 @@ def check(root):
         print('FAIL',len(failures))
         for x in failures: print('-',x)
         return 1
-    print(f'PASS: one skill entry, {len(patterns)} patterns, {len(ui_rules)} UI rules, 3 specialist modules, guides and tools present')
+    print(f'PASS: one skill entry, {len(patterns)} patterns, {len(ui_rules)} UI rules, {examples} reference screens, 3 specialist modules, guides and tools present')
     return 0
+
+def check_examples(root,rule_ids,failures):
+    """Reference screens: listed in the index, self-contained, and citing only real rule IDs."""
+    ex=root/'examples'
+    for p in ['README.md','tokens.css','gallery.css']:
+        if not (ex/p).is_file(): failures.append('missing examples/'+p)
+    pages=sorted(ex.glob('*.html'))
+    if not pages: failures.append('no reference screens in examples/')
+    index=(ex/'README.md').read_text() if (ex/'README.md').is_file() else ''
+    for f in pages:
+        t=f.read_text()
+        if f'`{f.name}`' not in index: failures.append(f'examples/{f.name} not listed in examples/README.md')
+        for need,what in [('<html lang=','lang attribute'),('<title>','title'),('name="viewport"','viewport meta')]:
+            if need not in t: failures.append(f'examples/{f.name} missing {what}')
+        if re.search(r'''(?:src|href)\s*=\s*["']?(?:https?:)?//|url\(\s*["']?(?:https?:)?//|@import''',t): failures.append(f'examples/{f.name} loads an external resource')
+        unknown=sorted(set(re.findall(r'\b[A-Z]{3}-\d{2}\b',t))-rule_ids)
+        if unknown: failures.append(f"examples/{f.name} cites unknown rule IDs: {', '.join(unknown)}")
+    for f in ex.glob('*.css'):
+        if re.search(r'''url\(\s*["']?(?:https?:)?//|@import''',f.read_text()): failures.append(f'examples/{f.name} loads an external resource')
+    return len(pages)
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--root',default=pathlib.Path(__file__).resolve().parents[1]);sys.exit(check(p.parse_args().root))
