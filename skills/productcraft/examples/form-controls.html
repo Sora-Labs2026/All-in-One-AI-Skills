@@ -1,0 +1,556 @@
+<!doctype html>
+<!-- ProductCraft example: form controls. Original Sora Labs example, MIT License.
+     Demonstrates: FRM-01, FRM-05, FRM-06, FRM-08, FRM-09, FRM-10, FRM-11, FRM-15, FRM-22, FRM-27,
+     CMP-10, CMP-16, CMP-23, CMP-24, CMP-31, BTN-06, BTN-14, MOB-01, MOB-07, MOB-10, COL-07, COL-10,
+     DRK-01, DRK-09, ICO-03, ENG-01, TYP-09 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Form controls</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    /* Field and control tokens: borders reach 3:1 against their surface (COL-01) */
+    :root { --field-border: #8a909c; --switch-off: #8a909c; --ring-soft: rgba(79, 70, 229, 0.22); }
+    [data-theme="dark"] { --field-border: #6b7280; --switch-off: #6b7280; --ring-soft: rgba(129, 140, 248, 0.3); color: var(--text); }
+
+    [hidden] { display: none !important; }
+    .sheet-header h1 { margin-top: var(--space-2); }
+    .variant > .variant-stage { flex: 1 0 auto; }
+    .stage-fill { width: 100%; }
+    .i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .card h3 { font-size: var(--text-md); }
+    .card-sub { margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+    legend { padding: 0; }
+    .group-label { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+    .group-label span { font-weight: 400; color: var(--text-2); }
+
+    /* v1 text fields: persistent label, boxed 44px control, reserved helper slot (FRM-01, FRM-10, FRM-15) */
+    .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4) var(--space-5); }
+    .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .field-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+    .field label { font-size: var(--text-sm); font-weight: 600; }
+    .tag { padding: 0 6px; border-radius: 4px; background: var(--surface-2); color: var(--text-3); font-size: 11px; font-weight: 600; line-height: 18px; }
+    .control { display: flex; align-items: center; gap: var(--space-2); height: 44px; padding: 0 var(--space-3); background: var(--surface); border: 1px solid var(--field-border); border-radius: var(--radius-sm);
+      transition-property: border-color, box-shadow; transition-duration: var(--dur-fast); }
+    .control input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; background: transparent; outline: none; font-size: var(--text-md); }
+    .control input::placeholder { color: var(--text-3); }
+    .control .i { width: 18px; height: 18px; color: var(--text-3); }
+    /* Focus is neutral brand color, never a verdict color (COL-10) */
+    .control:focus-within, .control.is-focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring-soft); }
+    .help { display: flex; align-items: flex-start; gap: 4px; min-height: 18px; font-size: var(--text-xs); line-height: 18px; color: var(--text-3); }
+    .help .i { width: 14px; height: 14px; margin-top: 2px; }
+    .is-error .control { border-color: var(--danger); }
+    .is-error .control .i, .is-error .help { color: var(--danger); }
+    .is-success .control { border-color: var(--success); }
+    .is-success .control .i, .is-success .help { color: var(--success); }
+    .is-disabled .control { background: var(--surface-2); border-color: var(--border); }
+    .is-disabled input { color: var(--text-2); cursor: not-allowed; }
+
+    /* v2 settings rows: whole row is the target, state as text (FRM-22) */
+    .settings { padding: 0; overflow: hidden; }
+    .settings-head { padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--border); }
+    .set-row { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-5); cursor: pointer; transition: background-color var(--dur-fast); }
+    .set-row + .set-row { border-top: 1px solid var(--border); }
+    .set-row:hover { background: var(--surface-2); }
+    .set-ic { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--accent-ink); }
+    .set-ic .i { width: 18px; height: 18px; }
+    .set-title { display: block; font-size: var(--text-md); font-weight: 600; }
+    .set-desc { display: block; font-size: var(--text-sm); color: var(--text-2); }
+    .set-state { min-width: 24px; font-size: var(--text-sm); font-weight: 600; color: var(--text-3); text-align: right; }
+    .switch { appearance: none; -webkit-appearance: none; position: relative; flex: none; width: 44px; height: 26px; margin: 0; border-radius: var(--radius-pill); background: var(--switch-off); cursor: pointer; transition: background-color var(--dur-fast); }
+    .switch::before { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #ffffff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); transition: transform var(--dur-fast) var(--ease-out); }
+    .switch:checked { background: var(--accent); }
+    .switch:checked::before { transform: translateX(18px); }
+    .switch:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--radius-pill); }
+    .set-note { display: flex; align-items: center; gap: var(--space-2); margin: 0 var(--space-5) var(--space-4); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--warning-soft); color: var(--warning); font-size: var(--text-sm); }
+    .set-note .i { width: 18px; height: 18px; }
+    .set-note p { flex: 1; }
+    .set-note button { min-height: 32px; padding: 0 var(--space-3); border: 1px solid currentColor; border-radius: 6px; background: transparent; color: inherit; font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+
+    /* v3 sliders: native range inputs, 44px thumbs, values shown and editable (FRM-08, FRM-27) */
+    .slider-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+    .slider-head label, .slider-head p { font-size: var(--text-sm); font-weight: 600; }
+    .slider-head output { font-size: var(--text-lg); font-weight: 700; }
+    .slider-head output small { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .slider { position: relative; height: 44px; margin: var(--space-1) 0 0; --lo: 0; --hi: 1; }
+    .slider-track { position: absolute; left: 22px; right: 22px; top: 50%; height: 6px; margin-top: -3px; border-radius: var(--radius-pill); background: var(--border); }
+    .slider-fill { position: absolute; top: 0; bottom: 0; left: calc(var(--lo) * 100%); right: calc((1 - var(--hi)) * 100%); border-radius: inherit; background: var(--accent); }
+    .range { -webkit-appearance: none; appearance: none; position: absolute; inset: 0; width: 100%; height: 44px; margin: 0; background: transparent; pointer-events: none; }
+    .range:focus-visible { outline: none; }
+    .range::-webkit-slider-runnable-track { height: 44px; background: transparent; }
+    .range::-moz-range-track { height: 44px; background: transparent; }
+    .range::-webkit-slider-thumb { -webkit-appearance: none; width: 44px; height: 44px; border: 0; border-radius: 50%; pointer-events: auto; cursor: grab;
+      background: radial-gradient(circle, var(--surface) 0 8px, var(--accent) 8.5px 11px, transparent 11.5px); }
+    .range::-moz-range-thumb { width: 44px; height: 44px; border: 0; border-radius: 50%; pointer-events: auto; cursor: grab;
+      background: radial-gradient(circle, var(--surface) 0 8px, var(--accent) 8.5px 11px, transparent 11.5px); }
+    /* Visible focus halo on the thumb (BTN-02, DRK-06) */
+    .range:focus-visible::-webkit-slider-thumb { background: radial-gradient(circle, var(--surface) 0 8px, var(--accent) 8.5px 11px, var(--ring-soft) 11.5px 16px, transparent 16.5px); }
+    .range:focus-visible::-moz-range-thumb { background: radial-gradient(circle, var(--surface) 0 8px, var(--accent) 8.5px 11px, var(--ring-soft) 11.5px 16px, transparent 16.5px); }
+    .slider-ends { display: flex; justify-content: space-between; padding: 0 var(--space-2); font-size: var(--text-xs); color: var(--text-3); }
+    .minmax { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: var(--space-3); margin-top: var(--space-4); }
+    .minmax .dash { padding-bottom: 12px; color: var(--text-3); }
+    .num-field label { display: block; margin-bottom: 6px; font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .num-field .control { height: 44px; }
+    .num-field .prefix { color: var(--text-3); font-size: var(--text-md); }
+    .divider { height: 1px; margin: var(--space-5) 0; background: var(--border); }
+
+    /* v4 segmented control and chips (CMP-10, CMP-23, MOB-07) */
+    .toolbar-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+    .segmented button { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 var(--space-3); white-space: nowrap; }
+    .segmented button .i { width: 16px; height: 16px; margin-left: -2px; }
+    .seg-row { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
+    .chip-scroll { display: flex; gap: var(--space-2); overflow-x: auto; padding: var(--space-1) var(--space-1) var(--space-2); margin: 0 calc(-1 * var(--space-1)); scroll-snap-type: x proximity; scrollbar-width: thin;
+      -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent); }
+    .chip-scroll[data-at-end="true"] { -webkit-mask-image: none; mask-image: none; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; flex: none; min-height: 40px; padding: 0 var(--space-4); border: 1px solid var(--field-border); border-radius: var(--radius-pill); background: var(--surface); color: var(--text-2); font-size: var(--text-sm); font-weight: 600; white-space: nowrap; cursor: pointer; scroll-snap-align: start;
+      transition-property: background-color, border-color, color; transition-duration: var(--dur-fast); }
+    .chip:hover { border-color: var(--text-3); color: var(--text); }
+    .chip .i { width: 16px; height: 16px; margin-left: -4px; }
+    .chip:not([aria-pressed="true"]) .i { display: none; }
+    .chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-ink); }
+    .chip .count { font-weight: 500; color: var(--text-3); }
+    .chip[aria-pressed="true"] .count { color: var(--accent-ink); }
+    .results { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--border); font-size: var(--text-sm); color: var(--text-2); }
+    .results b { color: var(--text); }
+    .text-btn { min-height: 32px; padding: 0 var(--space-2); border: 0; border-radius: 6px; background: transparent; color: var(--accent-ink); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .text-btn:hover { background: var(--accent-soft); }
+
+    /* v5 product options: swatches and stepper (CMP-24, BTN-14) */
+    .product { display: grid; grid-template-columns: 160px minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+    .product-shot { display: grid; place-items: center; height: 268px; border-radius: var(--radius-md); background: radial-gradient(120% 90% at 50% 20%, var(--surface) 0, var(--surface-2) 70%); border: 1px solid var(--border); }
+    .product-shot svg { width: 96px; height: 184px; }
+    .bottle-body { fill: var(--swatch); transition: fill var(--dur-med) var(--ease-out); }
+    .product h3 { font-size: var(--text-lg); }
+    .price { margin-top: 2px; font-size: var(--text-md); color: var(--text-2); }
+    .opt { margin-top: var(--space-4); }
+    .swatches { display: flex; gap: 2px; margin-left: -6px; }
+    .swatch { position: relative; display: grid; place-items: center; width: 44px; height: 44px; cursor: pointer; }
+    .swatch .dot { width: 28px; height: 28px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.16); }
+    /* Selected swatch: offset ring plus the visible name above (CMP-24, COL-07) */
+    .swatch input:checked + .dot { box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.16), 0 0 0 2px var(--surface), 0 0 0 4px var(--text); }
+    .swatch input:focus-visible + .dot { outline: 2px solid var(--focus); outline-offset: 6px; }
+    .stepper-row { display: flex; align-items: flex-end; gap: var(--space-3); margin-top: var(--space-4); }
+    .stepper { display: inline-flex; align-items: center; border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--surface); }
+    .stepper button { display: grid; place-items: center; width: 44px; height: 44px; border: 0; background: transparent; color: var(--text); cursor: pointer; border-radius: var(--radius-sm); }
+    .stepper button:hover { background: var(--surface-2); }
+    .stepper button[aria-disabled="true"] { color: var(--text-3); cursor: not-allowed; background: transparent; }
+    .stepper button .i { width: 18px; height: 18px; }
+    .stepper input { width: 36px; height: 44px; padding: 0; border: 0; border-left: 1px solid var(--border); border-right: 1px solid var(--border); background: transparent; text-align: center; font-size: var(--text-md); font-weight: 600; }
+    .stepper input:focus-visible { outline-offset: -2px; border-radius: 0; }
+    .add-btn { flex: 1; min-height: 46px; }
+    .fine { margin-top: var(--space-2); font-size: var(--text-xs); color: var(--text-3); }
+
+    /* v6 plan tiles and checkbox list (FRM-09, CMP-31) */
+    .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+    .tile { position: relative; display: flex; flex-direction: column; gap: 2px; padding: var(--space-5) var(--space-4) var(--space-4); border: 1px solid var(--field-border); border-radius: var(--radius-md); background: var(--surface); cursor: pointer; transition-property: border-color, box-shadow; transition-duration: var(--dur-fast); }
+    .tile:hover { border-color: var(--text-3); }
+    .tile-size { font-size: var(--text-xl); font-weight: 700; line-height: 1.2; }
+    .tile-price { font-size: var(--text-sm); color: var(--text-2); }
+    .tiles { padding-top: var(--space-2); }
+    .tile .badge { position: absolute; top: -11px; left: var(--space-3); background: var(--surface); box-shadow: inset 0 0 0 1px var(--accent); }
+    .tile:has(input:checked) .badge { background: var(--accent); color: var(--on-accent); box-shadow: none; }
+    .tile .mark { position: absolute; top: var(--space-3); right: var(--space-3); display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--field-border); color: var(--on-accent); }
+    .tile .mark .i { width: 14px; height: 14px; stroke-width: 2.5; visibility: hidden; }
+    .tile:has(input:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+    .tile:has(input:checked) .mark { border-color: var(--accent); background: var(--accent); }
+    .tile:has(input:checked) .mark .i { visibility: visible; }
+    .tile:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+    .check { display: flex; align-items: flex-start; gap: var(--space-3); min-height: 44px; padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); cursor: pointer; }
+    .check:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+    .check input { appearance: none; -webkit-appearance: none; display: grid; place-items: center; flex: none; width: 20px; height: 20px; margin: 1px 0 0; border: 1.5px solid var(--field-border); border-radius: 5px; background: var(--surface); cursor: pointer; }
+    .check input::after { content: ""; width: 10px; height: 6px; margin-top: -3px; border-left: 2px solid var(--on-accent); border-bottom: 2px solid var(--on-accent); transform: rotate(-45deg); opacity: 0; }
+    .check input:checked { border-color: var(--accent); background: var(--accent); }
+    .check input:checked::after { opacity: 1; }
+    .check b { display: block; font-size: var(--text-sm); }
+    .check small { display: block; font-size: var(--text-xs); color: var(--text-2); }
+    .check-count { font-size: var(--text-sm); color: var(--text-2); font-weight: 400; }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+    <symbol id="i-at" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 17l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+    <symbol id="i-board" viewBox="0 0 24 24"><rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="14" y="4" width="7" height="10" rx="1.5"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="6"/><circle cx="12" cy="12" r="3.5"/></svg>ProductCraft · Example screens</span>
+        <h1>Form controls</h1>
+        <p>Field states, settings switches, sliders with exact values, segmented controls and chips, swatches and steppers, plan tiles and checklists.</p>
+      </div>
+    </header>
+
+    <div class="variants cols-2">
+      <!-- v1: every text field state -->
+      <section class="variant" aria-labelledby="v1-title">
+        <h2 class="variant-label" id="v1-title"><span class="v">v1</span> Text field states</h2>
+        <div class="variant-stage">
+          <form class="stage-fill card fields" novalidate onsubmit="return false">
+            <div class="field">
+              <div class="field-top"><label for="f-workspace">Workspace name</label><span class="tag">Default</span></div>
+              <div class="control"><input id="f-workspace" name="workspace" placeholder="e.g. Sora Analytics" aria-describedby="h-workspace"></div>
+              <p class="help" id="h-workspace">Shown to everyone you invite.</p>
+            </div>
+            <div class="field">
+              <div class="field-top"><label for="f-display">Display name</label><span class="tag">Focus</span></div>
+              <div class="control is-focus"><svg class="i" aria-hidden="true"><use href="#i-user"/></svg><input id="f-display" name="display" value="Avery" autocomplete="nickname" aria-describedby="h-display"></div>
+              <p class="help" id="h-display">How teammates see you in comments.</p>
+            </div>
+            <div class="field">
+              <div class="field-top"><label for="f-email">Work email</label><span class="tag">Filled</span></div>
+              <div class="control"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg><input id="f-email" name="email" type="email" autocomplete="email" value="priya.nair@example.com" aria-describedby="h-email"></div>
+              <p class="help" id="h-email">Receipts are sent here.</p>
+            </div>
+            <div class="field is-error">
+              <div class="field-top"><label for="f-phone">Phone</label><span class="tag">Error</span></div>
+              <div class="control"><svg class="i" aria-hidden="true"><use href="#i-phone"/></svg><input id="f-phone" name="phone" type="tel" autocomplete="tel" value="+1 555-01" aria-invalid="true" aria-describedby="h-phone"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg></div>
+              <p class="help" id="h-phone"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>Enter all 10 digits, like +1 555-0142.</p>
+            </div>
+            <div class="field is-success">
+              <div class="field-top"><label for="f-user">Username</label><span class="tag">Success</span></div>
+              <div class="control"><svg class="i" aria-hidden="true" style="color:var(--text-3)"><use href="#i-at"/></svg><input id="f-user" name="username" autocomplete="username" value="avery.stone" aria-describedby="h-user"><svg class="i" aria-hidden="true"><use href="#i-check-circle"/></svg></div>
+              <p class="help" id="h-user"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Available</p>
+            </div>
+            <div class="field is-disabled">
+              <div class="field-top"><label for="f-currency">Billing currency</label><span class="tag">Disabled</span></div>
+              <div class="control"><input id="f-currency" name="currency" value="USD, US dollar" disabled aria-describedby="h-currency"><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg></div>
+              <p class="help" id="h-currency">Set by your workspace admin.</p>
+            </div>
+          </form>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-01</code> <code>FRM-10</code> <code>FRM-11</code> <code>FRM-15</code> <code>FRM-05</code> <code>COL-07</code> <code>COL-10</code></p>
+      </section>
+
+      <!-- v2: settings switches, dark theme -->
+      <section class="variant" aria-labelledby="v2-title">
+        <h2 class="variant-label" id="v2-title"><span class="v">v2</span> Settings switch rows (dark)</h2>
+        <div class="variant-stage dark" data-theme="dark">
+          <div class="stage-fill card settings">
+            <div class="settings-head"><h3>Notifications</h3><p class="card-sub">Changes apply right away.</p></div>
+            <label class="set-row">
+              <span class="set-ic"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg></span>
+              <span><span class="set-title" id="t-digest">Weekly digest</span><span class="set-desc" id="d-digest">A summary of your dashboards every Monday.</span></span>
+              <span class="set-state" aria-hidden="true">On</span>
+              <input class="switch" type="checkbox" role="switch" checked aria-labelledby="t-digest" aria-describedby="d-digest">
+            </label>
+            <label class="set-row">
+              <span class="set-ic"><svg class="i" aria-hidden="true"><use href="#i-at"/></svg></span>
+              <span><span class="set-title" id="t-mentions">Mentions</span><span class="set-desc" id="d-mentions">When someone mentions you in a comment.</span></span>
+              <span class="set-state" aria-hidden="true">On</span>
+              <input class="switch" type="checkbox" role="switch" checked aria-labelledby="t-mentions" aria-describedby="d-mentions">
+            </label>
+            <label class="set-row">
+              <span class="set-ic"><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg></span>
+              <span><span class="set-title" id="t-updates">Product updates</span><span class="set-desc" id="d-updates">New features and tips, about once a month.</span></span>
+              <span class="set-state" aria-hidden="true">Off</span>
+              <input class="switch" type="checkbox" role="switch" aria-labelledby="t-updates" aria-describedby="d-updates">
+            </label>
+            <label class="set-row">
+              <span class="set-ic"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg></span>
+              <span><span class="set-title" id="t-signin">Sign-in alerts</span><span class="set-desc" id="d-signin">Email me when a new device signs in.</span></span>
+              <span class="set-state" aria-hidden="true">Off</span>
+              <input class="switch" type="checkbox" role="switch" id="sw-signin" data-sensitive aria-labelledby="t-signin" aria-describedby="d-signin">
+            </label>
+            <div class="set-note" id="signin-note" role="status">
+              <svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>
+              <p>Sign-in alerts are off. New devices won't be reported.</p>
+              <button type="button" id="signin-undo">Undo</button>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-22</code> <code>FRM-06</code> <code>FRM-27</code> <code>ICO-03</code> <code>COL-07</code> <code>DRK-01</code> <code>DRK-09</code></p>
+      </section>
+
+      <!-- v3: sliders paired with exact values -->
+      <section class="variant" aria-labelledby="v3-title">
+        <h2 class="variant-label" id="v3-title"><span class="v">v3</span> Sliders with live values and number inputs</h2>
+        <div class="variant-stage">
+          <div class="stage-fill card">
+            <div role="group" aria-labelledby="price-label">
+              <div class="slider-head"><p id="price-label">Price range</p><output class="num" id="price-out" for="price-lo price-hi">$40 <small>to</small> $180</output></div>
+              <div class="slider" id="price-slider" style="--lo: 0.08; --hi: 0.36">
+                <div class="slider-track" aria-hidden="true"><div class="slider-fill"></div></div>
+                <input class="range" type="range" id="price-lo" min="0" max="500" step="5" value="40" aria-label="Minimum price" aria-valuetext="$40">
+                <input class="range" type="range" id="price-hi" min="0" max="500" step="5" value="180" aria-label="Maximum price" aria-valuetext="$180">
+              </div>
+              <div class="slider-ends num" aria-hidden="true"><span>$0</span><span>$500</span></div>
+              <div class="minmax">
+                <div class="num-field"><label for="price-min">Min price</label><div class="control"><span class="prefix" aria-hidden="true">$</span><input class="num" id="price-min" type="number" inputmode="numeric" min="0" max="500" step="5" value="40"></div></div>
+                <span class="dash" aria-hidden="true">to</span>
+                <div class="num-field"><label for="price-max">Max price</label><div class="control"><span class="prefix" aria-hidden="true">$</span><input class="num" id="price-max" type="number" inputmode="numeric" min="0" max="500" step="5" value="180"></div></div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div class="slider-head"><label for="radius">Delivery radius</label><output class="num" id="radius-out" for="radius">12 <small>km</small></output></div>
+            <div class="slider" id="radius-slider" style="--lo: 0; --hi: 0.2245">
+              <div class="slider-track" aria-hidden="true"><div class="slider-fill"></div></div>
+              <input class="range" type="range" id="radius" min="1" max="50" step="1" value="12" aria-valuetext="12 kilometers">
+            </div>
+            <div class="slider-ends num" aria-hidden="true"><span>1 km</span><span>50 km</span></div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-08</code> <code>FRM-27</code> <code>FRM-05</code> <code>MOB-01</code> <code>TYP-09</code> <code>FRM-01</code></p>
+      </section>
+
+      <!-- v4: segmented control and filter chips -->
+      <section class="variant" aria-labelledby="v4-title">
+        <h2 class="variant-label" id="v4-title"><span class="v">v4</span> Segmented control and filter chips</h2>
+        <div class="variant-stage">
+          <div class="stage-fill card toolbar-card">
+            <div class="seg-row">
+              <div>
+                <p class="group-label" id="period-label">Period</p>
+                <div class="segmented" role="radiogroup" aria-labelledby="period-label">
+                  <button type="button" role="radio" aria-checked="false" tabindex="-1">7 days</button>
+                  <button type="button" role="radio" aria-checked="true" tabindex="0">30 days</button>
+                  <button type="button" role="radio" aria-checked="false" tabindex="-1">90 days</button>
+                  <button type="button" role="radio" aria-checked="false" tabindex="-1">1 year</button>
+                </div>
+              </div>
+              <div>
+                <p class="group-label" id="view-label">View</p>
+                <div class="segmented" role="radiogroup" aria-labelledby="view-label">
+                  <button type="button" role="radio" aria-checked="true" tabindex="0"><svg class="i" aria-hidden="true"><use href="#i-list"/></svg>List</button>
+                  <button type="button" role="radio" aria-checked="false" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-board"/></svg>Board</button>
+                </div>
+              </div>
+            </div>
+            <div>
+              <p class="group-label"><span id="chips-label" style="color:var(--text);font-weight:600">Filters</span><button class="text-btn" type="button" id="chips-clear">Clear all</button></p>
+              <div class="chip-scroll" id="chips" role="group" aria-labelledby="chips-label">
+                <button class="chip" type="button" aria-pressed="true" data-f="0.58"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Paid</button>
+                <button class="chip" type="button" aria-pressed="true" data-f="0.42"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Unfulfilled</button>
+                <button class="chip" type="button" aria-pressed="false" data-f="0.35"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>International</button>
+                <button class="chip" type="button" aria-pressed="false" data-f="0.25"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Subscription</button>
+                <button class="chip" type="button" aria-pressed="false" data-f="0.2"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Gift card</button>
+                <button class="chip" type="button" aria-pressed="false" data-f="0.12"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Flagged</button>
+                <button class="chip" type="button" aria-pressed="false" data-f="0.08"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Pre-order</button>
+              </div>
+            </div>
+            <p class="results" role="status"><span>Showing <b class="num" id="match">299</b> of <span class="num">1,240</span> orders</span><span class="num" id="chip-count">2 filters on</span></p>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-23</code> <code>CMP-10</code> <code>FRM-06</code> <code>MOB-07</code> <code>COL-07</code> <code>CMP-16</code></p>
+      </section>
+
+      <!-- v5: swatch picker and quantity stepper -->
+      <section class="variant" aria-labelledby="v5-title">
+        <h2 class="variant-label" id="v5-title"><span class="v">v5</span> Swatch picker and quantity stepper</h2>
+        <div class="variant-stage">
+          <div class="stage-fill card product" id="product" style="--swatch: #5e7d55">
+            <div class="product-shot" aria-hidden="true">
+              <svg viewBox="0 0 104 200">
+                <rect x="38" y="6" width="28" height="20" rx="5" fill="#2b2f36"/>
+                <rect x="42" y="24" width="20" height="12" fill="#2b2f36" opacity="0.75"/>
+                <rect class="bottle-body" x="18" y="34" width="68" height="160" rx="24"/>
+                <rect x="28" y="52" width="8" height="118" rx="4" fill="#ffffff" opacity="0.28"/>
+                <rect x="18" y="104" width="68" height="34" fill="#000000" opacity="0.08"/>
+              </svg>
+            </div>
+            <div>
+              <h3>Trail bottle, 750 ml</h3>
+              <p class="price num">$28.00</p>
+              <fieldset class="opt">
+                <legend class="group-label">Color: <span id="swatch-name" style="color:var(--text);font-weight:600">Moss</span></legend>
+                <div class="swatches" id="swatches">
+                  <label class="swatch"><input class="visually-hidden" type="radio" name="color" value="Glacier" data-c="#8fb8d9"><span class="dot" style="--c:#8fb8d9"></span><span class="visually-hidden">Glacier</span></label>
+                  <label class="swatch"><input class="visually-hidden" type="radio" name="color" value="Moss" data-c="#5e7d55" checked><span class="dot" style="--c:#5e7d55"></span><span class="visually-hidden">Moss</span></label>
+                  <label class="swatch"><input class="visually-hidden" type="radio" name="color" value="Ember" data-c="#c8553d"><span class="dot" style="--c:#c8553d"></span><span class="visually-hidden">Ember</span></label>
+                  <label class="swatch"><input class="visually-hidden" type="radio" name="color" value="Graphite" data-c="#3c4048"><span class="dot" style="--c:#3c4048"></span><span class="visually-hidden">Graphite</span></label>
+                  <label class="swatch"><input class="visually-hidden" type="radio" name="color" value="Sand" data-c="#d8c7a4"><span class="dot" style="--c:#d8c7a4"></span><span class="visually-hidden">Sand</span></label>
+                </div>
+              </fieldset>
+              <div class="opt">
+                <p class="group-label" id="qty-label">Quantity</p>
+                <div class="stepper-row">
+                  <div class="stepper" role="group" aria-labelledby="qty-label">
+                    <button type="button" id="qty-dec" aria-label="Decrease quantity"><svg class="i" aria-hidden="true"><use href="#i-minus"/></svg></button>
+                    <input class="num" id="qty" type="text" inputmode="numeric" pattern="[0-9]*" value="2" aria-labelledby="qty-label" aria-describedby="qty-help">
+                    <button type="button" id="qty-inc" aria-label="Increase quantity"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg></button>
+                  </div>
+                  <button class="btn btn-primary add-btn" type="button" id="add-btn">Add to cart, <span class="num" id="add-total">$56.00</span></button>
+                </div>
+                <p class="fine" id="qty-help">Up to 10 per order. Ships in 2 days.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-24</code> <code>FRM-06</code> <code>BTN-14</code> <code>MOB-01</code> <code>COL-07</code> <code>ICO-04</code></p>
+      </section>
+
+      <!-- v6: selectable plan tiles and a checkbox list -->
+      <section class="variant" aria-labelledby="v6-title">
+        <h2 class="variant-label" id="v6-title"><span class="v">v6</span> Plan tiles and checkbox list</h2>
+        <div class="variant-stage">
+          <div class="stage-fill card">
+            <fieldset>
+              <legend class="group-label">Storage plan</legend>
+              <div class="tiles">
+                <label class="tile"><input class="visually-hidden" type="radio" name="plan" value="200gb"><span class="mark" aria-hidden="true"><svg class="i"><use href="#i-check"/></svg></span><span class="tile-size num">200 GB</span><span class="tile-price num">$2.99 per month</span></label>
+                <label class="tile"><input class="visually-hidden" type="radio" name="plan" value="2tb" checked><span class="mark" aria-hidden="true"><svg class="i"><use href="#i-check"/></svg></span><span class="pill pill-accent badge">Recommended</span><span class="tile-size num">2 TB</span><span class="tile-price num">$9.99 per month</span></label>
+                <label class="tile"><input class="visually-hidden" type="radio" name="plan" value="5tb"><span class="mark" aria-hidden="true"><svg class="i"><use href="#i-check"/></svg></span><span class="tile-size num">5 TB</span><span class="tile-price num">$24.99 per month</span></label>
+              </div>
+            </fieldset>
+            <div class="divider"></div>
+            <div role="group" aria-labelledby="backup-label">
+              <p class="group-label"><span id="backup-label" style="color:var(--text);font-weight:600">Back up automatically</span><span class="check-count num" id="check-count" aria-live="polite">2 of 4 selected</span></p>
+              <div class="checks" id="checks">
+                <label class="check"><input type="checkbox" checked><span><b>Photos and videos</b><small>Camera roll and edits</small></span></label>
+                <label class="check"><input type="checkbox" checked><span><b>Documents</b><small>Files in Sora Drive</small></span></label>
+                <label class="check"><input type="checkbox"><span><b>Shared folders</b><small>Folders others shared</small></span></label>
+                <label class="check"><input type="checkbox"><span><b>Device settings</b><small>Wi-Fi, apps, layout</small></span></label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-09</code> <code>BTN-06</code> <code>FRM-06</code> <code>CMP-31</code> <code>CMP-16</code> <code>MOB-10</code> <code>COL-07</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // FRM-22: switches apply at once, mirror their state as text, and offer undo for security changes.
+    (() => {
+      const note = document.getElementById("signin-note");
+      const signin = document.getElementById("sw-signin");
+      document.querySelectorAll(".switch").forEach((sw) => {
+        sw.addEventListener("change", () => {
+          sw.closest(".set-row").querySelector(".set-state").textContent = sw.checked ? "On" : "Off";
+          // Example only: replace with a request to your API that saves this preference.
+          if (sw.hasAttribute("data-sensitive")) note.hidden = sw.checked;
+        });
+      });
+      document.getElementById("signin-undo").addEventListener("click", () => {
+        signin.checked = true;
+        signin.dispatchEvent(new Event("change"));
+        signin.focus();
+      });
+    })();
+
+    // FRM-08: keep the slider thumbs, the live readout and the number fields in sync.
+    (() => {
+      const fmt = (v) => "$" + v;
+      const box = document.getElementById("price-slider");
+      const lo = document.getElementById("price-lo"), hi = document.getElementById("price-hi");
+      const min = document.getElementById("price-min"), max = document.getElementById("price-max");
+      const out = document.getElementById("price-out");
+      const step = Number(lo.step), top = Number(lo.max);
+
+      function render() {
+        box.style.setProperty("--lo", lo.value / top);
+        box.style.setProperty("--hi", hi.value / top);
+        lo.setAttribute("aria-valuetext", fmt(lo.value));
+        hi.setAttribute("aria-valuetext", fmt(hi.value));
+        out.innerHTML = `${fmt(lo.value)} <small>to</small> ${fmt(hi.value)}`;
+      }
+      // Thumbs never cross: each one stops a step short of the other.
+      lo.addEventListener("input", () => { lo.value = Math.min(lo.value, hi.value - step); min.value = lo.value; render(); });
+      hi.addEventListener("input", () => { hi.value = Math.max(hi.value, Number(lo.value) + step); max.value = hi.value; render(); });
+      // Typed values are clamped when the field is left, not on every keystroke (FRM-11).
+      min.addEventListener("change", () => { const v = Math.max(0, Math.min(Number(min.value) || 0, hi.value - step)); min.value = lo.value = v; render(); });
+      max.addEventListener("change", () => { const v = Math.min(top, Math.max(Number(max.value) || 0, Number(lo.value) + step)); max.value = hi.value = v; render(); });
+
+      const radius = document.getElementById("radius");
+      const rBox = document.getElementById("radius-slider");
+      const rOut = document.getElementById("radius-out");
+      radius.addEventListener("input", () => {
+        rBox.style.setProperty("--hi", (radius.value - radius.min) / (radius.max - radius.min));
+        rOut.innerHTML = `${radius.value} <small>km</small>`;
+        radius.setAttribute("aria-valuetext", radius.value + " kilometers");
+      });
+    })();
+
+    // CMP-23: radiogroups with roving tabindex and arrow keys; chips toggle aria-pressed.
+    (() => {
+      document.querySelectorAll('.segmented[role="radiogroup"]').forEach((group) => {
+        const radios = [...group.querySelectorAll('[role="radio"]')];
+        const select = (r) => {
+          radios.forEach((x) => { x.setAttribute("aria-checked", String(x === r)); x.tabIndex = x === r ? 0 : -1; });
+          r.focus();
+        };
+        group.addEventListener("click", (e) => { const r = e.target.closest('[role="radio"]'); if (r) select(r); });
+        group.addEventListener("keydown", (e) => {
+          const i = radios.indexOf(document.activeElement);
+          const move = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+          if (move) { e.preventDefault(); select(radios[(i + move + radios.length) % radios.length]); }
+          if (e.key === "Home") { e.preventDefault(); select(radios[0]); }
+          if (e.key === "End") { e.preventDefault(); select(radios[radios.length - 1]); }
+        });
+      });
+
+      const chips = [...document.querySelectorAll("#chips .chip")];
+      const scroller = document.getElementById("chips");
+      const update = () => {
+        const on = chips.filter((c) => c.getAttribute("aria-pressed") === "true");
+        // Example only: replace with a request to your API that returns the filtered count.
+        const n = Math.round(on.reduce((acc, c) => acc * Number(c.dataset.f), 1240) * (on.length ? 1 + on.length * 0.1 : 1));
+        document.getElementById("match").textContent = n.toLocaleString("en-US");
+        document.getElementById("chip-count").textContent = on.length ? `${on.length} filter${on.length > 1 ? "s" : ""} on` : "No filters";
+      };
+      chips.forEach((c) => c.addEventListener("click", () => {
+        c.setAttribute("aria-pressed", String(c.getAttribute("aria-pressed") !== "true"));
+        update();
+      }));
+      document.getElementById("chips-clear").addEventListener("click", () => { chips.forEach((c) => c.setAttribute("aria-pressed", "false")); update(); });
+      // Drop the edge fade once the row is scrolled to its end (MOB-07).
+      scroller.addEventListener("scroll", () => {
+        scroller.dataset.atEnd = String(scroller.scrollLeft + scroller.clientWidth >= scroller.scrollWidth - 2);
+      });
+      update();
+    })();
+
+    // CMP-24, BTN-14: swatches retint the product; the stepper keeps the button amount in step.
+    (() => {
+      const product = document.getElementById("product");
+      const name = document.getElementById("swatch-name");
+      document.getElementById("swatches").addEventListener("change", (e) => {
+        product.style.setProperty("--swatch", e.target.dataset.c);
+        name.textContent = e.target.value;
+      });
+
+      const PRICE = 28, MIN = 1, MAX = 10;
+      const qty = document.getElementById("qty");
+      const dec = document.getElementById("qty-dec"), inc = document.getElementById("qty-inc");
+      const total = document.getElementById("add-total");
+      const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+      function set(n) {
+        n = Math.max(MIN, Math.min(MAX, Number.parseInt(n, 10) || MIN));
+        qty.value = n;
+        dec.setAttribute("aria-disabled", String(n === MIN));
+        inc.setAttribute("aria-disabled", String(n === MAX));
+        total.textContent = money.format(n * PRICE);
+      }
+      dec.addEventListener("click", () => set(Number(qty.value) - 1));
+      inc.addEventListener("click", () => set(Number(qty.value) + 1));
+      qty.addEventListener("change", () => set(qty.value));
+      set(qty.value);
+    })();
+
+    // CMP-31: live count for the checkbox list.
+    (() => {
+      const boxes = [...document.querySelectorAll("#checks input")];
+      const count = document.getElementById("check-count");
+      const update = () => { count.textContent = `${boxes.filter((b) => b.checked).length} of ${boxes.length} selected`; };
+      boxes.forEach((b) => b.addEventListener("change", update));
+    })();
+  </script>
+</body>
+</html>

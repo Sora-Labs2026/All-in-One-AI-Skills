@@ -1,0 +1,493 @@
+<!doctype html>
+<!-- ProductCraft example: settings. Original Sora Labs example, MIT License.
+     Demonstrates: SCR-03, SCR-04, SCR-05, FRM-01, FRM-22, FRM-23, FRM-27, NAV-03, NAV-07, NAV-08, NAV-14,
+     NAV-15, ICO-03, ICO-04, BTN-01, BTN-09, FBK-03, FBK-06, FBK-08, COL-07, LAY-01, LAY-07, MOB-01 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Security settings</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    :root {
+      /* Off-track gray reaches 3.1:1 on the surface, so the control stays visible (WCAG 1.4.11) */
+      --switch-off: #8c93a0;
+    }
+    .i {
+      width: 20px; height: 20px; flex: none;
+      fill: none; stroke: currentColor; stroke-width: 1.75;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+    kbd {
+      display: inline-grid; place-items: center;
+      min-width: 22px; height: 22px; padding: 0 6px;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: var(--surface-2); color: var(--text-3);
+      font: 600 var(--text-xs)/1 var(--font);
+    }
+
+    /* ---------- App shell: settings nav + main ---------- */
+    .shell { display: grid; grid-template-columns: 272px minmax(0, 1fr); min-height: 100vh; }
+
+    /* The grid cell carries the background; the inner column sticks so the account stays in view */
+    .snav-cell { background: var(--surface); border-right: 1px solid var(--border); }
+    .snav {
+      position: sticky; top: 0; height: 100vh;
+      display: flex; flex-direction: column; gap: var(--space-5);
+      padding: var(--space-5) var(--space-4);
+    }
+    .brand { display: flex; align-items: center; gap: var(--space-2); padding: 0 var(--space-2); color: var(--text); font-size: var(--text-lg); font-weight: 700; }
+    .brand:hover { text-decoration: none; }
+    .logo { width: 28px; height: 28px; flex: none; }
+    .logo .bg { fill: var(--accent); }
+    .logo .fg { fill: none; stroke: var(--on-accent); stroke-width: 2.4; stroke-linecap: round; }
+    .logo .dot { fill: var(--on-accent); }
+    .back { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 32px; padding: 0 var(--space-2); border-radius: var(--radius-sm); color: var(--text-2); font-size: var(--text-sm); font-weight: 500; }
+    .back:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    .back .i { width: 16px; height: 16px; }
+    .snav-title { padding: 0 var(--space-2); font-size: var(--text-lg); }
+    .snav nav { display: grid; gap: var(--space-5); }
+    .snav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+    .snav-label { padding: 0 10px; margin-bottom: var(--space-1); font-size: var(--text-xs); font-weight: 600; line-height: 20px; color: var(--text-3); }
+    .snav-link {
+      display: flex; align-items: center; gap: var(--space-3);
+      min-height: 40px; padding: 0 10px; border-radius: var(--radius-sm);
+      color: var(--text-2); font-weight: 500;
+    }
+    .snav-link .i { color: var(--text-3); }
+    .snav-link:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    /* Active: tinted pill + bold label + accent icon (NAV-03) */
+    .snav-link[aria-current="page"] { background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; }
+    .snav-link[aria-current="page"] .i { color: var(--accent-ink); }
+    .snav-link .meta { margin-left: auto; font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .me { margin-top: auto; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-md); background: var(--surface-2); }
+    .me strong { display: block; font-size: var(--text-sm); font-weight: 600; }
+    .me small { display: block; font-size: var(--text-xs); color: var(--text-2); }
+
+    .main {
+      display: grid; grid-template-columns: minmax(0, 720px) 312px; gap: var(--space-7);
+      align-items: start;
+      padding: var(--space-8) var(--space-8) var(--space-8);
+    }
+    .content { display: grid; gap: var(--space-6); min-width: 0; }
+    .page-head p { margin-top: var(--space-2); color: var(--text-2); max-width: 60ch; }
+
+    /* ---------- Settings search with a visible label (SCR-05, FRM-01) ---------- */
+    .field-label { display: block; margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--text); }
+    .search { position: relative; }
+    .search > .i { position: absolute; left: var(--space-3); top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+    .search input {
+      width: 100%; height: 44px; padding: 0 var(--space-8) 0 40px;
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      background: var(--surface); font-size: var(--text-md);
+    }
+    .search input::placeholder { color: var(--text-3); }
+    .search input::-webkit-search-cancel-button { appearance: none; }
+    .search input:focus-visible { border-color: var(--accent); outline-offset: 1px; }
+    .search kbd { position: absolute; right: var(--space-3); top: 50%; transform: translateY(-50%); }
+    .no-results { padding: var(--space-6); border: 1px dashed var(--border); border-radius: var(--radius-lg); text-align: center; color: var(--text-2); }
+    .no-results[hidden] { display: none; }
+
+    /* ---------- Groups: small label, then an inset card (SCR-03) ---------- */
+    .group[hidden] { display: none; }
+    .group-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin: 0 var(--space-1) var(--space-2); }
+    .group-label { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .group-head p { font-size: var(--text-sm); color: var(--text-3); }
+    .inset { list-style: none; margin: 0; padding: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+
+    /* Each row: leading icon, title + one-line description, trailing control (FRM-22, ICO-03) */
+    .set-row {
+      position: relative;
+      display: flex; align-items: center; gap: var(--space-4);
+      min-height: 72px; padding: var(--space-4) var(--space-5);
+      color: var(--text);
+    }
+    .set-row[hidden] { display: none; }
+    .inset > li { position: relative; }
+    .inset > li + li::before { content: ""; position: absolute; z-index: 1; top: 0; left: 80px; right: 0; height: 1px; background: var(--border); }
+    .set-row.toggle { cursor: pointer; }
+    .set-row.toggle:hover, a.set-row:hover { background: color-mix(in srgb, var(--surface-2) 60%, var(--surface)); text-decoration: none; }
+    .row-ico { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-2); }
+    .row-ico.danger { background: var(--danger-soft); color: var(--danger); }
+    .row-text { flex: 1; min-width: 0; }
+    .row-title { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); font-weight: 600; }
+    .row-desc { margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    .row-value { font-size: var(--text-sm); color: var(--text-2); white-space: nowrap; }
+    .row-chev { color: var(--text-3); }
+    .group-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) var(--space-5); border-top: 1px solid var(--border); background: var(--surface-2); font-size: var(--text-sm); color: var(--text-2); }
+    .btn-sm { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+
+    /* ---------- Switch: role="switch" + aria-checked; knob position and the On/Off word carry state, not color alone ---------- */
+    .state { min-width: 28px; font-size: var(--text-sm); font-weight: 600; color: var(--text-2); text-align: right; }
+    .switch {
+      position: relative; flex: none;
+      width: 44px; height: 26px; padding: 0;
+      border: 0; border-radius: var(--radius-pill);
+      background: var(--switch-off); cursor: pointer;
+      transition: background-color var(--dur-fast);
+    }
+    .switch::after {
+      content: ""; position: absolute; top: 3px; left: 3px;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: #ffffff; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.3);
+      transition: transform var(--dur-med) var(--ease-out);
+    }
+    .switch[aria-checked="true"] { background: var(--accent); }
+    .switch[aria-checked="true"]::after { transform: translateX(18px); }
+    .switch:focus-visible { outline-offset: 3px; border-radius: var(--radius-pill); }
+
+    /* Confirmation toast with Undo for security-sensitive changes (FRM-22, FBK-03, FBK-04) */
+    .toast {
+      position: fixed; z-index: 20; left: 50%; bottom: var(--space-5);
+      display: flex; align-items: center; gap: var(--space-3);
+      padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+      border-radius: var(--radius-md);
+      background: var(--text); color: var(--surface);
+      font-size: var(--text-sm); font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      opacity: 0; transform: translate(-50%, 16px); pointer-events: none;
+      transition: opacity var(--dur-med) var(--ease-out), transform var(--dur-med) var(--ease-out);
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+    /* While hidden, Undo must not take focus; the status text stays exposed for announcements (ENG-05) */
+    .toast:not(.show) button { visibility: hidden; }
+    .toast .i { width: 18px; height: 18px; }
+    .toast button { min-height: 36px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-sm); background: transparent; color: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+    .toast button:hover { background: rgba(255, 255, 255, 0.12); }
+    .toast button:focus-visible { outline-color: var(--surface); }
+
+    /* Danger zone: last, separate, red button, specific copy (SCR-03, FBK-08) */
+    .danger .group-label { color: var(--danger); }
+    .danger .inset { border-color: color-mix(in srgb, var(--danger) 35%, var(--border)); }
+
+    /* ---------- Right column ---------- */
+    .side { position: sticky; top: var(--space-8); display: grid; gap: var(--space-4); }
+    .side h2 { font-size: var(--text-md); }
+    .chk-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .track { height: 8px; margin: var(--space-4) 0; border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; }
+    .track span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: transform var(--dur-med) var(--ease-out); transform-origin: left; }
+    .chk-list, .log { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+    .chk-list li { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-sm); }
+    .chk-list li span:nth-child(2) { flex: 1; }
+    .chk-list .i { width: 20px; height: 20px; }
+    .chk-list .done .i { color: var(--success); }
+    .chk-list .todo .i { color: var(--text-3); }
+    .chk-word { font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .todo .chk-word { color: var(--warning); }
+    .log li { display: grid; grid-template-columns: 8px 1fr; gap: var(--space-3); font-size: var(--text-sm); }
+    .log li::before { content: ""; width: 8px; height: 8px; margin-top: 7px; border-radius: 50%; background: var(--border); box-shadow: inset 0 0 0 2px var(--text-3); }
+    .log p + p { color: var(--text-2); font-size: var(--text-xs); }
+    .side .card > a { display: inline-block; margin-top: var(--space-4); font-size: var(--text-sm); font-weight: 600; }
+    .side .card > h2 + .log { margin-top: var(--space-4); }
+
+    /* ---------- Narrower screens ---------- */
+    @media (max-width: 1180px) {
+      .main { grid-template-columns: minmax(0, 1fr); }
+      .side { position: static; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    }
+    @media (max-width: 760px) {
+      .shell { grid-template-columns: minmax(0, 1fr); }
+      .snav-cell { border-right: 0; border-bottom: 1px solid var(--border); }
+      .snav { position: static; height: auto; gap: var(--space-3); padding: var(--space-4); }
+      .back, .me, .snav-label, .snav-title { display: none; }
+      .snav nav { display: flex; gap: var(--space-1); overflow-x: auto; margin: 0 calc(var(--space-4) * -1); padding: 0 var(--space-4); }
+      .snav ul { display: flex; gap: var(--space-1); }
+      .snav-link { white-space: nowrap; }
+      .snav-link .meta { display: none; }
+      .main { padding: var(--space-5) var(--space-4) var(--space-7); }
+      .set-row { padding: var(--space-4); gap: var(--space-3); }
+      .inset > li + li::before { left: var(--space-4); }
+      .session .btn, .danger .btn { margin-left: auto; }
+      .session, .danger .set-row { flex-wrap: wrap; }
+      .session .row-text, .danger .row-text { flex-basis: calc(100% - 56px); }
+      .group-foot { flex-wrap: wrap; }
+      .group-head { flex-direction: column; gap: 0; }
+    }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1-3.6 4-5.5 7.5-5.5s6.5 1.9 7.5 5.5"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.5c0 4.3-3 7.6-7 9-4-1.4-7-4.7-7-9V6z"/></symbol>
+    <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 3.5 19 6v5.5c0 4.3-3 7.6-7 9-4-1.4-7-4.7-7-9V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></symbol>
+    <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 3.5v4M15 3.5v4"/><path d="M6.5 7.5h11v3a5.5 5.5 0 0 1-11 0z"/><path d="M12 16v4.5"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 8.5-8.5M16.5 6.5 19 9M14 9l2 2"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></symbol>
+    <symbol id="i-laptop" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="10" rx="1.5"/><path d="M3 18.5h18"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 17.5h2"/></symbol>
+    <symbol id="i-tablet" viewBox="0 0 24 24"><rect x="4.5" y="3" width="15" height="18" rx="2.5"/><path d="M11 17.5h2"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M10.3 4.9 3.4 17a2 2 0 0 0 1.7 3h13.8a2 2 0 0 0 1.7-3L13.7 4.9a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4M12 16.8h.01"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></symbol>
+    <symbol id="i-chev-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol>
+    <symbol id="i-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  </svg>
+
+  <div class="shell">
+    <aside class="snav-cell" aria-label="Settings sidebar"><div class="snav">
+      <a class="brand" href="#" aria-label="Sora home">
+        <svg class="logo" viewBox="0 0 28 28" aria-hidden="true"><rect class="bg" width="28" height="28" rx="8"/><path class="fg" d="M8 18c2.6-5.3 9.4-5.3 12 0"/><circle class="dot" cx="14" cy="10" r="2.2"/></svg>
+        Sora
+      </a>
+      <a class="back" href="#"><svg class="i" aria-hidden="true"><use href="#i-arrow-left"/></svg>Back to workspace</a>
+      <p class="snav-title"><strong>Settings</strong></p>
+      <nav aria-label="Settings">
+        <div>
+          <h2 class="snav-label" id="nav-personal">Personal</h2>
+          <ul aria-labelledby="nav-personal">
+            <li><a class="snav-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-user"/></svg>Account</a></li>
+            <li><a class="snav-link" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg>Security</a></li>
+            <li><a class="snav-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-bell"/></svg>Notifications</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2 class="snav-label" id="nav-workspace">Workspace</h2>
+          <ul aria-labelledby="nav-workspace">
+            <li><a class="snav-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-card"/></svg>Billing<span class="meta">Pro</span></a></li>
+            <li><a class="snav-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-plug"/></svg>Integrations<span class="meta num">4</span></a></li>
+          </ul>
+        </div>
+      </nav>
+      <div class="me">
+        <span class="avatar" aria-hidden="true">AS</span>
+        <span><strong>Avery Stone</strong><small>avery@example.com</small></span>
+      </div>
+    </div></aside>
+
+    <main class="main">
+      <div class="content">
+        <header class="page-head">
+          <h1>Security</h1>
+          <p>Choose how you sign in to Sora and review where your account is signed in.</p>
+        </header>
+
+        <div>
+          <label class="field-label" for="settings-search">Search settings</label>
+          <div class="search">
+            <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+            <input id="settings-search" type="search" placeholder="Try “passkey” or “sign out”" autocomplete="off" aria-keyshortcuts="/" aria-controls="settings-groups">
+            <kbd aria-hidden="true">/</kbd>
+          </div>
+        </div>
+
+        <div id="settings-groups" class="content">
+          <section class="group" aria-labelledby="g-signin">
+            <div class="group-head"><h2 class="group-label" id="g-signin">Sign-in</h2></div>
+            <ul class="inset">
+              <li class="set-row toggle" data-keywords="2fa mfa code authenticator two factor verification">
+                <span class="row-ico"><svg class="i" aria-hidden="true"><use href="#i-shield-check"/></svg></span>
+                <div class="row-text">
+                  <p class="row-title" id="t-2fa">Two-factor authentication</p>
+                  <p class="row-desc" id="d-2fa">Ask for a code from your authenticator app at every new sign-in.</p>
+                </div>
+                <span class="state" aria-hidden="true">On</span>
+                <button class="switch" type="button" role="switch" aria-checked="true" aria-labelledby="t-2fa" aria-describedby="d-2fa" data-name="Two-factor authentication"></button>
+              </li>
+              <li class="set-row toggle" data-keywords="alerts email new device login notification">
+                <span class="row-ico"><svg class="i" aria-hidden="true"><use href="#i-bell"/></svg></span>
+                <div class="row-text">
+                  <p class="row-title" id="t-alerts">Sign-in alerts</p>
+                  <p class="row-desc" id="d-alerts">Email avery@example.com when a new device signs in.</p>
+                </div>
+                <span class="state" aria-hidden="true">Off</span>
+                <button class="switch" type="button" role="switch" aria-checked="false" aria-labelledby="t-alerts" aria-describedby="d-alerts" data-name="Sign-in alerts"></button>
+              </li>
+              <li>
+                <a class="set-row" href="#" data-keywords="passkey passkeys fingerprint face biometrics device">
+                  <span class="row-ico"><svg class="i" aria-hidden="true"><use href="#i-key"/></svg></span>
+                  <span class="row-text">
+                    <span class="row-title">Passkeys</span>
+                    <span class="row-desc" style="display:block">Sign in with your fingerprint, face or device PIN.</span>
+                  </span>
+                  <span class="row-value"><span class="num">2</span> saved</span>
+                  <svg class="i row-chev" aria-hidden="true"><use href="#i-chev-right"/></svg>
+                </a>
+              </li>
+              <li>
+                <a class="set-row" href="#" data-keywords="password change reset">
+                  <span class="row-ico"><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg></span>
+                  <span class="row-text">
+                    <span class="row-title">Password</span>
+                    <span class="row-desc" style="display:block">Used when a passkey isn’t available.</span>
+                  </span>
+                  <span class="row-value">Changed Aug 3</span>
+                  <svg class="i row-chev" aria-hidden="true"><use href="#i-chev-right"/></svg>
+                </a>
+              </li>
+            </ul>
+          </section>
+
+          <section class="group" aria-labelledby="g-sessions">
+            <div class="group-head"><h2 class="group-label" id="g-sessions">Sessions</h2><p>Devices signed in to your account</p></div>
+            <ul class="inset">
+              <li class="set-row session" data-keywords="session device sign out log out current this device browser laptop">
+                <span class="row-ico"><svg class="i" aria-hidden="true"><use href="#i-laptop"/></svg></span>
+                <div class="row-text">
+                  <p class="row-title">Desktop browser <span class="pill pill-accent">This device</span></p>
+                  <p class="row-desc">Lisbon, Portugal · Active now</p>
+                </div>
+              </li>
+              <li class="set-row session" data-keywords="session device sign out log out phone app mobile">
+                <span class="row-ico"><svg class="i" aria-hidden="true"><use href="#i-phone"/></svg></span>
+                <div class="row-text">
+                  <p class="row-title">Sora app on phone</p>
+                  <p class="row-desc">Porto, Portugal · 2 hours ago</p>
+                </div>
+                <button class="btn btn-secondary btn-sm" type="button" data-signout>Sign out<span class="visually-hidden"> of Sora app on phone</span></button>
+              </li>
+              <li class="set-row session" data-keywords="session device sign out log out tablet browser">
+                <span class="row-ico"><svg class="i" aria-hidden="true"><use href="#i-tablet"/></svg></span>
+                <div class="row-text">
+                  <p class="row-title">Tablet browser</p>
+                  <p class="row-desc">Berlin, Germany · Oct 19</p>
+                </div>
+                <button class="btn btn-secondary btn-sm" type="button" data-signout>Sign out<span class="visually-hidden"> of tablet browser</span></button>
+              </li>
+            </ul>
+          </section>
+
+          <section class="group danger" aria-labelledby="g-danger">
+            <div class="group-head"><h2 class="group-label" id="g-danger">Danger zone</h2></div>
+            <ul class="inset">
+              <li class="set-row" data-keywords="close delete remove account cancel">
+                <span class="row-ico danger"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg></span>
+                <div class="row-text">
+                  <p class="row-title">Close account</p>
+                  <p class="row-desc">Permanently deletes your account, your 2 workspaces and their billing history. This can’t be undone.</p>
+                </div>
+                <button class="btn btn-danger btn-sm" type="button">Close account…</button>
+              </li>
+            </ul>
+          </section>
+        </div>
+
+        <p class="no-results" id="no-results" hidden>No settings match “<span id="no-results-q"></span>”. Try “password” or “sessions”.</p>
+      </div>
+
+      <aside class="side" aria-label="Security overview">
+        <section class="card" aria-labelledby="chk-title">
+          <div class="chk-head">
+            <h2 id="chk-title">Security checkup</h2>
+            <span class="pill pill-warning" id="chk-pill"><span class="num">3</span>&nbsp;of 4 done</span>
+          </div>
+          <div class="track" role="progressbar" aria-labelledby="chk-title" aria-valuemin="0" aria-valuemax="4" aria-valuenow="3" aria-valuetext="3 of 4 steps done"><span id="chk-bar" style="transform: scaleX(0.75)"></span></div>
+          <ul class="chk-list">
+            <li class="done" data-switch="t-2fa"><svg class="i" aria-hidden="true"><use href="#i-check-circle"/></svg><span>Two-factor authentication</span><span class="chk-word">Done</span></li>
+            <li class="done"><svg class="i" aria-hidden="true"><use href="#i-check-circle"/></svg><span>Passkey saved</span><span class="chk-word">Done</span></li>
+            <li class="done"><svg class="i" aria-hidden="true"><use href="#i-check-circle"/></svg><span>Recovery codes downloaded</span><span class="chk-word">Done</span></li>
+            <li class="todo" data-switch="t-alerts"><svg class="i" aria-hidden="true"><use href="#i-circle"/></svg><span>Turn on sign-in alerts</span><span class="chk-word">To do</span></li>
+          </ul>
+        </section>
+
+        <section class="card" aria-labelledby="log-title">
+          <h2 id="log-title">Recent activity</h2>
+          <ol class="log">
+            <li><div><p>New sign-in on Sora app</p><p>Porto, Portugal · 2 hours ago</p></div></li>
+            <li><div><p>Passkey added: “Work laptop”</p><p>Oct 12</p></div></li>
+            <li><div><p>Password changed</p><p>Aug 3</p></div></li>
+          </ol>
+          <a href="#">View full security log</a>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div class="toast" id="notice">
+    <svg class="i" aria-hidden="true"><use href="#i-check"/></svg>
+    <span role="status" id="notice-text"></span>
+    <button type="button" id="undo">Undo</button>
+  </div>
+
+  <script>
+    // FRM-22 / FRM-27: role="switch" with aria-checked; the whole row toggles, the On/Off word mirrors the state,
+    // and the change applies at once with an Undo for security-sensitive settings.
+    // Example only: replace the state change with a request to your API and roll back if it fails.
+    const notice = document.getElementById('notice');
+    const noticeText = document.getElementById('notice-text');
+    let lastSwitch = null;
+    let hideTimer;
+
+    function setSwitch(sw, on, announce = true) {
+      sw.setAttribute('aria-checked', String(on));
+      sw.closest('.set-row').querySelector('.state').textContent = on ? 'On' : 'Off';
+      if (announce) {
+        lastSwitch = sw;
+        noticeText.textContent = `${sw.dataset.name} turned ${on ? 'on' : 'off'}.`;
+        notice.classList.add('show');
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(() => notice.classList.remove('show'), 8000);
+      }
+      updateCheckup();
+    }
+    document.querySelectorAll('[role="switch"]').forEach((sw) => {
+      sw.addEventListener('click', (e) => { e.stopPropagation(); setSwitch(sw, sw.getAttribute('aria-checked') !== 'true'); });
+      sw.closest('.set-row').addEventListener('click', () => sw.click());
+    });
+    document.getElementById('undo').addEventListener('click', () => {
+      if (!lastSwitch) return;
+      setSwitch(lastSwitch, lastSwitch.getAttribute('aria-checked') !== 'true', false);
+      noticeText.textContent = 'Change undone.';
+      notice.classList.remove('show');
+      lastSwitch.focus();
+    });
+
+    // FBK-06: the checkup follows the switches, with words as well as icons (COL-07).
+    function updateCheckup() {
+      const items = [...document.querySelectorAll('.chk-list li')];
+      items.forEach((li) => {
+        if (!li.dataset.switch) return;
+        const on = document.querySelector(`[aria-labelledby="${li.dataset.switch}"]`).getAttribute('aria-checked') === 'true';
+        li.className = on ? 'done' : 'todo';
+        li.querySelector('use').setAttribute('href', on ? '#i-check-circle' : '#i-circle');
+        li.querySelector('.chk-word').textContent = on ? 'Done' : 'To do';
+      });
+      const done = items.filter((li) => li.classList.contains('done')).length;
+      const bar = document.querySelector('[role="progressbar"]');
+      bar.setAttribute('aria-valuenow', done);
+      bar.setAttribute('aria-valuetext', `${done} of 4 steps done`);
+      document.getElementById('chk-bar').style.transform = `scaleX(${done / 4})`;
+      const pill = document.getElementById('chk-pill');
+      pill.className = 'pill ' + (done === 4 ? 'pill-success' : 'pill-warning');
+      pill.innerHTML = `<span class="num">${done}</span>&nbsp;of 4 done`;
+    }
+
+    // Sessions: Example only: replace with a request to your API before updating the row.
+    document.querySelectorAll('[data-signout]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const row = btn.closest('.set-row');
+        row.querySelector('.row-desc').textContent = 'Signed out just now';
+        btn.remove();
+        noticeText.textContent = 'Session signed out.';
+      });
+    });
+
+    // SCR-05: filter rows by label, description and synonyms; groups stay as headings for their results.
+    const search = document.getElementById('settings-search');
+    search.addEventListener('input', () => {
+      const q = search.value.trim().toLowerCase();
+      let total = 0;
+      document.querySelectorAll('.group').forEach((group) => {
+        let shown = 0;
+        group.querySelectorAll('[data-keywords]').forEach((row) => {
+          const match = !q || (row.textContent + ' ' + row.dataset.keywords).toLowerCase().includes(q);
+          (row.closest('li') || row).hidden = !match;
+          if (match) shown++;
+        });
+        group.hidden = shown === 0;
+        total += shown;
+      });
+      document.getElementById('no-results').hidden = total > 0;
+      document.getElementById('no-results-q').textContent = search.value.trim();
+    });
+    // BTN-09: the visible "/" hint is a real shortcut to the settings search.
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && !e.target.closest('input, textarea')) { e.preventDefault(); search.focus(); }
+    });
+  </script>
+</body>
+</html>

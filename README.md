@@ -10,7 +10,7 @@ Each skill in this repository is a folder of instructions, references, scripts a
 
 | Skill | Version | What it does |
 |---|---|---|
-| [**ProductCraft**](skills/productcraft/README.md) | 1.3.0 | Builds and hardens app UIs with one routed skill: design hierarchy, a screen-level UI rulebook, honest interaction feedback, forms and checkout, data views, mobile and accessibility, ethical conversion, auth-abuse defense, a 20-control security baseline and pre-launch security review, backed by a UI/UX pattern library. |
+| [**ProductCraft**](skills/productcraft/README.md) | 1.4.0 | Builds and hardens app UIs with one routed skill: design hierarchy, a screen-level UI rulebook, honest interaction feedback, forms and checkout, data views, mobile and accessibility, ethical conversion, auth-abuse defense, a 20-control security baseline and pre-launch security review, backed by a UI/UX pattern library and 21 reference screens. |
 
 ## ProductCraft
 
@@ -27,8 +27,27 @@ ProductCraft helps an agent build interfaces that show the important thing first
 - **UI rules**: a rulebook of screen-level rules with IDs (such as `BTN-02`) covering spacing, typography, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, common screens, motion, front-end engineering and brand identity
 - **Language choice**: for new projects, services or performance-critical components, asks once whether to use Rust and states the trade-offs (faster runtime, slower compiles, more AI tokens, no automatic page-load gain)
 - **Pattern library**: UI/UX patterns, each with a principle, an implementation rule and a guardrail
+- **Reference screens**: 21 original example pages with 92 screens, from dashboards to brand guidelines, that show the rules applied in working HTML
 
 Full details, example prompts and limitations are in the [ProductCraft README](skills/productcraft/README.md).
+
+## Reference screens
+
+ProductCraft ships 21 original reference pages with 92 screens in [`skills/productcraft/examples/`](skills/productcraft/examples/README.md). They cover dashboards, sign-in, verification codes, settings, navigation, tab bars, charts, cards, calendars, buttons, form controls, feedback, commerce, pricing, mobile apps, messaging, onboarding and brand guidelines.
+
+Each page is self-contained HTML that cites the UI rules it applies (for example `CMP-17` on KPI tiles) and passes a WCAG AA contrast check. Agents read the pages as reference code and rebuild the patterns with the project's own components and tokens; they never copy the sample brand.
+
+Click a thumbnail for the full page.
+
+| | | |
+|---|---|---|
+| <a href="docs/screens/dashboard-v1.jpg"><img src="docs/screens/thumbs/dashboard-v1.jpg" alt="Dashboard v1 example screen"></a><br><b>Dashboard v1</b> · light analytics · <a href="skills/productcraft/examples/dashboard-v1.html">HTML</a> | <a href="docs/screens/dashboard-v2.jpg"><img src="docs/screens/thumbs/dashboard-v2.jpg" alt="Dashboard v2 example screen"></a><br><b>Dashboard v2</b> · dark operations · <a href="skills/productcraft/examples/dashboard-v2.html">HTML</a> | <a href="docs/screens/dashboard-v3.jpg"><img src="docs/screens/thumbs/dashboard-v3.jpg" alt="Dashboard v3 example screen"></a><br><b>Dashboard v3</b> · bento overview · <a href="skills/productcraft/examples/dashboard-v3.html">HTML</a> |
+| <a href="docs/screens/sign-in.jpg"><img src="docs/screens/thumbs/sign-in.jpg" alt="Sign-in example screen"></a><br><b>Sign-in</b> · split screen · <a href="skills/productcraft/examples/sign-in.html">HTML</a> | <a href="docs/screens/auth.jpg"><img src="docs/screens/thumbs/auth.jpg" alt="Account access example screen"></a><br><b>Account access</b> · 5 versions · <a href="skills/productcraft/examples/auth.html">HTML</a> | <a href="docs/screens/otp.jpg"><img src="docs/screens/thumbs/otp.jpg" alt="Codes and PINs example screen"></a><br><b>Codes and PINs</b> · 6 versions · <a href="skills/productcraft/examples/otp.html">HTML</a> |
+| <a href="docs/screens/settings.jpg"><img src="docs/screens/thumbs/settings.jpg" alt="Settings example screen"></a><br><b>Settings</b> · security page · <a href="skills/productcraft/examples/settings.html">HTML</a> | <a href="docs/screens/navigation.jpg"><img src="docs/screens/thumbs/navigation.jpg" alt="Navigation example screen"></a><br><b>Navigation</b> · 5 versions · <a href="skills/productcraft/examples/navigation.html">HTML</a> | <a href="docs/screens/tab-bars.jpg"><img src="docs/screens/thumbs/tab-bars.jpg" alt="Tab bars example screen"></a><br><b>Tab bars</b> · 5 versions + spec · <a href="skills/productcraft/examples/tab-bars.html">HTML</a> |
+| <a href="docs/screens/charts.jpg"><img src="docs/screens/thumbs/charts.jpg" alt="Charts example screen"></a><br><b>Charts</b> · 6 versions · <a href="skills/productcraft/examples/charts.html">HTML</a> | <a href="docs/screens/cards.jpg"><img src="docs/screens/thumbs/cards.jpg" alt="Cards example screen"></a><br><b>Cards</b> · 6 versions · <a href="skills/productcraft/examples/cards.html">HTML</a> | <a href="docs/screens/calendar.jpg"><img src="docs/screens/thumbs/calendar.jpg" alt="Calendars example screen"></a><br><b>Calendars</b> · 5 versions · <a href="skills/productcraft/examples/calendar.html">HTML</a> |
+| <a href="docs/screens/buttons.jpg"><img src="docs/screens/thumbs/buttons.jpg" alt="Buttons example screen"></a><br><b>Buttons</b> · 6 versions · <a href="skills/productcraft/examples/buttons.html">HTML</a> | <a href="docs/screens/form-controls.jpg"><img src="docs/screens/thumbs/form-controls.jpg" alt="Form controls example screen"></a><br><b>Form controls</b> · 6 versions · <a href="skills/productcraft/examples/form-controls.html">HTML</a> | <a href="docs/screens/feedback.jpg"><img src="docs/screens/thumbs/feedback.jpg" alt="Feedback example screen"></a><br><b>Feedback</b> · 6 versions · <a href="skills/productcraft/examples/feedback.html">HTML</a> |
+| <a href="docs/screens/commerce.jpg"><img src="docs/screens/thumbs/commerce.jpg" alt="Commerce example screen"></a><br><b>Commerce</b> · 5 versions · <a href="skills/productcraft/examples/commerce.html">HTML</a> | <a href="docs/screens/pricing.jpg"><img src="docs/screens/thumbs/pricing.jpg" alt="Pricing example screen"></a><br><b>Pricing</b> · 4 versions · <a href="skills/productcraft/examples/pricing.html">HTML</a> | <a href="docs/screens/mobile-apps.jpg"><img src="docs/screens/thumbs/mobile-apps.jpg" alt="Mobile apps example screen"></a><br><b>Mobile apps</b> · 5 versions · <a href="skills/productcraft/examples/mobile-apps.html">HTML</a> |
+| <a href="docs/screens/messaging.jpg"><img src="docs/screens/thumbs/messaging.jpg" alt="Messaging and assistant example screen"></a><br><b>Messaging and assistant</b> · 4 versions · <a href="skills/productcraft/examples/messaging.html">HTML</a> | <a href="docs/screens/onboarding.jpg"><img src="docs/screens/thumbs/onboarding.jpg" alt="Onboarding and errors example screen"></a><br><b>Onboarding and errors</b> · 6 versions · <a href="skills/productcraft/examples/onboarding.html">HTML</a> | <a href="docs/screens/brand.jpg"><img src="docs/screens/thumbs/brand.jpg" alt="Brand guidelines example screen"></a><br><b>Brand guidelines</b> · 6 versions · <a href="skills/productcraft/examples/brand.html">HTML</a> |
 
 ## Install
 
@@ -65,8 +84,10 @@ mkdir -p .agents/skills && cp -R /tmp/sora-skills/skills/productcraft .agents/sk
 ├── .github/workflows/validate.yml    # runs package checks and tests on every push and PR
 ├── CHANGELOG.md
 ├── dist/                             # ready-to-upload ZIP + setup prompt for each skill
+├── docs/screens/                     # screenshots of the reference screens (README galleries)
 ├── LICENSE                           # MIT
 ├── scripts/build_dist.py             # rebuilds or verifies dist/ from skills/
+├── scripts/screenshots.cjs           # regenerates docs/screens/ from the example pages (Playwright)
 └── skills/
     └── productcraft/                 # the ProductCraft skill (SKILL.md is the entry point)
 ```
@@ -89,7 +110,8 @@ All of it uses the Python 3 standard library only. CI runs the same checks.
 
 1. Edit files under `skills/<skill>/`.
 2. Run `python3 scripts/build_dist.py` to rebuild the downloadable bundle in `dist/`.
-3. Run the validation commands above and commit `skills/` and `dist/` together.
+3. If you changed a page in `skills/productcraft/examples/`, run `node scripts/screenshots.cjs <page>` (needs Playwright with Chromium) to refresh its screenshots in `docs/screens/`.
+4. Run the validation commands above and commit `skills/`, `dist/` and `docs/` together.
 
 ## Principles
 

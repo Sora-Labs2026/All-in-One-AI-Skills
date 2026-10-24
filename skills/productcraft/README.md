@@ -1,10 +1,10 @@
 # ProductCraft
 
-**A Sora Labs Agent Skill** · version 1.3.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
+**A Sora Labs Agent Skill** · version 1.4.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
 
 ProductCraft is one installable skill that teaches a coding agent to build product interfaces that **show the important thing first, respond honestly, work on every device, and are secured where it matters**. It routes each task to only the modules that task needs, so a table change reads the table guidance, an auth change reads the auth-defense module, and a launch reads the five-gate security review.
 
-It is a coding skill, not a theme pack, component gallery or security certification. The agent changes your real codebase and reports what it actually tested.
+It is a coding skill, not a theme pack or security certification. Its reference screens are code to learn from, not a component kit to paste. The agent changes your real codebase and reports what it actually tested.
 
 ## What's inside
 
@@ -22,6 +22,7 @@ It is a coding skill, not a theme pack, component gallery or security certificat
 | **UI rules** | A rulebook of screen-level rules with IDs (spacing, type, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, screens, motion, front-end engineering, brand identity) | `modules/ui-rules.md` |
 | **Language choice** | Offers Rust for new projects, services or performance-critical components, with honest trade-offs, and remembers the answer | `modules/language-choice.md` |
 | **Pattern library** | One principle, one implementation rule and one guardrail for each UI/UX pattern | `references/pattern-library.md` |
+| **Reference screens** | 21 original HTML pages with 92 screens (dashboards, auth, settings, navigation, charts, cards, forms, feedback, commerce, pricing, mobile, messaging, onboarding, brand) that show the rules applied | `examples/README.md` |
 
 The pattern library covers foundations, feedback, forms, interaction, navigation, responsive layout, data views, conversion, safety and advanced patterns such as live presence, chat and view transitions. A machine-readable version is in `references/pattern-index.json`.
 
@@ -135,6 +136,20 @@ Add this to your project's `CLAUDE.md` or `AGENTS.md` so the agent keeps using P
 | `ENG` | Front-end engineering |
 | `BRD` | Brand identity |
 
+## Reference screens
+
+`examples/` holds 21 original reference pages with 92 screens. Each page is plain HTML and CSS with no external requests, cites the rule IDs it demonstrates and passes a WCAG AA contrast check. The router points an agent at the page that matches its task. The agent studies the semantics, states and details, then rebuilds the pattern with the project's own components and tokens. [`examples/README.md`](examples/README.md) lists every page and version.
+
+| | | |
+|---|---|---|
+| <a href="../../docs/screens/dashboard-v1.jpg"><img src="../../docs/screens/thumbs/dashboard-v1.jpg" alt="Dashboard v1 example screen"></a><br><b>Dashboard v1</b> · light analytics · <a href="examples/dashboard-v1.html">HTML</a> | <a href="../../docs/screens/dashboard-v2.jpg"><img src="../../docs/screens/thumbs/dashboard-v2.jpg" alt="Dashboard v2 example screen"></a><br><b>Dashboard v2</b> · dark operations · <a href="examples/dashboard-v2.html">HTML</a> | <a href="../../docs/screens/dashboard-v3.jpg"><img src="../../docs/screens/thumbs/dashboard-v3.jpg" alt="Dashboard v3 example screen"></a><br><b>Dashboard v3</b> · bento overview · <a href="examples/dashboard-v3.html">HTML</a> |
+| <a href="../../docs/screens/sign-in.jpg"><img src="../../docs/screens/thumbs/sign-in.jpg" alt="Sign-in example screen"></a><br><b>Sign-in</b> · split screen · <a href="examples/sign-in.html">HTML</a> | <a href="../../docs/screens/auth.jpg"><img src="../../docs/screens/thumbs/auth.jpg" alt="Account access example screen"></a><br><b>Account access</b> · 5 versions · <a href="examples/auth.html">HTML</a> | <a href="../../docs/screens/otp.jpg"><img src="../../docs/screens/thumbs/otp.jpg" alt="Codes and PINs example screen"></a><br><b>Codes and PINs</b> · 6 versions · <a href="examples/otp.html">HTML</a> |
+| <a href="../../docs/screens/settings.jpg"><img src="../../docs/screens/thumbs/settings.jpg" alt="Settings example screen"></a><br><b>Settings</b> · security page · <a href="examples/settings.html">HTML</a> | <a href="../../docs/screens/navigation.jpg"><img src="../../docs/screens/thumbs/navigation.jpg" alt="Navigation example screen"></a><br><b>Navigation</b> · 5 versions · <a href="examples/navigation.html">HTML</a> | <a href="../../docs/screens/tab-bars.jpg"><img src="../../docs/screens/thumbs/tab-bars.jpg" alt="Tab bars example screen"></a><br><b>Tab bars</b> · 5 versions + spec · <a href="examples/tab-bars.html">HTML</a> |
+| <a href="../../docs/screens/charts.jpg"><img src="../../docs/screens/thumbs/charts.jpg" alt="Charts example screen"></a><br><b>Charts</b> · 6 versions · <a href="examples/charts.html">HTML</a> | <a href="../../docs/screens/cards.jpg"><img src="../../docs/screens/thumbs/cards.jpg" alt="Cards example screen"></a><br><b>Cards</b> · 6 versions · <a href="examples/cards.html">HTML</a> | <a href="../../docs/screens/calendar.jpg"><img src="../../docs/screens/thumbs/calendar.jpg" alt="Calendars example screen"></a><br><b>Calendars</b> · 5 versions · <a href="examples/calendar.html">HTML</a> |
+| <a href="../../docs/screens/buttons.jpg"><img src="../../docs/screens/thumbs/buttons.jpg" alt="Buttons example screen"></a><br><b>Buttons</b> · 6 versions · <a href="examples/buttons.html">HTML</a> | <a href="../../docs/screens/form-controls.jpg"><img src="../../docs/screens/thumbs/form-controls.jpg" alt="Form controls example screen"></a><br><b>Form controls</b> · 6 versions · <a href="examples/form-controls.html">HTML</a> | <a href="../../docs/screens/feedback.jpg"><img src="../../docs/screens/thumbs/feedback.jpg" alt="Feedback example screen"></a><br><b>Feedback</b> · 6 versions · <a href="examples/feedback.html">HTML</a> |
+| <a href="../../docs/screens/commerce.jpg"><img src="../../docs/screens/thumbs/commerce.jpg" alt="Commerce example screen"></a><br><b>Commerce</b> · 5 versions · <a href="examples/commerce.html">HTML</a> | <a href="../../docs/screens/pricing.jpg"><img src="../../docs/screens/thumbs/pricing.jpg" alt="Pricing example screen"></a><br><b>Pricing</b> · 4 versions · <a href="examples/pricing.html">HTML</a> | <a href="../../docs/screens/mobile-apps.jpg"><img src="../../docs/screens/thumbs/mobile-apps.jpg" alt="Mobile apps example screen"></a><br><b>Mobile apps</b> · 5 versions · <a href="examples/mobile-apps.html">HTML</a> |
+| <a href="../../docs/screens/messaging.jpg"><img src="../../docs/screens/thumbs/messaging.jpg" alt="Messaging and assistant example screen"></a><br><b>Messaging and assistant</b> · 4 versions · <a href="examples/messaging.html">HTML</a> | <a href="../../docs/screens/onboarding.jpg"><img src="../../docs/screens/thumbs/onboarding.jpg" alt="Onboarding and errors example screen"></a><br><b>Onboarding and errors</b> · 6 versions · <a href="examples/onboarding.html">HTML</a> | <a href="../../docs/screens/brand.jpg"><img src="../../docs/screens/thumbs/brand.jpg" alt="Brand guidelines example screen"></a><br><b>Brand guidelines</b> · 6 versions · <a href="examples/brand.html">HTML</a> |
+
 ## Security baseline
 
 LaunchGuard ships a 20-control baseline in `modules/launchguard/references/security-baseline.md`. Each control lists what to do, the common trap and how to verify it. A security-sensitive change gets a scoped check of the controls it touches; a launch review reports all 20.
@@ -151,7 +166,7 @@ LaunchGuard ships a 20-control baseline in `modules/launchguard/references/secur
 
 | Tool | What it does |
 |---|---|
-| `scripts/check_package.py` | Checks package integrity: one `SKILL.md`, a valid pattern library, all modules present |
+| `scripts/check_package.py` | Checks package integrity: one `SKILL.md`, a valid pattern library and UI rulebook, all modules present, and reference screens that are listed, self-contained and cite only real rule IDs |
 | `modules/launchguard/scripts/preflight_scan.py` | Read-only, redacted heuristic scan for secret-shaped literals, public secret env names, disabled TLS verification, wildcard CORS, debug flags, HTML sinks, sensitive logging, cookies with HttpOnly or Secure disabled, and fast hashes used on passwords |
 | `modules/credential-shield/scripts/simulate_policy.py` | Offline, synthetic demonstration of how distributed credential-stuffing campaigns become visible through combined signals |
 | `assets/review-template.md` | Template for the agent's change report |
@@ -176,7 +191,7 @@ python3 -m unittest discover -s modules/credential-shield/tests -v
 python3 -m unittest discover -s modules/launchguard/tests -v
 ```
 
-The suites hold 18 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
+The suites hold 19 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
 
 ## Package layout
 
@@ -199,6 +214,7 @@ productcraft/
 │   ├── ui-distiller/            # guide + design rules, patterns, quality gate
 │   ├── credential-shield/       # guide, references, policy example, simulator, tests
 │   └── launchguard/             # guide, security baseline, references, scanner, tests, report templates
+├── examples/                    # reference screens: HTML pages, tokens.css, gallery.css, README index
 ├── references/
 │   ├── ui-rules/                # UI rulebook, one file per category
 │   ├── ui-rules-index.json

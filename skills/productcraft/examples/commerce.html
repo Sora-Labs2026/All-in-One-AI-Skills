@@ -1,0 +1,774 @@
+<!doctype html>
+<!-- ProductCraft example: Commerce. Original Sora Labs example, MIT License.
+     Demonstrates: CMP-21, CMP-24, CMP-27, CMP-32, SCR-15, SCR-16, SCR-21, BTN-01, BTN-14, FBK-05, FBK-06,
+     FBK-16, FRM-01, FRM-09, COP-04, COP-08, COP-11, COP-12, COP-13, TYP-09, ENG-03, ENG-06, ICO-04, ICO-10, MOB-01 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Commerce screens</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    /* Sheet tweaks: equal-height stages per row */
+    .sheet-header h1 { margin-top: var(--space-2); }
+    .variant-stage { flex: 1; }
+    .variant-stage.tight { padding: var(--space-5); }
+
+    .ico { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .surface {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+    }
+
+    /* Product art: one aspect ratio for every card (CMP-21). For photos use <img> with object-fit: cover. */
+    .art {
+      position: relative; aspect-ratio: 4 / 5; overflow: hidden;
+      border-radius: var(--radius-md); background: var(--art-bg);
+    }
+    .art > svg { display: block; width: 100%; height: 100%; }
+    .tone-sand  { --art-bg: linear-gradient(160deg, #f7f0e7, #ead9c3); --tone: #d6b48a; --ink: #6b5440; }
+    .tone-clay  { --art-bg: linear-gradient(160deg, #f6ebe6, #e8d0c5); --tone: #c98068; --ink: #5a3a30; }
+    .tone-sage  { --art-bg: linear-gradient(160deg, #eef3ee, #d3e1d6); --tone: #8fae96; --ink: #2f4a3a; }
+    .tone-slate { --art-bg: linear-gradient(160deg, #eceff6, #d5dbeb); --tone: #8e99c6; --ink: #3f4770; }
+    .tone-graphite { --art-bg: linear-gradient(160deg, #eceef1, #cfd3da); --tone: #50565f; --ink: #23262b; }
+
+    .tag {
+      position: absolute; top: var(--space-3); left: var(--space-3);
+      padding: 2px 10px; border-radius: var(--radius-pill);
+      background: var(--surface); color: var(--text); font-size: var(--text-xs); font-weight: 600; line-height: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+    .rating { display: inline-flex; align-items: center; gap: 4px; font-size: var(--text-sm); color: var(--text-2); }
+    .rating .ico { width: 14px; height: 14px; color: var(--text); }
+    .rating strong { color: var(--text); font-weight: 600; }
+
+    /* v1 product grid (CMP-21) */
+    .shop { width: 100%; max-width: 1120px; padding: var(--space-5); }
+    .shop-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-5); }
+    .shop-head p { margin-top: 2px; color: var(--text-2); font-size: var(--text-sm); }
+    .bag-pill {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      min-height: 40px; padding: 0 var(--space-2) 0 var(--space-4);
+      border-radius: var(--radius-pill); border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); font-size: var(--text-sm); font-weight: 600;
+    }
+    .bag-pill:hover { text-decoration: none; background: var(--surface-2); }
+    .bag-pill .count {
+      display: inline-grid; place-items: center; min-width: 26px; height: 26px; padding: 0 var(--space-2);
+      border-radius: var(--radius-pill); background: var(--text); color: var(--surface); font-size: var(--text-xs);
+    }
+    .product-grid {
+      list-style: none; margin: 0; padding: 0;
+      display: grid; gap: var(--space-5);
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+    .product { position: relative; display: flex; flex-direction: column; }
+    .product .art { aspect-ratio: 1; }
+    .product .cat { margin-top: var(--space-3); font-size: var(--text-xs); font-weight: 500; color: var(--text-3); }
+    .product h3 { margin-top: 2px; font-size: var(--text-md); }
+    .product h3 a { color: var(--text); }
+    /* The title is the card's one link; its hit area stretches over the card (CMP-21) */
+    .product h3 a::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius-md); }
+    .product h3 a:focus-visible { outline: none; }
+    .product h3 a:focus-visible::after { outline: 2px solid var(--focus); outline-offset: 4px; }
+    .product .rating { margin-top: var(--space-1); }
+    .buy-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-top: var(--space-3); }
+    .price { font-size: var(--text-md); font-weight: 700; }
+    .price s { margin-left: var(--space-1); font-size: var(--text-sm); font-weight: 500; color: var(--text-3); }
+    .saving { margin-top: 2px; font-size: var(--text-xs); color: var(--success); font-weight: 600; }
+    /* Add button sits above the stretched link and keeps its width while the label changes (ENG-03) */
+    .add { position: relative; z-index: 1; min-width: 84px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+    .add .i-done { display: none; }
+    .add[data-state="added"] .i-add { display: none; }
+    .add[data-state="added"] .i-done { display: block; }
+    .add[data-state="added"] { color: var(--success); }
+
+    /* v2 product detail (SCR-16) */
+    .pdp { width: 100%; padding: var(--space-5); display: grid; grid-template-columns: 5fr 6fr; gap: var(--space-6); align-items: start; }
+    #pdp[data-color="Sand"] { --art-bg: linear-gradient(160deg, #f7f0e7, #ead9c3); --tone: #d6b48a; --ink: #6b5440; }
+    #pdp[data-color="Sage"] { --art-bg: linear-gradient(160deg, #eef3ee, #d3e1d6); --tone: #9bb7a1; --ink: #2f4a3a; }
+    #pdp[data-color="Graphite"] { --art-bg: linear-gradient(160deg, #eceef1, #cfd3da); --tone: #50565f; --ink: #23262b; }
+    .art svg, .thumb svg { transition: opacity var(--dur-fast); }
+    .thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); margin-top: var(--space-3); }
+    .thumbs button {
+      padding: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;
+      background: var(--art-bg); aspect-ratio: 1; cursor: pointer;
+    }
+    .thumbs button svg { display: block; width: 100%; height: 100%; }
+    .thumbs button[aria-current="true"] { border-color: var(--text); box-shadow: 0 0 0 1px var(--text); }
+    .crumbs { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-1); margin: 0; padding: 0; font-size: var(--text-sm); color: var(--text-3); }
+    .crumbs li + li::before { content: "/"; margin-right: var(--space-1); color: var(--text-3); }
+    .crumbs a { color: var(--text-2); }
+    .crumbs [aria-current] { color: var(--text-3); }
+    .pdp-name { margin-top: var(--space-2); font-size: var(--text-xl); letter-spacing: -0.01em; }
+    .pdp-price-row { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-2); }
+    .pdp-price { font-size: var(--text-lg); font-weight: 700; }
+    .pdp-price-row .rating { padding-left: var(--space-3); border-left: 1px solid var(--border); }
+    .pdp-price-row a.rating:hover { text-decoration: none; }
+    .pdp-price-row a.rating:hover span { text-decoration: underline; }
+    .pdp-desc { margin-top: var(--space-3); color: var(--text-2); font-size: var(--text-md); }
+    fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+    .field-label, .swatches legend { font-size: var(--text-sm); font-weight: 600; color: var(--text); padding: 0; }
+    .swatches legend strong { font-weight: 500; color: var(--text-2); }
+    .swatches { margin-top: var(--space-5); }
+    .swatch-row { display: flex; gap: var(--space-1); margin-top: var(--space-1); margin-left: calc(var(--space-2) * -1); }
+    /* 44px hit area around a smaller visible dot (CMP-24, MOB-01) */
+    .swatch { position: relative; display: grid; place-items: center; width: 44px; height: 44px; cursor: pointer; }
+    .swatch input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+    .swatch .dot { width: 28px; height: 28px; border-radius: 50%; background: var(--dot); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12); }
+    .swatch input:checked + .dot { box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 0 0 2px var(--surface), 0 0 0 4px var(--text); }
+    .swatch input:focus-visible + .dot { outline: 2px solid var(--focus); outline-offset: 6px; }
+    .qty-row { display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-4); }
+    .stepper {
+      display: inline-flex; align-items: center;
+      border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface);
+    }
+    .stepper button {
+      display: grid; place-items: center; width: 44px; height: 44px; padding: 0;
+      border: 0; background: transparent; color: var(--text); cursor: pointer; border-radius: var(--radius-sm);
+    }
+    .stepper button:hover { background: var(--surface-2); }
+    .stepper button[aria-disabled="true"] { color: var(--text-3); cursor: not-allowed; background: transparent; }
+    .stepper output { min-width: 32px; text-align: center; font-weight: 600; }
+    .stepper.sm button { width: 36px; height: 36px; }
+    .stepper.sm .ico { width: 16px; height: 16px; }
+    .pdp .btn-block { margin-top: var(--space-4); }
+    .delivery { display: flex; gap: var(--space-3); align-items: flex-start; margin-top: var(--space-4); font-size: var(--text-sm); color: var(--text-2); }
+    .delivery .ico { color: var(--text); margin-top: 1px; }
+    .delivery strong { display: block; color: var(--text); font-weight: 600; }
+    .chips { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-4) 0 0; padding: 0; }
+    .chips li {
+      display: inline-flex; align-items: center; gap: 6px; padding: var(--space-1) var(--space-3);
+      border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-2);
+      font-size: var(--text-xs); font-weight: 600;
+    }
+    .chips .ico { width: 14px; height: 14px; color: var(--text); }
+    .more { margin-top: var(--space-4); border-top: 1px solid var(--border); }
+    .more details { border-bottom: 1px solid var(--border); }
+    .more summary {
+      display: flex; align-items: center; justify-content: space-between; min-height: 44px;
+      list-style: none; cursor: pointer; font-size: var(--text-sm); font-weight: 600;
+    }
+    .more summary::-webkit-details-marker { display: none; }
+    .more summary .ico { width: 18px; height: 18px; color: var(--text-2); transition: transform var(--dur-fast) var(--ease-out); }
+    .more details[open] summary .ico { transform: rotate(180deg); }
+    .more details p { padding-bottom: var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
+
+    /* v3 bag drawer */
+    .drawer { width: 100%; max-width: 380px; padding: var(--space-5); box-shadow: var(--shadow-lg); }
+    .drawer-head { display: flex; align-items: center; justify-content: space-between; margin: calc(var(--space-2) * -1) calc(var(--space-2) * -1) 0 0; }
+    .drawer-head h2 { display: flex; align-items: baseline; gap: var(--space-2); }
+    .drawer-head h2 span { font-size: var(--text-sm); font-weight: 500; color: var(--text-3); }
+    .goal { margin-top: var(--space-4); padding: var(--space-3); border-radius: var(--radius-sm); background: var(--surface-2); font-size: var(--text-sm); color: var(--text-2); }
+    .goal strong { color: var(--text); }
+    .goal-bar { height: 6px; margin-top: var(--space-2); border-radius: var(--radius-pill); background: var(--border); overflow: hidden; }
+    .goal-bar span { display: block; height: 100%; width: var(--pct, 0%); border-radius: inherit; background: var(--success); }
+    .lines { list-style: none; margin: var(--space-2) 0 0; padding: 0; }
+    .line {
+      display: grid; gap: 0 var(--space-3); padding: var(--space-4) 0; border-bottom: 1px solid var(--border);
+      grid-template-columns: 64px 1fr auto;
+      grid-template-areas: "thumb name price" "thumb variant variant" "thumb controls controls";
+    }
+    .line .art { grid-area: thumb; width: 64px; border-radius: var(--radius-sm); align-self: start; }
+    .line-name { grid-area: name; font-weight: 600; font-size: var(--text-md); }
+    .line-price { grid-area: price; font-weight: 600; text-align: right; }
+    .line-variant { grid-area: variant; font-size: var(--text-sm); color: var(--text-3); }
+    .line-controls { grid-area: controls; display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-2); }
+    .btn-sm { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+    .btn-sm svg { width: 16px; height: 16px; }
+    .empty { padding: var(--space-6) 0; text-align: center; color: var(--text-2); }
+    .sum { margin: var(--space-4) 0 0; display: grid; gap: var(--space-2); font-size: var(--text-sm); }
+    .sum div { display: flex; justify-content: space-between; gap: var(--space-3); }
+    .sum dt { color: var(--text-2); }
+    .sum dd { margin: 0; font-weight: 600; text-align: right; }
+    .sum .total { padding-top: var(--space-3); margin-top: var(--space-1); border-top: 1px solid var(--border); font-size: var(--text-md); }
+    .sum .total dt { color: var(--text); font-weight: 700; }
+    .sum .total dd { font-size: var(--text-lg); font-weight: 700; }
+    .fine { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: var(--space-3); font-size: var(--text-xs); color: var(--text-3); text-align: center; }
+    .fine .ico { width: 14px; height: 14px; }
+    .drawer .btn-block { margin-top: var(--space-4); }
+
+    /* v4 one-page checkout (SCR-15) */
+    .checkout { width: 100%; padding: var(--space-5); display: grid; grid-template-columns: minmax(0, 1fr) 288px; gap: var(--space-6); align-items: start; }
+    .co-main { display: grid; gap: var(--space-5); }
+    .co-step legend { display: flex; align-items: center; gap: var(--space-3); padding: 0; margin-bottom: var(--space-3); font-size: var(--text-lg); font-weight: 600; }
+    .step-num {
+      display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%;
+      background: var(--text); color: var(--surface); font-size: var(--text-xs); font-weight: 700;
+    }
+    .fields { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+    .fields .wide { grid-column: 1 / -1; }
+    .field { display: grid; gap: var(--space-2); }
+    .field label { font-size: var(--text-sm); font-weight: 600; }
+    .field input {
+      width: 100%; min-height: 44px; padding: 0 var(--space-3);
+      border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface);
+      font-size: var(--text-md); color: var(--text);
+    }
+    .field input:hover { border-color: #c9ced6; }
+    .field input:focus-visible { outline: 2px solid var(--focus); outline-offset: 0; border-color: var(--focus); border-radius: var(--radius-sm); }
+    .options { display: grid; gap: var(--space-2); }
+    .options.two { grid-template-columns: 1fr 1fr; }
+    .options.three { grid-template-columns: repeat(3, 1fr); }
+    .option.tile { grid-template-columns: 1fr auto; align-items: start; gap: var(--space-3) var(--space-2); padding: var(--space-3) var(--space-4) var(--space-4); }
+    .option.tile .tile-text { grid-column: 1 / -1; }
+    /* Card-shaped radios: whole tile changes when selected, plus a filled indicator (FRM-09, CMP-16) */
+    .option {
+      position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--space-3);
+      min-height: 60px; padding: var(--space-3) var(--space-4);
+      border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); cursor: pointer;
+      transition-property: border-color, background-color; transition-duration: var(--dur-fast);
+    }
+    .option:hover { border-color: #c9ced6; }
+    .option input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+    .option .radio { width: 20px; height: 20px; border-radius: 50%; border: 1.75px solid var(--text-3); display: grid; place-items: center; }
+    .option:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+    .option:has(input:checked) .radio { border-color: var(--accent); }
+    .option:has(input:checked) .radio::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+    .option:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .option b { display: block; font-size: var(--text-md); font-weight: 600; }
+    .option small { display: block; font-size: var(--text-sm); color: var(--text-2); }
+    .option .delta-price { font-weight: 600; font-size: var(--text-sm); color: var(--text); }
+    .option .card-ico { width: 22px; height: 22px; color: var(--text-2); }
+    .check-row { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; margin-top: var(--space-2); font-size: var(--text-sm); color: var(--text-2); cursor: pointer; }
+    .check-row input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+    .co-summary { position: sticky; top: var(--space-5); padding: var(--space-5); border-radius: var(--radius-md); background: var(--surface-2); }
+    .co-summary h2 { display: flex; justify-content: space-between; align-items: baseline; font-size: var(--text-md); }
+    .co-summary h2 a { font-size: var(--text-sm); font-weight: 600; }
+    .mini { list-style: none; margin: var(--space-4) 0 0; padding: 0 0 var(--space-4); display: grid; gap: var(--space-3); border-bottom: 1px solid var(--border); }
+    .mini li { display: grid; grid-template-columns: 40px 1fr auto; gap: var(--space-3); align-items: center; font-size: var(--text-sm); }
+    .mini .art { width: 40px; border-radius: 6px; }
+    .mini b { display: block; font-weight: 600; color: var(--text); }
+    .mini span { color: var(--text-3); font-size: var(--text-xs); }
+    .mini li > .num { font-weight: 600; color: var(--text); font-size: var(--text-sm); }
+    .co-summary .btn-block { margin-top: var(--space-4); }
+    .paying { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: var(--space-3); font-size: var(--text-xs); color: var(--text-2); }
+    .paying .ico { width: 14px; height: 14px; }
+
+    /* v5 order confirmation (SCR-21) */
+    .confirm { width: 100%; max-width: 380px; padding: var(--space-5); }
+    .ok-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--success-soft); color: var(--success); }
+    .ok-icon .ico { width: 24px; height: 24px; stroke-width: 2; }
+    .confirm h2 { margin-top: var(--space-4); font-size: var(--text-xl); letter-spacing: -0.01em; }
+    .confirm .lead { margin-top: var(--space-1); color: var(--text-2); font-size: var(--text-sm); }
+    .facts { margin: var(--space-5) 0 0; padding: var(--space-1) var(--space-4); border-radius: var(--radius-md); background: var(--surface-2); font-size: var(--text-sm); }
+    .facts div { display: flex; align-items: center; justify-content: space-between; min-height: 44px; gap: var(--space-3); }
+    .facts div + div { border-top: 1px solid var(--border); }
+    .facts dt { color: var(--text-2); }
+    .facts dd { margin: 0; display: flex; align-items: center; gap: var(--space-1); font-weight: 600; }
+    .copy { min-height: 32px; height: 32px; padding: 0 var(--space-2); margin-right: calc(var(--space-2) * -1); font-size: var(--text-xs); }
+    .copy svg { width: 14px; height: 14px; }
+    .confirm .mini { border-bottom: 0; padding-bottom: 0; }
+    .track-title { margin-top: var(--space-5); font-size: var(--text-sm); font-weight: 600; }
+    .tracker { list-style: none; margin: var(--space-3) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); }
+    .tracker li { position: relative; display: grid; justify-items: start; gap: 2px; font-size: var(--text-xs); color: var(--text-3); padding-top: 28px; }
+    .tracker li::before {
+      content: ""; position: absolute; top: 0; left: 0; width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--border); background: var(--surface); box-sizing: border-box;
+    }
+    .tracker li::after { content: ""; position: absolute; top: 8px; left: 26px; right: 8px; height: 2px; border-radius: var(--radius-pill); background: var(--border); }
+    .tracker li:last-child::after { display: none; }
+    .tracker b { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .tracker [aria-current="step"]::before { border: 5px solid var(--accent); }
+    .tracker [aria-current="step"] b { color: var(--text); }
+    .tracker [aria-current="step"] span { color: var(--accent-ink); font-weight: 600; }
+    .confirm-actions { display: grid; gap: var(--space-2); margin-top: var(--space-5); }
+  </style>
+</head>
+<body>
+  <!-- Icon and product-art sprite: repeated SVG parts are defined once (ICO-10) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M5.5 8h13l-1.1 12h-10.8L5.5 8z"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 3.5l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 16.9l-5.25 2.7 1-5.8L3.5 9.7l5.9-.9z"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24"><path d="M3 6.5h11v10H3z"/><path d="M14 10h4l3 3.2v3.3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17.5" cy="17.5" r="1.8"/></symbol>
+    <symbol id="i-return" viewBox="0 0 24 24"><path d="M9 14L4.5 9.5 9 5"/><path d="M4.5 9.5H15a5 5 0 0 1 0 10h-4"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5.5c0 4.5-3 7.8-7 9.5-4-1.7-7-5-7-9.5V6l7-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M3.5 7.5L12 3l8.5 4.5v9L12 21l-8.5-4.5v-9z"/><path d="M3.5 7.5L12 12l8.5-4.5M12 12v9"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.5 7h15M10 11v6M14 11v6M6.5 7l.8 12.5h9.4L17.5 7M9.5 7V4.5h5V7"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9.5" rx="2"/><path d="M8.5 11V8a3.5 3.5 0 0 1 7 0v3"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/></symbol>
+    <symbol id="i-card-plus" viewBox="0 0 24 24"><path d="M21 12V8a2.5 2.5 0 0 0-2.5-2.5h-13A2.5 2.5 0 0 0 3 8v8a2.5 2.5 0 0 0 2.5 2.5H13M3 10h18M18 15v6M15 18h6"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></symbol>
+    <symbol id="i-chev-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+
+    <symbol id="art-lamp" viewBox="0 0 200 250">
+      <ellipse cx="100" cy="207" rx="60" ry="7" fill="#000" fill-opacity=".08"/>
+      <ellipse cx="100" cy="124" rx="56" ry="18" fill="#fff" fill-opacity=".55"/>
+      <rect x="95" y="112" width="10" height="86" rx="5" fill="var(--ink)"/>
+      <rect x="64" y="192" width="72" height="13" rx="6.5" fill="var(--ink)"/>
+      <path d="M48 118C48 74 70 50 100 50s52 24 52 68z" fill="var(--tone)"/>
+      <path d="M62 104c3-24 17-38 36-40" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="5" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="art-mug" viewBox="0 0 200 250">
+      <ellipse cx="96" cy="196" rx="56" ry="7" fill="#000" fill-opacity=".08"/>
+      <path d="M138 116h8a22 22 0 0 1 0 44h-8" fill="none" stroke="var(--tone)" stroke-width="11" stroke-linecap="round"/>
+      <path d="M50 98h92v80a16 16 0 0 1-16 16H66a16 16 0 0 1-16-16z" fill="var(--tone)"/>
+      <ellipse cx="96" cy="98" rx="46" ry="9" fill="var(--ink)"/>
+      <path d="M82 76c-7-8 7-12 0-22M104 72c-7-8 7-12 0-22" fill="none" stroke="var(--ink)" stroke-opacity=".3" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M62 114v58" stroke="#fff" stroke-opacity=".35" stroke-width="6" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="art-speaker" viewBox="0 0 200 250">
+      <ellipse cx="100" cy="207" rx="52" ry="7" fill="#000" fill-opacity=".1"/>
+      <rect x="56" y="48" width="88" height="156" rx="24" fill="var(--tone)"/>
+      <rect x="56" y="48" width="88" height="156" rx="24" fill="none" stroke="#fff" stroke-opacity=".3" stroke-width="3"/>
+      <circle cx="100" cy="86" r="12" fill="var(--ink)" fill-opacity=".85"/>
+      <circle cx="100" cy="150" r="32" fill="var(--ink)" fill-opacity=".85"/>
+      <circle cx="100" cy="150" r="13" fill="var(--tone)" fill-opacity=".7"/>
+    </symbol>
+    <symbol id="art-throw" viewBox="0 0 200 250">
+      <ellipse cx="100" cy="203" rx="70" ry="7" fill="#000" fill-opacity=".08"/>
+      <rect x="34" y="152" width="132" height="46" rx="16" fill="var(--ink)"/>
+      <rect x="40" y="110" width="120" height="46" rx="16" fill="var(--tone)"/>
+      <rect x="48" y="70" width="104" height="44" rx="16" fill="var(--ink)" fill-opacity=".75"/>
+      <path d="M48 133h104M42 175h116M58 92h84" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>
+    </symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 7.5l4.5 4.5-4.5 4.5L7.5 12z"/></svg>
+          ProductCraft · Example screens
+        </span>
+        <h1>Commerce</h1>
+        <p>Sora Shop from browsing to delivery: product cards, buy box, bag, checkout and confirmation.</p>
+      </div>
+    </header>
+
+    <div class="variants cols-3">
+      <!-- v1 -->
+      <section class="variant span-all" aria-labelledby="v1-label">
+        <div class="variant-label" id="v1-label"><span class="v">v1</span> Product grid</div>
+        <div class="variant-stage tight">
+          <div class="surface shop">
+            <div class="shop-head">
+              <div>
+                <h2>New arrivals</h2>
+                <p>Small-batch pieces for slower evenings at home.</p>
+              </div>
+              <a class="bag-pill" href="#v3-label">
+                <svg class="ico" aria-hidden="true"><use href="#i-bag"/></svg>
+                View bag
+                <span class="count num" id="bag-count">3</span><span class="visually-hidden"> items</span>
+              </a>
+            </div>
+            <ul class="product-grid">
+              <li class="product">
+                <div class="art tone-sand"><svg viewBox="0 22 200 200" aria-hidden="true"><use href="#art-lamp" width="200" height="250"/></svg><span class="tag">New</span></div>
+                <p class="cat">Lighting</p>
+                <h3><a href="#v2-label">Dune Table Lamp</a></h3>
+                <p class="rating"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg><strong aria-hidden="true">4.8</strong><span aria-hidden="true">(204)</span><span class="visually-hidden">Rated 4.8 out of 5 from 204 reviews</span></p>
+                <div class="buy-row">
+                  <p class="price num">$128.00</p>
+                  <button class="btn btn-secondary add" type="button" data-add="Dune Table Lamp">
+                    <svg class="ico i-add" aria-hidden="true"><use href="#i-plus"/></svg><svg class="ico i-done" aria-hidden="true"><use href="#i-check"/></svg>
+                    <span class="label">Add</span><span class="visually-hidden"> Dune Table Lamp to bag</span>
+                  </button>
+                </div>
+              </li>
+              <li class="product">
+                <div class="art tone-clay"><svg viewBox="0 22 200 200" aria-hidden="true"><use href="#art-mug" width="200" height="250"/></svg></div>
+                <p class="cat">Kitchen</p>
+                <h3><a href="#v2-label">Drift Stoneware Mug</a></h3>
+                <p class="rating"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg><strong aria-hidden="true">4.9</strong><span aria-hidden="true">(512)</span><span class="visually-hidden">Rated 4.9 out of 5 from 512 reviews</span></p>
+                <div class="buy-row">
+                  <p class="price num">$24.00</p>
+                  <button class="btn btn-secondary add" type="button" data-add="Drift Stoneware Mug">
+                    <svg class="ico i-add" aria-hidden="true"><use href="#i-plus"/></svg><svg class="ico i-done" aria-hidden="true"><use href="#i-check"/></svg>
+                    <span class="label">Add</span><span class="visually-hidden"> Drift Stoneware Mug to bag</span>
+                  </button>
+                </div>
+              </li>
+              <li class="product">
+                <div class="art tone-sage"><svg viewBox="0 22 200 200" aria-hidden="true"><use href="#art-speaker" width="200" height="250"/></svg></div>
+                <p class="cat">Audio</p>
+                <h3><a href="#v2-label">Echo Room Speaker</a></h3>
+                <p class="rating"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg><strong aria-hidden="true">4.7</strong><span aria-hidden="true">(89)</span><span class="visually-hidden">Rated 4.7 out of 5 from 89 reviews</span></p>
+                <div class="buy-row">
+                  <p class="price num">$189.00</p>
+                  <button class="btn btn-secondary add" type="button" data-add="Echo Room Speaker">
+                    <svg class="ico i-add" aria-hidden="true"><use href="#i-plus"/></svg><svg class="ico i-done" aria-hidden="true"><use href="#i-check"/></svg>
+                    <span class="label">Add</span><span class="visually-hidden"> Echo Room Speaker to bag</span>
+                  </button>
+                </div>
+              </li>
+              <li class="product">
+                <div class="art tone-slate"><svg viewBox="0 22 200 200" aria-hidden="true"><use href="#art-throw" width="200" height="250"/></svg></div>
+                <p class="cat">Textiles</p>
+                <h3><a href="#v2-label">Loop Wool Throw</a></h3>
+                <p class="rating"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg><strong aria-hidden="true">4.6</strong><span aria-hidden="true">(147)</span><span class="visually-hidden">Rated 4.6 out of 5 from 147 reviews</span></p>
+                <div class="buy-row">
+                  <div>
+                    <!-- Offer shown with the original price and its end date up front (COP-11) -->
+                    <p class="price num">$96.00 <s><span class="visually-hidden">was </span>$120.00</s></p>
+                    <p class="saving">Save $24 until Oct 31</p>
+                  </div>
+                  <button class="btn btn-secondary add" type="button" data-add="Loop Wool Throw">
+                    <svg class="ico i-add" aria-hidden="true"><use href="#i-plus"/></svg><svg class="ico i-done" aria-hidden="true"><use href="#i-check"/></svg>
+                    <span class="label">Add</span><span class="visually-hidden"> Loop Wool Throw to bag</span>
+                  </button>
+                </div>
+              </li>
+            </ul>
+            <p class="visually-hidden" aria-live="polite" id="shop-live"></p>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-21</code> <code>FBK-16</code> <code>COP-13</code> <code>COP-11</code> <code>CMP-27</code> <code>BTN-01</code> <code>ENG-03</code> <code>TYP-09</code></p>
+      </section>
+
+      <!-- v2 -->
+      <section class="variant span-2" aria-labelledby="v2-label">
+        <div class="variant-label" id="v2-label"><span class="v">v2</span> Product detail buy box</div>
+        <div class="variant-stage">
+          <div class="surface pdp" id="pdp" data-color="Sand">
+            <div class="gallery">
+              <div class="art"><svg viewBox="0 0 200 250" id="pdp-main" role="img" aria-label="Dune Table Lamp, front view"><use href="#art-lamp" width="200" height="250"/></svg></div>
+              <div class="thumbs" role="group" aria-label="Product images">
+                <button type="button" aria-current="true" data-view="0 0 200 250" data-alt="front view"><svg viewBox="0 0 200 250" aria-hidden="true"><use href="#art-lamp" width="200" height="250"/></svg><span class="visually-hidden">Front view</span></button>
+                <button type="button" data-view="40 36 120 120" data-alt="shade detail"><svg viewBox="40 36 120 120" aria-hidden="true"><use href="#art-lamp" width="200" height="250"/></svg><span class="visually-hidden">Shade detail</span></button>
+                <button type="button" data-view="50 150 100 70" data-alt="base detail"><svg viewBox="50 150 100 70" aria-hidden="true"><use href="#art-lamp" width="200" height="250"/></svg><span class="visually-hidden">Base detail</span></button>
+              </div>
+            </div>
+            <div class="buybox">
+              <nav aria-label="Breadcrumb">
+                <ol class="crumbs">
+                  <li><a href="#">Shop</a></li>
+                  <li><a href="#">Lighting</a></li>
+                  <li><span aria-current="page">Table lamps</span></li>
+                </ol>
+              </nav>
+              <h2 class="pdp-name">Dune Table Lamp</h2>
+              <div class="pdp-price-row">
+                <p class="pdp-price num">$128.00</p>
+                <a class="rating" href="#"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg><strong>4.8</strong><span>(204 reviews)</span><span class="visually-hidden">, rated out of 5</span></a>
+              </div>
+              <p class="pdp-desc">A hand-glazed stoneware shade on a slim oak stem. Warm, dimmable light for desks and bedside tables.</p>
+
+              <!-- Swatches: a named radio group with the selection in the legend (CMP-24) -->
+              <fieldset class="swatches">
+                <legend>Color: <strong id="color-name">Sand</strong></legend>
+                <div class="swatch-row">
+                  <label class="swatch" style="--dot:#d6b48a"><input type="radio" name="color" value="Sand" checked><span class="dot"></span><span class="visually-hidden">Sand</span></label>
+                  <label class="swatch" style="--dot:#9bb7a1"><input type="radio" name="color" value="Sage"><span class="dot"></span><span class="visually-hidden">Sage</span></label>
+                  <label class="swatch" style="--dot:#50565f"><input type="radio" name="color" value="Graphite"><span class="dot"></span><span class="visually-hidden">Graphite</span></label>
+                </div>
+              </fieldset>
+
+              <div class="qty-row">
+                <span class="field-label" id="qty-label">Quantity</span>
+                <div class="stepper" role="group" aria-labelledby="qty-label" data-stepper id="pdp-qty">
+                  <button type="button" aria-label="Decrease quantity" data-step="-1"><svg class="ico" aria-hidden="true"><use href="#i-minus"/></svg></button>
+                  <output class="num" aria-live="polite">1</output>
+                  <button type="button" aria-label="Increase quantity" data-step="1"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+                </div>
+              </div>
+              <!-- The amount lives in the button and follows the quantity (BTN-14) -->
+              <button class="btn btn-primary btn-block" type="button" id="pdp-add"><span>Add to bag, <span class="num" id="pdp-total">$128.00</span></span></button>
+
+              <p class="delivery">
+                <svg class="ico" aria-hidden="true"><use href="#i-truck"/></svg>
+                <span><strong>Arrives Wed, Oct 28 – Fri, Oct 30</strong>Standard delivery $6.00, free on orders over $200</span>
+              </p>
+              <ul class="chips" aria-label="Purchase protection">
+                <li><svg class="ico" aria-hidden="true"><use href="#i-return"/></svg>Free 30-day returns</li>
+                <li><svg class="ico" aria-hidden="true"><use href="#i-shield"/></svg>2-year warranty</li>
+                <li><svg class="ico" aria-hidden="true"><use href="#i-box"/></svg>Ships in 1 day</li>
+              </ul>
+              <div class="more">
+                <details>
+                  <summary>Details, dimensions and care<svg class="ico" aria-hidden="true"><use href="#i-chev-down"/></svg></summary>
+                  <p>Height 42 cm, shade 28 cm wide. Dimmable LED bulb included. Wipe the shade with a dry cloth.</p>
+                </details>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>SCR-16</code> <code>CMP-24</code> <code>BTN-14</code> <code>MOB-01</code> <code>NAV-05</code> <code>COP-12</code> <code>CMP-27</code> <code>ENG-06</code></p>
+      </section>
+
+      <!-- v3 -->
+      <section class="variant" aria-labelledby="v3-label">
+        <div class="variant-label" id="v3-label"><span class="v">v3</span> Bag summary drawer</div>
+        <div class="variant-stage tight">
+          <section class="surface drawer" role="dialog" aria-modal="false" aria-labelledby="bag-title" id="bag">
+            <header class="drawer-head">
+              <h2 id="bag-title">Your bag <span><span class="num" data-bag-items>3</span> items</span></h2>
+              <button class="icon-btn" type="button" aria-label="Close bag"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button>
+            </header>
+            <!-- Honest progress toward free delivery (FBK-06) -->
+            <div class="goal">
+              <p id="goal-text">Add <strong class="num">$24.00</strong> more for free standard delivery</p>
+              <div class="goal-bar" role="progressbar" aria-labelledby="goal-text" aria-valuemin="0" aria-valuemax="200" aria-valuenow="176" style="--pct: 88%"><span></span></div>
+            </div>
+            <ul class="lines">
+              <li class="line" data-price="128" data-name="Dune Table Lamp">
+                <div class="art tone-sand"><svg viewBox="0 0 200 250" aria-hidden="true"><use href="#art-lamp" width="200" height="250"/></svg></div>
+                <p class="line-name">Dune Table Lamp</p>
+                <p class="line-price num">$128.00</p>
+                <p class="line-variant">Color: Sand</p>
+                <div class="line-controls">
+                  <div class="stepper sm" role="group" aria-label="Quantity, Dune Table Lamp" data-stepper>
+                    <button type="button" aria-label="Decrease quantity" data-step="-1"><svg class="ico" aria-hidden="true"><use href="#i-minus"/></svg></button>
+                    <output class="num">1</output>
+                    <button type="button" aria-label="Increase quantity" data-step="1"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" type="button" data-remove><svg class="ico" aria-hidden="true"><use href="#i-trash"/></svg>Remove<span class="visually-hidden"> Dune Table Lamp</span></button>
+                </div>
+              </li>
+              <li class="line" data-price="24" data-name="Drift Stoneware Mug">
+                <div class="art tone-clay"><svg viewBox="0 0 200 250" aria-hidden="true"><use href="#art-mug" width="200" height="250"/></svg></div>
+                <p class="line-name">Drift Stoneware Mug</p>
+                <p class="line-price num">$48.00</p>
+                <p class="line-variant">Color: Clay · <span class="num">$24.00</span> each</p>
+                <div class="line-controls">
+                  <div class="stepper sm" role="group" aria-label="Quantity, Drift Stoneware Mug" data-stepper>
+                    <button type="button" aria-label="Decrease quantity" data-step="-1"><svg class="ico" aria-hidden="true"><use href="#i-minus"/></svg></button>
+                    <output class="num">2</output>
+                    <button type="button" aria-label="Increase quantity" data-step="1"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+                  </div>
+                  <button class="btn btn-ghost btn-sm" type="button" data-remove><svg class="ico" aria-hidden="true"><use href="#i-trash"/></svg>Remove<span class="visually-hidden"> Drift Stoneware Mug</span></button>
+                </div>
+              </li>
+            </ul>
+            <p class="empty" hidden>Your bag is empty.</p>
+            <!-- Every fee is listed before checkout (SCR-15, CMP-32) -->
+            <dl class="sum">
+              <div><dt>Subtotal</dt><dd class="num" data-sum="subtotal">$176.00</dd></div>
+              <div><dt>Standard delivery</dt><dd class="num" data-sum="shipping">$6.00</dd></div>
+              <div><dt>Estimated tax (8.5%)</dt><dd class="num" data-sum="tax">$14.96</dd></div>
+              <div class="total"><dt>Total</dt><dd class="num" data-sum="total">$196.96</dd></div>
+            </dl>
+            <button class="btn btn-primary btn-block" type="button"><span>Check out, <span class="num" data-sum="total">$196.96</span></span></button>
+            <p class="fine"><svg class="ico" aria-hidden="true"><use href="#i-lock"/></svg>No charge until you place the order</p>
+            <p class="visually-hidden" aria-live="polite" id="bag-live"></p>
+          </section>
+        </div>
+        <p class="rule-ids">Rules: <code>SCR-15</code> <code>CMP-32</code> <code>BTN-14</code> <code>FBK-06</code> <code>ICO-04</code> <code>TYP-09</code> <code>COP-08</code></p>
+      </section>
+
+      <!-- v4 -->
+      <section class="variant span-2" aria-labelledby="v4-label">
+        <div class="variant-label" id="v4-label"><span class="v">v4</span> One-page checkout</div>
+        <div class="variant-stage">
+          <form class="surface checkout" id="checkout" aria-label="Checkout" onsubmit="return false">
+            <div class="co-main">
+              <fieldset class="co-step">
+                <legend><span class="step-num" aria-hidden="true">1</span>Shipping address</legend>
+                <div class="fields">
+                  <div class="field"><label for="co-name">Full name</label><input id="co-name" autocomplete="name" value="Avery Stone"></div>
+                  <div class="field"><label for="co-phone">Phone for delivery updates</label><input id="co-phone" type="tel" autocomplete="tel" value="+1 555-0142"></div>
+                  <div class="field wide"><label for="co-street">Street address</label><input id="co-street" autocomplete="address-line1" value="48 Alder Street, Apt 3"></div>
+                  <div class="field"><label for="co-city">City</label><input id="co-city" autocomplete="address-level2" value="Riverton"></div>
+                  <div class="field"><label for="co-zip">Postal code</label><input id="co-zip" autocomplete="postal-code" inputmode="numeric" value="40112"></div>
+                </div>
+              </fieldset>
+
+              <!-- Delivery speed as card radios with price deltas (SCR-15, FRM-09) -->
+              <fieldset class="co-step">
+                <legend><span class="step-num" aria-hidden="true">2</span>Delivery speed</legend>
+                <div class="options three">
+                  <label class="option tile"><input type="radio" name="speed" value="6" data-label="Standard delivery" checked><span class="radio"></span><span class="delta-price num">$6.00</span><span class="tile-text"><b>Standard</b><small>Oct 28 – 30</small></span></label>
+                  <label class="option tile"><input type="radio" name="speed" value="14" data-label="Express delivery"><span class="radio"></span><span class="delta-price num">+$8.00</span><span class="tile-text"><b>Express</b><small>Tue, Oct 27</small></span></label>
+                  <label class="option tile"><input type="radio" name="speed" value="22" data-label="Next-day delivery"><span class="radio"></span><span class="delta-price num">+$16.00</span><span class="tile-text"><b>Next day</b><small>Mon, Oct 26</small></span></label>
+                </div>
+              </fieldset>
+
+              <fieldset class="co-step">
+                <legend><span class="step-num" aria-hidden="true">3</span>Payment method</legend>
+                <div class="options two">
+                  <label class="option"><input type="radio" name="pay" value="saved" checked><span class="radio"></span><span><b class="num">•••• 4821</b><small>Expires 08/28</small></span><svg class="ico card-ico" aria-hidden="true"><use href="#i-card"/></svg></label>
+                  <label class="option"><input type="radio" name="pay" value="new"><span class="radio"></span><span><b>New card</b><small>Debit or credit</small></span><svg class="ico card-ico" aria-hidden="true"><use href="#i-card-plus"/></svg></label>
+                </div>
+                <!-- Consent to save details is never pre-ticked (SCR-15) -->
+                <label class="check-row"><input type="checkbox"> Save my address for next time</label>
+              </fieldset>
+            </div>
+
+            <!-- Sticky summary that recalculates instantly -->
+            <aside class="co-summary" aria-labelledby="sum-title">
+              <h2 id="sum-title">Order summary <a href="#v3-label">Edit bag</a></h2>
+              <ul class="mini">
+                <li><div class="art tone-sand"><svg viewBox="0 0 200 250" aria-hidden="true"><use href="#art-lamp" width="200" height="250"/></svg></div><p><b>Dune Table Lamp</b><span>Sand · Qty 1</span></p><span class="num">$128.00</span></li>
+                <li><div class="art tone-clay"><svg viewBox="0 0 200 250" aria-hidden="true"><use href="#art-mug" width="200" height="250"/></svg></div><p><b>Drift Stoneware Mug</b><span>Clay · Qty 2</span></p><span class="num">$48.00</span></li>
+              </ul>
+              <dl class="sum">
+                <div><dt>Subtotal</dt><dd class="num">$176.00</dd></div>
+                <div><dt id="co-ship-label">Standard delivery</dt><dd class="num" id="co-ship">$6.00</dd></div>
+                <div><dt>Estimated tax (8.5%)</dt><dd class="num">$14.96</dd></div>
+                <div class="total"><dt>Total</dt><dd class="num" id="co-total">$196.96</dd></div>
+              </dl>
+              <button class="btn btn-primary btn-block" type="submit"><span>Pay <span class="num" id="co-pay">$196.96</span></span></button>
+              <p class="paying"><svg class="ico" aria-hidden="true"><use href="#i-lock"/></svg>Paying with <span class="num">•••• 4821</span></p>
+              <p class="visually-hidden" aria-live="polite" id="co-live"></p>
+            </aside>
+          </form>
+        </div>
+        <p class="rule-ids">Rules: <code>SCR-15</code> <code>FRM-01</code> <code>FRM-09</code> <code>CMP-16</code> <code>BTN-14</code> <code>CMP-32</code> <code>FRM-03</code> <code>TYP-09</code></p>
+      </section>
+
+      <!-- v5 -->
+      <section class="variant" aria-labelledby="v5-label">
+        <div class="variant-label" id="v5-label"><span class="v">v5</span> Order confirmation</div>
+        <div class="variant-stage tight">
+          <section class="surface confirm" aria-labelledby="ok-title">
+            <div class="ok-icon"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></div>
+            <h2 id="ok-title">Order confirmed</h2>
+            <p class="lead">Thanks, Avery. A receipt is on its way to avery.stone@example.com.</p>
+            <dl class="facts">
+              <div><dt>Order number</dt><dd><span class="num" id="order-ref">#SL-1042</span>
+                <button class="btn btn-ghost copy" type="button" id="copy-ref"><svg class="ico" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy</span><span class="visually-hidden"> order number</span></button></dd></div>
+              <div><dt>Paid with</dt><dd><svg class="ico" style="width:16px;height:16px" aria-hidden="true"><use href="#i-card"/></svg><span class="num">•••• 4821</span></dd></div>
+              <div><dt>Total</dt><dd class="num">$196.96</dd></div>
+            </dl>
+            <ul class="mini">
+              <li><div class="art tone-sand"><svg viewBox="0 0 200 250" aria-hidden="true"><use href="#art-lamp" width="200" height="250"/></svg></div><p><b>Dune Table Lamp</b><span>Sand · Qty 1</span></p><span class="num">$128.00</span></li>
+              <li><div class="art tone-clay"><svg viewBox="0 0 200 250" aria-hidden="true"><use href="#art-mug" width="200" height="250"/></svg></div><p><b>Drift Stoneware Mug</b><span>Clay · Qty 2</span></p><span class="num">$48.00</span></li>
+            </ul>
+            <!-- Delivery tracker: current step named in text, not only color (FBK-05) -->
+            <p class="track-title" id="track-title">Delivery</p>
+            <ol class="tracker" aria-labelledby="track-title">
+              <li aria-current="step"><b>Packed</b><span>In progress</span></li>
+              <li><b>Shipped</b><span>Mon, Oct 26</span></li>
+              <li><b>Arrives</b><span>Wed, Oct 28</span></li>
+            </ol>
+            <div class="confirm-actions">
+              <a class="btn btn-primary btn-block" href="#v1-label">Continue shopping</a>
+              <a class="btn btn-secondary btn-block" href="#">View receipt</a>
+            </div>
+          </section>
+        </div>
+        <p class="rule-ids">Rules: <code>SCR-21</code> <code>FBK-07</code> <code>FBK-05</code> <code>COP-04</code> <code>CMP-32</code> <code>BTN-01</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Format money at render time with one locale (COP-08)
+    const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+    const TAX_RATE = 0.085;
+    const FREE_DELIVERY_FROM = 200;
+
+    // Quantity stepper with labeled 44px buttons; minus stays focusable but inert at 1 (BTN-14, BTN-10)
+    function stepper(root, onChange, min = 1, max = 9) {
+      const out = root.querySelector("output");
+      const sync = (n) => {
+        out.textContent = n;
+        root.querySelector('[data-step="-1"]').setAttribute("aria-disabled", String(n <= min));
+        root.querySelector('[data-step="1"]').setAttribute("aria-disabled", String(n >= max));
+      };
+      root.addEventListener("click", (e) => {
+        const btn = e.target.closest("[data-step]");
+        if (!btn || btn.getAttribute("aria-disabled") === "true") return;
+        const n = Number(out.textContent) + Number(btn.dataset.step);
+        sync(n);
+        onChange(n);
+      });
+      sync(Number(out.textContent));
+    }
+
+    // v1: confirm add-to-bag in place, update the count and announce it politely (FBK-16)
+    const bagCount = document.getElementById("bag-count");
+    const shopLive = document.getElementById("shop-live");
+    document.querySelectorAll("[data-add]").forEach((btn) => {
+      const label = btn.querySelector(".label");
+      btn.addEventListener("click", () => {
+        if (btn.dataset.state === "added") return;
+        const count = Number(bagCount.textContent) + 1;
+        bagCount.textContent = count;
+        shopLive.textContent = `${btn.dataset.add} added to bag. ${count} items in bag.`;
+        btn.dataset.state = "added";
+        label.textContent = "Added";
+        setTimeout(() => { btn.dataset.state = ""; label.textContent = "Add"; }, 2000);
+      });
+    });
+
+    // v2: the swatch choice names itself in the legend and re-tints the product via one attribute (CMP-24, ENG-06)
+    const pdp = document.getElementById("pdp");
+    pdp.querySelectorAll('input[name="color"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
+        pdp.dataset.color = radio.value;
+        document.getElementById("color-name").textContent = radio.value;
+      });
+    });
+    const pdpMain = document.getElementById("pdp-main");
+    pdp.querySelectorAll(".thumbs button").forEach((thumb, i, all) => {
+      thumb.addEventListener("click", () => {
+        all.forEach((t) => t.removeAttribute("aria-current"));
+        thumb.setAttribute("aria-current", "true");
+        pdpMain.setAttribute("viewBox", thumb.dataset.view);
+        pdpMain.setAttribute("aria-label", `Dune Table Lamp, ${thumb.dataset.alt}`);
+      });
+    });
+    // The amount in the button follows the quantity (BTN-14)
+    stepper(document.getElementById("pdp-qty"), (n) => {
+      document.getElementById("pdp-total").textContent = money.format(128 * n);
+    });
+
+    // v3: the bag recalculates every fee as quantities change (SCR-15)
+    const bag = document.getElementById("bag");
+    function renderBag() {
+      let subtotal = 0, items = 0;
+      bag.querySelectorAll(".line").forEach((line) => {
+        const qty = Number(line.querySelector("output").textContent);
+        const lineTotal = Number(line.dataset.price) * qty;
+        line.querySelector(".line-price").textContent = money.format(lineTotal);
+        subtotal += lineTotal; items += qty;
+      });
+      const shipping = items === 0 || subtotal >= FREE_DELIVERY_FROM ? 0 : 6;
+      const tax = Math.round(subtotal * TAX_RATE * 100) / 100;
+      const values = { subtotal, shipping, tax, total: subtotal + shipping + tax };
+      bag.querySelectorAll("[data-sum]").forEach((el) => {
+        const v = values[el.dataset.sum];
+        el.textContent = el.dataset.sum === "shipping" && v === 0 ? "Free" : money.format(v);
+      });
+      bag.querySelector("[data-bag-items]").textContent = items;
+      bag.querySelector(".empty").hidden = items > 0;
+      const left = Math.max(0, FREE_DELIVERY_FROM - subtotal);
+      document.getElementById("goal-text").innerHTML = left > 0
+        ? `Add <strong class="num">${money.format(left)}</strong> more for free standard delivery`
+        : "<strong>Free standard delivery unlocked</strong>";
+      const bar = bag.querySelector(".goal-bar");
+      bar.setAttribute("aria-valuenow", String(Math.min(subtotal, FREE_DELIVERY_FROM)));
+      bar.style.setProperty("--pct", `${Math.min(100, (subtotal / FREE_DELIVERY_FROM) * 100)}%`);
+    }
+    bag.querySelectorAll("[data-stepper]").forEach((s) => stepper(s, renderBag));
+    bag.querySelectorAll("[data-remove]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const line = btn.closest(".line");
+        document.getElementById("bag-live").textContent = `Removed ${line.dataset.name} from bag.`;
+        line.remove();
+        renderBag();
+      });
+    });
+
+    // v4: the sticky summary and the pay button update with the delivery choice (SCR-15, BTN-14)
+    const checkout = document.getElementById("checkout");
+    checkout.querySelectorAll('input[name="speed"]').forEach((radio) => {
+      radio.addEventListener("change", () => {
+        const shipping = Number(radio.value);
+        const total = money.format(176 + shipping + 14.96);
+        document.getElementById("co-ship-label").textContent = radio.dataset.label;
+        document.getElementById("co-ship").textContent = money.format(shipping);
+        document.getElementById("co-total").textContent = total;
+        document.getElementById("co-pay").textContent = total;
+        document.getElementById("co-live").textContent = `${radio.dataset.label}. Total ${total}.`;
+      });
+    });
+
+    // v5: copyable order reference with a one-word confirmation (SCR-15, COP-04)
+    document.getElementById("copy-ref").addEventListener("click", async (e) => {
+      const label = e.currentTarget.querySelector("span");
+      try { await navigator.clipboard.writeText(document.getElementById("order-ref").textContent); } catch (err) { /* clipboard unavailable */ }
+      label.textContent = "Copied";
+      setTimeout(() => { label.textContent = "Copy"; }, 2000);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,667 @@
+<!doctype html>
+<!-- ProductCraft example: messaging. Original Sora Labs example, MIT License.
+     Demonstrates: SCR-19, SCR-24, NAV-03, NAV-08, CMP-13, CMP-16, CMP-17, CMP-18, CMP-20, CMP-23,
+     FBK-17, FRM-01, BTN-01, BTN-08, BTN-09, ICO-02, ICO-04, COL-07, COP-01, COP-12, MOB-01, MOB-11, TYP-09 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Messaging and assistant</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    .i { width: 20px; height: 20px; flex: none; }
+    .i-sm { width: 16px; height: 16px; flex: none; }
+    .msg-grid { grid-template-columns: minmax(0, 1fr) 432px; }
+    .msg-grid .stretch { flex: 1; }
+    .phone-stage { padding: var(--space-6) var(--space-4); }
+    .window-bar .title { margin-left: var(--space-3); font-size: var(--text-xs); color: var(--text-3); font-weight: 600; }
+
+    /* Shared bits */
+    .av-40 { width: 40px; height: 40px; font-size: var(--text-sm); }
+    .av-24 { width: 24px; height: 24px; font-size: 10px; }
+    .av-green { background: var(--success-soft); color: var(--success); }
+    .av-amber { background: var(--warning-soft); color: var(--warning); }
+    .av-gray { background: var(--neutral-soft); color: var(--neutral-ink); }
+    .av-wrap { position: relative; flex: none; display: inline-grid; }
+    .presence { position: absolute; right: -1px; bottom: -1px; width: 12px; height: 12px; border-radius: 50%; background: var(--success); border: 2px solid var(--surface); }
+    .badge-count { min-width: 20px; height: 20px; padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); font-size: var(--text-xs); font-weight: 700; line-height: 20px; text-align: center; }
+    .kbd { display: inline-block; padding: 0 var(--space-1); min-width: 20px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; font-size: 11px; line-height: 16px; color: var(--text-2); background: var(--surface); text-align: center; }
+    .btn-sm { min-height: 32px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+    .btn-sm svg { width: 16px; height: 16px; }
+    .field-label { display: block; font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    textarea { font: inherit; color: var(--text); background: transparent; border: 0; resize: none; width: 100%; padding: 0; line-height: 1.5; }
+    textarea:focus { outline: none; }
+    .composer-box:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+    /* v1: three-pane chat */
+    .chat { display: grid; grid-template-columns: 216px 312px minmax(0, 1fr); height: 592px; grid-template-rows: minmax(0, 1fr); background: var(--surface); }
+    .spaces { background: var(--bg); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: var(--space-3); gap: var(--space-4); }
+    .ws-switch { display: flex; align-items: center; gap: var(--space-2); width: 100%; padding: var(--space-2); border: 0; background: transparent; border-radius: var(--radius-sm); cursor: pointer; text-align: left; }
+    .ws-switch:hover { background: var(--surface-2); }
+    .ws-logo { width: 28px; height: 28px; border-radius: var(--radius-sm); display: grid; place-items: center; background: var(--accent); color: var(--on-accent); font-size: var(--text-sm); font-weight: 700; flex: none; }
+    .ws-switch strong { font-size: var(--text-sm); flex: 1; }
+    .nav-label { padding: 0 var(--space-2); margin-bottom: var(--space-1); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .nav-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+    .nav-list a { display: flex; align-items: center; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-2); border-radius: var(--radius-sm); color: var(--text-2); font-size: var(--text-sm); font-weight: 500; }
+    .nav-list a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    .nav-list a[aria-current="page"] { background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; }
+    .nav-list a span:first-of-type { flex: 1; }
+    .nav-list .count { font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .nav-list a[aria-current="page"] .count { color: var(--accent-ink); }
+    .me { margin-top: auto; display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2); border-top: 1px solid var(--border); padding-top: var(--space-3); }
+    .me strong { display: block; font-size: var(--text-sm); line-height: 1.3; }
+    .me span { font-size: var(--text-xs); color: var(--text-3); }
+
+    .convos { border-right: 1px solid var(--border); display: flex; flex-direction: column; min-width: 0; }
+    .convos-head { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-3) var(--space-2) var(--space-4); }
+    .convos-filter { padding: 0 var(--space-4) var(--space-3); border-bottom: 1px solid var(--border); }
+    .convo-list { list-style: none; margin: 0; padding: var(--space-2); overflow: hidden; display: grid; gap: var(--space-1); align-content: start; }
+    .convo { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 0 var(--space-3); align-items: center; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); color: var(--text); position: relative; }
+    .convo:hover { background: var(--surface-2); text-decoration: none; }
+    .convo[aria-current="true"] { background: var(--accent-soft); }
+    .convo[aria-current="true"]::before { content: ""; position: absolute; left: 0; top: var(--space-3); bottom: var(--space-3); width: 3px; border-radius: 2px; background: var(--accent); }
+    .convo .name { font-size: var(--text-sm); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .convo .preview { font-size: var(--text-sm); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .convo .meta { display: grid; justify-items: end; gap: var(--space-1); align-self: stretch; align-content: center; }
+    .convo .time { font-size: var(--text-xs); color: var(--text-3); }
+    .convo.unread .name { font-weight: 700; }
+    .convo.unread .preview { color: var(--text); font-weight: 500; }
+    .convo.unread .time { color: var(--accent-ink); font-weight: 600; }
+    .space-av { width: 40px; height: 40px; flex: none; border-radius: var(--radius-md); display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-ink); }
+
+    .thread { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+    .thread-head { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); }
+    .thread-head .who { flex: 1; min-width: 0; }
+    .thread-head .who strong { display: block; font-size: var(--text-md); line-height: 1.3; }
+    .status-text { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-2); }
+    .status-text::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--success); }
+    .thread-head .actions { display: flex; gap: var(--space-1); }
+    .messages { flex: 1; min-height: 0; overflow: hidden; padding: var(--space-3) var(--space-5); display: flex; flex-direction: column; justify-content: flex-end; gap: var(--space-3); }
+    .divider { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+    .msg-group { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 0 var(--space-2); align-items: end; max-width: 78%; }
+    .msg-group .avatar { grid-row: 1 / span 9; align-self: end; }
+    .msg-group .stack { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+    .msg-group .head { font-size: var(--text-xs); color: var(--text-3); }
+    .msg-group .head b { color: var(--text); font-weight: 600; margin-right: var(--space-1); }
+    .bubble { padding: var(--space-2) var(--space-3); border-radius: var(--radius-lg); font-size: var(--text-sm); line-height: 1.45; background: var(--surface-2); color: var(--text); max-width: 100%; }
+    .msg-group.in .bubble { border-bottom-left-radius: 6px; border-top-left-radius: 6px; }
+    .msg-group.in .bubble:first-of-type { border-top-left-radius: var(--radius-lg); }
+    .msg-group.in .bubble:last-of-type { border-bottom-left-radius: var(--radius-lg); }
+    .msg-group.out { margin-left: auto; grid-template-columns: minmax(0, 1fr); }
+    .msg-group.out .stack { align-items: flex-end; }
+    .msg-group.out .bubble { background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 6px; border-top-right-radius: 6px; }
+    .msg-group.out .bubble:first-of-type { border-top-right-radius: var(--radius-lg); }
+    .msg-group.out .bubble:last-of-type { border-bottom-right-radius: var(--radius-lg); }
+    .receipt { font-size: var(--text-xs); color: var(--text-3); display: inline-flex; align-items: center; gap: var(--space-1); }
+    .file-card { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); min-width: 280px; }
+    .file-card .ico { width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--danger-soft); color: var(--danger); display: grid; place-items: center; flex: none; }
+    .file-card div { flex: 1; min-width: 0; }
+    .file-card strong { display: block; font-size: var(--text-sm); }
+    .file-card span { font-size: var(--text-xs); color: var(--text-3); }
+
+    .composer { padding: var(--space-3) var(--space-5) var(--space-4); }
+    .composer-box { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); padding: var(--space-2) var(--space-3) var(--space-2); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-1); transition: border-color var(--dur-fast); }
+    .composer-bar { display: flex; align-items: center; gap: var(--space-2); }
+    .composer-bar .hint { margin-left: auto; font-size: var(--text-xs); color: var(--text-3); display: inline-flex; align-items: center; gap: var(--space-1); }
+
+    /* v2: assistant empty state */
+    .assist { display: grid; grid-template-columns: 216px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: 704px; background: var(--surface); }
+    .history { background: var(--bg); border-right: 1px solid var(--border); padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-4); }
+    .history .btn { justify-content: flex-start; }
+    .history h3 { font-size: var(--text-xs); font-weight: 600; color: var(--text-3); padding: 0 var(--space-2); margin-bottom: var(--space-1); }
+    .history ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-1); }
+    .history li a { display: block; padding: var(--space-2); border-radius: var(--radius-sm); font-size: var(--text-sm); color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .history li a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    .assist-main { display: flex; flex-direction: column; min-width: 0; }
+    .assist-top { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--border); }
+    .assist-top strong { font-size: var(--text-sm); }
+    .scope { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 32px; padding: 0 var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface); font-size: var(--text-xs); font-weight: 600; color: var(--text-2); cursor: pointer; }
+    .assist-body { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: var(--space-6) var(--space-7); gap: var(--space-5); max-width: 620px; width: 100%; margin: 0 auto; }
+    .spark { width: 44px; height: 44px; border-radius: var(--radius-md); display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-ink); }
+    .greet h2 { font-size: var(--text-2xl); line-height: 1.2; letter-spacing: -0.01em; font-weight: 700; margin-top: var(--space-4); }
+    .greet p { margin-top: var(--space-2); color: var(--text-2); }
+    .suggestions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+    .chip-suggest { display: flex; align-items: center; gap: var(--space-3); min-height: 56px; padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: var(--text); font-size: var(--text-sm); font-weight: 500; text-align: left; cursor: pointer; line-height: 1.35; }
+    .chip-suggest:hover { background: var(--surface-2); }
+    .chip-suggest svg { color: var(--accent-ink); }
+    .assist-note { font-size: var(--text-xs); color: var(--text-3); display: flex; gap: var(--space-2); align-items: flex-start; }
+    
+    /* v4: assistant beside a dashboard */
+    .dash-assist { display: grid; grid-template-columns: minmax(0, 1fr) 400px; grid-template-rows: minmax(0, 1fr); height: 624px; background: var(--bg); }
+    .dash { padding: var(--space-5); display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+    .dash-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .dash-head p { font-size: var(--text-sm); color: var(--text-2); }
+    .kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+    .kpi { padding: var(--space-4); }
+    .kpi .label { font-size: var(--text-sm); color: var(--text-2); }
+    .kpi .value { font-size: var(--text-xl); font-weight: 700; margin: var(--space-1) 0; letter-spacing: -0.01em; }
+    .kpi .delta + span { font-size: var(--text-xs); color: var(--text-3); margin-left: var(--space-1); }
+    .chart-card { padding: var(--space-4) var(--space-5); flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .chart-card .top { display: flex; justify-content: space-between; align-items: baseline; }
+    .chart-card .top p { font-size: var(--text-sm); color: var(--text-2); }
+    .bars { height: 288px; display: grid; grid-template-columns: 44px repeat(6, 1fr); gap: 0 var(--space-4); align-items: end; margin-top: var(--space-4); position: relative; }
+    .bars .axis { align-self: stretch; display: flex; flex-direction: column; justify-content: space-between; font-size: var(--text-xs); color: var(--text-3); padding: var(--space-3) 0; text-align: right; line-height: 16px; }
+    .bars::before { content: ""; position: absolute; left: 60px; right: 0; top: 20px; bottom: 20px; background: linear-gradient(var(--border), var(--border)) top / 100% 1px no-repeat, linear-gradient(var(--border), var(--border)) center / 100% 1px no-repeat, linear-gradient(var(--border), var(--border)) bottom / 100% 1px no-repeat; pointer-events: none; }
+    .bar-col { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: var(--space-1); height: 100%; justify-content: flex-end; }
+    .bar-col .bar { width: 100%; max-width: 52px; border-radius: 6px 6px 2px 2px; background: var(--accent-soft); }
+    .bar-col.current .bar { background: var(--accent); }
+    .bar-col .val { font-size: var(--text-xs); color: var(--text-3); }
+    .bar-col.current .val { color: var(--text); font-weight: 700; }
+    .bar-col .mon { font-size: var(--text-xs); color: var(--text-2); height: 16px; line-height: 16px; }
+    .bar-col.current .mon { color: var(--text); font-weight: 700; }
+
+    .panel { background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; min-width: 0; }
+    .panel-head { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); border-bottom: 1px solid var(--border); }
+    .panel-head strong { flex: 1; font-size: var(--text-sm); display: inline-flex; align-items: center; gap: var(--space-2); }
+    .panel-head strong svg { color: var(--accent-ink); }
+    .panel-body { flex: 1; min-height: 0; overflow: hidden; padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+    .q { align-self: flex-end; max-width: 85%; padding: var(--space-2) var(--space-3); border-radius: var(--radius-lg); border-bottom-right-radius: 6px; background: var(--accent); color: var(--on-accent); font-size: var(--text-sm); }
+    .answer { display: grid; gap: var(--space-3); font-size: var(--text-sm); }
+    .figure { padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--surface-2); }
+    .figure .k { font-size: var(--text-xs); color: var(--text-2); }
+    .figure .v { font-size: var(--text-xl); font-weight: 700; line-height: 1.2; margin: var(--space-1) 0; }
+    .figure .cmp { font-size: var(--text-xs); color: var(--text-2); }
+    .mini { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); align-items: end; height: 80px; padding: 0 var(--space-1); }
+    .mini div { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); justify-content: flex-end; height: 100%; }
+    .mini i { display: block; width: 100%; border-radius: 4px 4px 2px 2px; background: var(--accent); }
+    .mini b { font-size: 11px; font-weight: 600; color: var(--text); }
+    .mini span { font-size: 11px; color: var(--text-3); }
+    .source { display: flex; gap: var(--space-2); align-items: flex-start; font-size: var(--text-xs); color: var(--text-2); padding-top: var(--space-2); border-top: 1px solid var(--border); }
+    .source svg { color: var(--text-3); }
+    .report-link { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-sm); font-weight: 600; }
+    .working { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .spinner { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--accent-soft); border-top-color: var(--accent); animation: spin 0.8s linear infinite; flex: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .working .btn { margin-left: auto; }
+    .panel .composer { padding: var(--space-3) var(--space-4) var(--space-4); border-top: 1px solid var(--border); }
+    .composer-inline { display: flex; align-items: flex-end; gap: var(--space-2); }
+    .composer-inline textarea { padding-bottom: var(--space-1); }
+
+    /* v3: mobile chat */
+    .m-head { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-3) var(--space-2) var(--space-1); border-bottom: 1px solid var(--border); background: var(--surface); }
+    .m-head .icon-btn { width: 44px; height: 44px; }
+    .m-head .who { flex: 1; min-width: 0; }
+    .m-head .who strong { display: block; font-size: var(--text-md); line-height: 1.25; }
+    .m-thread { flex: 1; overflow: hidden; padding: var(--space-4); display: flex; flex-direction: column; justify-content: flex-end; gap: var(--space-3); background: var(--surface); }
+    .m-thread .msg-group { max-width: 86%; grid-template-columns: minmax(0, 1fr); }
+    .m-thread .bubble { font-size: var(--text-md); }
+    .m-thread .msg-group.in .bubble.selected { box-shadow: 0 0 0 2px var(--accent); }
+    .msg-actions { display: flex; gap: var(--space-1); padding: var(--space-1); border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-lg); margin-top: var(--space-1); }
+    .msg-actions button { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-1); min-width: 60px; min-height: 48px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-2); font-size: var(--text-xs); font-weight: 600; cursor: pointer; }
+    .msg-actions button:hover { background: var(--surface-2); color: var(--text); }
+    .gesture-hint { align-self: center; font-size: var(--text-xs); color: var(--text-3); display: inline-flex; align-items: center; gap: var(--space-1); }
+    .m-compose { background: var(--surface); border-top: 1px solid var(--border); padding: var(--space-2) var(--space-3) var(--space-2); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+    .reply-to { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-1) var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--surface-2); box-shadow: inset 3px 0 0 var(--accent); }
+    .reply-to div { flex: 1; min-width: 0; font-size: var(--text-xs); }
+    .reply-to strong { display: block; color: var(--accent-ink); }
+    .reply-to span { display: block; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .reply-to .icon-btn { width: 44px; height: 44px; margin: calc(var(--space-2) * -1) 0; }
+    .m-row { display: flex; align-items: flex-end; gap: var(--space-2); }
+    .m-row .icon-btn { width: 44px; height: 44px; }
+    .m-field { flex: 1; min-width: 0; min-height: 44px; border: 1px solid var(--border); border-radius: 22px; padding: var(--space-1) var(--space-4); background: var(--surface); }
+    .m-field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .m-field label { display: block; font-size: 11px; font-weight: 600; color: var(--text-3); line-height: 14px; }
+    .m-field textarea { font-size: var(--text-md); line-height: 20px; height: 20px; }
+    .send-round { width: 44px; height: 44px; border-radius: 50%; border: 0; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); cursor: pointer; flex: none; }
+    .send-round:disabled { opacity: 0.55; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="ic" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"></g>
+  </defs>
+  <symbol id="i-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h5l1.5 3h5L16 13h5"/><path d="M5.5 5h13L21 13v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-6z"/></symbol>
+  <symbol id="i-mail-dot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h11"/><path d="M20 11v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6"/><path d="M4 7l8 6 4-3"/><circle cx="19" cy="6" r="2.5"/></symbol>
+  <symbol id="i-at" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/></symbol>
+  <symbol id="i-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h12v16l-6-4-6 4z"/></symbol>
+  <symbol id="i-hash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16"/></symbol>
+  <symbol id="i-chev-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m7 10 5 5 5-5"/></symbol>
+  <symbol id="i-chev-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h8"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h3.5l2 5-2.5 1.5a11 11 0 0 0 5.5 5.5L15 13.5l5 2V19a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m20.5 11.5-8.4 8.4a5 5 0 0 1-7.1-7.1l8.8-8.8a3.4 3.4 0 0 1 4.8 4.8l-8.8 8.8a1.7 1.7 0 0 1-2.4-2.4l8.1-8.1"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10.5 13.5"/><path d="M21 3l-6.5 18-4-7.5L3 9.5z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V7z"/><path d="M14 3v4h4M9 13h6M9 17h4"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+  <symbol id="i-check2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m2 12 5 5 9-10M12 16l1 1 9-10"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 13.8 9 19.5 11 13.8 13 12 18.5 10.2 13 4.5 11 10.2 9z"/><path d="M19 3v3M17.5 4.5h3"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M7 16v-5M12 16V7M17 16v-8"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M3 20a6 6 0 0 1 12 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6 6 0 0 1 3 5.5"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h3"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v12c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/></symbol>
+  <symbol id="i-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-arrow-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  <symbol id="i-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
+  <symbol id="i-reply" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v4"/></symbol>
+  <symbol id="i-smile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14a4 4 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M15 9V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v9a1 1 0 0 0 1 1h4"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h.01M12 12h.01M19 12h.01"/></symbol>
+  <symbol id="i-swipe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h10M11 5l3 3-3 3"/><path d="M9 21v-6.5a1.5 1.5 0 0 1 3 0V17l4.5 1a2 2 0 0 1 1.5 2.3L17.6 22"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="7" width="10" height="10" rx="2"/></symbol>
+</svg>
+
+<main class="sheet">
+  <header class="sheet-header">
+    <div>
+      <span class="sheet-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M8 12h8M12 8v8"/></svg>
+        ProductCraft · Example screens
+      </span>
+      <h1>Messaging and assistant</h1>
+      <p>Conversation list, thread and composer on desktop and mobile, plus an assistant that answers next to the data it describes.</p>
+    </div>
+  </header>
+
+  <div class="variants msg-grid">
+
+    <!-- v1: desktop three-pane chat -->
+    <section class="variant span-all" aria-labelledby="v1-title">
+      <div class="variant-label" id="v1-title"><span class="v">v1</span> Desktop chat: sections, conversations and thread</div>
+      <div class="variant-stage">
+        <div class="window">
+          <div class="window-bar"><i></i><i></i><i></i><span class="title">Sora Team · Messages</span></div>
+          <div class="chat">
+            <nav class="spaces" aria-label="Messages">
+              <button class="ws-switch" type="button" aria-label="Switch workspace, current: Sora Team">
+                <span class="ws-logo" aria-hidden="true">S</span><strong>Sora Team</strong>
+                <svg class="i-sm" aria-hidden="true"><use href="#i-chev-down"/></svg>
+              </button>
+              <div>
+                <ul class="nav-list">
+                  <li><a href="#" aria-current="page"><svg class="i-sm" aria-hidden="true"><use href="#i-inbox"/></svg><span>All messages</span></a></li>
+                  <li><a href="#"><svg class="i-sm" aria-hidden="true"><use href="#i-mail-dot"/></svg><span>Unread</span><span class="count num">5</span></a></li>
+                  <li><a href="#"><svg class="i-sm" aria-hidden="true"><use href="#i-at"/></svg><span>Mentions</span><span class="count num">2</span></a></li>
+                  <li><a href="#"><svg class="i-sm" aria-hidden="true"><use href="#i-bookmark"/></svg><span>Saved</span></a></li>
+                </ul>
+              </div>
+              <div>
+                <div class="nav-label">Spaces</div>
+                <ul class="nav-list">
+                  <li><a href="#"><svg class="i-sm" aria-hidden="true"><use href="#i-hash"/></svg><span>Launch Q4</span><span class="count num">3</span></a></li>
+                  <li><a href="#"><svg class="i-sm" aria-hidden="true"><use href="#i-hash"/></svg><span>Design reviews</span></a></li>
+                  <li><a href="#"><svg class="i-sm" aria-hidden="true"><use href="#i-hash"/></svg><span>Customer support</span></a></li>
+                </ul>
+              </div>
+              <div class="me">
+                <span class="av-wrap"><span class="avatar">AS</span><span class="presence" aria-hidden="true"></span></span>
+                <div><strong>Avery Stone</strong><span>Online</span></div>
+              </div>
+            </nav>
+
+            <section class="convos" aria-label="Conversations">
+              <div class="convos-head">
+                <h2 style="font-size: var(--text-md)">All messages</h2>
+                <button class="icon-btn" type="button" aria-label="New message" title="New message"><svg aria-hidden="true"><use href="#i-edit"/></svg></button>
+              </div>
+              <div class="convos-filter">
+                <div class="segmented" role="radiogroup" aria-label="Show conversations">
+                  <button type="button" role="radio" aria-checked="true" tabindex="0">All</button>
+                  <button type="button" role="radio" aria-checked="false" tabindex="-1">Direct</button>
+                  <button type="button" role="radio" aria-checked="false" tabindex="-1">Spaces</button>
+                </div>
+              </div>
+              <ul class="convo-list">
+                <li><a class="convo" href="#" aria-current="true">
+                  <span class="av-wrap"><span class="avatar av-40">PN</span><span class="presence" aria-hidden="true"></span></span>
+                  <span style="min-width:0"><span class="name" style="display:block">Priya Nair</span><span class="preview" style="display:block">Done, the tax note is under the table now.</span></span>
+                  <span class="meta"><span class="time num">10:44</span></span>
+                </a></li>
+                <li><a class="convo unread" href="#">
+                  <span class="space-av" aria-hidden="true"><svg class="i"><use href="#i-hash"/></svg></span>
+                  <span style="min-width:0"><span class="name" style="display:block">Launch Q4</span><span class="preview" style="display:block">Jordan: Final copy is in the brief</span></span>
+                  <span class="meta"><span class="time num">10:15</span><span class="badge-count num" aria-label="3 unread messages">3</span></span>
+                </a></li>
+                <li><a class="convo unread" href="#">
+                  <span class="avatar av-40 av-green">JR</span>
+                  <span style="min-width:0"><span class="name" style="display:block">Jordan Reyes</span><span class="preview" style="display:block">Can we move the review to Thursday?</span></span>
+                  <span class="meta"><span class="time num">09:58</span><span class="badge-count num" aria-label="2 unread messages">2</span></span>
+                </a></li>
+                <li><a class="convo" href="#">
+                  <span class="avatar av-40 av-gray">SO</span>
+                  <span style="min-width:0"><span class="name" style="display:block">Sam Okafor</span><span class="preview" style="display:block">You: Sent invoice #SL-1042 for review</span></span>
+                  <span class="meta"><span class="time num">09:20</span></span>
+                </a></li>
+                <li><a class="convo" href="#">
+                  <span class="avatar av-40 av-amber">HK</span>
+                  <span style="min-width:0"><span class="name" style="display:block">Hana Kim</span><span class="preview" style="display:block">Thanks, that fixed the export</span></span>
+                  <span class="meta"><span class="time">Yesterday</span></span>
+                </a></li>
+                <li><a class="convo" href="#">
+                  <span class="avatar av-40">LB</span>
+                  <span style="min-width:0"><span class="name" style="display:block">Leo Brandt</span><span class="preview" style="display:block">Shared a file: q3-retro-notes.pdf</span></span>
+                  <span class="meta"><span class="time">Mon</span></span>
+                </a></li>
+              </ul>
+            </section>
+
+            <section class="thread" aria-label="Conversation with Priya Nair">
+              <header class="thread-head">
+                <span class="avatar av-40">PN</span>
+                <div class="who"><strong>Priya Nair</strong><span class="status-text">Online · Product designer</span></div>
+                <div class="actions">
+                  <button class="icon-btn" type="button" aria-label="Search in conversation" title="Search in conversation"><svg aria-hidden="true"><use href="#i-search"/></svg></button>
+                  <button class="icon-btn" type="button" aria-label="Start call" title="Start call"><svg aria-hidden="true"><use href="#i-phone"/></svg></button>
+                  <button class="icon-btn" type="button" aria-label="Conversation details" title="Conversation details"><svg aria-hidden="true"><use href="#i-info"/></svg></button>
+                </div>
+              </header>
+              <div class="messages" role="log" aria-label="Messages">
+                <div class="divider" role="separator">Today</div>
+                <div class="msg-group in">
+                  <span class="avatar">PN</span>
+                  <div class="stack">
+                    <div class="head"><b>Priya Nair</b><span class="num">10:38</span></div>
+                    <div class="bubble">Morning! Here's the updated pricing table.</div>
+                    <div class="file-card">
+                      <span class="ico" aria-hidden="true"><svg class="i"><use href="#i-file"/></svg></span>
+                      <div><strong>pricing-table-v3.pdf</strong><span class="num">PDF · 1.2 MB</span></div>
+                      <button class="icon-btn" type="button" aria-label="Download pricing-table-v3.pdf" title="Download"><svg aria-hidden="true"><use href="#i-download"/></svg></button>
+                    </div>
+                    <div class="bubble">The annual plan now shows the monthly price and the yearly total.</div>
+                  </div>
+                </div>
+                <div class="msg-group out">
+                  <div class="stack">
+                    <div class="bubble">This reads much clearer.</div>
+                    <div class="bubble">Can you add the tax note under the table?</div>
+                    <span class="receipt"><svg class="i-sm" aria-hidden="true"><use href="#i-check2"/></svg><span class="num">Read 10:41</span></span>
+                  </div>
+                </div>
+                <div class="msg-group in">
+                  <span class="avatar">PN</span>
+                  <div class="stack">
+                    <div class="head"><b>Priya Nair</b><span class="num">10:44</span></div>
+                    <div class="bubble">Done, the tax note is under the table now.</div>
+                  </div>
+                </div>
+              </div>
+              <form class="composer" data-composer onsubmit="return false">
+                <div class="composer-box">
+                  <label class="field-label" for="c1">Message Priya Nair</label>
+                  <textarea id="c1" rows="1"></textarea>
+                  <div class="composer-bar">
+                    <button class="btn btn-ghost btn-sm" type="button"><svg aria-hidden="true"><use href="#i-clip"/></svg>Attach</button>
+                    <span class="hint"><span class="kbd">Enter</span> to send · <span class="kbd">Shift</span> + <span class="kbd">Enter</span> for a new line</span>
+                    <button class="btn btn-primary btn-sm" type="submit" disabled aria-keyshortcuts="Enter"><svg aria-hidden="true"><use href="#i-send"/></svg>Send</button>
+                  </div>
+                </div>
+              </form>
+            </section>
+          </div>
+        </div>
+      </div>
+      <p class="rule-ids">Rules: <code>SCR-19</code> <code>NAV-03</code> <code>NAV-08</code> <code>CMP-13</code> <code>CMP-16</code> <code>CMP-20</code> <code>CMP-23</code> <code>COL-07</code> <code>FRM-01</code> <code>BTN-09</code> <code>ICO-02</code> <code>ICO-04</code></p>
+    </section>
+
+    <!-- v2: assistant empty state -->
+    <section class="variant" aria-labelledby="v2-title">
+      <div class="variant-label" id="v2-title"><span class="v">v2</span> Assistant: empty state with suggestions</div>
+      <div class="variant-stage stretch">
+        <div class="window">
+          <div class="window-bar"><i></i><i></i><i></i><span class="title">Sora Analytics · Assistant</span></div>
+          <div class="assist">
+            <nav class="history" aria-label="Chat history">
+              <button class="btn btn-secondary btn-sm" type="button"><svg aria-hidden="true"><use href="#i-plus"/></svg>New chat</button>
+              <div>
+                <h3>Today</h3>
+                <ul>
+                  <li><a href="#">Weekly sales summary</a></li>
+                  <li><a href="#">Refunds above $500</a></li>
+                </ul>
+              </div>
+              <div>
+                <h3>Yesterday</h3>
+                <ul>
+                  <li><a href="#">Customers who churned in September</a></li>
+                  <li><a href="#">Reminder for overdue invoices</a></li>
+                </ul>
+              </div>
+              <div>
+                <h3>Past week</h3>
+                <ul>
+                  <li><a href="#">Top products by margin</a></li>
+                  <li><a href="#">Q2 and Q3 revenue compared</a></li>
+                  <li><a href="#">Stock below reorder point</a></li>
+                  <li><a href="#">New customers by region</a></li>
+                </ul>
+              </div>
+              <div class="me">
+                <span class="avatar">AS</span>
+                <div><strong>Avery Stone</strong><span>Sora Analytics</span></div>
+              </div>
+            </nav>
+            <div class="assist-main">
+              <div class="assist-top">
+                <strong>New chat</strong>
+                <button class="scope" type="button" aria-label="Data source: Sora Shop, all stores. Change"><svg class="i-sm" aria-hidden="true"><use href="#i-db"/></svg>Sora Shop · All stores<svg class="i-sm" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+              </div>
+              <div class="assist-body">
+                <div class="greet">
+                  <span class="spark" aria-hidden="true"><svg class="i"><use href="#i-spark"/></svg></span>
+                  <h2>Good morning, Avery</h2>
+                  <p>Ask about orders, customers or revenue. Every answer names its source and time period.</p>
+                </div>
+                <div class="suggestions" aria-label="Suggestions" role="group">
+                  <button class="chip-suggest" type="button" data-suggest><svg class="i" aria-hidden="true"><use href="#i-chart"/></svg>Summarize last week's sales</button>
+                  <button class="chip-suggest" type="button" data-suggest><svg class="i" aria-hidden="true"><use href="#i-users"/></svg>Which customers churned in September?</button>
+                  <button class="chip-suggest" type="button" data-suggest><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg>Compare Q3 revenue with Q2</button>
+                  <button class="chip-suggest" type="button" data-suggest><svg class="i" aria-hidden="true"><use href="#i-receipt"/></svg>List overdue invoices over $500</button>
+                </div>
+                <form data-composer onsubmit="return false">
+                  <div class="composer-box">
+                    <label class="field-label" for="c2">Ask Sora Assistant</label>
+                    <textarea id="c2" rows="2"></textarea>
+                    <div class="composer-bar">
+                      <button class="btn btn-ghost btn-sm" type="button"><svg aria-hidden="true"><use href="#i-clip"/></svg>Add file</button>
+                      <button class="btn btn-primary btn-sm" type="submit" disabled style="margin-left:auto"><svg aria-hidden="true"><use href="#i-send"/></svg>Send</button>
+                    </div>
+                  </div>
+                </form>
+                <p class="assist-note"><svg class="i-sm" aria-hidden="true"><use href="#i-shield"/></svg><span>The assistant reads orders, customers and invoices you can already see. It can't edit or delete data.</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="rule-ids">Rules: <code>SCR-24</code> <code>FBK-09</code> <code>FRM-01</code> <code>COP-12</code> <code>BTN-01</code> <code>BTN-08</code> <code>LAY-05</code></p>
+    </section>
+
+    <!-- v3: mobile chat -->
+    <section class="variant" aria-labelledby="v3-title">
+      <div class="variant-label" id="v3-title"><span class="v">v3</span> Mobile chat with tap options</div>
+      <div class="variant-stage stretch phone-stage">
+        <div class="phone">
+          <div class="phone-status" style="background: var(--surface)"><span class="num">9:41</span><span class="icons" aria-hidden="true"><span></span><span></span></span></div>
+          <div class="phone-body">
+            <header class="m-head">
+              <button class="icon-btn" type="button" aria-label="Back to conversations"><svg aria-hidden="true"><use href="#i-chev-left"/></svg></button>
+              <span class="avatar av-green">JR</span>
+              <div class="who"><strong>Jordan Reyes</strong><span class="status-text">Online</span></div>
+              <button class="icon-btn" type="button" aria-label="Start call" style="width:44px;height:44px"><svg aria-hidden="true"><use href="#i-phone"/></svg></button>
+            </header>
+            <div class="m-thread" role="log" aria-label="Messages">
+              <div class="divider" role="separator">Today</div>
+              <div class="msg-group in">
+                <div class="stack">
+                  <div class="bubble">Are we still on for the launch review?</div>
+                  <div class="bubble">I can do 15:00 or 16:30.</div>
+                </div>
+              </div>
+              <div class="msg-group out">
+                <div class="stack">
+                  <div class="bubble">15:00 works. I'll bring the final deck.</div>
+                  <span class="receipt"><svg class="i-sm" aria-hidden="true"><use href="#i-check2"/></svg><span class="num">Read 09:12</span></span>
+                </div>
+              </div>
+              <div class="msg-group in">
+                <div class="stack">
+                  <div class="bubble selected">Perfect. Can you also share the budget sheet?</div>
+                  <div class="msg-actions" role="toolbar" aria-label="Message options">
+                    <button type="button"><svg class="i" aria-hidden="true"><use href="#i-reply"/></svg>Reply</button>
+                    <button type="button"><svg class="i" aria-hidden="true"><use href="#i-smile"/></svg>React</button>
+                    <button type="button"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Copy</button>
+                    <button type="button"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg>More</button>
+                  </div>
+                </div>
+              </div>
+              <p class="gesture-hint"><svg class="i-sm" aria-hidden="true"><use href="#i-swipe"/></svg>Swipe right to reply, or tap a message</p>
+            </div>
+            <form class="m-compose" data-composer onsubmit="return false">
+              <div class="reply-to">
+                <div><strong>Replying to Jordan</strong><span>Perfect. Can you also share the budget sheet?</span></div>
+                <button class="icon-btn" type="button" aria-label="Cancel reply"><svg aria-hidden="true"><use href="#i-x"/></svg></button>
+              </div>
+              <div class="m-row">
+                <button class="icon-btn" type="button" aria-label="Attach file"><svg aria-hidden="true"><use href="#i-clip"/></svg></button>
+                <div class="m-field"><label for="c4">Message</label><textarea id="c4" rows="1"></textarea></div>
+                <button class="send-round" type="submit" disabled aria-label="Send message"><svg class="i" aria-hidden="true"><use href="#i-send"/></svg></button>
+              </div>
+            </form>
+          </div>
+          <div class="phone-home" style="background: var(--surface)"></div>
+        </div>
+      </div>
+      <p class="rule-ids">Rules: <code>SCR-19</code> <code>MOB-11</code> <code>MOB-01</code> <code>ICO-04</code> <code>COL-07</code></p>
+    </section>
+
+    <!-- v4: assistant answering beside a dashboard -->
+    <section class="variant span-all" aria-labelledby="v4-title">
+      <div class="variant-label" id="v4-title"><span class="v">v4</span> Assistant docked beside the data, answering with period and source</div>
+      <div class="variant-stage">
+        <div class="window">
+          <div class="window-bar"><i></i><i></i><i></i><span class="title">Sora Analytics · Sales overview</span></div>
+          <div class="dash-assist">
+            <div class="dash">
+              <div class="dash-head">
+                <div><h2>Sales overview</h2><p>Sora Shop · All stores</p></div>
+                <button class="btn btn-secondary btn-sm" type="button"><svg aria-hidden="true"><use href="#i-calendar"/></svg>1–30 Sep 2026<svg aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+              </div>
+              <div class="kpis" id="kpis"></div>
+              <div class="card chart-card">
+                <div class="top"><h3>Monthly revenue</h3><p>September is the highest month this year</p></div>
+                <div class="bars" role="img" aria-label="Monthly revenue, April to September 2026: April $38,200, May $40,150, June $39,480, July $41,900, August $43,520, September $48,920.">
+                  <div class="axis num" aria-hidden="true"><span>$50K</span><span>$25K</span><span>$0</span></div>
+                </div>
+              </div>
+            </div>
+            <aside class="panel" aria-label="Assistant">
+              <div class="panel-head">
+                <strong><svg class="i-sm" aria-hidden="true"><use href="#i-spark"/></svg>Assistant</strong>
+                <button class="icon-btn" type="button" aria-label="Close assistant" title="Close assistant"><svg aria-hidden="true"><use href="#i-x"/></svg></button>
+              </div>
+              <div class="panel-body" aria-live="polite">
+                <p class="q">How did September sales compare to August?</p>
+                <div class="answer">
+                  <div class="figure">
+                    <div class="k">Revenue, September 2026</div>
+                    <div class="v num">$48,920</div>
+                    <div class="cmp"><span class="delta delta-good"><svg aria-hidden="true"><use href="#i-arrow-up"/></svg><span class="num">+12.4%</span></span> vs August (<span class="num">$43,520</span>)</div>
+                  </div>
+                  <p>Growth came mostly in the last two weeks, after the autumn collection launched.</p>
+                  <div class="mini" role="img" aria-label="September revenue by week: week 1 $10,840, week 2 $11,960, week 3 $12,410, week 4 $13,710.">
+                    <div><b class="num">$10.8K</b><i style="height: 35px"></i><span>Wk 1</span></div>
+                    <div><b class="num">$12.0K</b><i style="height: 38px"></i><span>Wk 2</span></div>
+                    <div><b class="num">$12.4K</b><i style="height: 40px"></i><span>Wk 3</span></div>
+                    <div><b class="num">$13.7K</b><i style="height: 44px"></i><span>Wk 4</span></div>
+                  </div>
+                  <div class="source"><svg class="i-sm" aria-hidden="true"><use href="#i-db"/></svg><span>Source: Sora Shop orders, 1–30 Sep 2026, refunds excluded. <a class="report-link" href="#">Show full report<svg class="i-sm" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></span></div>
+                </div>
+                <p class="q">Which products drove the increase?</p>
+                <div class="working" role="status">
+                  <span class="spinner" aria-hidden="true"></span>Reading sales data...
+                  <button class="btn btn-secondary btn-sm" type="button"><svg aria-hidden="true"><use href="#i-stop"/></svg>Stop</button>
+                </div>
+              </div>
+              <form class="composer" data-composer onsubmit="return false">
+                <div class="composer-box">
+                  <label class="field-label" for="c3">Ask about this dashboard</label>
+                  <div class="composer-inline">
+                    <textarea id="c3" rows="1"></textarea>
+                    <button class="btn btn-primary btn-sm" type="submit" disabled><svg aria-hidden="true"><use href="#i-send"/></svg>Send</button>
+                  </div>
+                </div>
+              </form>
+            </aside>
+          </div>
+        </div>
+      </div>
+      <p class="rule-ids">Rules: <code>SCR-24</code> <code>FBK-17</code> <code>CMP-17</code> <code>CMP-18</code> <code>TYP-09</code> <code>COL-07</code> <code>BTN-07</code></p>
+    </section>
+  </div>
+</main>
+
+<script>
+  // SCR-19: Send stays disabled until the composer has text; Enter sends, Shift+Enter adds a line.
+  document.querySelectorAll("[data-composer]").forEach((form) => {
+    const field = form.querySelector("textarea");
+    const send = form.querySelector("[type=submit]");
+    const sync = () => { send.disabled = field.value.trim() === ""; };
+    field.addEventListener("input", sync);
+    field.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (!send.disabled) form.requestSubmit(send); }
+    });
+    form.addEventListener("submit", () => {
+      // Example only: replace with a request to your API.
+      field.value = ""; sync();
+    });
+  });
+
+  // SCR-24: a suggestion chip fills the composer so the user can edit it before sending.
+  document.querySelectorAll("[data-suggest]").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const field = document.getElementById("c2");
+      field.value = chip.textContent.trim();
+      field.dispatchEvent(new Event("input"));
+      field.focus();
+    });
+  });
+
+  // CMP-23: radiogroup with arrow-key selection and a roving tabindex.
+  document.querySelectorAll('[role="radiogroup"]').forEach((group) => {
+    const radios = [...group.querySelectorAll('[role="radio"]')];
+    const select = (r) => {
+      radios.forEach((x) => { x.setAttribute("aria-checked", x === r); x.tabIndex = x === r ? 0 : -1; });
+      r.focus();
+    };
+    radios.forEach((r, i) => {
+      r.addEventListener("click", () => select(r));
+      r.addEventListener("keydown", (e) => {
+        const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+        if (step) { e.preventDefault(); select(radios[(i + step + radios.length) % radios.length]); }
+      });
+    });
+  });
+
+  // CMP-17, ENG-07: KPI tiles and chart bars rendered from raw values, formatted at render time.
+  const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+  const money2 = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2 });
+  const count = new Intl.NumberFormat("en-US");
+  const pct = new Intl.NumberFormat("en-US", { style: "percent", minimumFractionDigits: 1, signDisplay: "always" });
+  const kpis = [
+    { label: "Revenue", value: 48920, prev: 43520, fmt: money },
+    { label: "Orders", value: 1284, prev: 1210, fmt: count },
+    { label: "Average order", value: 48920 / 1284, prev: 43520 / 1210, fmt: money2 },
+  ];
+  document.getElementById("kpis").innerHTML = kpis.map((k) => {
+    const change = k.value / k.prev - 1;
+    const up = change >= 0;
+    return `<div class="card kpi"><div class="label">${k.label}</div><div class="value num">${k.fmt.format(k.value)}</div>` +
+      `<span class="delta ${up ? "delta-good" : "delta-bad"}"><svg aria-hidden="true"><use href="#i-arrow-${up ? "up" : "down"}"/></svg><span class="num">${pct.format(change)}</span></span><span>vs August</span></div>`;
+  }).join("");
+  const months = [["Apr", 38200], ["May", 40150], ["Jun", 39480], ["Jul", 41900], ["Aug", 43520], ["Sep", 48920]];
+  const compact = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 1 });
+  document.querySelector(".bars").insertAdjacentHTML("beforeend", months.map(([m, v], i) =>
+    `<div class="bar-col${i === months.length - 1 ? " current" : ""}" aria-hidden="true"><span class="val num">${compact.format(v)}</span>` +
+    `<span class="bar" style="height:calc((100% - 40px) * ${v / 50000})"></span><span class="mon">${m}</span></div>`).join(""));
+</script>
+</body>
+</html>

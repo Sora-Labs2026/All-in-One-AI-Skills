@@ -1,0 +1,508 @@
+<!doctype html>
+<!-- ProductCraft example: brand guidelines. Original Sora Labs example, MIT License.
+     The Sora mark, wordmark and palette on this page are original and drawn here in SVG.
+     Demonstrates: BRD-01, BRD-02, BRD-03, BRD-04, BRD-05, COL-01, COL-07, COL-08, COL-11, CMP-02, CMP-26,
+     TYP-01, TYP-02, TYP-03, TYP-08, COP-06, ICO-07 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Sora brand guidelines</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    /* Brand tokens (BRD-03): one name per color, exposed for code. */
+    :root {
+      --sora-blue: #2B50E0;
+      --sora-deep: #1E3AB8;
+      --sora-ink: #161A2B;
+      --sora-slate: #5B6275;
+      --sora-sky: #8DB2FF;
+      --sora-dawn: #FF8A5B;
+      --sora-mist: #EEF2FF;
+      --sora-paper: #FFFFFF;
+    }
+    .i { width: 20px; height: 20px; flex: none; }
+    .i-sm { width: 16px; height: 16px; flex: none; }
+    .brand-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .brand-grid > .variant { grid-column: span 12; }
+    .brand-grid > .s7 { grid-column: span 7; }
+    .brand-grid > .s5 { grid-column: span 5; }
+    .stage-top { place-items: stretch; align-content: start; }
+    .board { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); }
+    .cap { font-size: var(--text-xs); color: var(--text-2); }
+    .cap strong { color: var(--text); font-weight: 600; }
+    .section-label { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); margin-bottom: var(--space-2); }
+    .lockup { --sym: var(--sora-blue); --word: var(--sora-ink); }
+    .lockup.reversed { --sym: var(--sora-paper); --word: var(--sora-paper); }
+
+    /* v1 construction */
+    .construct { display: grid; grid-template-columns: 1fr 1.25fr; gap: var(--space-4); }
+    .construct .board { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-3); }
+    .construct svg { width: 100%; height: auto; display: block; }
+    .legend { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-1); font-size: var(--text-xs); color: var(--text-2); }
+    .legend li { display: flex; gap: var(--space-2); align-items: baseline; }
+    .legend b { color: var(--text); font-weight: 600; min-width: 72px; }
+    .word-final { display: flex; align-items: center; justify-content: center; gap: var(--space-5); padding: var(--space-4); border-radius: var(--radius-sm); background: var(--bg); margin-top: auto; }
+
+    /* v2 clear space and minimum size */
+    .space-board { padding: var(--space-4); }
+    .space-board svg { width: 100%; max-width: 380px; height: auto; display: block; margin: 0 auto; }
+    .min-row { display: grid; grid-template-columns: auto auto auto; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-3); padding: var(--space-3) var(--space-4); }
+    .min-cell { display: flex; align-items: center; gap: var(--space-3); }
+    .dont-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin-top: var(--space-3); }
+    .dont { overflow: hidden; }
+    .dont .art { height: 60px; display: grid; place-items: center; overflow: hidden; }
+    .dont p { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-2) var(--space-3); font-size: var(--text-xs); font-weight: 600; color: var(--danger); border-top: 1px solid var(--border); }
+    .busy-mini { background:
+      radial-gradient(circle at 20% 30%, #ff8a5b 0 16%, transparent 34%),
+      radial-gradient(circle at 75% 25%, #3cc6b4 0 14%, transparent 32%),
+      radial-gradient(circle at 55% 80%, #f5c542 0 14%, transparent 34%),
+      linear-gradient(135deg, #8db2ff, #e98ad0); }
+
+    /* v3 lockups */
+    .lockups { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-3); width: 100%; }
+    .lk { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; background: var(--surface); }
+    .lk .art { height: 136px; display: grid; place-items: center; }
+    .lk .art svg { display: block; }
+    .lk p { padding: var(--space-3); border-top: 1px solid var(--border); }
+    .bg-paper { background: var(--sora-paper); }
+    .bg-mist { background: var(--sora-mist); }
+    .bg-ink { background: var(--sora-ink); }
+    .bg-blue { background: var(--sora-blue); }
+
+    /* v4 app icons */
+    .icons { display: grid; grid-template-columns: repeat(4, auto); justify-content: space-between; gap: var(--space-3); width: 100%; }
+    .wall { border-radius: var(--radius-md); padding: var(--space-4); display: grid; gap: var(--space-3); align-content: start; }
+    .wall h3 { font-size: var(--text-xs); font-weight: 600; }
+    .sizes { display: flex; gap: var(--space-4); align-items: flex-end; }
+    .size { display: grid; justify-items: center; gap: var(--space-1); }
+    .size svg { display: block; }
+    .size span { font-size: 11px; font-weight: 600; line-height: 16px; }
+    .wall-light { background: linear-gradient(160deg, #f7f8fb, #e9ecf3); border: 1px solid var(--border); }
+    .wall-light h3, .wall-light .size span { color: var(--text-2); }
+    .wall-dark { background: linear-gradient(160deg, #1b1e27, #0f1115); }
+    .wall-dark h3, .wall-dark .size span { color: #b4bac4; }
+    .wall-busy { background:
+      radial-gradient(circle at 12% 18%, #ff8a5b 0 12%, transparent 30%),
+      radial-gradient(circle at 85% 20%, #3cc6b4 0 13%, transparent 32%),
+      radial-gradient(circle at 70% 88%, #f5c542 0 12%, transparent 30%),
+      radial-gradient(circle at 28% 80%, #8db2ff 0 14%, transparent 34%),
+      radial-gradient(circle at 50% 45%, #e98ad0 0 10%, transparent 28%),
+      linear-gradient(135deg, #3b2f7a, #7a3b6e); }
+    .wall-busy h3, .wall-busy .size span { justify-self: start; color: var(--sora-ink); background: rgba(255, 255, 255, 0.92); padding: 0 var(--space-2); border-radius: var(--radius-pill); }
+    .wall-busy .size span { justify-self: center; }
+    .wall-mono { background: var(--surface); border: 1px solid var(--border); }
+    .wall-mono h3, .wall-mono .size span { color: var(--text-2); }
+    .mono-list { display: grid; gap: var(--space-3); }
+    .mono-list .size span { font-size: var(--text-xs); text-align: center; }
+
+    /* v5 palette */
+    .swatches { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: var(--space-3); width: 100%; }
+    .swatch { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; background: var(--surface); }
+    .swatch .chip { height: 56px; padding: var(--space-2) var(--space-3); display: flex; align-items: flex-end; font-size: var(--text-lg); font-weight: 700; }
+    .swatch dl { margin: 0; padding: var(--space-2) var(--space-3) var(--space-3); display: grid; gap: 0; font-size: var(--text-xs); color: var(--text-2); }
+    .swatch dt { font-size: var(--text-sm); font-weight: 700; color: var(--text); }
+    .swatch dd { margin: 0; }
+    .swatch .role { margin-top: var(--space-1); color: var(--text); }
+    .pairs-wrap { width: 100%; margin-top: var(--space-4); }
+    .pairs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-2) var(--space-3); list-style: none; margin: 0; padding: 0; }
+    .pair { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); }
+    .pair .s { height: 32px; border-radius: 6px; display: grid; place-items: center; font-weight: 700; font-size: var(--text-md); box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08); }
+    .pair .n { font-size: var(--text-sm); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .pair .r { font-size: var(--text-xs); color: var(--text-2); }
+    .verdict { display: inline-flex; align-items: center; gap: var(--space-1); padding: 0 var(--space-2); line-height: 20px; border-radius: var(--radius-pill); font-size: var(--text-xs); font-weight: 700; white-space: nowrap; }
+    .verdict svg { width: 14px; height: 14px; }
+    .v-pass { color: var(--success); background: var(--success-soft); }
+    .v-fail { color: var(--danger); background: var(--danger-soft); }
+
+    /* v6 voice and type */
+    .voice { display: grid; grid-template-columns: 1fr 1.15fr 1fr; gap: var(--space-4); width: 100%; }
+    .voice .board { padding: var(--space-4) var(--space-5); }
+    .voice h3 { font-size: var(--text-sm); margin-bottom: var(--space-3); }
+    .scales { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+    .scale .ends { display: flex; justify-content: space-between; font-size: var(--text-sm); font-weight: 600; }
+    .scale .ends span:first-child { color: var(--text-2); font-weight: 500; }
+    .scale .ends span:last-child { color: var(--text-2); font-weight: 500; }
+    .scale .ends span.lean { color: var(--text); font-weight: 700; }
+    .track { position: relative; height: 20px; margin: var(--space-1) 0; }
+    .track::before { content: ""; position: absolute; left: 0; right: 0; top: 9px; height: 2px; border-radius: 1px; background: var(--border); }
+    .track i { position: absolute; top: 6px; width: 2px; height: 8px; border-radius: 1px; background: var(--text-3); transform: translateX(-1px); opacity: 0.5; }
+    .track b { position: absolute; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--sora-blue); box-shadow: 0 0 0 3px var(--surface), 0 0 0 4px var(--sora-blue); transform: translateX(-8px); }
+    .scale p { font-size: var(--text-xs); color: var(--text-2); }
+    .copy-ex { display: grid; gap: var(--space-2); }
+    .ex-context { font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .ex { border-radius: var(--radius-sm); padding: var(--space-2) var(--space-3); font-size: var(--text-sm); display: grid; gap: 0; }
+    .ex .tag { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-xs); font-weight: 700; }
+    .ex .tag svg { width: 14px; height: 14px; }
+    .ex-do { background: var(--success-soft); }
+    .ex-do .tag { color: var(--success); }
+    .ex-avoid { background: var(--danger-soft); }
+    .ex-avoid .tag { color: var(--danger); }
+    .ex q { quotes: "“" "”"; color: var(--text); }
+    .spec-top { display: flex; align-items: flex-end; gap: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border); }
+    .spec-top .aa { font-size: 64px; line-height: 0.9; font-weight: 700; letter-spacing: -0.02em; color: var(--sora-ink); }
+    .spec-top div { font-size: var(--text-xs); color: var(--text-2); }
+    .spec-top strong { display: block; font-size: var(--text-md); color: var(--text); }
+    .spec { list-style: none; margin: 0; padding: 0; }
+    .spec li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: var(--space-3); align-items: baseline; padding: var(--space-2) 0; border-bottom: 1px solid var(--border); }
+    .spec li:last-child { border-bottom: 0; }
+    .spec .meta { font-size: 11px; color: var(--text-3); line-height: 1.3; }
+    .spec .meta b { display: block; color: var(--text-2); font-size: var(--text-xs); }
+    .t-display { font-size: 32px; line-height: 40px; font-weight: 700; letter-spacing: -0.01em; color: var(--sora-ink); white-space: nowrap; }
+    .t-title { font-size: 24px; line-height: 32px; font-weight: 600; color: var(--sora-ink); }
+    .t-body { font-size: 15px; line-height: 24px; color: var(--sora-ink); }
+    .t-caption { font-size: 12px; line-height: 16px; font-weight: 500; color: var(--sora-slate); }
+  </style>
+</head>
+<body>
+<!-- Brand sprite: the symbol, the wordmark, lockups and the app icon, drawn once and reused (BRD-04). -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <pattern id="grid4" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M4 0H0V4" fill="none" style="stroke: var(--border)" stroke-width="0.3"/></pattern>
+    <pattern id="grid16" width="16" height="16" patternUnits="userSpaceOnUse"><path d="M16 0H0V16" fill="none" style="stroke: var(--text-3)" stroke-opacity="0.35" stroke-width="0.35"/></pattern>
+    <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="1.6" height="5" style="fill: var(--sora-blue)" fill-opacity="0.22"/></pattern>
+  </defs>
+  <!-- Symbol: an S from two tangent circles (track radius 5u, stroke 4u) and a sun dot (4u). Grid unit u = 4. -->
+  <symbol id="sora-symbol" viewBox="28 16 72 96">
+    <path d="M74.79 37.16A20 20 0 1 0 56 64A20 20 0 1 1 37.21 90.84" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="92" cy="24" r="8" fill="currentColor"/>
+  </symbol>
+  <!-- Wordmark: x-height 36, stroke 6, bowls share one radius. -->
+  <symbol id="sora-word" viewBox="0 6 131 36">
+    <g fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round">
+      <path d="M17.55 13.93A7.5 7.5 0 1 0 10.5 24A7.5 7.5 0 1 1 3.45 34.07"/>
+      <circle cx="46" cy="24" r="15"/>
+      <path d="M74 39V9M74 24A15 15 0 0 1 89 9"/>
+      <circle cx="113" cy="24" r="15"/>
+      <path d="M128 9V39"/>
+    </g>
+  </symbol>
+  <symbol id="sora-h" viewBox="0 0 248 96">
+    <use href="#sora-symbol" width="72" height="96" style="color: var(--sym, currentColor)"/>
+    <use href="#sora-word" x="100" y="28" width="148" height="40.67" style="color: var(--word, currentColor)"/>
+  </symbol>
+  <symbol id="sora-v" viewBox="0 0 131 148">
+    <use href="#sora-symbol" x="29.5" width="72" height="96" style="color: var(--sym, currentColor)"/>
+    <use href="#sora-word" y="112" width="131" height="36" style="color: var(--word, currentColor)"/>
+  </symbol>
+  <!-- App icon: solid tile, symbol at 60% of the tile height, no wordmark (BRD-02). -->
+  <symbol id="sora-icon" viewBox="0 0 128 128">
+    <rect width="128" height="128" rx="28.6" style="fill: var(--icon-bg, #2B50E0)"/>
+    <rect x="0.5" y="0.5" width="127" height="127" rx="28.1" fill="none" style="stroke: var(--icon-line, transparent)"/>
+    <use href="#sora-symbol" x="35.2" y="25.6" width="57.6" height="76.8" style="color: var(--icon-fg, #ffffff)"/>
+  </symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-x-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6"/></symbol>
+</svg>
+
+<main class="sheet">
+  <header class="sheet-header">
+    <div>
+      <span class="sheet-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><path d="M8 12h8M12 8v8"/></svg>
+        ProductCraft · Example screens
+      </span>
+      <h1>Sora brand guidelines</h1>
+      <p>One mark built from circles, its lockups and app icon, a palette with measured text pairs, and a voice placed on scales.</p>
+    </div>
+  </header>
+
+  <div class="variants brand-grid">
+
+    <!-- v1: construction -->
+    <section class="variant s7" aria-labelledby="v1-title">
+      <div class="variant-label" id="v1-title"><span class="v">v1</span> Mark and wordmark on a construction grid</div>
+      <div class="variant-stage stage-top">
+        <div class="construct">
+          <figure class="board" style="margin:0">
+            <svg viewBox="0 0 128 128" role="img" aria-label="Sora symbol on a 32 by 32 unit grid: two tangent circles of radius 5 units form an S with a 4 unit stroke, and a 4 unit sun dot sits at the upper right.">
+              <rect width="128" height="128" style="fill: var(--surface)"/>
+              <rect width="128" height="128" fill="url(#grid4)"/>
+              <rect width="128" height="128" fill="url(#grid16)"/>
+              <use href="#sora-symbol" x="28" y="16" width="72" height="96" style="color: var(--sora-blue)" opacity="0.92"/>
+              <g fill="none" style="stroke: var(--sora-dawn)" stroke-width="0.6">
+                <rect x="28" y="16" width="72" height="96" stroke-dasharray="2 1.5"/>
+                <circle cx="56" cy="44" r="20" stroke-dasharray="2 1.5"/>
+                <circle cx="56" cy="84" r="20" stroke-dasharray="2 1.5"/>
+                <circle cx="56" cy="44" r="28" stroke-opacity="0.55"/>
+                <circle cx="56" cy="84" r="28" stroke-opacity="0.55"/>
+                <circle cx="56" cy="44" r="12" stroke-opacity="0.55"/>
+                <circle cx="56" cy="84" r="12" stroke-opacity="0.55"/>
+                <circle cx="74.79" cy="37.16" r="8" stroke-dasharray="1.5 1"/>
+                <circle cx="37.21" cy="90.84" r="8" stroke-dasharray="1.5 1"/>
+                <path d="M56 8V120M20 64H108" stroke-opacity="0.7"/>
+                <path d="M56 44L80 35.27M56 84L32 92.73" stroke-opacity="0.7"/>
+              </g>
+              <g style="fill: var(--sora-ink)">
+                <circle cx="56" cy="44" r="1.2"/><circle cx="56" cy="84" r="1.2"/><circle cx="92" cy="24" r="1.2" style="fill: var(--sora-paper)"/>
+              </g>
+            </svg>
+            <ul class="legend">
+              <li><b>Grid</b>32 × 32, unit u = 4 px at 128 px</li>
+              <li><b>Curves</b>two tangent circles, track radius 5u</li>
+              <li><b>Stroke</b>4u, round terminals cut at 20°</li>
+              <li><b>Sun dot</b>4u, equal to the stroke width</li>
+            </ul>
+          </figure>
+          <figure class="board" style="margin:0">
+            <svg viewBox="-6 -4 178 54" role="img" aria-label="Sora wordmark between baseline and x-height guides. The o and a bowls share one circle; the stroke is one sixth of the x-height.">
+              <rect x="-6" y="-4" width="178" height="54" style="fill: var(--surface)"/>
+              <g style="stroke: var(--sora-dawn)" stroke-width="0.4" fill="none">
+                <path d="M-6 6H136M-6 42H136"/>
+                <path d="M-6 24H136" stroke-dasharray="1.5 1.5" stroke-opacity="0.7"/>
+                <path d="M71 0V48M77 0V48" stroke-dasharray="1 1" stroke-opacity="0.7"/>
+              </g>
+              <use href="#sora-word" y="6" width="131" height="36" style="color: var(--sora-ink)" opacity="0.92"/>
+              <g fill="none" style="stroke: var(--sora-dawn)" stroke-width="0.45" stroke-dasharray="1.5 1">
+                <circle cx="46" cy="24" r="15"/>
+                <circle cx="113" cy="24" r="15"/>
+                <circle cx="89" cy="24" r="15" stroke-opacity="0.6"/>
+              </g>
+              <g style="fill: var(--text-2)" font-size="4.4" font-family="system-ui, sans-serif" font-weight="600">
+                <text x="139" y="7.5">x-height</text>
+                <text x="139" y="25.5">mid line</text>
+                <text x="139" y="43.5">baseline</text>
+                <text x="66" y="-0.6">stroke 6</text>
+              </g>
+            </svg>
+            <ul class="legend">
+              <li><b>x-height</b>36, stroke 6 (one sixth)</li>
+              <li><b>Bowls</b>o, r and a share one radius of 15</li>
+              <li><b>s</b>the symbol's two-circle S at 0.375 scale</li>
+            </ul>
+            <div class="word-final lockup">
+              <svg width="186" height="72" viewBox="0 0 248 96" role="img" aria-label="Sora horizontal lockup"><use href="#sora-h"/></svg>
+            </div>
+          </figure>
+        </div>
+      </div>
+      <p class="rule-ids">Rules: <code>BRD-01</code> <code>BRD-04</code> <code>ICO-07</code></p>
+    </section>
+
+    <!-- v2: clear space and minimum size -->
+    <section class="variant s5" aria-labelledby="v2-title">
+      <div class="variant-label" id="v2-title"><span class="v">v2</span> Clear space, minimum sizes and misuse</div>
+      <div class="variant-stage stage-top">
+        <div>
+          <figure class="board space-board" style="margin:0">
+            <svg viewBox="0 0 312 160" role="img" aria-label="Clear space: keep two sun-dot widths, 2x, free on every side of the lockup.">
+              <rect x="0.5" y="0.5" width="311" height="159" rx="2" fill="url(#hatch)" style="stroke: var(--sora-blue)" stroke-opacity="0.45" stroke-dasharray="3 2"/>
+              <rect x="32" y="32" width="248" height="96" style="fill: var(--surface)"/>
+              <g class="lockup"><use href="#sora-h" x="32" y="32" width="248" height="96"/></g>
+              <g style="fill: var(--sora-blue)" fill-opacity="0.35">
+                <circle cx="8" cy="80" r="8"/><circle cx="24" cy="80" r="8"/>
+                <circle cx="304" cy="80" r="8"/><circle cx="288" cy="80" r="8"/>
+                <circle cx="124" cy="8" r="8"/><circle cx="124" cy="24" r="8"/>
+                <circle cx="124" cy="152" r="8"/><circle cx="124" cy="136" r="8"/>
+              </g>
+              <g style="fill: var(--sora-ink)" font-size="9" font-family="system-ui, sans-serif" font-weight="700">
+                <text x="138" y="20">2x</text><text x="138" y="148">2x</text>
+              </g>
+            </svg>
+            <p class="cap" style="margin-top: var(--space-2)"><strong>x = sun dot diameter.</strong> Keep 2x clear on every side; nothing else enters the hatched area.</p>
+          </figure>
+          <div class="board min-row">
+            <div class="min-cell">
+              <svg width="12" height="16" viewBox="0 0 72 96" role="img" aria-label="Symbol at 16 pixels" style="color: var(--sora-blue)"><use href="#sora-symbol"/></svg>
+              <p class="cap"><strong>Symbol</strong><br><span class="num">min 16 px</span></p>
+            </div>
+            <div class="min-cell lockup">
+              <svg width="84" height="32.5" viewBox="0 0 248 96" role="img" aria-label="Lockup at 84 pixels wide"><use href="#sora-h"/></svg>
+              <p class="cap"><strong>Lockup</strong><br><span class="num">min 84 px</span></p>
+            </div>
+            <div class="min-cell">
+              <svg width="16" height="16" viewBox="0 0 128 128" role="img" aria-label="Favicon at 16 pixels"><use href="#sora-icon"/></svg>
+              <p class="cap"><strong>Favicon</strong><br><span class="num">16 px, symbol</span></p>
+            </div>
+          </div>
+          <div class="dont-row">
+            <div class="board dont">
+              <div class="art lockup"><svg width="116" height="30" viewBox="0 0 248 96" preserveAspectRatio="none" aria-hidden="true"><use href="#sora-h"/></svg></div>
+              <p><svg class="i-sm" aria-hidden="true"><use href="#i-x-circle"/></svg>Don't stretch</p>
+            </div>
+            <div class="board dont">
+              <div class="art lockup" style="--sym: #e98ad0; --word: #3cc6b4"><svg width="96" height="37" viewBox="0 0 248 96" aria-hidden="true"><use href="#sora-h"/></svg></div>
+              <p><svg class="i-sm" aria-hidden="true"><use href="#i-x-circle"/></svg>Don't recolor</p>
+            </div>
+            <div class="board dont">
+              <div class="art lockup busy-mini" style="--sym: #ffffff; --word: #ffffff"><svg width="96" height="37" viewBox="0 0 248 96" aria-hidden="true"><use href="#sora-h"/></svg></div>
+              <p><svg class="i-sm" aria-hidden="true"><use href="#i-x-circle"/></svg>Not on busy art</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="rule-ids">Rules: <code>BRD-01</code> <code>BRD-02</code> <code>COL-08</code> <code>COL-07</code></p>
+    </section>
+
+    <!-- v3: lockups -->
+    <section class="variant" aria-labelledby="v3-title">
+      <div class="variant-label" id="v3-title"><span class="v">v3</span> Lockups and reversed versions</div>
+      <div class="variant-stage">
+        <div class="lockups">
+          <figure class="lk" style="margin:0">
+            <div class="art bg-paper lockup"><svg width="168" height="65" viewBox="0 0 248 96" role="img" aria-label="Horizontal lockup"><use href="#sora-h"/></svg></div>
+            <p class="cap"><strong>Horizontal</strong> · default for headers and documents</p>
+          </figure>
+          <figure class="lk" style="margin:0">
+            <div class="art bg-mist lockup"><svg width="72" height="81" viewBox="0 0 131 148" role="img" aria-label="Stacked lockup"><use href="#sora-v"/></svg></div>
+            <p class="cap"><strong>Stacked</strong> · square spaces and merchandise</p>
+          </figure>
+          <figure class="lk" style="margin:0">
+            <div class="art bg-paper"><svg width="54" height="72" viewBox="0 0 72 96" role="img" aria-label="Symbol only" style="color: var(--sora-blue)"><use href="#sora-symbol"/></svg></div>
+            <p class="cap"><strong>Symbol only</strong> · avatars, favicons, app icon</p>
+          </figure>
+          <figure class="lk" style="margin:0">
+            <div class="art bg-ink lockup reversed"><svg width="168" height="65" viewBox="0 0 248 96" role="img" aria-label="Reversed lockup on Ink"><use href="#sora-h"/></svg></div>
+            <p class="cap"><strong>Reversed on Ink</strong> · dark backgrounds</p>
+          </figure>
+          <figure class="lk" style="margin:0">
+            <div class="art bg-blue lockup reversed"><svg width="168" height="65" viewBox="0 0 248 96" role="img" aria-label="Reversed lockup on Sora Blue"><use href="#sora-h"/></svg></div>
+            <p class="cap"><strong>Reversed on Sora Blue</strong> · saturated color and photos with a scrim</p>
+          </figure>
+        </div>
+      </div>
+      <p class="rule-ids">Rules: <code>BRD-01</code> <code>BRD-04</code> <code>COL-08</code> <code>COL-11</code></p>
+    </section>
+
+    <!-- v4: app icon -->
+    <section class="variant" aria-labelledby="v4-title">
+      <div class="variant-label" id="v4-title"><span class="v">v4</span> App icon at home-screen and settings sizes</div>
+      <div class="variant-stage">
+        <div class="icons" id="icon-walls"></div>
+      </div>
+      <p class="rule-ids">Rules: <code>BRD-02</code> <code>BRD-04</code> <code>COL-08</code> <code>ENG-07</code></p>
+    </section>
+
+    <!-- v5: palette -->
+    <section class="variant" aria-labelledby="v5-title">
+      <div class="variant-label" id="v5-title"><span class="v">v5</span> Palette with roles and measured text pairs</div>
+      <div class="variant-stage">
+        <div style="width:100%">
+          <div class="swatches" id="swatches"></div>
+          <div class="pairs-wrap">
+            <p class="section-label">Text on color, WCAG 2.2 contrast measured from the HEX values. AA needs 4.5:1 for body text.</p>
+            <ul class="pairs" id="pairs"></ul>
+          </div>
+        </div>
+      </div>
+      <p class="rule-ids">Rules: <code>BRD-03</code> <code>COL-01</code> <code>COL-07</code> <code>COL-11</code> <code>CMP-02</code> <code>ENG-07</code></p>
+    </section>
+
+    <!-- v6: voice and type -->
+    <section class="variant" aria-labelledby="v6-title">
+      <div class="variant-label" id="v6-title"><span class="v">v6</span> Tone of voice and type specimen</div>
+      <div class="variant-stage">
+        <div class="voice">
+          <div class="board">
+            <h3>Where Sora sits</h3>
+            <ul class="scales" id="scales"></ul>
+          </div>
+          <div class="board">
+            <h3>Voice in practice</h3>
+            <div class="copy-ex">
+              <p class="ex-context">Payment declined</p>
+              <div class="ex ex-do"><span class="tag"><svg aria-hidden="true"><use href="#i-check"/></svg>Do</span><q>Your card ending 4821 was declined. Try another card or contact your bank.</q></div>
+              <div class="ex ex-avoid"><span class="tag"><svg aria-hidden="true"><use href="#i-x"/></svg>Avoid</span><q>Oops! Your card had other plans. Give it another whirl!</q></div>
+              <p class="ex-context" style="margin-top: var(--space-2)">Empty project list</p>
+              <div class="ex ex-do"><span class="tag"><svg aria-hidden="true"><use href="#i-check"/></svg>Do</span><q>No projects yet. Create one to keep tasks and files together.</q></div>
+              <div class="ex ex-avoid"><span class="tag"><svg aria-hidden="true"><use href="#i-x"/></svg>Avoid</span><q>Wow, so empty!!! Time to get busy, superstar.</q></div>
+            </div>
+          </div>
+          <div class="board">
+            <h3>Type</h3>
+            <div class="spec-top">
+              <span class="aa" aria-hidden="true">Aa</span>
+              <div><strong>Inter</strong>Fallback: system UI sans · weights 400, 500, 600, 700</div>
+            </div>
+            <ul class="spec">
+              <li><span class="meta"><b>Display</b><span class="num">32/40 · 700</span></span><span class="t-display">Plan calmly</span></li>
+              <li><span class="meta"><b>Title</b><span class="num">24/32 · 600</span></span><span class="t-title">Weekly review</span></li>
+              <li><span class="meta"><b>Body</b><span class="num">15/24 · 400</span></span><span class="t-body">Tasks, files and updates in one place.</span></li>
+              <li><span class="meta"><b>Caption</b><span class="num">12/16 · 500</span></span><span class="t-caption">Updated 2 minutes ago by Nina Park</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <p class="rule-ids">Rules: <code>BRD-05</code> <code>TYP-01</code> <code>TYP-02</code> <code>TYP-03</code> <code>COP-06</code> <code>COL-07</code></p>
+    </section>
+  </div>
+</main>
+
+<script>
+  // BRD-03, COL-01: contrast ratios are computed from the HEX values (WCAG 2.2 relative luminance),
+  // so a pair is only listed as approved when it really reaches 4.5:1.
+  const palette = [
+    { name: "Sora Blue", hex: "#2B50E0", role: "Primary actions, links, the symbol", ink: "#FFFFFF" },
+    { name: "Deep Blue", hex: "#1E3AB8", role: "Pressed states, emphasis", ink: "#FFFFFF" },
+    { name: "Ink", hex: "#161A2B", role: "Text, dark backgrounds", ink: "#FFFFFF" },
+    { name: "Slate", hex: "#5B6275", role: "Secondary text", ink: "#FFFFFF" },
+    { name: "Sky", hex: "#8DB2FF", role: "Illustration, charts", ink: "#161A2B" },
+    { name: "Dawn", hex: "#FF8A5B", role: "Highlights, sparingly", ink: "#161A2B" },
+    { name: "Mist", hex: "#EEF2FF", role: "Tinted backgrounds", ink: "#161A2B" },
+    { name: "Paper", hex: "#FFFFFF", role: "Page background", ink: "#161A2B" },
+  ];
+  const byName = Object.fromEntries(palette.map((c) => [c.name, c]));
+  const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  const lum = (hex) => {
+    const [r, g, b] = rgb(hex).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const ratio = (a, b) => { const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05); };
+
+  document.getElementById("swatches").innerHTML = palette.map((c) => {
+    const r = ratio(c.ink, c.hex).toFixed(2);
+    return `<div class="swatch"><div class="chip" style="background:${c.hex};color:${c.ink}" aria-hidden="true">Aa</div>` +
+      `<dl><dt>${c.name}</dt><dd class="num">${c.hex}</dd><dd class="num">RGB ${rgb(c.hex).join(", ")}</dd>` +
+      `<dd class="role">${c.role}</dd></dl></div>`;
+  }).join("");
+
+  const pairs = [
+    ["Ink", "Paper"], ["Paper", "Ink"], ["Paper", "Deep Blue"], ["Ink", "Sky"],
+    ["Ink", "Dawn"], ["Paper", "Sora Blue"], ["Sora Blue", "Paper"], ["Slate", "Paper"],
+    ["Paper", "Dawn"], ["Paper", "Sky"], ["Sora Blue", "Ink"], ["Dawn", "Paper"],
+  ];
+  document.getElementById("pairs").innerHTML = pairs.map(([fg, bg]) => {
+    const r = ratio(byName[fg].hex, byName[bg].hex);
+    const pass = r >= 4.5;
+    const level = r >= 7 ? "AAA" : "AA";
+    const verdict = pass
+      ? `<span class="verdict v-pass"><svg aria-hidden="true"><use href="#i-check"/></svg>${level}</span>`
+      : `<span class="verdict v-fail"><svg aria-hidden="true"><use href="#i-x"/></svg>Not for text</span>`;
+    return `<li class="pair"><span class="s" style="background:${byName[bg].hex};color:${byName[fg].hex}" aria-hidden="true">Aa</span>` +
+      `<span><span class="n" style="display:block">${fg} on ${bg}</span><span class="r num">${r.toFixed(2)}:1</span></span>${verdict}</li>`;
+  }).join("");
+
+  // BRD-05: the voice as positions on scales (0 = left end, 4 = right end), each with a concrete rule.
+  const scales = [
+    { left: "Funny", right: "Serious", pos: 3, rule: "Warm, but no jokes in errors or payments." },
+    { left: "Casual", right: "Formal", pos: 1, rule: "Plain words and contractions; no slang." },
+    { left: "Enthusiastic", right: "Matter-of-fact", pos: 3, rule: "State what happened and what to do next." },
+    { left: "Wordy", right: "Brief", pos: 3, rule: "One idea per sentence; buttons say the outcome." },
+  ];
+  document.getElementById("scales").innerHTML = scales.map((s) => {
+    const pct = (s.pos / 4) * 100;
+    const lean = s.pos < 2 ? "left" : s.pos > 2 ? "right" : "middle";
+    const ticks = [0, 25, 50, 75, 100].map((t) => `<i style="left:${t}%"></i>`).join("");
+    return `<li class="scale"><div class="ends"><span class="${lean === "left" ? "lean" : ""}">${s.left}</span><span class="${lean === "right" ? "lean" : ""}">${s.right}</span></div>` +
+      `<div class="track" role="img" aria-label="${s.left} to ${s.right}: position ${s.pos + 1} of 5, leaning ${lean === "left" ? s.left.toLowerCase() : s.right.toLowerCase()}">${ticks}<b style="left:${pct}%"></b></div>` +
+      `<p>${s.rule}</p></li>`;
+  }).join("");
+
+  // BRD-02: preview the icon at real pixel sizes on light, dark and busy wallpapers, plus monochrome.
+  const sizes = [[180, 120], [60, 40, 29]];
+  const icon = (px, style = "") => `<svg width="${px}" height="${px}" viewBox="0 0 128 128" style="${style}" aria-hidden="true"><use href="#sora-icon"/></svg>`;
+  const wall = (cls, title) => `<div class="wall ${cls}"><h3>${title}</h3>` +
+    sizes.map((row) => `<div class="sizes">${row.map((px) => `<div class="size">${icon(px)}<span class="num">${px} px</span></div>`).join("")}</div>`).join("") + `</div>`;
+  document.getElementById("icon-walls").innerHTML =
+    wall("wall-light", "Light wallpaper") + wall("wall-dark", "Dark wallpaper") + wall("wall-busy", "Busy wallpaper") +
+    `<div class="wall wall-mono"><h3>Monochrome</h3><div class="mono-list">` +
+    `<div class="size">${icon(60, "--icon-bg:#161A2B;--icon-fg:#FFFFFF")}<span>Mono dark</span></div>` +
+    `<div class="size">${icon(60, "--icon-bg:#FFFFFF;--icon-fg:#161A2B;--icon-line:#D5D9E2")}<span>Mono light</span></div>` +
+    `<div class="size">${icon(60, "--icon-bg:#2A2D36;--icon-fg:#C9CED6")}<span>Tinted</span></div>` +
+    `</div></div>`;
+</script>
+</body>
+</html>

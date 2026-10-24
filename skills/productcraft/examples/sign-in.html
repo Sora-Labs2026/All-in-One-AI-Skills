@@ -1,0 +1,379 @@
+<!doctype html>
+<!-- ProductCraft example: sign-in. Original Sora Labs example, MIT License.
+     Demonstrates: SCR-12, FRM-01, FRM-02, FRM-05, FRM-15, FRM-18, FRM-19, FRM-28, BTN-01, BTN-02, BTN-13,
+     FBK-01, FBK-10, ENG-01, ENG-02, ENG-03, COL-01, COL-10, COL-11, LAY-01, LAY-02, MOB-01, MOB-05, ICO-04, COP-01 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440,height=900,full=false">
+  <title>ProductCraft example: Sign in</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* Field boundary tokens reach 3:1 against the surface (COL-01). */
+    :root { --field-border: #8a919d; --field-bg: var(--surface); }
+    [data-theme="dark"] { --field-border: #6b7280; --field-bg: var(--bg); }
+
+    body { background: var(--surface); }
+
+    /* Split layout: form column first, brand panel second (SCR-12). */
+    .auth {
+      display: grid;
+      grid-template-columns: minmax(0, 640px) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+    .auth-main {
+      display: flex; flex-direction: column;
+      padding: var(--space-6) var(--space-8);
+    }
+    .auth-form {
+      width: 100%; max-width: 400px;
+      margin: auto; /* centers the column vertically and horizontally */
+      padding: var(--space-6) 0;
+    }
+
+    .brand { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--text); font-size: var(--text-lg); font-weight: 700; letter-spacing: -0.01em; }
+    .brand:hover { text-decoration: none; }
+    .brand svg { width: 32px; height: 32px; color: var(--accent); }
+
+    .auth-form h1 { margin-top: var(--space-6); font-size: var(--text-2xl); letter-spacing: -0.02em; }
+    .lede { margin-top: var(--space-2); color: var(--text-2); }
+
+    form { margin-top: var(--space-6); display: grid; gap: var(--space-4); }
+
+    /* Fields: label above, boxed 48px input (FRM-01, FRM-02, FRM-15). */
+    .field { display: grid; gap: var(--space-2); }
+    .field label, .label-row label { font-size: var(--text-sm); font-weight: 600; }
+    .label-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+    .label-row a { font-size: var(--text-sm); font-weight: 600; }
+
+    .input {
+      width: 100%; min-height: 48px; padding: 0 var(--space-4);
+      border: 1px solid var(--field-border); border-radius: var(--radius-sm);
+      background: var(--field-bg); font-size: var(--text-md);
+      transition: border-color var(--dur-fast);
+    }
+    .input::placeholder { color: var(--text-3); }
+    .input:hover { border-color: var(--text-3); }
+    /* Focus uses the brand color, never a verdict color (COL-10). */
+    .input:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; border-color: var(--accent); border-radius: var(--radius-sm); }
+
+    /* Show/hide toggle sits inside the field's trailing edge (FRM-19) with a 44px hit area (MOB-01). */
+    .password { position: relative; }
+    .password .input { padding-right: 52px; }
+    .password .icon-btn { position: absolute; top: 2px; right: 2px; width: 44px; height: 44px; }
+    .password .icon-btn .eye-off { display: none; }
+    .password .icon-btn[aria-pressed="true"] .eye { display: none; }
+    .password .icon-btn[aria-pressed="true"] .eye-off { display: block; }
+
+    .check { display: inline-flex; align-items: center; gap: var(--space-3); min-height: 24px; cursor: pointer; color: var(--text-2); font-size: var(--text-md); }
+    .check input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+
+    /* Async button: every label lives in one grid cell so the box never resizes (ENG-03). */
+    .submit { margin-top: var(--space-2); }
+    .submit .labels { display: grid; }
+    .submit .labels > span { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); visibility: hidden; }
+    .submit[data-state="idle"] [data-label="idle"],
+    .submit[data-state="submitting"] [data-label="submitting"],
+    .submit[data-state="done"] [data-label="done"] { visibility: visible; }
+    .submit[aria-disabled="true"] { opacity: 1; cursor: progress; } /* busy, not disabled: keep full strength (BTN-02) */
+    .submit[data-state="submitting"] { background: var(--accent-hover); }
+    .submit:active { background: var(--accent-hover); }
+
+    .spinner {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid currentColor; border-right-color: transparent;
+      animation: spin 700ms linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Status line reserves its height so messages never push the layout (FRM-10). */
+    .status { min-height: 20px; margin-top: calc(-1 * var(--space-2)); font-size: var(--text-sm); color: var(--text-2); display: flex; align-items: center; gap: var(--space-2); }
+    .status[data-tone="error"] { color: var(--danger); }
+
+    .divider { display: flex; align-items: center; gap: var(--space-3); margin-top: var(--space-4); color: var(--text-3); font-size: var(--text-sm); }
+    .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+    /* Equal-width provider buttons, quieter than the primary (BTN-13). */
+    .providers { display: grid; gap: var(--space-3); margin-top: var(--space-4); }
+    .providers .btn { width: 100%; min-height: 48px; }
+    .providers .btn svg { color: var(--text-2); }
+    a.btn:hover { text-decoration: none; }
+
+    .switch { margin-top: var(--space-6); color: var(--text-2); }
+    .switch a { font-weight: 600; }
+
+    .auth-foot { width: 100%; max-width: 400px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); font-size: var(--text-sm); color: var(--text-3); }
+    .auth-foot a { color: var(--text-3); }
+    .auth-foot a:hover { color: var(--text-2); }
+    .auth-foot span { margin-right: auto; }
+
+    /* Brand panel: deep indigo; all text checked against the lightest stop it sits on (COL-11). */
+    .auth-brand {
+      position: relative; overflow: hidden;
+      margin: var(--space-4) var(--space-4) var(--space-4) 0;
+      border-radius: var(--radius-lg);
+      padding: var(--space-8);
+      color: #ffffff;
+      background:
+        radial-gradient(70% 55% at 85% 95%, rgba(99, 102, 241, 0.55), transparent 70%),
+        radial-gradient(50% 40% at 10% 0%, rgba(67, 56, 202, 0.45), transparent 70%),
+        linear-gradient(160deg, #1e1b4b 0%, #312e81 60%, #3730a3 100%);
+      display: flex; flex-direction: column;
+    }
+    .auth-brand::before {
+      content: ""; position: absolute; width: 720px; height: 720px; right: -260px; top: -300px;
+      border-radius: 50%; border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 0 0 80px rgba(255, 255, 255, 0.02), 0 0 0 160px rgba(255, 255, 255, 0.015);
+    }
+    .brand-copy { position: relative; max-width: 640px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #e0e7ff; font-size: var(--text-sm); font-weight: 600;
+    }
+    .eyebrow svg { width: 16px; height: 16px; }
+    .brand-copy h2 { margin-top: var(--space-5); font-size: 40px; line-height: 1.15; font-weight: 700; letter-spacing: -0.02em; text-wrap: balance; }
+    .brand-copy p { margin-top: var(--space-4); color: #e0e7ff; font-size: var(--text-lg); line-height: 1.55; max-width: 500px; }
+
+    /* Abstract product preview: simple shapes, decorative only. */
+    .preview { position: relative; flex: 1; min-height: 380px; margin-top: var(--space-7); }
+    .pv-window {
+      position: absolute; left: var(--space-6); top: 0; width: 760px; height: 560px;
+      background: #ffffff; border-radius: var(--radius-md);
+      box-shadow: 0 32px 64px -16px rgba(10, 8, 40, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.2);
+      overflow: hidden; display: flex; flex-direction: column;
+    }
+    .pv-top { height: 44px; flex: none; display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-4); border-bottom: 1px solid #eceef2; }
+    .pv-logo { width: 20px; height: 20px; border-radius: 6px; background: #4f46e5; }
+    .pv-search { width: 180px; height: 20px; border-radius: var(--radius-pill); background: #f1f3f5; margin-left: var(--space-4); }
+    .pv-avatar { width: 24px; height: 24px; border-radius: 50%; margin-left: auto; background: linear-gradient(135deg, #a5b4fc, #6366f1); }
+    .pv-body { flex: 1; display: flex; min-height: 0; }
+    .pv-side { width: 128px; flex: none; padding: var(--space-4) var(--space-3); display: grid; align-content: start; gap: var(--space-3); border-right: 1px solid #eceef2; background: #fafbfc; }
+    .pv-side span { height: 12px; border-radius: var(--radius-pill); background: #e3e6ea; }
+    .pv-side span:nth-child(2) { width: 80%; }
+    .pv-side span:nth-child(3) { width: 65%; }
+    .pv-side span:nth-child(4) { width: 75%; }
+    .pv-side span.is-active { height: 24px; border-radius: 6px; background: #eef2ff; box-shadow: inset 3px 0 0 #4f46e5; }
+    .pv-main { flex: 1; padding: var(--space-4); display: grid; grid-template-rows: auto 1fr; gap: var(--space-3); min-width: 0; }
+    .pv-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+    .pv-kpi { border: 1px solid #eceef2; border-radius: var(--radius-sm); padding: var(--space-3); display: grid; gap: var(--space-2); }
+    .pv-kpi .l { width: 55%; height: 8px; border-radius: 4px; background: #e3e6ea; }
+    .pv-kpi .v { width: 70%; height: 16px; border-radius: 4px; background: #1f2937; }
+    .pv-kpi .d { width: 36px; height: 12px; border-radius: var(--radius-pill); background: #d1fae5; }
+    .pv-kpi .d.down { background: #fee2e2; }
+    .pv-chart { border: 1px solid #eceef2; border-radius: var(--radius-sm); padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-2); min-height: 0; }
+    .pv-chart .h { display: flex; gap: var(--space-2); align-items: center; }
+    .pv-chart .h i { display: block; height: 8px; border-radius: 4px; background: #e3e6ea; }
+    .pv-chart svg { flex: 1; width: 100%; min-height: 0; }
+
+    .pv-float {
+      position: absolute; background: #ffffff; border-radius: var(--radius-md);
+      box-shadow: 0 24px 48px -12px rgba(10, 8, 40, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.2);
+      padding: var(--space-4);
+    }
+    .pv-donut { left: 0; top: 264px; width: 196px; display: grid; gap: var(--space-3); }
+    .pv-donut .row { display: flex; align-items: center; gap: var(--space-3); }
+    .pv-donut .bars { flex: 1; display: grid; gap: var(--space-2); }
+    .pv-donut .bars i { display: block; height: 8px; border-radius: 4px; background: #e3e6ea; }
+    .pv-note { left: 420px; top: 372px; width: 248px; display: flex; gap: var(--space-3); align-items: center; }
+    .pv-note .dot { width: 32px; height: 32px; border-radius: 50%; flex: none; background: #d1fae5; display: grid; place-items: center; color: #047857; }
+    .pv-note .dot svg { width: 18px; height: 18px; }
+    .pv-note .lines { flex: 1; display: grid; gap: var(--space-2); }
+    .pv-note .lines i { display: block; height: 8px; border-radius: 4px; background: #e3e6ea; }
+    .pv-note .lines i:first-child { width: 80%; background: #374151; }
+
+    /* Narrow screens: form first, decorative panel removed (SCR-12, MOB-05). */
+    @media (max-width: 960px) {
+      .auth { grid-template-columns: 1fr; }
+      .auth-brand { display: none; }
+      .auth-main { padding: var(--space-5) var(--space-4); }
+      .input { font-size: 16px; } /* 16px keeps mobile browsers from zooming into the field */
+    }
+  </style>
+</head>
+<body>
+  <div class="auth">
+    <main class="auth-main">
+      <div class="auth-form">
+        <a class="brand" href="/">
+          <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="currentColor"/><path d="M9.5 19.5a6.5 6.5 0 0 1 13 0" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/><path d="M7.5 23.5h17" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/></svg>
+          Sora
+        </a>
+        <h1>Welcome back</h1>
+        <p class="lede">Sign in to your Sora Analytics workspace.</p>
+
+        <!-- A real form: it posts to your own auth endpoint and works without JavaScript (ENG-01, FRM-28). -->
+        <form id="signin-form" action="/session" method="post">
+          <div class="field">
+            <label for="email">Email</label>
+            <input class="input" id="email" name="email" type="email" autocomplete="username" placeholder="name@example.com" required>
+          </div>
+
+          <div class="field">
+            <div class="label-row">
+              <label for="password">Password</label>
+              <a href="/forgot-password">Forgot password?</a>
+            </div>
+            <div class="password">
+              <input class="input" id="password" name="password" type="password" autocomplete="current-password" required>
+              <button class="icon-btn" type="button" aria-label="Show password" aria-pressed="false" aria-controls="password" data-password-toggle hidden>
+                <svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17.4 17.4 0 0 1-3.2 4.1M6.6 6.6C3.9 8.4 2 12 2 12s3.6 7 10 7a10.3 10.3 0 0 0 5.4-1.5"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <label class="check">
+            <input type="checkbox" name="remember" value="30d">
+            Keep me signed in for 30 days
+          </label>
+
+          <!-- One state attribute drives the label, busy and disabled styling (ENG-02, FBK-10). -->
+          <button class="btn btn-primary btn-block submit" type="submit" data-state="idle">
+            <span class="labels">
+              <span data-label="idle">Sign in</span>
+              <span data-label="submitting"><span class="spinner" aria-hidden="true"></span>Signing in...</span>
+              <span data-label="done"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Signed in</span>
+            </span>
+          </button>
+          <p class="status" id="signin-status" role="status" aria-live="polite"></p>
+        </form>
+
+        <div class="divider">or continue with</div>
+        <div class="providers">
+          <a class="btn btn-secondary" href="/sso">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/><path d="M16 9h2a2 2 0 0 1 2 2v10"/><path d="M3 21h18"/><path d="M8 7h4M8 11h4M8 15h4"/></svg>
+            Continue with SSO
+          </a>
+          <button class="btn btn-secondary" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.8 12.2 20 3"/><path d="m16 7 3 3"/><path d="m13.5 9.5 2 2"/></svg>
+            Continue with passkey
+          </button>
+        </div>
+
+        <p class="switch">New to Sora? <a href="/sign-up">Create an account</a></p>
+      </div>
+
+      <footer class="auth-foot">
+        <span>&copy; 2026 Sora Analytics</span>
+        <a href="/privacy">Privacy</a>
+        <a href="/terms">Terms</a>
+        <a href="/help">Help</a>
+      </footer>
+    </main>
+
+    <aside class="auth-brand" aria-label="About Sora Analytics">
+      <div class="brand-copy">
+        <span class="eyebrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>
+          Sora Analytics
+        </span>
+        <h2>Every metric your team needs, in one calm workspace.</h2>
+        <p>Revenue, product and support data stay in sync, so your weekly review starts with answers instead of exports.</p>
+      </div>
+
+      <div class="preview" aria-hidden="true">
+        <div class="pv-window">
+          <div class="pv-top"><span class="pv-logo"></span><span class="pv-search"></span><span class="pv-avatar"></span></div>
+          <div class="pv-body">
+            <div class="pv-side"><span class="is-active"></span><span></span><span></span><span></span><span></span></div>
+            <div class="pv-main">
+              <div class="pv-kpis">
+                <div class="pv-kpi"><span class="l"></span><span class="v"></span><span class="d"></span></div>
+                <div class="pv-kpi"><span class="l"></span><span class="v" style="width: 55%"></span><span class="d"></span></div>
+                <div class="pv-kpi"><span class="l"></span><span class="v" style="width: 62%"></span><span class="d down"></span></div>
+              </div>
+              <div class="pv-chart">
+                <div class="h"><i style="width: 96px; background: #374151"></i><i style="width: 48px; margin-left: auto"></i></div>
+                <svg viewBox="0 0 576 354">
+                  <defs>
+                    <linearGradient id="pv-fill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stop-color="#6366f1" stop-opacity="0.28"/>
+                      <stop offset="1" stop-color="#6366f1" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <g stroke="#eceef2" stroke-width="1"><path d="M0 88h576M0 176h576M0 264h576"/></g>
+                  <path d="M0 270 C50 258 80 214 130 216 S210 160 260 166 S340 100 390 108 S490 40 576 26 V354 H0 Z" fill="url(#pv-fill)"/>
+                  <path d="M0 270 C50 258 80 214 130 216 S210 160 260 166 S340 100 390 108 S490 40 576 26" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round"/>
+                  <path d="M0 310 C70 302 120 280 180 284 S290 250 350 256 S470 214 576 200" fill="none" stroke="#a5b4fc" stroke-width="2.5" stroke-dasharray="6 6" stroke-linecap="round"/>
+                  <circle cx="390" cy="108" r="6" fill="#ffffff" stroke="#4f46e5" stroke-width="3"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pv-float pv-donut">
+          <div class="row">
+            <svg width="64" height="64" viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="24" fill="none" stroke="#eef2ff" stroke-width="10"/>
+              <circle cx="32" cy="32" r="24" fill="none" stroke="#4f46e5" stroke-width="10" stroke-dasharray="98 151" stroke-linecap="round" transform="rotate(-90 32 32)"/>
+              <circle cx="32" cy="32" r="24" fill="none" stroke="#a5b4fc" stroke-width="10" stroke-dasharray="30 151" stroke-dashoffset="-104" stroke-linecap="round" transform="rotate(-90 32 32)"/>
+            </svg>
+            <div class="bars"><i style="width: 90%; background: #374151"></i><i style="width: 70%"></i><i style="width: 50%"></i></div>
+          </div>
+        </div>
+
+        <div class="pv-float pv-note">
+          <span class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+          <span class="lines"><i></i><i style="width: 60%"></i></span>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <script>
+    // FRM-19: show/hide password with aria-pressed, keeping the caret where it was.
+    document.querySelectorAll("[data-password-toggle]").forEach((toggle) => {
+      const input = document.getElementById(toggle.getAttribute("aria-controls"));
+      toggle.hidden = false; // revealed only when the script can make it work
+      toggle.addEventListener("click", () => {
+        const show = toggle.getAttribute("aria-pressed") !== "true";
+        const { selectionStart, selectionEnd } = input;
+        input.type = show ? "text" : "password";
+        toggle.setAttribute("aria-pressed", String(show));
+        input.setSelectionRange(selectionStart, selectionEnd);
+      });
+    });
+
+    // ENG-02, FBK-10: the sign-in button is a state machine (idle -> submitting -> done, or back to idle).
+    const form = document.getElementById("signin-form");
+    const submit = form.querySelector(".submit");
+    const status = document.getElementById("signin-status");
+    const transitions = { idle: ["submitting"], submitting: ["done", "idle"], done: [] };
+
+    function setState(next) {
+      const current = submit.dataset.state;
+      if (!transitions[current].includes(next)) return false;
+      submit.dataset.state = next;
+      submit.setAttribute("aria-busy", String(next === "submitting"));
+      submit.setAttribute("aria-disabled", String(next !== "idle"));
+      return true;
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault(); // native validation already ran; without JS the form posts normally
+      if (!setState("submitting")) return; // ignores repeat presses mid-request
+      status.dataset.tone = "";
+      status.textContent = "Signing in...";
+      try {
+        await signIn(new FormData(form));
+        setState("done");
+        status.textContent = "Signed in. Opening your workspace...";
+        // In a real app, navigate to the workspace here.
+      } catch (error) {
+        setState("idle");
+        status.dataset.tone = "error";
+        status.textContent = "We couldn't sign you in. Check your email and password, then try again.";
+      }
+    });
+
+    // Example only: replace with a request to your API.
+    function signIn(formData) {
+      return new Promise((resolve) => setTimeout(resolve, 1200));
+    }
+  </script>
+</body>
+</html>

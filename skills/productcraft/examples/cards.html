@@ -1,0 +1,619 @@
+<!doctype html>
+<!-- ProductCraft example: cards. Original Sora Labs example, MIT License.
+     Demonstrates: CMP-17, CMP-20, CMP-21, CMP-22, CMP-28, CMP-29, CMP-15, CMP-06, CMP-13, CMP-27, TYP-09,
+     COL-07, COP-13, FBK-06, FBK-16, ICO-04, MOB-01, MOB-07, LAY-07, ENG-03, DRK-09 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- One tall viewport instead of a full-page capture: resizing the viewport mid-capture resets the carousel scroll position. -->
+  <meta name="screenshot" content="width=1440,height=2391,full=false">
+  <title>ProductCraft example: Cards</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    :root { --star: #f59e0b; }
+    .variant-stage { flex: 1; grid-template-columns: minmax(0, 1fr); }
+    .theme-scope { width: 100%; display: grid; place-items: center; color: var(--text); }
+    h4 { margin: 0; }
+    svg.i { width: 20px; height: 20px; flex: none; }
+    .link-btn { padding: 0; border: 0; background: none; color: var(--accent-ink); font-weight: 600; cursor: pointer; }
+    .link-btn:hover { text-decoration: underline; }
+
+    /* v1 KPI tiles: label, large tabular value, delta with period (CMP-17, TYP-09) */
+    .kpi-row { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
+    .kpi { display: flex; flex-direction: column; gap: var(--space-2); }
+    .kpi-head { display: flex; align-items: center; gap: var(--space-3); }
+    .kpi-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--accent-soft); color: var(--accent-ink); }
+    .kpi-label { font-size: var(--text-sm); color: var(--text-2); }
+    .kpi-value { font-size: var(--text-2xl); font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+    .kpi-value .cur, .kpi-value .minor, .kpi-value .of { font-size: var(--text-lg); font-weight: 600; color: var(--text-2); }
+    .kpi .delta .period { font-weight: 400; color: var(--text-3); }
+    .kpi-split { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); }
+    .kpi-split > div { display: flex; flex-direction: column; gap: var(--space-2); }
+    .spark { width: 124px; height: 48px; flex: none; }
+    .spark path { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .spark circle { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+    .goal { width: 100%; height: 8px; margin-top: var(--space-1); border: 0; border-radius: var(--radius-pill); background: var(--surface-2); appearance: none; overflow: hidden; }
+    .goal::-webkit-progress-bar { background: var(--surface-2); border-radius: var(--radius-pill); }
+    .goal::-webkit-progress-value { background: var(--accent); border-radius: var(--radius-pill); }
+    .goal::-moz-progress-bar { background: var(--accent); border-radius: var(--radius-pill); }
+    .goal-meta { display: flex; justify-content: space-between; gap: var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
+
+    /* v2 list rows: leading visual, two lines, trailing signed amount (CMP-20, LAY-07) */
+    .list-card { width: 100%; max-width: 460px; padding: var(--space-4) var(--space-3); }
+    .list-head { display: flex; align-items: center; justify-content: space-between; padding: var(--space-1) var(--space-3) var(--space-2); }
+    .day + .day { margin-top: var(--space-3); }
+    .day-head { display: flex; justify-content: space-between; padding: var(--space-2) var(--space-3); font-size: var(--text-xs); color: var(--text-3); }
+    .day-head h4 { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .rows { margin: 0; padding: 0; list-style: none; }
+    .row {
+      display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3);
+      width: 100%; min-height: 56px; padding: var(--space-2) var(--space-3);
+      border: 0; border-radius: var(--radius-md); background: transparent; text-align: left; cursor: pointer;
+    }
+    .row:hover { background: var(--surface-2); }
+    .lead { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-2); }
+    .avatar.avatar-40 { width: 40px; height: 40px; font-size: var(--text-sm); }
+    .row-text { display: grid; min-width: 0; }
+    .row-title { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .row-sub { font-size: var(--text-sm); color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .amount { font-weight: 600; text-align: right; white-space: nowrap; }
+    .amount.credit { color: var(--success); }
+
+    /* v3 feed post: header, clamped body, media, reactions (CMP-29, CMP-28) */
+    .post { width: 100%; max-width: 480px; padding: var(--space-4) 0 var(--space-2); }
+    .post-head { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-4); }
+    .post-meta { display: grid; flex: 1; min-width: 0; line-height: 1.35; }
+    .post-name { font-weight: 600; }
+    .post-head .icon-btn { width: 44px; height: 44px; margin-right: calc(var(--space-2) * -1); }
+    .post-body { padding: var(--space-3) var(--space-4) 0; }
+    .post-body p { color: var(--text); }
+    .post-body p.clamp { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .post-body .link-btn { min-height: 32px; }
+    .post-media { margin: var(--space-2) var(--space-4) 0; aspect-ratio: 16 / 9; border-radius: var(--radius-md); overflow: hidden; }
+    .post-media svg { display: block; width: 100%; height: 100%; }
+    .post-actions { display: flex; gap: var(--space-1); margin-top: var(--space-2); padding: 0 var(--space-2); }
+    .action {
+      display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-3);
+      border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-2); font-size: var(--text-sm); font-weight: 600; cursor: pointer;
+    }
+    .action:hover { background: var(--surface-2); color: var(--text); }
+    .action .count { font-weight: 400; color: var(--text-3); }
+    .action[aria-pressed="true"] { color: var(--danger); }
+    .action[aria-pressed="true"] svg { fill: currentColor; }
+    .action.share { margin-left: auto; }
+    .share-row { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4) var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .share-row[hidden] { display: none; }
+
+    /* v4 product cards: fixed image ratio, comparable anatomy (CMP-21, CMP-06, COP-13) */
+    .shop { width: 100%; max-width: 1040px; }
+    .shop-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-4); }
+    .cart-pill { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-2) 0 var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface); color: var(--text); font-size: var(--text-sm); font-weight: 600; }
+    .cart-pill:hover { text-decoration: none; background: var(--surface-2); }
+    .cart-count { display: grid; place-items: center; min-width: 28px; height: 28px; padding: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); font-size: var(--text-xs); }
+    .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+    .product { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-2); }
+    .product-media { aspect-ratio: 4 / 3; border-radius: var(--radius-sm); overflow: hidden; background: var(--art); }
+    .product-media svg { display: block; width: 100%; height: 100%; }
+    .product-info { display: grid; gap: var(--space-1); padding: 0 var(--space-2); }
+    .product-cat { font-size: var(--text-xs); color: var(--text-3); }
+    .product-title { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); font-size: var(--text-md); }
+    .product-title a { color: var(--text); }
+    .price { font-weight: 700; white-space: nowrap; }
+    .rating { display: flex; align-items: center; gap: var(--space-1); font-size: var(--text-sm); color: var(--text-2); }
+    .rating svg { width: 16px; height: 16px; color: var(--star); }
+    .rating strong { color: var(--text); }
+    .product .btn { margin: 0 var(--space-2) var(--space-2); }
+
+    /* v5 carousel: labeled buttons, position, dots, scroll snap with a peek (CMP-22, MOB-07) */
+    .carousel { width: 100%; }
+    .carousel-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-4); }
+    .carousel-head p { font-size: var(--text-sm); color: var(--text-2); }
+    .carousel-controls { display: flex; align-items: center; gap: var(--space-2); }
+    .carousel-pos { min-width: 48px; text-align: center; font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .nav-btn { width: 44px; height: 44px; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface); }
+    .nav-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .track {
+      display: grid; grid-auto-flow: column; grid-auto-columns: 74%; gap: var(--space-4);
+      overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; scrollbar-width: none;
+    }
+    .track::-webkit-scrollbar { display: none; }
+    .slide { scroll-snap-align: start; padding: var(--space-2); }
+    .slide-art { aspect-ratio: 16 / 9; border-radius: var(--radius-sm); overflow: hidden; background: var(--art); }
+    .slide-art svg { display: block; width: 100%; height: 100%; }
+    .slide-text { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-3) var(--space-2) var(--space-1); }
+    .slide-text span { font-size: var(--text-sm); color: var(--text-3); }
+    .dots { display: flex; justify-content: center; margin-top: var(--space-3); }
+    .dot-btn { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 0; background: transparent; cursor: pointer; }
+    .dot-btn::before { content: ""; width: 8px; height: 8px; border-radius: var(--radius-pill); background: var(--text-3); opacity: 0.4; transition: transform var(--dur-fast); }
+    .dot-btn[aria-current="true"]::before { width: 20px; background: var(--accent); opacity: 1; }
+
+    /* v6 notifications: actor bold, action, relative time, unread marker (CMP-29, COL-07) */
+    .notif-card { width: 100%; max-width: 460px; padding: var(--space-4) var(--space-3) var(--space-3); }
+    .notif-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: 0 var(--space-3) var(--space-2); }
+    .notif-head h3 { display: flex; align-items: center; gap: var(--space-2); }
+    .notif-head .btn { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+    .group-label { padding: var(--space-3) var(--space-3) var(--space-1); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .notifs { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); }
+    .notif { display: grid; grid-template-columns: 40px minmax(0, 1fr) 12px; gap: var(--space-3); align-items: start; padding: var(--space-3); border-radius: var(--radius-md); }
+    .notif.is-unread { background: var(--accent-soft); animation: notif-in var(--dur-med) var(--ease-out) both; }
+    .notif p { font-size: var(--text-sm); color: var(--text-2); line-height: 1.45; }
+    .notif p strong { color: var(--text); font-weight: 600; }
+    .notif time { display: block; margin-top: var(--space-1); font-size: var(--text-xs); color: var(--text-3); }
+    .unread-dot { width: 10px; height: 10px; margin-top: var(--space-2); border-radius: var(--radius-pill); background: var(--accent); }
+    .notif:not(.is-unread) .unread-dot { visibility: hidden; }
+    @keyframes notif-in { from { opacity: 0; transform: translateY(-8px); } }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-wallet" viewBox="0 0 24 24"><path d="M4 8V7a2 2 0 0 1 2-2h11v3"/><rect x="4" y="8" width="16" height="12" rx="2.5"/><path d="M15.5 14h1.5"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 10h18M7 15h4"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2l2.3 10.2a2 2 0 0 0 2 1.6h7.3a2 2 0 0 0 2-1.5L20 8H6.2"/><circle cx="10" cy="20" r="1.2"/><circle cx="17" cy="20" r="1.2"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-train" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="13" rx="3"/><path d="M6 10h12M9.5 13h.01M14.5 13h.01M8 20l1.5-2M16 20l-1.5-2"/></symbol>
+        <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-briefcase" viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7M3 12.5h18"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-cloud" viewBox="0 0 24 24"><path d="M7.5 18.5h9.5a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6 1.2A3.4 3.4 0 0 0 7.5 18.5z"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.25" fill="currentColor"/><circle cx="12" cy="12" r="1.25" fill="currentColor"/><circle cx="19" cy="12" r="1.25" fill="currentColor"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.4-7.5-10.2A4.2 4.2 0 0 1 12 7.2a4.2 4.2 0 0 1 7.5 2.6C19.5 15.6 12 20 12 20z"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-comment" viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 0 1-11.7 7.1L4 19.8l1.2-4A8 8 0 1 1 20 11.5z"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-share" viewBox="0 0 24 24"><path d="M12 15V3.5M8 7.5l4-4 4 4"/><path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z" fill="currentColor" stroke="none"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="6"/><path d="M8 15.5c2.5 0 3.5-7 8-7"/></svg>
+          ProductCraft · Example screens
+        </span>
+        <h1>Cards</h1>
+        <p>Six card patterns with a fixed anatomy each: KPI tiles, list rows, a feed post, product cards, a carousel and notifications. Every interactive part is a real button or link with a name.</p>
+      </div>
+      <p class="subtle">6 versions · light and dark</p>
+    </header>
+
+    <div class="variants cols-2">
+      <!-- v1 -->
+      <section class="variant span-all" aria-labelledby="v1">
+        <h2 class="variant-label" id="v1"><span class="v">v1</span> KPI tiles: with icon, with sparkline, with progress</h2>
+        <div class="variant-stage">
+          <div class="kpi-row">
+            <article class="card kpi" aria-labelledby="k1">
+              <div class="kpi-head">
+                <span class="kpi-icon" aria-hidden="true"><svg class="i"><use href="#i-wallet"/></svg></span>
+                <h3 class="kpi-label" id="k1">Available balance</h3>
+              </div>
+              <p class="kpi-value num"><span class="cur">$</span>12,480<span class="minor">.50</span></p>
+              <span class="delta delta-good"><svg aria-hidden="true"><use href="#i-up"/></svg>+$1,240.00 <span class="period">vs last month</span></span>
+            </article>
+
+            <article class="card kpi" aria-labelledby="k2">
+              <div class="kpi-split">
+                <div>
+                  <h3 class="kpi-label" id="k2">Card spending, October</h3>
+                  <p class="kpi-value num"><span class="cur">$</span>3,214<span class="minor">.80</span></p>
+                  <span class="delta delta-good"><svg aria-hidden="true"><use href="#i-down"/></svg>&minus;8.2% <span class="period">vs September</span></span>
+                </div>
+                <svg class="spark" viewBox="0 0 124 48" role="img" aria-label="Spending trend over 12 months, from $3,820 down to $3,214">
+                  <path d="M2.0,12.4 L12.9,22.6 L23.8,6.0 L34.7,18.2 L45.6,29.0 L56.5,25.1 L67.5,33.4 L78.4,27.8 L89.3,37.8 L100.2,31.9 L111.1,27.9 L120.0,42.0"/>
+                  <circle cx="120" cy="42" r="4"/>
+                </svg>
+              </div>
+            </article>
+
+            <article class="card kpi" aria-labelledby="k3">
+              <div class="kpi-head">
+                <span class="kpi-icon" aria-hidden="true"><svg class="i"><use href="#i-flag"/></svg></span>
+                <h3 class="kpi-label" id="k3">Trip savings goal</h3>
+              </div>
+              <p class="kpi-value num"><span class="cur">$</span>6,300 <span class="of">of $9,000</span></p>
+              <progress class="goal" max="9000" value="6300" aria-labelledby="k3" aria-valuetext="$6,300 of $9,000, 70 percent">70%</progress>
+              <div class="goal-meta"><span class="num">70% saved · due Dec 31</span><span class="delta delta-good"><svg aria-hidden="true"><use href="#i-up"/></svg>+$450 <span class="period">this month</span></span></div>
+            </article>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-17</code> <code>TYP-09</code> <code>FBK-06</code> <code>COL-07</code> <code>CMP-15</code></p>
+      </section>
+
+      <!-- v2 -->
+      <section class="variant" aria-labelledby="v2">
+        <h2 class="variant-label" id="v2"><span class="v">v2</span> List rows grouped by date</h2>
+        <div class="variant-stage">
+          <article class="card list-card" aria-labelledby="act-title">
+            <header class="list-head">
+              <h3 id="act-title">Recent activity</h3>
+              <a href="#activity">See all</a>
+            </header>
+
+            <section class="day" aria-labelledby="day-1">
+              <div class="day-head"><h4 id="day-1">Today</h4><span>Sat, Oct 24</span></div>
+              <ul class="rows">
+                <li><button type="button" class="row">
+                  <span class="lead" aria-hidden="true"><svg class="i"><use href="#i-cart"/></svg></span>
+                  <span class="row-text"><span class="row-title">Corner Market</span><span class="row-sub">Groceries · 9:41 AM</span></span>
+                  <span class="amount num">&minus;$64.20</span>
+                </button></li>
+                <li><button type="button" class="row">
+                  <span class="avatar avatar-40" aria-hidden="true">JR</span>
+                  <span class="row-text"><span class="row-title">Jordan Reyes</span><span class="row-sub">Dinner split · 8:15 AM</span></span>
+                  <span class="amount num credit">+$32.50</span>
+                </button></li>
+              </ul>
+            </section>
+
+            <section class="day" aria-labelledby="day-2">
+              <div class="day-head"><h4 id="day-2">Yesterday</h4><span>Fri, Oct 23</span></div>
+              <ul class="rows">
+                <li><button type="button" class="row">
+                  <span class="lead" aria-hidden="true"><svg class="i"><use href="#i-briefcase"/></svg></span>
+                  <span class="row-text"><span class="row-title">Salary</span><span class="row-sub">Direct deposit · 9:00 AM</span></span>
+                  <span class="amount num credit">+$3,240.00</span>
+                </button></li>
+                <li><button type="button" class="row">
+                  <span class="lead" aria-hidden="true"><svg class="i"><use href="#i-train"/></svg></span>
+                  <span class="row-text"><span class="row-title">City Transit</span><span class="row-sub">Transport · 6:02 PM</span></span>
+                  <span class="amount num">&minus;$2.75</span>
+                </button></li>
+              </ul>
+            </section>
+
+            <section class="day" aria-labelledby="day-3">
+              <div class="day-head"><h4 id="day-3">Wednesday</h4><span>Oct 21</span></div>
+              <ul class="rows">
+                <li><button type="button" class="row">
+                  <span class="avatar avatar-40" aria-hidden="true">PN</span>
+                  <span class="row-text"><span class="row-title">Priya Nair</span><span class="row-sub">Rent share · 7:30 PM</span></span>
+                  <span class="amount num">&minus;$820.00</span>
+                </button></li>
+                <li><button type="button" class="row">
+                  <span class="lead" aria-hidden="true"><svg class="i"><use href="#i-cloud"/></svg></span>
+                  <span class="row-text"><span class="row-title">Cloud storage</span><span class="row-sub">Subscription · card •••• 4821</span></span>
+                  <span class="amount num">&minus;$9.99</span>
+                </button></li>
+              </ul>
+            </section>
+          </article>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-20</code> <code>TYP-09</code> <code>COL-07</code> <code>LAY-07</code> <code>MOB-01</code></p>
+      </section>
+
+      <!-- v3 -->
+      <section class="variant" aria-labelledby="v3">
+        <h2 class="variant-label" id="v3"><span class="v">v3</span> Feed post card</h2>
+        <div class="variant-stage">
+          <article class="card post" aria-labelledby="post-author">
+            <header class="post-head">
+              <span class="avatar avatar-40" aria-hidden="true">NP</span>
+              <div class="post-meta">
+                <span class="post-name" id="post-author">Nina Park</span>
+                <span class="subtle">Design lead · <time datetime="2026-10-24T08:12" title="Oct 24, 2026, 8:12 AM">2 h ago</time></span>
+              </div>
+              <button type="button" class="icon-btn" aria-label="More options for Nina Park's post"><svg aria-hidden="true"><use href="#i-more"/></svg></button>
+            </header>
+            <div class="post-body">
+              <p id="post-text" class="clamp">We just shipped the new timeline view in Sora Boards. Drag any card across weeks, zoom from quarter to day, and watch dependencies update as you plan. Huge thanks to Hana, Owen and Mateo for three weeks of prototypes, usability sessions and patience while we rebuilt the scroll engine twice. Tell us what to tune next.</p>
+              <button type="button" class="link-btn" aria-expanded="false" aria-controls="post-text" id="see-more">See more</button>
+            </div>
+            <div class="post-media" role="img" aria-label="Illustration of a project timeline with overlapping colored task bars">
+              <svg viewBox="0 0 480 270" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs><linearGradient id="tl-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eef2ff"/><stop offset="1" stop-color="#fae8ff"/></linearGradient></defs>
+                <rect width="480" height="270" fill="url(#tl-bg)"/>
+                <g stroke="#c7d2fe" stroke-width="1"><path d="M80 0v270M160 0v270M240 0v270M320 0v270M400 0v270"/></g>
+                <rect x="40" y="44" width="150" height="26" rx="13" fill="#4f46e5"/>
+                <rect x="132" y="88" width="190" height="26" rx="13" fill="#a5b4fc"/>
+                <rect x="96" y="132" width="120" height="26" rx="13" fill="#f472b6"/>
+                <rect x="232" y="132" width="168" height="26" rx="13" fill="#c084fc"/>
+                <rect x="276" y="176" width="150" height="26" rx="13" fill="#34d399"/>
+                <rect x="60" y="220" width="210" height="26" rx="13" fill="#818cf8"/>
+                <path d="M190 57c40 0 30 44 70 44M322 101c30 0 0 44 24 44" stroke="#312e81" stroke-width="2" stroke-dasharray="4 5" fill="none"/>
+                <path d="M286 0v270" stroke="#312e81" stroke-width="2"/>
+                <circle cx="286" cy="12" r="6" fill="#312e81"/>
+              </svg>
+            </div>
+            <div class="post-actions">
+              <button type="button" class="action" aria-pressed="false" id="like"><svg class="i" aria-hidden="true"><use href="#i-heart"/></svg>Like <span class="count num">128</span></button>
+              <button type="button" class="action"><svg class="i" aria-hidden="true"><use href="#i-comment"/></svg>Comment <span class="count num">24</span></button>
+              <button type="button" class="action share" id="share" aria-expanded="false" aria-controls="share-row"><svg class="i" aria-hidden="true"><use href="#i-share"/></svg>Share</button>
+            </div>
+            <div class="share-row" id="share-row" hidden>
+              <button type="button" class="btn btn-secondary" id="copy-link"><svg aria-hidden="true"><use href="#i-link"/></svg>Copy link</button>
+              <span role="status" id="copy-status"></span>
+            </div>
+          </article>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-29</code> <code>CMP-28</code> <code>ICO-04</code> <code>MOB-01</code> <code>CMP-13</code></p>
+      </section>
+
+      <!-- v4 -->
+      <section class="variant span-all" aria-labelledby="v4">
+        <h2 class="variant-label" id="v4"><span class="v">v4</span> Product cards in a grid</h2>
+        <div class="variant-stage">
+          <div class="shop">
+            <div class="shop-head">
+              <h3>Bestsellers for the home office</h3>
+              <a class="cart-pill" href="#cart">View cart <span class="cart-count num" id="cart-count">2</span></a>
+            </div>
+            <ul class="products">
+              <li class="card product">
+                <div class="product-media" style="--art: linear-gradient(140deg, #fef3c7, #fed7aa)">
+                  <svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <ellipse cx="100" cy="128" rx="44" ry="6" fill="#92400e" opacity="0.15"/>
+                    <rect x="76" y="116" width="48" height="10" rx="5" fill="#1f2937"/>
+                    <path d="M100 117 L86 72 L120 46" stroke="#1f2937" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+                    <circle cx="86" cy="72" r="5" fill="#1f2937"/>
+                    <path d="M112 34 L148 52 L138 68 L104 50 Z" fill="#1f2937" stroke="#1f2937" stroke-width="6" stroke-linejoin="round"/>
+                    <path d="M124 70 L112 104" stroke="#fde68a" stroke-width="16" stroke-linecap="round" opacity="0.6"/>
+                  </svg>
+                </div>
+                <div class="product-info">
+                  <span class="product-cat">Lighting</span>
+                  <h4 class="product-title"><a href="#arc-lamp">Arc desk lamp</a><span class="price num">$89.00</span></h4>
+                  <p class="rating"><svg aria-hidden="true"><use href="#i-star"/></svg><strong class="num">4.8</strong>/5 <span class="num">(212 reviews)</span></p>
+                </div>
+                <button type="button" class="btn btn-secondary add" data-name="Arc desk lamp"><svg aria-hidden="true"><use href="#i-plus"/></svg><span>Add<span class="visually-hidden"> Arc desk lamp</span> to cart</span></button>
+              </li>
+              <li class="card product">
+                <div class="product-media" style="--art: linear-gradient(140deg, #e0e7ff, #c7d2fe)">
+                  <svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <ellipse cx="100" cy="130" rx="40" ry="6" fill="#312e81" opacity="0.15"/>
+                    <rect x="68" y="30" width="64" height="96" rx="20" fill="#312e81"/>
+                    <circle cx="100" cy="92" r="20" fill="#4338ca"/>
+                    <circle cx="100" cy="92" r="8" fill="#a5b4fc"/>
+                    <circle cx="100" cy="52" r="6" fill="#a5b4fc"/>
+                  </svg>
+                </div>
+                <div class="product-info">
+                  <span class="product-cat">Audio</span>
+                  <h4 class="product-title"><a href="#pebble-speaker">Pebble speaker</a><span class="price num">$129.00</span></h4>
+                  <p class="rating"><svg aria-hidden="true"><use href="#i-star"/></svg><strong class="num">4.6</strong>/5 <span class="num">(98 reviews)</span></p>
+                </div>
+                <button type="button" class="btn btn-secondary add" data-name="Pebble speaker"><svg aria-hidden="true"><use href="#i-plus"/></svg><span>Add<span class="visually-hidden"> Pebble speaker</span> to cart</span></button>
+              </li>
+              <li class="card product">
+                <div class="product-media" style="--art: linear-gradient(140deg, #dcfce7, #a7f3d0)">
+                  <svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <ellipse cx="100" cy="122" rx="56" ry="6" fill="#064e3b" opacity="0.15"/>
+                    <rect x="48" y="92" width="104" height="26" rx="10" fill="#047857"/>
+                    <rect x="56" y="68" width="88" height="26" rx="10" fill="#10b981"/>
+                    <rect x="64" y="44" width="72" height="26" rx="10" fill="#ecfdf5"/>
+                    <path d="M64 57h72M56 81h88M48 105h104" stroke="#064e3b" stroke-width="1.5" opacity="0.25"/>
+                  </svg>
+                </div>
+                <div class="product-info">
+                  <span class="product-cat">Textiles</span>
+                  <h4 class="product-title"><a href="#linen-throw">Linen throw</a><span class="price num">$54.00</span></h4>
+                  <p class="rating"><svg aria-hidden="true"><use href="#i-star"/></svg><strong class="num">4.9</strong>/5 <span class="num">(341 reviews)</span></p>
+                </div>
+                <button type="button" class="btn btn-secondary add" data-name="Linen throw"><svg aria-hidden="true"><use href="#i-plus"/></svg><span>Add<span class="visually-hidden"> Linen throw</span> to cart</span></button>
+              </li>
+              <li class="card product">
+                <div class="product-media" style="--art: linear-gradient(140deg, #fce7f3, #fbcfe8)">
+                  <svg viewBox="0 0 200 150" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                    <ellipse cx="100" cy="128" rx="34" ry="5" fill="#831843" opacity="0.15"/>
+                    <path d="M100 82 C92 60 74 50 62 52 C66 66 80 78 100 82Z" fill="#15803d"/>
+                    <path d="M100 82 C108 56 126 44 140 46 C134 62 120 76 100 82Z" fill="#16a34a"/>
+                    <path d="M100 82 C98 62 102 42 112 30 C116 48 110 68 100 82Z" fill="#22c55e"/>
+                    <path d="M72 82 H128 L120 124 H80 Z" fill="#fdf2f8" stroke="#be185d" stroke-width="3" stroke-linejoin="round"/>
+                    <path d="M75 96 H125" stroke="#be185d" stroke-width="3"/>
+                  </svg>
+                </div>
+                <div class="product-info">
+                  <span class="product-cat">Plants</span>
+                  <h4 class="product-title"><a href="#orbit-planter">Orbit planter</a><span class="price num">$32.00</span></h4>
+                  <p class="rating"><svg aria-hidden="true"><use href="#i-star"/></svg><strong class="num">4.5</strong>/5 <span class="num">(57 reviews)</span></p>
+                </div>
+                <button type="button" class="btn btn-secondary add" data-name="Orbit planter"><svg aria-hidden="true"><use href="#i-plus"/></svg><span>Add<span class="visually-hidden"> Orbit planter</span> to cart</span></button>
+              </li>
+            </ul>
+            <p class="visually-hidden" role="status" id="cart-status"></p>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-21</code> <code>COP-13</code> <code>FBK-16</code> <code>CMP-06</code> <code>ENG-03</code> <code>MOB-01</code></p>
+      </section>
+
+      <!-- v5 -->
+      <section class="variant" aria-labelledby="v5">
+        <h2 class="variant-label" id="v5"><span class="v">v5</span> Carousel with position, dots and snap</h2>
+        <div class="variant-stage">
+          <section class="carousel" aria-roledescription="carousel" aria-labelledby="col-title" id="carousel">
+            <div class="carousel-head">
+              <div>
+                <h3 id="col-title">Featured collections</h3>
+                <p>Hand-picked sets, updated weekly</p>
+              </div>
+              <div class="carousel-controls">
+                <button type="button" class="icon-btn nav-btn" aria-label="Previous collection" data-dir="-1"><svg aria-hidden="true"><use href="#i-left"/></svg></button>
+                <span class="carousel-pos num" aria-live="polite" id="carousel-pos">1 of 6</span>
+                <button type="button" class="icon-btn nav-btn" aria-label="Next collection" data-dir="1"><svg aria-hidden="true"><use href="#i-right"/></svg></button>
+              </div>
+            </div>
+            <div class="track" id="track">
+              <div class="slide" role="group" aria-roledescription="slide" aria-label="1 of 6: Desk setups">
+                <div class="slide-art" style="--art: linear-gradient(135deg, #312e81, #6366f1)"><svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="250" cy="40" r="70" fill="#818cf8" opacity="0.5"/><rect x="40" y="96" width="150" height="60" rx="12" fill="#e0e7ff" opacity="0.9"/></svg></div>
+                <div class="slide-text"><h4>Desk setups</h4><span class="num">24 items</span></div>
+              </div>
+              <div class="slide" role="group" aria-roledescription="slide" aria-label="2 of 6: Quiet corners">
+                <div class="slide-art" style="--art: linear-gradient(135deg, #0f766e, #5eead4)"><svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="80" cy="150" r="90" fill="#134e4a" opacity="0.35"/><circle cx="236" cy="70" r="36" fill="#f0fdfa"/><rect x="190" y="120" width="96" height="14" rx="7" fill="#f0fdfa" opacity="0.7"/></svg></div>
+                <div class="slide-text"><h4>Quiet corners</h4><span class="num">18 items</span></div>
+              </div>
+              <div class="slide" role="group" aria-roledescription="slide" aria-label="3 of 6: Kitchen basics">
+                <div class="slide-art" style="--art: linear-gradient(135deg, #9a3412, #fb923c)"><svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect x="40" y="40" width="80" height="100" rx="40" fill="#fff7ed" opacity="0.85"/><circle cx="220" cy="100" r="54" fill="#7c2d12" opacity="0.35"/></svg></div>
+                <div class="slide-text"><h4>Kitchen basics</h4><span class="num">31 items</span></div>
+              </div>
+              <div class="slide" role="group" aria-roledescription="slide" aria-label="4 of 6: Outdoor living">
+                <div class="slide-art" style="--art: linear-gradient(135deg, #166534, #86efac)"><svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><path d="M0 140 Q80 90 160 130 T320 120 V180 H0Z" fill="#14532d" opacity="0.5"/><circle cx="240" cy="50" r="24" fill="#f7fee7"/></svg></div>
+                <div class="slide-text"><h4>Outdoor living</h4><span class="num">15 items</span></div>
+              </div>
+              <div class="slide" role="group" aria-roledescription="slide" aria-label="5 of 6: Gift picks">
+                <div class="slide-art" style="--art: linear-gradient(135deg, #9d174d, #f472b6)"><svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect x="110" y="60" width="100" height="80" rx="10" fill="#fdf2f8" opacity="0.9"/><path d="M160 60v80M110 92h100" stroke="#9d174d" stroke-width="8"/></svg></div>
+                <div class="slide-text"><h4>Gift picks</h4><span class="num">40 items</span></div>
+              </div>
+              <div class="slide" role="group" aria-roledescription="slide" aria-label="6 of 6: New arrivals">
+                <div class="slide-art" style="--art: linear-gradient(135deg, #1e293b, #64748b)"><svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><circle cx="100" cy="90" r="44" fill="#f8fafc" opacity="0.85"/><circle cx="210" cy="90" r="44" fill="#f8fafc" opacity="0.35"/></svg></div>
+                <div class="slide-text"><h4>New arrivals</h4><span class="num">12 items</span></div>
+              </div>
+            </div>
+            <div class="dots" id="dots" aria-label="Choose a collection" role="group"></div>
+          </section>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-22</code> <code>MOB-07</code> <code>MOB-01</code> <code>ICO-04</code> <code>COL-07</code> <code>CMP-27</code></p>
+      </section>
+
+      <!-- v6 -->
+      <section class="variant" aria-labelledby="v6">
+        <h2 class="variant-label" id="v6"><span class="v">v6</span> Notification items, dark theme</h2>
+        <div class="variant-stage dark">
+          <div class="theme-scope" data-theme="dark">
+            <article class="card notif-card" aria-labelledby="notif-title">
+              <header class="notif-head">
+                <h3 id="notif-title">Notifications <span class="pill pill-accent" id="unread-pill">3 unread</span></h3>
+                <button type="button" class="btn btn-ghost" id="mark-read">Mark all as read</button>
+              </header>
+              <h4 class="group-label" id="g-new">New</h4>
+              <ul class="notifs" aria-labelledby="g-new">
+                <li class="notif is-unread">
+                  <span class="avatar avatar-40" aria-hidden="true">JR</span>
+                  <p><span class="visually-hidden unread-text">Unread: </span><strong>Jordan Reyes</strong> commented on Q4 launch plan: “Ship it Monday?”<time datetime="2026-10-24T10:07" title="Oct 24, 2026, 10:07 AM">5 min ago</time></p>
+                  <span class="unread-dot" aria-hidden="true"></span>
+                </li>
+                <li class="notif is-unread">
+                  <span class="avatar avatar-40" aria-hidden="true">PN</span>
+                  <p><span class="visually-hidden unread-text">Unread: </span><strong>Priya Nair</strong> invited you to the Design reviews board<time datetime="2026-10-24T09:12" title="Oct 24, 2026, 9:12 AM">1 h ago</time></p>
+                  <span class="unread-dot" aria-hidden="true"></span>
+                </li>
+                <li class="notif is-unread">
+                  <span class="avatar avatar-40" aria-hidden="true">SO</span>
+                  <p><span class="visually-hidden unread-text">Unread: </span><strong>Sam Okafor</strong> approved expense report #SL-1042<time datetime="2026-10-24T07:40" title="Oct 24, 2026, 7:40 AM">3 h ago</time></p>
+                  <span class="unread-dot" aria-hidden="true"></span>
+                </li>
+              </ul>
+              <h4 class="group-label" id="g-earlier">Earlier</h4>
+              <ul class="notifs" aria-labelledby="g-earlier">
+                <li class="notif">
+                  <span class="avatar avatar-40" aria-hidden="true">HK</span>
+                  <p><strong>Hana Kim</strong> mentioned you in Weekly sync notes<time datetime="2026-10-23T16:20" title="Oct 23, 2026, 4:20 PM">Yesterday</time></p>
+                  <span class="unread-dot" aria-hidden="true"></span>
+                </li>
+              </ul>
+            </article>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-29</code> <code>COL-07</code> <code>CMP-13</code> <code>DRK-09</code> <code>FBK-03</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // Feed: expand the clamped body in place (CMP-29)
+    const seeMore = document.getElementById("see-more");
+    seeMore.addEventListener("click", () => {
+      const open = seeMore.getAttribute("aria-expanded") !== "true";
+      document.getElementById("post-text").classList.toggle("clamp", !open);
+      seeMore.setAttribute("aria-expanded", open);
+      seeMore.textContent = open ? "See less" : "See more";
+    });
+
+    // Feed: like is a toggle button with aria-pressed and a live count (CMP-29)
+    const like = document.getElementById("like");
+    like.addEventListener("click", () => {
+      const on = like.getAttribute("aria-pressed") !== "true";
+      const count = like.querySelector(".count");
+      like.setAttribute("aria-pressed", on);
+      count.textContent = Number(count.textContent) + (on ? 1 : -1);
+    });
+
+    // Feed: native share sheet first, labeled "Copy link" fallback with confirmation (CMP-28)
+    const share = document.getElementById("share");
+    const shareRow = document.getElementById("share-row");
+    share.addEventListener("click", async () => {
+      const data = { title: "Nina Park on Sora", text: "New timeline view in Sora Boards", url: location.href };
+      if (navigator.canShare && navigator.canShare(data)) {
+        try { await navigator.share(data); } catch (e) { /* person closed the sheet */ }
+        return;
+      }
+      const open = shareRow.hidden;
+      shareRow.hidden = !open;
+      share.setAttribute("aria-expanded", open);
+    });
+    document.getElementById("copy-link").addEventListener("click", async () => {
+      const status = document.getElementById("copy-status");
+      try { await navigator.clipboard.writeText(location.href); status.textContent = "Link copied"; }
+      catch (e) { status.textContent = "Copy failed. Select the address bar to copy the link."; }
+    });
+
+    // Product cards: update the cart count at once, relabel briefly, announce politely (FBK-16, ENG-03)
+    const cartCount = document.getElementById("cart-count");
+    const cartStatus = document.getElementById("cart-status");
+    document.querySelectorAll(".add").forEach((btn) => {
+      const original = btn.innerHTML;
+      btn.addEventListener("click", () => {
+        // Example only: replace with a request to your API.
+        const total = Number(cartCount.textContent) + 1;
+        cartCount.textContent = total;
+        cartStatus.textContent = `${btn.dataset.name} added to cart. ${total} items in cart.`;
+        btn.innerHTML = '<svg aria-hidden="true"><use href="#i-check"/></svg><span>Added</span>';
+        setTimeout(() => { btn.innerHTML = original; }, 2500);
+      });
+    });
+
+    // Carousel: buttons, dots with aria-current, arrow keys and scroll snap stay in sync (CMP-22)
+    (function () {
+      const track = document.getElementById("track");
+      const slides = [...track.children];
+      const pos = document.getElementById("carousel-pos");
+      const dots = document.getElementById("dots");
+      const [prev, next] = document.querySelectorAll(".nav-btn");
+      let index = 0;
+      slides.forEach((slide, i) => {
+        const dot = document.createElement("button");
+        dot.type = "button";
+        dot.className = "dot-btn";
+        dot.setAttribute("aria-label", `Show ${slide.querySelector("h4").textContent}`);
+        dot.addEventListener("click", () => go(i));
+        dots.append(dot);
+      });
+      function update(i) {
+        index = i;
+        pos.textContent = `${i + 1} of ${slides.length}`;
+        [...dots.children].forEach((d, k) => (k === i ? d.setAttribute("aria-current", "true") : d.removeAttribute("aria-current")));
+        prev.disabled = i === 0;
+        next.disabled = i === slides.length - 1;
+      }
+      function go(i, instant) {
+        const target = Math.max(0, Math.min(slides.length - 1, i));
+        track.scrollTo({ left: slides[target].offsetLeft - track.offsetLeft, behavior: instant ? "instant" : "smooth" });
+        update(target);
+      }
+      prev.addEventListener("click", () => go(index - 1));
+      next.addEventListener("click", () => go(index + 1));
+      document.getElementById("carousel").addEventListener("keydown", (e) => {
+        if (e.key === "ArrowLeft") go(index - 1);
+        if (e.key === "ArrowRight") go(index + 1);
+      });
+      track.addEventListener("scroll", () => {
+        const step = slides[1].offsetLeft - slides[0].offsetLeft;
+        const i = Math.round(track.scrollLeft / step);
+        if (i !== index) update(i);
+      }, { passive: true });
+      go(1, true);
+    })();
+
+    // Notifications: clear unread markers and their hidden text together (CMP-29, COL-07)
+    document.getElementById("mark-read").addEventListener("click", () => {
+      document.querySelectorAll(".notif.is-unread").forEach((n) => n.classList.remove("is-unread"));
+      document.querySelectorAll(".unread-text").forEach((t) => t.remove());
+      document.getElementById("unread-pill").textContent = "All read";
+    });
+  </script>
+</body>
+</html>

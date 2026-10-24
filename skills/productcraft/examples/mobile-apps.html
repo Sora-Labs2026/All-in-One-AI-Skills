@@ -1,0 +1,677 @@
+<!doctype html>
+<!-- ProductCraft example: Mobile apps. Original Sora Labs example, MIT License.
+     Demonstrates: SCR-20, SCR-23, CMP-17, CMP-20, CMP-26, CMP-27, CMP-30, CMP-31, FBK-06, FRM-27, MOB-01, MOB-03, MOB-04,
+     MOB-05, MOB-11, NAV-02, NAV-03, NAV-11, NAV-15, TYP-09, ICO-04, ICO-07, ICO-08, BTN-08, COL-07, COP-10, ENG-10 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Mobile app screens</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    .sheet-header h1 { margin-top: var(--space-2); }
+    /* Three phones per row; the second row is centered */
+    .variants.phones { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .variants.phones .variant { grid-column: span 2; }
+    .variants.phones .variant:nth-child(4) { grid-column: 2 / span 2; }
+    .variant-stage.device { padding: var(--space-5) var(--space-4); }
+    .variant-stage.dark .phone { box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), var(--shadow-lg); }
+    .phone { color: var(--text); }
+
+    .ico { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .screen { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    /* One side margin on every screen (MOB-05) */
+    .content { flex: 1; min-height: 0; overflow: hidden; padding: var(--space-2) var(--space-4) var(--space-4); }
+    .round-btn {
+      display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-pill);
+      border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; position: relative;
+    }
+    .round-btn .ico { width: 22px; height: 22px; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-5); }
+    .section-head h2 { font-size: var(--text-md); }
+    .section-head a { display: inline-flex; align-items: center; min-height: 44px; font-size: var(--text-sm); font-weight: 600; }
+
+    /* Labeled tab bar: full-column hit areas and safe-area padding (NAV-11, NAV-02) */
+    .tabbar {
+      flex: none; display: grid; grid-template-columns: repeat(4, 1fr);
+      padding: var(--space-1) var(--space-2) env(safe-area-inset-bottom);
+      background: var(--surface); border-top: 1px solid var(--border);
+    }
+    .tabbar a {
+      display: grid; justify-items: center; align-content: center; gap: 2px; min-height: 56px;
+      color: var(--text-3); font-size: 11px; font-weight: 600; text-decoration: none; border-radius: var(--radius-sm);
+    }
+    .tabbar a .pip { display: grid; place-items: center; width: 52px; height: 28px; border-radius: var(--radius-pill); }
+    .tabbar a .ico { width: 22px; height: 22px; }
+    .tabbar a[aria-current="page"] { color: var(--accent-ink); }
+    .tabbar a[aria-current="page"] .pip { background: var(--accent-soft); }
+
+    /* v1 wallet home (SCR-23) */
+    .greet { display: flex; align-items: center; gap: var(--space-3); }
+    .greet .avatar { width: 40px; height: 40px; font-size: var(--text-sm); }
+    .greet p { font-size: var(--text-sm); color: var(--text-2); line-height: 1.3; }
+    .greet h2 { font-size: var(--text-lg); line-height: 1.3; }
+    .greet .round-btn { margin-left: auto; }
+    .count-badge {
+      position: absolute; top: -4px; right: -6px; min-width: 20px; height: 20px; padding: 0 6px;
+      border-radius: var(--radius-pill); background: var(--danger); color: #fff; border: 2px solid var(--bg);
+      font-size: 11px; font-weight: 700; line-height: 16px; text-align: center;
+    }
+    .balance {
+      margin-top: var(--space-4); padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+      border-radius: var(--radius-lg); color: #fff;
+      background: radial-gradient(120% 140% at 100% 0%, #7c3aed 0%, rgba(124, 58, 237, 0) 55%), linear-gradient(135deg, #3730a3, #4f46e5);
+      box-shadow: 0 14px 30px -14px rgba(79, 70, 229, 0.7);
+    }
+    .balance-top { display: flex; align-items: center; justify-content: space-between; margin-right: calc(var(--space-2) * -1); }
+    .balance-top span { font-size: var(--text-sm); color: rgba(255, 255, 255, 0.86); }
+    .eye { width: 44px; height: 44px; display: grid; place-items: center; border: 0; border-radius: var(--radius-pill); background: transparent; color: #fff; cursor: pointer; }
+    .eye:hover { background: rgba(255, 255, 255, 0.12); }
+    .eye .ico { width: 22px; height: 22px; }
+    .eye .i-shown, .balance[data-hidden="true"] .eye .i-hidden { display: none; }
+    .balance[data-hidden="true"] .eye .i-shown { display: block; }
+    .amount { margin-top: 2px; font-size: var(--text-2xl); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+    .amount small { font-size: var(--text-lg); font-weight: 600; opacity: 0.9; }
+    .amount .masked, .balance[data-hidden="true"] .amount .value { display: none; }
+    .balance[data-hidden="true"] .amount .masked { display: inline; letter-spacing: 0.1em; }
+    .balance-foot { display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-3); font-size: var(--text-sm); }
+    .on-card-delta { display: inline-flex; align-items: center; gap: 4px; padding: 2px var(--space-2); border-radius: var(--radius-pill); background: rgba(255, 255, 255, 0.16); font-weight: 600; font-size: var(--text-xs); }
+    .on-card-delta .ico { width: 14px; height: 14px; stroke-width: 2.25; }
+    .balance-foot .card-no { color: rgba(255, 255, 255, 0.86); }
+    .quick { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); margin: var(--space-5) 0 0; padding: 0; }
+    .quick button {
+      display: grid; justify-items: center; gap: 6px; width: 100%; padding: 0; border: 0; background: none; cursor: pointer;
+      font-size: var(--text-xs); font-weight: 600; color: var(--text);
+    }
+    .quick .circle { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border); color: var(--accent-ink); box-shadow: var(--shadow-sm); }
+    .quick .ico { width: 22px; height: 22px; }
+    .rows { list-style: none; margin: 0; padding: 0; }
+    /* Row anatomy: leading visual, two lines, signed trailing amount (CMP-20) */
+    .row { display: grid; grid-template-columns: 40px 1fr auto; gap: var(--space-3); align-items: center; min-height: 56px; }
+    .row + .row { border-top: 1px solid var(--border); }
+    .row .lead { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--surface-2); color: var(--text-2); }
+    .row .lead .ico { width: 20px; height: 20px; }
+    .row .avatar { width: 40px; height: 40px; font-size: var(--text-xs); }
+    .row b { display: block; font-size: var(--text-md); font-weight: 600; line-height: 1.3; }
+    .row span.meta { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .row .amt { font-weight: 600; text-align: right; }
+    .row .amt.in { color: var(--success); }
+
+    /* v2 ride flow with a bottom sheet (SCR-20) */
+    .ride .map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .ride .top { position: relative; display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-4); }
+    .ride .top .round-btn { box-shadow: var(--shadow-sm); }
+    .dest {
+      display: flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-4) 0 var(--space-3);
+      border-radius: var(--radius-pill); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm);
+      font-size: var(--text-sm); font-weight: 600;
+    }
+    .dest .dot { width: 10px; height: 10px; border-radius: 2px; background: var(--text); }
+    .dest span.muted { font-weight: 500; }
+    .sheet-panel {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      padding: 0 var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
+      background: var(--surface); border-radius: 20px 20px 0 0; box-shadow: 0 -10px 30px -12px rgba(15, 23, 42, 0.25);
+    }
+    .handle { display: grid; place-items: center; width: 100%; height: 24px; padding: 0; border: 0; background: none; cursor: pointer; }
+    .handle::before { content: ""; width: 40px; height: 4px; border-radius: var(--radius-pill); background: var(--border); box-shadow: inset 0 0 0 1px #d4d8de; }
+    .eta { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-3); }
+    .eta h2 { font-size: var(--text-lg); line-height: 1.3; }
+    .eta p { font-size: var(--text-sm); color: var(--text-2); }
+    .eta .mins { text-align: right; line-height: 1; }
+    .eta .mins b { font-size: var(--text-2xl); font-weight: 700; letter-spacing: -0.02em; }
+    .eta .mins span { display: block; margin-top: 2px; font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .trip-bar { position: relative; height: 6px; margin-top: var(--space-3); border-radius: var(--radius-pill); background: var(--surface-2); box-shadow: inset 0 0 0 1px var(--border); }
+    .trip-bar span { position: absolute; inset: 0 auto 0 0; width: 62%; border-radius: inherit; background: var(--accent); }
+    .trip-legend { display: flex; justify-content: space-between; margin-top: 6px; font-size: var(--text-xs); color: var(--text-3); }
+    .driver { display: grid; grid-template-columns: 48px 1fr auto; gap: var(--space-3); align-items: center; margin-top: var(--space-4); padding: var(--space-3); border-radius: var(--radius-md); background: var(--surface-2); }
+    .driver .avatar { width: 48px; height: 48px; font-size: var(--text-sm); background: linear-gradient(135deg, #c7d2fe, #a5b4fc); color: #312e81; }
+    .driver b { display: block; font-size: var(--text-md); }
+    .driver .rating { display: flex; align-items: center; gap: 4px; font-size: var(--text-xs); color: var(--text-2); white-space: nowrap; }
+    .driver .rating .ico { width: 13px; height: 13px; color: var(--text); }
+    .vehicle { text-align: right; font-size: var(--text-xs); color: var(--text-2); }
+    .plate { display: inline-block; margin-top: 2px; padding: 1px var(--space-2); border: 1.5px solid var(--text); border-radius: 6px; font-size: var(--text-sm); font-weight: 700; color: var(--text); letter-spacing: 0.04em; background: var(--surface); }
+    .trip-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-top: var(--space-3); }
+    .trip-actions .btn { min-height: 44px; }
+    .btn-tonal { background: var(--accent-soft); color: var(--accent-ink); }
+    .btn-tonal:hover { background: #e0e7ff; }
+    .cancel { width: 100%; min-height: 44px; margin-top: var(--space-1); color: var(--danger); font-size: var(--text-sm); }
+    .cancel:hover { background: var(--danger-soft); color: var(--danger); }
+
+    /* v3 health summary */
+    .health-head { display: flex; align-items: center; justify-content: space-between; }
+    .health-head p { font-size: var(--text-sm); color: var(--text-2); }
+    .health-head h2 { font-size: var(--text-xl); line-height: 1.25; }
+    .health-head .avatar { width: 40px; height: 40px; font-size: var(--text-sm); }
+    .week { list-style: none; display: grid; grid-template-columns: repeat(7, 1fr); margin: var(--space-4) 0 0; padding: 0; }
+    .week a {
+      display: grid; justify-items: center; gap: 2px; padding: var(--space-2) 0; border-radius: var(--radius-md);
+      color: var(--text-2); text-decoration: none; font-size: 11px; font-weight: 600;
+    }
+    .week a b { font-size: var(--text-sm); color: var(--text); }
+    .week .done { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+    .week .done.part { background: transparent; box-shadow: inset 0 0 0 1.5px var(--accent); }
+    .week [aria-current="date"] { background: var(--accent); color: rgba(255, 255, 255, 0.86); }
+    .week [aria-current="date"] b { color: #fff; }
+    .week [aria-current="date"] .done { background: #fff; box-shadow: none; }
+    .rings-card { margin-top: var(--space-4); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+    .rings-card h3 { font-size: var(--text-sm); display: flex; justify-content: space-between; }
+    .rings-card h3 span { color: var(--text-3); font-weight: 500; }
+    .rings { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); margin: var(--space-3) 0 0; padding: 0; text-align: center; }
+    .ring { position: relative; width: 76px; height: 76px; margin: 0 auto; }
+    .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .ring .track { stroke: var(--surface-2); }
+    .ring .val { stroke: var(--ring); }
+    .ring-label { position: absolute; inset: 0; display: grid; place-content: center; line-height: 1.1; }
+    .ring-label b { font-size: var(--text-lg); font-weight: 700; }
+    .ring-label span { font-size: 11px; color: var(--text-2); font-weight: 600; }
+    .rings p { margin-top: var(--space-2); font-size: var(--text-xs); color: var(--text-2); }
+    .rings p strong { display: block; color: var(--text); font-size: var(--text-sm); }
+    .tiles { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin: var(--space-2) 0 0; padding: 0; }
+    .tile { padding: var(--space-3); border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--border); }
+    .tile .label { display: flex; align-items: center; gap: 6px; font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .tile .label .ico { width: 16px; height: 16px; color: var(--accent-ink); }
+    .tile .value { margin-top: var(--space-1); font-size: var(--text-xl); font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+    .tile .value small { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); letter-spacing: 0; }
+    .tile .note { margin-top: 2px; font-size: var(--text-xs); color: var(--text-2); }
+    .tile .delta { font-size: var(--text-xs); }
+
+    /* v4 habit tracker: teal accent through the same tokens (CMP-26) */
+    .hab-head { display: flex; align-items: center; justify-content: space-between; }
+    .hab-head p { font-size: var(--text-sm); color: var(--text-2); }
+    .hab-head h2 { font-size: var(--text-xl); line-height: 1.25; }
+    .hab-head .round-btn { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+    .days { list-style: none; display: grid; grid-template-columns: repeat(7, 1fr); margin: var(--space-4) 0 0; padding: 0; text-align: center; }
+    .days li { display: grid; justify-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text-3); }
+    .days .mark { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; border: 1.75px dashed var(--border); color: var(--text-3); }
+    .days .mark .ico { width: 16px; height: 16px; stroke-width: 2.5; }
+    .days .full .mark { border: 0; background: var(--accent); color: var(--on-accent); }
+    .days .part .mark { border: 1.75px solid var(--accent); color: var(--accent-ink); font-size: 11px; font-weight: 700; }
+    .days .today { color: var(--text); }
+    .days .today .mark { border: 2px solid var(--text); color: var(--text); font-size: 11px; font-weight: 700; }
+    .streak { display: flex; gap: var(--space-3); align-items: center; margin-top: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--accent-soft); }
+    .streak .ico { width: 22px; height: 22px; color: var(--accent-ink); }
+    .streak b { display: block; font-size: var(--text-md); color: var(--text); }
+    .streak p { font-size: var(--text-xs); color: var(--text-2); }
+    .list-head { display: flex; align-items: baseline; justify-content: space-between; margin-top: var(--space-5); }
+    .list-head h3 { font-size: var(--text-md); }
+    .list-head p { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .habit-progress { height: 4px; margin-top: var(--space-2); border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; }
+    .habit-progress span { display: block; height: 100%; width: var(--pct, 60%); border-radius: inherit; background: var(--accent); transition: transform var(--dur-med) var(--ease-out); }
+    .checklist { list-style: none; margin: var(--space-2) 0 0; padding: 0; }
+    .checklist li + li { border-top: 1px solid var(--border); }
+    /* Real checkboxes, styled; the whole row is the label (CMP-31, FRM-27, MOB-10) */
+    .check { display: grid; grid-template-columns: 28px 1fr auto; gap: var(--space-3); align-items: center; min-height: 52px; cursor: pointer; }
+    .check input {
+      appearance: none; -webkit-appearance: none; margin: 0; width: 26px; height: 26px; border-radius: 50%;
+      border: 1.75px solid var(--text-3); display: grid; place-items: center; cursor: pointer; background: var(--surface);
+    }
+    .check input::after { content: ""; width: 12px; height: 7px; border: solid var(--on-accent); border-width: 0 0 2.25px 2.25px; transform: translateY(-1px) rotate(-45deg); opacity: 0; }
+    .check input:checked { background: var(--accent); border-color: var(--accent); }
+    .check input:checked::after { opacity: 1; }
+    .check input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .check .name { font-size: var(--text-md); font-weight: 500; }
+    .check .qty { font-size: var(--text-xs); color: var(--text-3); font-weight: 500; }
+    .check:has(input:checked) .name { text-decoration: line-through; color: var(--text-3); }
+
+    /* v5 music player (CMP-30) */
+    .player { padding: var(--space-1) var(--space-5) var(--space-4); display: flex; flex-direction: column; }
+    .np-head { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; text-align: center; margin: 0 calc(var(--space-2) * -1); }
+    .np-head p { font-size: var(--text-xs); color: var(--text-2); line-height: 1.3; }
+    .np-head p b { display: block; font-size: var(--text-sm); color: var(--text); }
+    .plain-btn { display: grid; place-items: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: var(--radius-pill); background: none; color: var(--text); cursor: pointer; }
+    .plain-btn:hover { background: var(--surface-2); }
+    .artwork { margin-top: var(--space-4); aspect-ratio: 1; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 20px 40px -18px rgba(124, 58, 237, 0.6); }
+    .artwork svg { display: block; width: 100%; height: 100%; }
+    .track { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-5); }
+    .track h2 { font-size: var(--text-xl); line-height: 1.25; }
+    .track p { color: var(--text-2); font-size: var(--text-md); }
+    .fav[aria-pressed="true"] { color: var(--accent); }
+    .fav[aria-pressed="true"] .ico { fill: currentColor; }
+    /* Native range under the styling, value spoken with units (FRM-27) */
+    .seek { margin-top: var(--space-3); }
+    .seek input {
+      -webkit-appearance: none; appearance: none; width: 100%; height: 24px; margin: 0; background: transparent; cursor: pointer;
+      --pct: 36%;
+    }
+    .seek input::-webkit-slider-runnable-track { height: 4px; border-radius: var(--radius-pill); background: linear-gradient(to right, var(--text) var(--pct), rgba(255, 255, 255, 0.18) var(--pct)); }
+    .seek input::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 50%; background: var(--text); border: 0; }
+    .seek input::-moz-range-track { height: 4px; border-radius: var(--radius-pill); background: rgba(255, 255, 255, 0.18); }
+    .seek input::-moz-range-progress { height: 4px; border-radius: var(--radius-pill); background: var(--text); }
+    .seek input::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--text); border: 0; }
+    .times { display: flex; justify-content: space-between; font-size: var(--text-xs); color: var(--text-2); }
+    .controls { display: flex; align-items: center; justify-content: space-between; margin: var(--space-2) calc(var(--space-2) * -1) 0; }
+    .controls .plain-btn .ico { width: 26px; height: 26px; }
+    .controls .toggle { color: var(--text-2); position: relative; }
+    .controls .toggle .ico { width: 22px; height: 22px; }
+    .controls .toggle[aria-pressed="true"] { color: var(--accent); }
+    .controls .toggle[aria-pressed="true"]::after { content: ""; position: absolute; bottom: 5px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: currentColor; }
+    /* Play is clearly larger than the secondary controls */
+    .play { display: grid; place-items: center; width: 68px; height: 68px; border: 0; border-radius: 50%; background: var(--text); color: var(--bg); cursor: pointer; }
+    .play .ico { width: 30px; height: 30px; }
+    .play .i-play, .play[data-state="paused"] .i-pause { display: none; }
+    .play[data-state="paused"] .i-play { display: block; }
+    .extras { display: flex; justify-content: space-between; margin: auto calc(var(--space-2) * -1) 0; padding-top: var(--space-3); }
+    .extras button {
+      display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 var(--space-2);
+      border: 0; border-radius: var(--radius-sm); background: none; color: var(--text-2); font-size: var(--text-xs); font-weight: 600; cursor: pointer;
+    }
+    .extras button:hover { color: var(--text); background: var(--surface-2); }
+    .extras .ico { width: 18px; height: 18px; }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 1.5h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M4 4l16 16"/><path d="M9.9 5.8a9.7 9.7 0 0 1 2.1-.3c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-2.7 3.4M6.6 6.9C4 8.6 2.5 12 2.5 12S6 18.5 12 18.5a9 9 0 0 0 4.4-1.1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M7 17L17 7M8.5 7H17v8.5"/></symbol>
+    <symbol id="i-request" viewBox="0 0 24 24"><path d="M17 7L7 17M15.5 17H7V8.5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-3-2-3 2-3-2-3 2z"/><path d="M9 8.5h6M9 12.5h6"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20h-5v-6H9v6H4z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6.5h11M9 12h11M9 17.5h11M4.5 6.5h.01M4.5 12h.01M4.5 17.5h.01"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c1-3.5 3.8-5.5 7-5.5s6 2 7 5.5"/></symbol>
+    <symbol id="i-basket" viewBox="0 0 24 24"><path d="M4 9.5h16l-1.6 10h-12.8z"/><path d="M8.5 9.5l2-5M15.5 9.5l-2-5"/></symbol>
+    <symbol id="i-train" viewBox="0 0 24 24"><rect x="6" y="3.5" width="12" height="13" rx="3"/><path d="M6 11h12M9 20.5l1.5-4M15 20.5l-1.5-4M9.5 13.8h.01M14.5 13.8h.01"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5.5 4h3l1.5 4-2 1.3a11 11 0 0 0 6.7 6.7L16 14l4 1.5v3a1.5 1.5 0 0 1-1.6 1.5A15.5 15.5 0 0 1 4 5.6 1.5 1.5 0 0 1 5.5 4z"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4.5 5.5h15v10.5h-9l-4.5 3.5V16h-1.5z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M12 3.5l2.6 5.3 5.9.9-4.25 4.1 1 5.8L12 16.9l-5.25 2.7 1-5.8L3.5 9.7l5.9-.9z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></symbol>
+    <symbol id="i-steps" viewBox="0 0 24 24"><path d="M8 3.5c1.7 0 2.5 2 2.5 4.5S9.5 12 8 12 5.5 10.5 5.5 8 6.3 3.5 8 3.5zM16 8c1.7 0 2.5 2 2.5 4.5S17.5 16.5 16 16.5s-2.5-1.5-2.5-4S14.3 8 16 8z"/><path d="M6 15.5h4M14 20h4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10z"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s6.5-5.6 6.5-11a6.5 6.5 0 0 0-13 0c0 5.4 6.5 11 6.5 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 19.5h16"/><path d="M6.5 15.5l4-4.5 3 2.5 5-6"/></symbol>
+    <symbol id="i-dumbbell" viewBox="0 0 24 24"><path d="M6.5 7.5v9M17.5 7.5v9M3.5 10v4M20.5 10v4M6.5 12h11"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.9"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2.5"/><path d="M4 9.5h16M8.5 3v4M15.5 3v4"/></symbol>
+    <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19c0-8 5-13.5 14-14 0 9-5.5 14-14 14z"/><path d="M5 19l7-7"/></symbol>
+    <symbol id="i-chev-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.3" fill="currentColor"/><circle cx="12" cy="12" r="1.3" fill="currentColor"/><circle cx="18.5" cy="12" r="1.3" fill="currentColor"/></symbol>
+    <symbol id="i-shuffle" viewBox="0 0 24 24"><path d="M3.5 7H7c4 0 6 10 10 10h3.5M3.5 17H7c1.6 0 2.8-1.6 3.8-3.6M13.2 9.6C14.2 8.1 15.4 7 17 7h3.5"/><path d="M18 4.5L20.5 7 18 9.5M18 14.5l2.5 2.5-2.5 2.5"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="M18.5 5.5v13L9 12z" fill="currentColor"/><path d="M6 5.5v13"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="M5.5 5.5v13L15 12z" fill="currentColor"/><path d="M18 5.5v13"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6.5" y="5" width="3.5" height="14" rx="1" fill="currentColor" stroke="none"/><rect x="14" y="5" width="3.5" height="14" rx="1" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M4.5 11V9.5A2.5 2.5 0 0 1 7 7h12.5M17 4.5L19.5 7 17 9.5M19.5 13v1.5A2.5 2.5 0 0 1 17 17H4.5M7 19.5L4.5 17 7 14.5"/></symbol>
+    <symbol id="i-speaker" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><circle cx="12" cy="14" r="3"/><path d="M12 7h.01"/></symbol>
+    <symbol id="i-lyrics" viewBox="0 0 24 24"><path d="M4.5 6.5h15M4.5 11h15M4.5 15.5h9"/></symbol>
+    <symbol id="i-queue" viewBox="0 0 24 24"><path d="M4 6.5h16M4 11.5h16M4 16.5h8"/><path d="M15.5 14.5v5l4-2.5z"/></symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M12 7.5l4.5 4.5-4.5 4.5L7.5 12z"/></svg>
+          ProductCraft · Example screens
+        </span>
+        <h1>Mobile apps</h1>
+        <p>Five Sora phone screens: wallet, live ride, health summary, habit tracker and music player.</p>
+      </div>
+    </header>
+
+    <div class="variants phones">
+      <!-- v1 -->
+      <section class="variant" aria-labelledby="v1-label">
+        <div class="variant-label" id="v1-label"><span class="v">v1</span> Wallet home</div>
+        <div class="variant-stage device">
+          <div class="phone">
+            <div class="phone-status"><span>9:30</span><span class="icons" aria-hidden="true"><span></span><span></span></span></div>
+            <div class="phone-body">
+              <div class="screen">
+                <div class="content">
+                  <div class="greet">
+                    <span class="avatar" aria-hidden="true">AS</span>
+                    <div><p>Good morning</p><h2>Avery Stone</h2></div>
+                    <button class="round-btn" type="button" aria-label="Notifications, 3 new"><svg class="ico" aria-hidden="true"><use href="#i-bell"/></svg><span class="count-badge num" aria-hidden="true">3</span></button>
+                  </div>
+
+                  <!-- Balance with an eye toggle that remembers the choice (SCR-23) -->
+                  <section class="balance" id="balance" aria-labelledby="bal-label" data-hidden="false">
+                    <div class="balance-top">
+                      <span id="bal-label">Sora Pay balance</span>
+                      <button class="eye" type="button" aria-pressed="false" aria-label="Hide balance" id="eye">
+                        <svg class="ico i-hidden" aria-hidden="true"><use href="#i-eye"/></svg><svg class="ico i-shown" aria-hidden="true"><use href="#i-eye-off"/></svg>
+                      </button>
+                    </div>
+                    <p class="amount num"><span class="value">$12,480<small>.36</small></span><span class="masked" aria-label="Balance hidden">••••••</span></p>
+                    <div class="balance-foot">
+                      <span class="on-card-delta"><svg class="ico" aria-hidden="true"><use href="#i-up"/></svg><span class="num">+$320.00</span> this week</span>
+                      <span class="card-no num">•••• 4821</span>
+                    </div>
+                  </section>
+
+                  <ul class="quick" aria-label="Quick actions">
+                    <li><button type="button"><span class="circle"><svg class="ico" aria-hidden="true"><use href="#i-send"/></svg></span>Send</button></li>
+                    <li><button type="button"><span class="circle"><svg class="ico" aria-hidden="true"><use href="#i-request"/></svg></span>Request</button></li>
+                    <li><button type="button"><span class="circle"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></span>Add money</button></li>
+                    <li><button type="button"><span class="circle"><svg class="ico" aria-hidden="true"><use href="#i-receipt"/></svg></span>Pay bills</button></li>
+                  </ul>
+
+                  <div class="section-head"><h2>Recent activity</h2><a href="#">See all</a></div>
+                  <ul class="rows">
+                    <li class="row"><span class="avatar" aria-hidden="true">NP</span><span><b>Nina Park</b><span class="meta">Received · Today, 9:12</span></span><span class="amt in num">+$240.00</span></li>
+                    <li class="row"><span class="lead" aria-hidden="true"><svg class="ico"><use href="#i-basket"/></svg></span><span><b>Corner Market</b><span class="meta">Groceries · Today, 8:40</span></span><span class="amt num">−$64.20</span></li>
+                    <li class="row"><span class="lead" aria-hidden="true"><svg class="ico"><use href="#i-train"/></svg></span><span><b>Metro pass</b><span class="meta">Transport · Yesterday</span></span><span class="amt num">−$20.00</span></li>
+                  </ul>
+                </div>
+                <nav class="tabbar" aria-label="Main">
+                  <a href="#" aria-current="page"><span class="pip"><svg class="ico" aria-hidden="true"><use href="#i-home"/></svg></span>Home</a>
+                  <a href="#"><span class="pip"><svg class="ico" aria-hidden="true"><use href="#i-list"/></svg></span>Activity</a>
+                  <a href="#"><span class="pip"><svg class="ico" aria-hidden="true"><use href="#i-card"/></svg></span>Cards</a>
+                  <a href="#"><span class="pip"><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg></span>Profile</a>
+                </nav>
+              </div>
+            </div>
+            <div class="phone-home" aria-hidden="true"></div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>SCR-23</code> <code>CMP-20</code> <code>NAV-11</code> <code>NAV-03</code> <code>ICO-04</code> <code>TYP-09</code></p>
+      </section>
+
+      <!-- v2 -->
+      <section class="variant" aria-labelledby="v2-label">
+        <div class="variant-label" id="v2-label"><span class="v">v2</span> Ride with a bottom sheet</div>
+        <div class="variant-stage device">
+          <div class="phone">
+            <div class="phone-status"><span>9:30</span><span class="icons" aria-hidden="true"><span></span><span></span></span></div>
+            <div class="phone-body">
+              <div class="screen ride">
+                <!-- Abstract map: context stays visible above the sheet -->
+                <svg class="map" viewBox="0 0 340 652" preserveAspectRatio="xMidYMin slice" aria-hidden="true">
+                  <rect width="340" height="652" fill="#e9ecf0"/>
+                  <path d="M-10 470 C 60 430 120 450 180 410 S 300 380 360 330 V 700 H -10 Z" fill="#d7e5f3"/>
+                  <rect x="196" y="86" width="120" height="96" rx="14" fill="#d5e8d9"/>
+                  <g fill="#f6f7f9">
+                    <rect x="16" y="20" width="84" height="70" rx="8"/><rect x="116" y="20" width="64" height="70" rx="8"/>
+                    <rect x="16" y="106" width="84" height="88" rx="8"/><rect x="116" y="106" width="64" height="88" rx="8"/>
+                    <rect x="16" y="210" width="84" height="80" rx="8"/><rect x="116" y="210" width="96" height="80" rx="8"/><rect x="228" y="198" width="96" height="92" rx="8"/>
+                    <rect x="16" y="306" width="120" height="76" rx="8"/><rect x="152" y="306" width="80" height="60" rx="8"/><rect x="248" y="20" width="76" height="52" rx="8"/>
+                  </g>
+                  <g stroke="#ffffff" stroke-width="10" fill="none" stroke-linecap="round">
+                    <path d="M108 0 V 400"/><path d="M0 98 H 340"/><path d="M0 200 H 340"/><path d="M188 0 V 300"/><path d="M0 298 H 240"/><path d="M220 190 L 330 300"/>
+                  </g>
+                  <path d="M108 70 V 200 H 188 V 280" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M108 70 V 200 H 188 V 280" fill="none" stroke="#4f46e5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="108" cy="70" r="13" fill="#4f46e5" fill-opacity=".18"/>
+                  <circle cx="108" cy="70" r="7" fill="#4f46e5" stroke="#fff" stroke-width="3"/>
+                  <g transform="translate(188 280)">
+                    <circle r="16" fill="#15171a"/>
+                    <rect x="-5" y="-5" width="10" height="10" rx="2" fill="#fff"/>
+                  </g>
+                  <g transform="translate(108 150)">
+                    <circle r="18" fill="#fff" stroke="#e3e6ea"/>
+                    <path d="M-8 4V0l2-5a2 2 0 0 1 2-1.3h8A2 2 0 0 1 6 -5l2 5v4z" fill="#4f46e5"/>
+                  </g>
+                </svg>
+                <div class="top">
+                  <button class="round-btn" type="button" aria-label="Back"><svg class="ico" aria-hidden="true"><use href="#i-back"/></svg></button>
+                  <p class="dest"><span class="dot" aria-hidden="true"></span>Harbor Station <span class="muted">· 12 min</span></p>
+                </div>
+                <section class="sheet-panel" aria-labelledby="eta-title">
+                  <!-- The handle is also a button, so the sheet never needs a drag (MOB-11) -->
+                  <button class="handle" type="button" aria-label="Expand trip details" aria-expanded="false"></button>
+                  <div class="eta">
+                    <div><h2 id="eta-title">Driver on the way</h2><p>Meet at the north entrance</p></div>
+                    <p class="mins"><b class="num">4</b><span>min away</span></p>
+                  </div>
+                  <div class="trip-bar" role="progressbar" aria-label="Driver approach" aria-valuemin="0" aria-valuemax="100" aria-valuenow="62" aria-valuetext="1.2 km away, arriving 9:34"><span></span></div>
+                  <div class="trip-legend"><span class="num">1.2 km away</span><span class="num">Arrives 9:34</span></div>
+                  <div class="driver">
+                    <span class="avatar" aria-hidden="true">MS</span>
+                    <div><b>Mateo Silva</b><span class="rating"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg><span class="num">4.9/5 · 1.2k trips</span></span></div>
+                    <div class="vehicle">Grey hatchback<br><span class="plate num" aria-label="Plate 8JXR 214">8JXR 214</span></div>
+                  </div>
+                  <div class="trip-actions">
+                    <button class="btn btn-tonal" type="button"><svg aria-hidden="true" class="ico"><use href="#i-phone"/></svg>Call</button>
+                    <button class="btn btn-tonal" type="button"><svg aria-hidden="true" class="ico"><use href="#i-chat"/></svg>Message</button>
+                  </div>
+                  <!-- Cancel opens a confirmation before anything is cancelled (SCR-20) -->
+                  <button class="btn btn-ghost cancel" type="button" aria-haspopup="dialog">Cancel ride</button>
+                </section>
+              </div>
+            </div>
+            <div class="phone-home" aria-hidden="true"></div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>SCR-20</code> <code>MOB-03</code> <code>MOB-04</code> <code>MOB-11</code> <code>BTN-08</code> <code>FBK-06</code></p>
+      </section>
+
+      <!-- v3 -->
+      <section class="variant" aria-labelledby="v3-label">
+        <div class="variant-label" id="v3-label"><span class="v">v3</span> Health summary</div>
+        <div class="variant-stage device">
+          <div class="phone">
+            <div class="phone-status"><span>9:30</span><span class="icons" aria-hidden="true"><span></span><span></span></span></div>
+            <div class="phone-body">
+              <div class="screen">
+                <div class="content">
+                  <div class="health-head">
+                    <div><p>Saturday, Oct 24</p><h2>Today</h2></div>
+                    <span class="avatar" aria-hidden="true">HK</span>
+                  </div>
+                  <nav aria-label="Days this week">
+                    <ul class="week">
+                      <li><a href="#"><span>M</span><b class="num">19</b><span class="done"></span><span class="visually-hidden">, goals met</span></a></li>
+                      <li><a href="#"><span>T</span><b class="num">20</b><span class="done"></span><span class="visually-hidden">, goals met</span></a></li>
+                      <li><a href="#"><span>W</span><b class="num">21</b><span class="done part"></span><span class="visually-hidden">, partly met</span></a></li>
+                      <li><a href="#"><span>T</span><b class="num">22</b><span class="done"></span><span class="visually-hidden">, goals met</span></a></li>
+                      <li><a href="#"><span>F</span><b class="num">23</b><span class="done"></span><span class="visually-hidden">, goals met</span></a></li>
+                      <li><a href="#" aria-current="date"><span>S</span><b class="num">24</b><span class="done part"></span><span class="visually-hidden">, today, in progress</span></a></li>
+                      <li><a href="#"><span>S</span><b class="num">25</b><span class="visually-hidden">, upcoming</span></a></li>
+                    </ul>
+                  </nav>
+
+                  <!-- Rings: value and unit in the middle, goal and percent below (TYP-09, ICO-07 pathLength) -->
+                  <section class="rings-card" aria-labelledby="rings-title">
+                    <h3 id="rings-title">Activity <span>Goals for today</span></h3>
+                    <ul class="rings">
+                      <li>
+                        <div class="ring" style="--ring:#4f46e5"><svg viewBox="0 0 76 76" aria-hidden="true"><circle class="track" cx="38" cy="38" r="32" fill="none" stroke-width="8"/><circle class="val" cx="38" cy="38" r="32" fill="none" stroke-width="8" stroke-linecap="round" pathLength="100" stroke-dasharray="70 100"/></svg>
+                          <span class="ring-label"><b class="num">420</b><span>kcal</span></span></div>
+                        <p><strong>Move</strong>70% of 600</p>
+                      </li>
+                      <li>
+                        <div class="ring" style="--ring:#0d9488"><svg viewBox="0 0 76 76" aria-hidden="true"><circle class="track" cx="38" cy="38" r="32" fill="none" stroke-width="8"/><circle class="val" cx="38" cy="38" r="32" fill="none" stroke-width="8" stroke-linecap="round" pathLength="100" stroke-dasharray="80 100"/></svg>
+                          <span class="ring-label"><b class="num">24</b><span>min</span></span></div>
+                        <p><strong>Exercise</strong>80% of 30</p>
+                      </li>
+                      <li>
+                        <div class="ring" style="--ring:#db2777"><svg viewBox="0 0 76 76" aria-hidden="true"><circle class="track" cx="38" cy="38" r="32" fill="none" stroke-width="8"/><circle class="val" cx="38" cy="38" r="32" fill="none" stroke-width="8" stroke-linecap="round" pathLength="100" stroke-dasharray="75 100"/></svg>
+                          <span class="ring-label"><b class="num">9</b><span>hours</span></span></div>
+                        <p><strong>Stand</strong>75% of 12</p>
+                      </li>
+                    </ul>
+                  </section>
+
+                  <!-- Stat tiles: label, value with unit, plain qualifier or signed delta (CMP-17, TYP-09) -->
+                  <ul class="tiles">
+                    <li class="tile"><p class="label"><svg class="ico" aria-hidden="true"><use href="#i-steps"/></svg>Steps</p><p class="value num">8,412</p><p class="delta delta-good"><svg viewBox="0 0 24 24" class="ico" aria-hidden="true"><use href="#i-up"/></svg>+12% vs Fri</p></li>
+                    <li class="tile"><p class="label"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg>Resting heart</p><p class="value num">58 <small>bpm</small></p><p class="note">Normal range</p></li>
+                    <li class="tile"><p class="label"><svg class="ico" aria-hidden="true"><use href="#i-moon"/></svg>Sleep</p><p class="value num">7 <small>h</small> 20 <small>min</small></p><p class="note">Above your average</p></li>
+                    <li class="tile"><p class="label"><svg class="ico" aria-hidden="true"><use href="#i-pin"/></svg>Distance</p><p class="value num">5.8 <small>km</small></p><p class="note">Mostly walking</p></li>
+                  </ul>
+                </div>
+                <nav class="tabbar" aria-label="Main">
+                  <a href="#" aria-current="page"><span class="pip"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg></span>Today</a>
+                  <a href="#"><span class="pip"><svg class="ico" aria-hidden="true"><use href="#i-chart"/></svg></span>Trends</a>
+                  <a href="#"><span class="pip"><svg class="ico" aria-hidden="true"><use href="#i-dumbbell"/></svg></span>Workouts</a>
+                  <a href="#"><span class="pip"><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg></span>Profile</a>
+                </nav>
+              </div>
+            </div>
+            <div class="phone-home" aria-hidden="true"></div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>TYP-09</code> <code>CMP-17</code> <code>ICO-07</code> <code>COL-07</code> <code>NAV-11</code> <code>NAV-03</code></p>
+      </section>
+
+      <!-- v4 -->
+      <section class="variant" aria-labelledby="v4-label">
+        <div class="variant-label" id="v4-label"><span class="v">v4</span> Habit tracker</div>
+        <div class="variant-stage device">
+          <div class="phone" data-accent="teal">
+            <div class="phone-status"><span>9:30</span><span class="icons" aria-hidden="true"><span></span><span></span></span></div>
+            <div class="phone-body">
+              <div class="screen">
+                <div class="content">
+                  <div class="hab-head">
+                    <div><p>Saturday, Oct 24</p><h2>Habits</h2></div>
+                    <button class="round-btn" type="button" aria-label="Add habit"><svg class="ico" aria-hidden="true"><use href="#i-plus"/></svg></button>
+                  </div>
+                  <!-- Week row: each day says its state in text, not only by its mark (COL-07) -->
+                  <ol class="days" aria-label="This week">
+                    <li class="full">M<span class="mark"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span><span class="visually-hidden">Monday, all done</span></li>
+                    <li class="full">T<span class="mark"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span><span class="visually-hidden">Tuesday, all done</span></li>
+                    <li class="full">W<span class="mark"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span><span class="visually-hidden">Wednesday, all done</span></li>
+                    <li class="part">T<span class="mark num" aria-hidden="true">4/5</span><span class="visually-hidden">Thursday, 4 of 5 done</span></li>
+                    <li class="full">F<span class="mark"><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg></span><span class="visually-hidden">Friday, all done</span></li>
+                    <li class="today" aria-current="date">S<span class="mark num" aria-hidden="true" id="today-mark">3/5</span><span class="visually-hidden">Saturday, today</span></li>
+                    <li>S<span class="mark"></span><span class="visually-hidden">Sunday, upcoming</span></li>
+                  </ol>
+                  <!-- Streak in a calm tone: progress without pressure -->
+                  <div class="streak">
+                    <svg class="ico" aria-hidden="true"><use href="#i-leaf"/></svg>
+                    <div><b><span class="num">12</span>-day streak</b><p>Nice and steady. Longest run: 18 days.</p></div>
+                  </div>
+                  <div class="list-head"><h3 id="today-title">Today</h3><p aria-live="polite" id="habit-count"><span class="num">3 of 5</span> done</p></div>
+                  <div class="habit-progress" aria-hidden="true"><span id="habit-bar"></span></div>
+                  <ul class="checklist" aria-labelledby="today-title" id="habits">
+                    <li><label class="check"><input type="checkbox" checked><span class="name">Drink water</span><span class="qty">8 glasses</span></label></li>
+                    <li><label class="check"><input type="checkbox" checked><span class="name">Morning stretch</span><span class="qty">10 min</span></label></li>
+                    <li><label class="check"><input type="checkbox" checked><span class="name">Read</span><span class="qty">20 pages</span></label></li>
+                    <li><label class="check"><input type="checkbox"><span class="name">Walk outside</span><span class="qty">30 min</span></label></li>
+                    <li><label class="check"><input type="checkbox"><span class="name">Journal</span><span class="qty">5 min</span></label></li>
+                  </ul>
+                </div>
+                <nav class="tabbar" aria-label="Main">
+                  <a href="#" aria-current="page"><span class="pip"><svg class="ico" aria-hidden="true"><use href="#i-check-circle"/></svg></span>Today</a>
+                  <a href="#"><span class="pip"><svg class="ico" aria-hidden="true"><use href="#i-calendar"/></svg></span>History</a>
+                  <a href="#"><span class="pip"><svg class="ico" aria-hidden="true"><use href="#i-chart"/></svg></span>Insights</a>
+                  <a href="#"><span class="pip"><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg></span>Profile</a>
+                </nav>
+              </div>
+            </div>
+            <div class="phone-home" aria-hidden="true"></div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-31</code> <code>FBK-06</code> <code>FRM-27</code> <code>CMP-26</code> <code>COL-07</code> <code>MOB-01</code></p>
+      </section>
+
+      <!-- v5 -->
+      <section class="variant" aria-labelledby="v5-label">
+        <div class="variant-label" id="v5-label"><span class="v">v5</span> Music player</div>
+        <div class="variant-stage device dark">
+          <div class="phone" data-theme="dark">
+            <div class="phone-status"><span>9:30</span><span class="icons" aria-hidden="true"><span></span><span></span></span></div>
+            <div class="phone-body">
+              <div class="screen player">
+                <div class="np-head">
+                  <button class="plain-btn" type="button" aria-label="Minimize player"><svg class="ico" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+                  <p>Playing from playlist<b>Evening Focus</b></p>
+                  <button class="plain-btn" type="button" aria-label="More options"><svg class="ico" aria-hidden="true"><use href="#i-more"/></svg></button>
+                </div>
+                <div class="artwork">
+                  <svg viewBox="0 0 300 300" role="img" aria-label="Album art for Tidal Lines">
+                    <defs>
+                      <linearGradient id="art-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1e1b4b"/><stop offset=".55" stop-color="#6d28d9"/><stop offset="1" stop-color="#f472b6"/></linearGradient>
+                      <radialGradient id="art-sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fde68a"/><stop offset="1" stop-color="#fb923c"/></radialGradient>
+                    </defs>
+                    <rect width="300" height="300" fill="url(#art-bg)"/>
+                    <circle cx="196" cy="118" r="54" fill="url(#art-sun)" opacity=".95"/>
+                    <g fill="none" stroke="#fff" stroke-linecap="round" stroke-width="3">
+                      <path d="M-10 186 C 40 166 80 206 130 186 S 220 166 310 186" stroke-opacity=".9"/>
+                      <path d="M-10 208 C 40 188 80 228 130 208 S 220 188 310 208" stroke-opacity=".7"/>
+                      <path d="M-10 230 C 40 210 80 250 130 230 S 220 210 310 230" stroke-opacity=".5"/>
+                      <path d="M-10 252 C 40 232 80 272 130 252 S 220 232 310 252" stroke-opacity=".35"/>
+                      <path d="M-10 274 C 40 254 80 294 130 274 S 220 254 310 274" stroke-opacity=".2"/>
+                    </g>
+                  </svg>
+                </div>
+                <div class="track">
+                  <div><h2>Tidal Lines</h2><p>Hana Kim</p></div>
+                  <button class="plain-btn fav" type="button" aria-pressed="true" aria-label="Save to library"><svg class="ico" aria-hidden="true"><use href="#i-heart"/></svg></button>
+                </div>
+                <div class="seek">
+                  <input type="range" id="seek" min="0" max="232" value="84" aria-label="Seek" aria-valuetext="1:24 of 3:52">
+                  <div class="times num"><span id="elapsed">1:24</span><span>3:52</span></div>
+                </div>
+                <!-- Familiar order; play is larger; toggles report aria-pressed (CMP-30) -->
+                <div class="controls">
+                  <button class="plain-btn toggle" type="button" aria-pressed="false" aria-label="Shuffle"><svg class="ico" aria-hidden="true"><use href="#i-shuffle"/></svg></button>
+                  <button class="plain-btn" type="button" aria-label="Previous track"><svg class="ico" aria-hidden="true"><use href="#i-prev"/></svg></button>
+                  <button class="play" type="button" aria-label="Pause" id="play" data-state="playing"><svg class="ico i-pause" aria-hidden="true"><use href="#i-pause"/></svg><svg class="ico i-play" aria-hidden="true"><use href="#i-play"/></svg></button>
+                  <button class="plain-btn" type="button" aria-label="Next track"><svg class="ico" aria-hidden="true"><use href="#i-next"/></svg></button>
+                  <button class="plain-btn toggle" type="button" aria-pressed="true" aria-label="Repeat"><svg class="ico" aria-hidden="true"><use href="#i-repeat"/></svg></button>
+                </div>
+                <div class="extras">
+                  <button type="button"><svg class="ico" aria-hidden="true"><use href="#i-speaker"/></svg>Living room</button>
+                  <button type="button"><svg class="ico" aria-hidden="true"><use href="#i-lyrics"/></svg>Lyrics</button>
+                  <button type="button"><svg class="ico" aria-hidden="true"><use href="#i-queue"/></svg>Up next</button>
+                </div>
+              </div>
+            </div>
+            <div class="phone-home" aria-hidden="true"></div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-30</code> <code>FRM-27</code> <code>ICO-04</code> <code>MOB-01</code> <code>BTN-08</code> <code>DRK-09</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // v1: hide-balance toggle with aria-pressed, remembered between visits (SCR-23, ENG-10)
+    const balance = document.getElementById("balance");
+    const eye = document.getElementById("eye");
+    function setHidden(hidden) {
+      balance.dataset.hidden = String(hidden);
+      eye.setAttribute("aria-pressed", String(hidden));
+    }
+    try { setHidden(localStorage.getItem("sora-hide-balance") === "true"); } catch (e) { /* storage unavailable */ }
+    eye.addEventListener("click", () => {
+      const hidden = eye.getAttribute("aria-pressed") !== "true";
+      setHidden(hidden);
+      try { localStorage.setItem("sora-hide-balance", String(hidden)); } catch (e) { /* storage unavailable */ }
+    });
+
+    // v4: live "3 of 5 done" count and progress from real checkboxes (CMP-31)
+    const habits = [...document.querySelectorAll("#habits input")];
+    function renderHabits() {
+      const done = habits.filter((h) => h.checked).length;
+      document.getElementById("habit-count").innerHTML = `<span class="num">${done} of ${habits.length}</span> done`;
+      document.getElementById("today-mark").textContent = `${done}/${habits.length}`;
+      document.getElementById("habit-bar").style.setProperty("--pct", `${(done / habits.length) * 100}%`);
+    }
+    habits.forEach((h) => h.addEventListener("change", renderHabits));
+    renderHabits();
+
+    // v5: play/pause swaps its name, toggles report aria-pressed, seek speaks time (CMP-30, FRM-27)
+    const play = document.getElementById("play");
+    play.addEventListener("click", () => {
+      const playing = play.dataset.state === "playing";
+      play.dataset.state = playing ? "paused" : "playing";
+      play.setAttribute("aria-label", playing ? "Play" : "Pause");
+    });
+    document.querySelectorAll(".toggle, .fav").forEach((btn) => {
+      btn.addEventListener("click", () => btn.setAttribute("aria-pressed", String(btn.getAttribute("aria-pressed") !== "true")));
+    });
+    const seek = document.getElementById("seek");
+    const clock = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+    function renderSeek() {
+      const t = Number(seek.value);
+      seek.style.setProperty("--pct", `${(t / Number(seek.max)) * 100}%`);
+      seek.setAttribute("aria-valuetext", `${clock(t)} of ${clock(Number(seek.max))}`);
+      document.getElementById("elapsed").textContent = clock(t);
+    }
+    seek.addEventListener("input", renderSeek);
+    renderSeek();
+  </script>
+</body>
+</html>

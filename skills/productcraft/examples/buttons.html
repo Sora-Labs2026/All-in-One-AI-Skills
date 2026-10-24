@@ -1,0 +1,645 @@
+<!doctype html>
+<!-- ProductCraft example: buttons. Original Sora Labs example, MIT License.
+     Demonstrates: BTN-01, BTN-02, BTN-03, BTN-07, BTN-08, BTN-09, BTN-10, BTN-12, BTN-13, BTN-14,
+     FBK-01, FBK-04, FBK-08, FBK-10, FBK-11, FBK-12, FBK-15, ENG-01, ENG-02, ENG-03, ENG-04, ENG-05, ENG-09,
+     COP-01, COP-04, COP-09, COL-07, COL-10, COL-13, CMP-11, ICO-04, ICO-07, DRK-06, DRK-09, MOT-01, MOT-04 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Buttons</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    /* Extra button tokens for pressed and destructive states (BTN-02, DRK-06) */
+    :root { --accent-press: #3730a3; --danger-hover: #991b1b; }
+    [data-theme="dark"] { --accent-press: #c7d2fe; --danger-hover: #fca5a5; color: var(--text); }
+
+    [hidden] { display: none !important; }
+    .sheet-header h1 { margin-top: var(--space-2); }
+    .i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .btn .i { width: 18px; height: 18px; }
+    .stage-fill { width: 100%; }
+    .variant > .variant-stage { flex: 1 0 auto; } /* equal stage heights per row */
+
+    /* Inner layer carries the press scale so the hit box never moves (BTN-12, ENG-04) */
+    .btn-in { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); transition: transform var(--dur-fast) var(--ease-out); }
+    .btn:active > .btn-in, .btn.is-pressed > .btn-in { transform: scale(0.97); }
+    .btn-primary:active, .btn-primary.is-pressed { background: var(--accent-press); }
+    .btn-primary.is-hover { background: var(--accent-hover); }
+    .btn.is-focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .btn-danger:hover { background: var(--danger-hover); }
+    /* Busy and confirmed buttons stay at full strength so they never read as disabled (BTN-02) */
+    .btn[aria-busy="true"], .pay[data-state="done"] { opacity: 1; cursor: progress; }
+
+    /* Stacked labels: every state label shares one grid cell, so the widest sets the width (ENG-03) */
+    .stack { display: grid; }
+    .stack > .lbl { grid-area: 1 / 1; display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); visibility: hidden; }
+
+    .spin { animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* v1 hierarchy */
+    .hier { display: grid; grid-template-columns: 1fr 1fr; height: 100%; }
+    .hier-pane { background: var(--surface); padding: var(--space-5); }
+    .hier-pane + .hier-pane { border-left: 1px solid var(--border); }
+    .pane-tag { display: flex; align-items: center; gap: 6px; font-size: var(--text-xs); font-weight: 600; color: var(--text-3); margin-bottom: var(--space-2); }
+    .pane-tag .i { width: 16px; height: 16px; }
+    .hier-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) 0; border-top: 1px solid var(--border); }
+    .hier-row:first-of-type { border-top: 0; }
+    .hier-row b { display: block; font-size: var(--text-sm); }
+    .hier-row small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+
+    /* v2 states */
+    .states { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); }
+    .state { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); padding: var(--space-5) var(--space-3) var(--space-4); text-align: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); }
+    .state b { display: block; font-size: var(--text-sm); }
+    .state small { display: block; font-size: var(--text-xs); line-height: 1.4; color: var(--text-3); }
+    .save .lbl[data-for="idle"] { visibility: visible; }
+    .save[aria-busy="true"] { cursor: progress; }
+    .save[aria-busy="true"] .lbl[data-for="idle"] { visibility: hidden; }
+    .save[aria-busy="true"] .lbl[data-for="working"] { visibility: visible; }
+
+    /* v3 async purchase */
+    .pay-grid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+    .seq { display: flex; flex-direction: column; gap: var(--space-3); }
+    .seq-step { display: flex; flex-direction: column; gap: 6px; }
+    .seq-step small { font-size: var(--text-xs); color: var(--text-3); }
+    .seq-step small b { color: var(--text-2); font-weight: 600; }
+    .pay[data-state="idle"] [data-for="idle"],
+    .pay[data-state="working"] [data-for="working"],
+    .pay[data-state="done"] [data-for="done"],
+    .pay[data-state="failed"] [data-for="failed"] { visibility: visible; }
+    .pay[data-state="working"] { cursor: progress; }
+    .pay[data-state="done"] { background: var(--success-soft); color: var(--success); border-color: transparent; cursor: default; }
+    .pay[data-state="failed"] { background: var(--danger); color: var(--on-danger); }
+    .pay[data-state="failed"]:hover { background: var(--danger-hover); }
+    .checkout { padding: var(--space-5); }
+    .co-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: var(--space-4); }
+    .co-lines { display: grid; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .co-lines div { display: flex; justify-content: space-between; }
+    .co-total { padding-top: var(--space-2); border-top: 1px solid var(--border); color: var(--text); font-size: var(--text-md); font-weight: 700; }
+    .co-method { display: flex; align-items: center; gap: var(--space-2); margin: var(--space-4) 0; font-size: var(--text-sm); color: var(--text-2); }
+    .co-method .i { width: 18px; height: 18px; color: var(--text-3); }
+    .inline-error { display: flex; gap: var(--space-2); margin-top: var(--space-3); font-size: var(--text-sm); color: var(--danger); }
+    .inline-error .i { width: 18px; height: 18px; margin-top: 1px; }
+    .demo-ctl { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-4); padding-top: var(--space-3); border-top: 1px dashed var(--border); font-size: var(--text-xs); color: var(--text-3); }
+    .demo-ctl label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    .demo-ctl input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
+    .link-btn { min-height: 28px; padding: 0 var(--space-2); border: 0; border-radius: 6px; background: transparent; color: var(--accent-ink); font-size: var(--text-xs); font-weight: 600; cursor: pointer; }
+    .link-btn:hover { background: var(--accent-soft); }
+
+    /* v4 download */
+    .dl-list { display: flex; flex-direction: column; gap: var(--space-3); }
+    .dl-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); }
+    .file-ic { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--accent-ink); }
+    .dl-name { font-size: var(--text-md); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dl-meta { display: flex; align-items: center; gap: 6px; font-size: var(--text-xs); color: var(--text-3); }
+    .dl-meta .i { width: 14px; height: 14px; }
+    .dl-meta .ok, .dl-meta .err { display: inline-flex; align-items: center; gap: 4px; color: var(--success); font-weight: 600; }
+    .dl-meta .err { color: var(--danger); }
+    .dl-actions { display: flex; align-items: center; gap: var(--space-1); }
+    .dl-btn { position: relative; overflow: hidden; }
+    .dl-btn .stack { position: relative; }
+    .dl-fill { position: absolute; inset: 0; background: var(--accent-soft); box-shadow: inset 0 -3px 0 var(--accent); transform-origin: left center; transform: scaleX(var(--p, 0)); transition: transform var(--dur-fast) linear; }
+    .dl-btn[data-state="idle"] [data-for="idle"],
+    .dl-btn[data-state="working"] [data-for="working"],
+    .dl-btn[data-state="done"] [data-for="done"],
+    .dl-btn[data-state="failed"] [data-for="failed"] { visibility: visible; }
+    .dl-btn:not([data-state="working"]) .dl-fill { display: none; }
+    .dl-btn[data-state="working"] { border-color: var(--accent); color: var(--accent-ink); cursor: progress; }
+    .pct { display: inline-block; min-width: 4ch; text-align: right; }
+
+    /* v5 delete with undo */
+    .del-stage { display: flex; flex-direction: column; justify-content: center; align-items: stretch; gap: var(--space-5); }
+    .files-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; }
+    .files-head { display: flex; align-items: baseline; justify-content: space-between; padding: var(--space-4) var(--space-5); }
+    .files-head p { font-size: var(--text-sm); color: var(--text-3); }
+    .files-list { margin: 0; padding: 0; list-style: none; }
+    .file-row { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto auto; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3) var(--space-2) var(--space-5); border-top: 1px solid var(--border); }
+    .file-row .file-ic { width: 36px; height: 36px; }
+    .file-row .file-ic .i { width: 18px; height: 18px; }
+    .file-row b { display: block; font-size: var(--text-sm); }
+    .file-row small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .file-size { font-size: var(--text-sm); color: var(--text-2); }
+    .icon-btn.del:hover { color: var(--danger); background: var(--danger-soft); }
+    .toast-dock { display: flex; justify-content: center; pointer-events: none; } /* space stays reserved, so nothing shifts when it opens */
+    .toast { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); pointer-events: auto;
+      opacity: 0; transform: translateY(8px); visibility: hidden; transition: opacity var(--dur-med) var(--ease-out), transform var(--dur-med) var(--ease-out), visibility 0s linear var(--dur-med); }
+    .toast[data-open="true"] { opacity: 1; transform: none; visibility: visible; transition-delay: 0s; }
+    .toast p { font-size: var(--text-sm); color: var(--text-2); }
+    .toast p b { color: var(--text); }
+    .ring { position: relative; display: grid; place-items: center; width: 32px; height: 32px; flex: none; }
+    .ring svg { position: absolute; inset: 0; width: 32px; height: 32px; transform: rotate(-90deg); fill: none; stroke-width: 3; stroke-linecap: round; }
+    .ring-track { stroke: var(--border); }
+    .ring-bar { stroke: var(--accent); stroke-dasharray: 1; stroke-dashoffset: var(--elapsed, 0); }
+    .ring-n { font-size: var(--text-xs); font-weight: 700; }
+    .toast .btn-undo { min-height: 36px; padding: 0 var(--space-3); color: var(--accent-ink); }
+    .toast .btn-undo:hover { background: var(--accent-soft); color: var(--accent-ink); }
+    .toast .icon-btn { width: 36px; height: 36px; }
+
+    /* v6 icon, provider and split buttons */
+    .v6-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-5); align-items: stretch; }
+    .panel { padding: var(--space-5); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+    .panel-title { font-size: var(--text-xs); font-weight: 600; color: var(--text-3); margin-bottom: var(--space-3); }
+    .toolbar { display: inline-flex; align-items: center; gap: 2px; padding: var(--space-1); margin-top: var(--space-7); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+    .toolbar .sep { width: 1px; height: 24px; margin: 0 var(--space-1); background: var(--border); }
+    .tip-wrap { position: relative; display: inline-flex; }
+    .tip { position: absolute; bottom: calc(100% + var(--space-2)); left: 50%; display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-2); border-radius: 6px; background: var(--text); color: var(--surface); font-size: var(--text-xs); font-weight: 600; white-space: nowrap; pointer-events: none;
+      opacity: 0; transform: translate(-50%, 4px); transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out); }
+    .tip::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border: 5px solid transparent; border-top-color: var(--text); }
+    .tip kbd { font: inherit; font-size: 11px; padding: 0 var(--space-1); border-radius: 4px; background: rgba(255, 255, 255, 0.16); }
+    /* Tooltip shows on hover and keyboard focus, not hover alone (CMP-11) */
+    .tip-wrap:hover .tip, .tip-wrap:focus-within .tip, .tip-wrap.tip-open .tip { opacity: 1; transform: translate(-50%, 0); }
+    .tip-wrap.tip-open .icon-btn { background: var(--surface-2); color: var(--text); }
+    .split-row { margin-top: var(--space-5); padding: var(--space-4) 0 128px; border-top: 1px solid var(--border); } /* room for the open menu */
+    .split { position: relative; display: inline-flex; }
+    .split .btn-main { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+    .split .btn-more { width: 40px; padding: 0; border-left: 0; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+    .split .btn-more .i { transition: transform var(--dur-fast) var(--ease-out); }
+    .split .btn-more[aria-expanded="true"] .i { transform: rotate(180deg); }
+    .split-menu { position: absolute; top: calc(100% + 6px); left: 0; z-index: 2; width: 220px; padding: var(--space-1); margin: 0; list-style: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); }
+    .split-menu button { display: flex; align-items: center; gap: var(--space-2); width: 100%; min-height: 36px; padding: 0 var(--space-2); border: 0; border-radius: 6px; background: transparent; font-size: var(--text-sm); text-align: left; cursor: pointer; }
+    .split-menu button:hover { background: var(--surface-2); }
+    .split-menu .i { width: 16px; height: 16px; color: var(--text-3); }
+    .split-menu small { margin-left: auto; color: var(--text-3); font-size: var(--text-xs); }
+    .signin { display: flex; flex-direction: column; }
+    .signin h3 { margin-bottom: var(--space-1); }
+    .signin-foot { margin-top: auto; padding-top: var(--space-4); font-size: var(--text-sm); color: var(--text-2); text-align: center; }
+    .signin-foot a { font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+    .signin p { font-size: var(--text-sm); color: var(--text-2); margin-bottom: var(--space-4); }
+    .signin .stack-v { display: grid; gap: var(--space-3); }
+    .or { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-xs); color: var(--text-3); }
+    .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+    .provider { justify-content: flex-start; gap: var(--space-3); padding-left: var(--space-4); }
+    .provider .i { color: var(--text-2); }
+  </style>
+</head>
+<body>
+  <!-- Inline icon set: one 24px stroke family (ICO-01) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-retry" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/></symbol>
+    <symbol id="i-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" opacity="0.3"/><path d="M20.5 12A8.5 8.5 0 0 0 12 3.5"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+    <symbol id="i-open" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/></symbol>
+    <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="M15 14l5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></symbol>
+    <symbol id="i-comment" viewBox="0 0 24 24"><path d="M20 15a2 2 0 0 1-2 2H8l-4 4V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></symbol>
+    <symbol id="i-archive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></symbol>
+    <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="19" cy="12" r="1.4" fill="currentColor"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24"><path d="M5 21V5a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v16"/><path d="M16 9h2a2 2 0 0 1 2 2v10"/><path d="M9 7h3M9 11h3M9 15h3"/><path d="M3 21h18"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9"/><path d="M17 6l3 3"/><path d="M14.5 8.5l2 2"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h3"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/></symbol>
+    <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="6"/><circle cx="12" cy="12" r="3.5"/></svg>ProductCraft · Example screens</span>
+        <h1>Buttons</h1>
+        <p>Hierarchy, every state, async purchase and download flows, undoable deletes, and icon, provider and split buttons for Sora.</p>
+      </div>
+    </header>
+
+    <div class="variants cols-2">
+      <!-- v1: hierarchy in both themes -->
+      <section class="variant" aria-labelledby="v1-title">
+        <h2 class="variant-label" id="v1-title"><span class="v">v1</span> Hierarchy in light and dark</h2>
+        <div class="variant-stage flush">
+          <div class="hier">
+            <div class="hier-pane" data-theme="light">
+              <p class="pane-tag"><svg class="i" aria-hidden="true"><use href="#i-sun"/></svg>Light</p>
+              <div class="hier-row"><div><b>Primary</b><small>One per view</small></div><button class="btn btn-primary" type="button"><span class="btn-in">Publish report</span></button></div>
+              <div class="hier-row"><div><b>Secondary</b><small>Alternatives</small></div><button class="btn btn-secondary" type="button"><span class="btn-in">Save draft</span></button></div>
+              <div class="hier-row"><div><b>Ghost</b><small>Minor or dismiss</small></div><button class="btn btn-ghost" type="button"><span class="btn-in">Cancel</span></button></div>
+              <div class="hier-row"><div><b>Destructive</b><small>Irreversible</small></div><button class="btn btn-danger" type="button"><span class="btn-in"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>Delete report</span></button></div>
+            </div>
+            <div class="hier-pane" data-theme="dark">
+              <p class="pane-tag"><svg class="i" aria-hidden="true"><use href="#i-moon"/></svg>Dark</p>
+              <div class="hier-row"><div><b>Primary</b><small>One per view</small></div><button class="btn btn-primary" type="button"><span class="btn-in">Publish report</span></button></div>
+              <div class="hier-row"><div><b>Secondary</b><small>Alternatives</small></div><button class="btn btn-secondary" type="button"><span class="btn-in">Save draft</span></button></div>
+              <div class="hier-row"><div><b>Ghost</b><small>Minor or dismiss</small></div><button class="btn btn-ghost" type="button"><span class="btn-in">Cancel</span></button></div>
+              <div class="hier-row"><div><b>Destructive</b><small>Irreversible</small></div><button class="btn btn-danger" type="button"><span class="btn-in"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>Delete report</span></button></div>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>BTN-01</code> <code>BTN-03</code> <code>BTN-07</code> <code>BTN-08</code> <code>FBK-08</code> <code>COP-01</code> <code>DRK-05</code> <code>DRK-09</code></p>
+      </section>
+
+      <!-- v2: every state of the primary button, frozen as static classes -->
+      <section class="variant" aria-labelledby="v2-title">
+        <h2 class="variant-label" id="v2-title"><span class="v">v2</span> Every state of the primary button</h2>
+        <div class="variant-stage">
+          <div class="stage-fill states" inert>
+            <div class="state">
+              <button class="btn btn-primary save" type="button"><span class="btn-in stack"><span class="lbl" data-for="idle">Save changes</span><span class="lbl" data-for="working"><svg class="i spin" aria-hidden="true"><use href="#i-spin"/></svg>Saving…</span></span></button>
+              <div><b>Default</b><small>Accent fill, 40px tall</small></div>
+            </div>
+            <div class="state">
+              <button class="btn btn-primary save is-hover" type="button"><span class="btn-in stack"><span class="lbl" data-for="idle">Save changes</span><span class="lbl" data-for="working"><svg class="i spin" aria-hidden="true"><use href="#i-spin"/></svg>Saving…</span></span></button>
+              <div><b>Hover</b><small>Hover token, 150ms fade</small></div>
+            </div>
+            <div class="state">
+              <button class="btn btn-primary save is-focus" type="button"><span class="btn-in stack"><span class="lbl" data-for="idle">Save changes</span><span class="lbl" data-for="working"><svg class="i spin" aria-hidden="true"><use href="#i-spin"/></svg>Saving…</span></span></button>
+              <div><b>Focus-visible</b><small>2px ring, 2px offset</small></div>
+            </div>
+            <div class="state">
+              <button class="btn btn-primary save is-pressed" type="button"><span class="btn-in stack"><span class="lbl" data-for="idle">Save changes</span><span class="lbl" data-for="working"><svg class="i spin" aria-hidden="true"><use href="#i-spin"/></svg>Saving…</span></span></button>
+              <div><b>Pressed</b><small>Deeper fill, label at 0.97</small></div>
+            </div>
+            <div class="state">
+              <button class="btn btn-primary save" type="button" aria-disabled="true" aria-describedby="save-why"><span class="btn-in stack"><span class="lbl" data-for="idle">Save changes</span><span class="lbl" data-for="working"><svg class="i spin" aria-hidden="true"><use href="#i-spin"/></svg>Saving…</span></span></button>
+              <div><b>Disabled</b><small id="save-why">Focusable, explains why</small></div>
+            </div>
+            <div class="state">
+              <button class="btn btn-primary save" type="button" aria-busy="true" aria-disabled="true"><span class="btn-in stack"><span class="lbl" data-for="idle">Save changes</span><span class="lbl" data-for="working"><svg class="i spin" aria-hidden="true"><use href="#i-spin"/></svg>Saving…</span></span></button>
+              <div><b>Loading</b><small>Spinner + verb, fixed</small></div>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>BTN-02</code> <code>BTN-10</code> <code>BTN-12</code> <code>ENG-03</code> <code>ENG-04</code> <code>FBK-01</code> <code>FBK-10</code> <code>MOT-04</code></p>
+      </section>
+
+      <!-- v3: async purchase with stable width -->
+      <section class="variant" aria-labelledby="v3-title">
+        <h2 class="variant-label" id="v3-title"><span class="v">v3</span> Async purchase, stable width</h2>
+        <div class="variant-stage">
+          <div class="stage-fill pay-grid">
+            <div class="seq" inert>
+              <div class="seq-step"><small><b>1 Idle</b> · amount in label</small>
+                <button class="btn btn-primary pay" type="button" data-state="idle"><span class="btn-in stack"><span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg>Pay <span class="num">$248.00</span></span><span class="lbl" data-for="working"><svg class="i spin" aria-hidden="true"><use href="#i-spin"/></svg>Processing…</span><span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Paid</span><span class="lbl" data-for="failed"><svg class="i" aria-hidden="true"><use href="#i-retry"/></svg>Try again</span></span></button></div>
+              <div class="seq-step"><small><b>2 Working</b> · aria-busy, locked</small>
+                <button class="btn btn-primary pay" type="button" data-state="working"><span class="btn-in stack"><span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg>Pay <span class="num">$248.00</span></span><span class="lbl" data-for="working"><svg class="i spin" aria-hidden="true"><use href="#i-spin"/></svg>Processing…</span><span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Paid</span><span class="lbl" data-for="failed"><svg class="i" aria-hidden="true"><use href="#i-retry"/></svg>Try again</span></span></button></div>
+              <div class="seq-step"><small><b>3 Done</b> · after the server says so</small>
+                <button class="btn btn-primary pay" type="button" data-state="done"><span class="btn-in stack"><span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg>Pay <span class="num">$248.00</span></span><span class="lbl" data-for="working"><svg class="i spin" aria-hidden="true"><use href="#i-spin"/></svg>Processing…</span><span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Paid</span><span class="lbl" data-for="failed"><svg class="i" aria-hidden="true"><use href="#i-retry"/></svg>Try again</span></span></button></div>
+              <div class="seq-step"><small><b>4 Failed</b> · red fill, retry</small>
+                <button class="btn btn-primary pay" type="button" data-state="failed"><span class="btn-in stack"><span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg>Pay <span class="num">$248.00</span></span><span class="lbl" data-for="working"><svg class="i spin" aria-hidden="true"><use href="#i-spin"/></svg>Processing…</span><span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Paid</span><span class="lbl" data-for="failed"><svg class="i" aria-hidden="true"><use href="#i-retry"/></svg>Try again</span></span></button></div>
+            </div>
+
+            <div class="card checkout">
+              <div class="co-head"><h3>Checkout</h3><span class="subtle num">Order #SL-1042</span></div>
+              <div class="co-lines">
+                <div><span>Trail pack, 2 items</span><span class="num">$230.00</span></div>
+                <div><span>Shipping</span><span class="num">$18.00</span></div>
+                <div class="co-total"><span>Total</span><span class="num">$248.00</span></div>
+              </div>
+              <p class="co-method"><svg class="i" aria-hidden="true"><use href="#i-card"/></svg>Card <span class="num">•••• 4821</span></p>
+              <button class="btn btn-primary btn-block pay" id="pay" type="button" data-state="idle" aria-describedby="pay-error">
+                <span class="btn-in stack">
+                  <span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg>Pay <span class="num">$248.00</span></span>
+                  <span class="lbl" data-for="working"><svg class="i spin" aria-hidden="true"><use href="#i-spin"/></svg>Processing…</span>
+                  <span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Paid</span>
+                  <span class="lbl" data-for="failed"><svg class="i" aria-hidden="true"><use href="#i-retry"/></svg>Try again</span>
+                </span>
+              </button>
+              <p class="inline-error" id="pay-error" hidden><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg><span>Card <span class="num">•••• 4821</span> was declined. Try again or use another card.</span></p>
+              <p class="visually-hidden" id="pay-live" role="status"></p>
+              <div class="demo-ctl">
+                <label><input type="checkbox" id="pay-decline">Demo: decline next payment</label>
+                <button class="link-btn" type="button" id="pay-reset">Reset demo</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>BTN-14</code> <code>FBK-10</code> <code>FBK-11</code> <code>ENG-02</code> <code>ENG-03</code> <code>COP-09</code> <code>COL-10</code> <code>COL-13</code></p>
+      </section>
+
+      <!-- v4: download with inline determinate progress -->
+      <section class="variant" aria-labelledby="v4-title">
+        <h2 class="variant-label" id="v4-title"><span class="v">v4</span> Download with inline progress</h2>
+        <div class="variant-stage">
+          <div class="stage-fill dl-list">
+            <div class="dl-row" id="dl-demo">
+              <span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg></span>
+              <div>
+                <p class="dl-name">Q3 revenue report.pdf</p>
+                <p class="dl-meta num" data-meta>PDF · 4.2 MB</p>
+              </div>
+              <div class="dl-actions">
+                <button class="icon-btn" type="button" data-cancel aria-label="Cancel download of Q3 revenue report.pdf" hidden><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+                <button class="btn btn-secondary dl-btn" type="button" data-state="idle" data-dl>
+                  <span class="dl-fill" aria-hidden="true"></span>
+                  <span class="btn-in stack">
+                    <span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Download</span>
+                    <span class="lbl num" data-for="working">Downloading <span class="pct" data-pct>0%</span></span>
+                    <span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-open"/></svg>Open file</span>
+                    <span class="lbl" data-for="failed"><svg class="i" aria-hidden="true"><use href="#i-retry"/></svg>Retry</span>
+                  </span>
+                </button>
+                <span class="visually-hidden" role="progressbar" aria-label="Q3 revenue report.pdf download" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-bar hidden></span>
+              </div>
+            </div>
+
+            <div class="dl-row" inert>
+              <span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-table"/></svg></span>
+              <div>
+                <p class="dl-name">Customer list export.csv</p>
+                <p class="dl-meta num">11.5 of 18.6 MB · about 6 s left</p>
+              </div>
+              <div class="dl-actions">
+                <button class="icon-btn" type="button" aria-label="Cancel download of Customer list export.csv"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+                <button class="btn btn-secondary dl-btn" type="button" data-state="working" aria-busy="true" style="--p: 0.62">
+                  <span class="dl-fill" aria-hidden="true"></span>
+                  <span class="btn-in stack">
+                    <span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Download</span>
+                    <span class="lbl num" data-for="working">Downloading <span class="pct">62%</span></span>
+                    <span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-open"/></svg>Open file</span>
+                    <span class="lbl" data-for="failed"><svg class="i" aria-hidden="true"><use href="#i-retry"/></svg>Retry</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div class="dl-row" inert>
+              <span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg></span>
+              <div>
+                <p class="dl-name">Brand guidelines.pdf</p>
+                <p class="dl-meta num"><span class="ok"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Downloaded</span> · 9.8 MB</p>
+              </div>
+              <div class="dl-actions">
+                <button class="btn btn-secondary dl-btn" type="button" data-state="done">
+                  <span class="dl-fill" aria-hidden="true"></span>
+                  <span class="btn-in stack">
+                    <span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Download</span>
+                    <span class="lbl num" data-for="working">Downloading <span class="pct">100%</span></span>
+                    <span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-open"/></svg>Open file</span>
+                    <span class="lbl" data-for="failed"><svg class="i" aria-hidden="true"><use href="#i-retry"/></svg>Retry</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div class="dl-row" inert>
+              <span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-image"/></svg></span>
+              <div>
+                <p class="dl-name">Field photos.zip</p>
+                <p class="dl-meta num"><span class="err"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>Stopped at 38%</span> · connection lost</p>
+              </div>
+              <div class="dl-actions">
+                <button class="btn btn-secondary dl-btn" type="button" data-state="failed">
+                  <span class="dl-fill" aria-hidden="true"></span>
+                  <span class="btn-in stack">
+                    <span class="lbl" data-for="idle"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Download</span>
+                    <span class="lbl num" data-for="working">Downloading <span class="pct">100%</span></span>
+                    <span class="lbl" data-for="done"><svg class="i" aria-hidden="true"><use href="#i-open"/></svg>Open file</span>
+                    <span class="lbl" data-for="failed"><svg class="i" aria-hidden="true"><use href="#i-retry"/></svg>Retry</span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FBK-02</code> <code>FBK-10</code> <code>FBK-12</code> <code>ENG-02</code> <code>ENG-03</code> <code>COP-09</code> <code>BTN-01</code> <code>ICO-04</code></p>
+      </section>
+
+      <!-- v5: destructive delete with an undo window -->
+      <section class="variant" aria-labelledby="v5-title">
+        <h2 class="variant-label" id="v5-title"><span class="v">v5</span> Delete with undo countdown</h2>
+        <div class="variant-stage del-stage">
+          <div class="files-card">
+            <div class="files-head"><h3>Launch assets</h3><p class="num" id="file-count">5 files</p></div>
+            <ul class="files-list" id="files">
+              <li class="file-row" data-name="launch-plan.pdf"><span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg></span><div><b>launch-plan.pdf</b><small>Edited today by Priya Nair</small></div><span class="file-size num">3.1 MB</span><button class="icon-btn del" type="button" aria-label="Delete launch-plan.pdf"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg></button></li>
+              <li class="file-row" data-name="brand-assets.zip" id="row-brand"><span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-folder"/></svg></span><div><b>brand-assets.zip</b><small>Edited 2 days ago by Leo Brandt</small></div><span class="file-size num">48.2 MB</span><button class="icon-btn del" type="button" aria-label="Delete brand-assets.zip"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg></button></li>
+              <li class="file-row" data-name="press-photos.zip"><span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-image"/></svg></span><div><b>press-photos.zip</b><small>Edited 4 days ago by Hana Kim</small></div><span class="file-size num">126 MB</span><button class="icon-btn del" type="button" aria-label="Delete press-photos.zip"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg></button></li>
+              <li class="file-row" data-name="launch-video.mp4"><span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-play"/></svg></span><div><b>launch-video.mp4</b><small>Edited 5 days ago by Mateo Silva</small></div><span class="file-size num">214 MB</span><button class="icon-btn del" type="button" aria-label="Delete launch-video.mp4"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg></button></li>
+              <li class="file-row" data-name="color-tokens.json"><span class="file-ic"><svg class="i" aria-hidden="true"><use href="#i-code"/></svg></span><div><b>color-tokens.json</b><small>Edited last week by Owen Clarke</small></div><span class="file-size num">12 KB</span><button class="icon-btn del" type="button" aria-label="Delete color-tokens.json"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg></button></li>
+            </ul>
+          </div>
+          <p class="visually-hidden" id="del-live" role="status"></p>
+          <div class="toast-dock">
+            <div class="toast" id="undo-toast" data-theme="dark" data-open="false">
+              <span class="ring" aria-hidden="true"><svg viewBox="0 0 32 32"><circle class="ring-track" cx="16" cy="16" r="13"/><circle class="ring-bar" id="ring-bar" cx="16" cy="16" r="13" pathLength="1"/></svg><span class="ring-n num" id="ring-n">8</span></span>
+              <p>Deleted <b id="undo-name">brand-assets.zip</b></p>
+              <button class="btn btn-ghost btn-undo" type="button" id="undo-btn"><span class="btn-in"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg>Undo</span></button>
+              <button class="icon-btn" type="button" id="undo-close" aria-label="Dismiss"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FBK-15</code> <code>FBK-04</code> <code>FBK-08</code> <code>ENG-09</code> <code>ICO-04</code> <code>ICO-07</code> <code>COP-04</code> <code>MOT-01</code></p>
+      </section>
+
+      <!-- v6: icon buttons with tooltips, split button and provider buttons -->
+      <section class="variant" aria-labelledby="v6-title">
+        <h2 class="variant-label" id="v6-title"><span class="v">v6</span> Icon, split and provider buttons</h2>
+        <div class="variant-stage">
+          <div class="stage-fill v6-grid">
+            <div class="panel">
+              <p class="panel-title">Icon buttons with tooltips</p>
+              <div class="toolbar" role="toolbar" aria-label="Report actions">
+                <span class="tip-wrap"><button class="icon-btn" type="button" aria-label="Undo" aria-keyshortcuts="Meta+Z"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg></button><span class="tip" aria-hidden="true">Undo <kbd>⌘Z</kbd></span></span>
+                <span class="tip-wrap"><button class="icon-btn" type="button" aria-label="Redo" aria-keyshortcuts="Meta+Shift+Z"><svg class="i" aria-hidden="true"><use href="#i-redo"/></svg></button><span class="tip" aria-hidden="true">Redo <kbd>⇧⌘Z</kbd></span></span>
+                <span class="sep" aria-hidden="true"></span>
+                <span class="tip-wrap tip-open"><button class="icon-btn" type="button" aria-label="Add comment" aria-keyshortcuts="Meta+Alt+M"><svg class="i" aria-hidden="true"><use href="#i-comment"/></svg></button><span class="tip" aria-hidden="true">Add comment <kbd>⌥⌘M</kbd></span></span>
+                <span class="tip-wrap"><button class="icon-btn" type="button" aria-label="Share"><svg class="i" aria-hidden="true"><use href="#i-share"/></svg></button><span class="tip" aria-hidden="true">Share</span></span>
+                <span class="tip-wrap"><button class="icon-btn" type="button" aria-label="More actions"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg></button><span class="tip" aria-hidden="true">More actions</span></span>
+              </div>
+              <div class="split-row">
+                <p class="panel-title">Split button</p>
+                <div class="split">
+                  <button class="btn btn-secondary btn-main" type="button"><span class="btn-in"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Export CSV</span></button>
+                  <button class="btn btn-secondary btn-more" type="button" id="split-toggle" aria-label="More export formats" aria-expanded="true" aria-controls="split-menu"><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></button>
+                  <ul class="split-menu" id="split-menu">
+                    <li><button type="button"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg>Export PDF<small>Print-ready</small></button></li>
+                    <li><button type="button"><svg class="i" aria-hidden="true"><use href="#i-table"/></svg>Export spreadsheet</button></li>
+                    <li><button type="button"><svg class="i" aria-hidden="true"><use href="#i-clock"/></svg>Schedule export…</button></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel signin">
+              <h3>Sign in to Sora Analytics</h3>
+              <p>Use your work email or your company login.</p>
+              <div class="stack-v">
+                <button class="btn btn-primary btn-block" type="button"><span class="btn-in"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg>Continue with email</span></button>
+                <p class="or">or</p>
+                <button class="btn btn-secondary btn-block provider" type="button"><span class="btn-in"><svg class="i" aria-hidden="true"><use href="#i-building"/></svg>Continue with SSO</span></button>
+                <button class="btn btn-secondary btn-block provider" type="button"><span class="btn-in"><svg class="i" aria-hidden="true"><use href="#i-key"/></svg>Continue with passkey</span></button>
+              </div>
+              <p class="signin-foot">New to Sora? <a href="#">Create an account</a></p>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>ICO-04</code> <code>CMP-11</code> <code>BTN-09</code> <code>BTN-13</code> <code>BTN-01</code> <code>BTN-08</code> <code>ENG-01</code> <code>MOB-01</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // ENG-02, FBK-10, FBK-11: one data-state drives the pay button; the verdict waits for the real result.
+    (() => {
+      const pay = document.getElementById("pay");
+      const live = document.getElementById("pay-live");
+      const error = document.getElementById("pay-error");
+      const decline = document.getElementById("pay-decline");
+      const allowed = { idle: ["working"], working: ["done", "failed"], failed: ["working"], done: ["idle"] };
+      const said = { idle: "", working: "Processing payment", done: "Paid $248.00", failed: "Payment declined. Try again or use another card." };
+
+      function setState(next) {
+        if (!allowed[pay.dataset.state].includes(next)) return false;
+        pay.dataset.state = next;
+        pay.setAttribute("aria-busy", String(next === "working"));
+        pay.setAttribute("aria-disabled", String(next === "working" || next === "done"));
+        error.hidden = next !== "failed";
+        live.textContent = said[next];
+        return true;
+      }
+
+      // Example only: replace with a request to your API.
+      const charge = () => new Promise((resolve, reject) =>
+        setTimeout(() => (decline.checked ? reject(new Error("declined")) : resolve()), 1400));
+
+      pay.addEventListener("click", async () => {
+        if (!setState("working")) return; // ignore presses the current state does not allow
+        try { await charge(); setState("done"); } catch { setState("failed"); }
+      });
+      document.getElementById("pay-reset").addEventListener("click", () => {
+        if (pay.dataset.state === "done") setState("idle");
+        if (pay.dataset.state === "failed") { pay.dataset.state = "idle"; error.hidden = true; pay.setAttribute("aria-disabled", "false"); }
+      });
+    })();
+
+    // ENG-02, FBK-12, COP-09: download button with honest, monotonic progress and Cancel.
+    (() => {
+      const row = document.getElementById("dl-demo");
+      const btn = row.querySelector("[data-dl]");
+      const cancel = row.querySelector("[data-cancel]");
+      const pct = row.querySelector("[data-pct]");
+      const bar = row.querySelector("[data-bar]");
+      const meta = row.querySelector("[data-meta]");
+      const total = 4.2;
+      let controller = null;
+
+      function render(state, p = 0) {
+        btn.dataset.state = state;
+        btn.style.setProperty("--p", p);
+        btn.setAttribute("aria-busy", String(state === "working"));
+        cancel.hidden = bar.hidden = state !== "working";
+        const percent = Math.floor(p * 100);
+        pct.textContent = percent + "%";
+        bar.setAttribute("aria-valuenow", percent);
+        meta.innerHTML = state === "working" ? `${(p * total).toFixed(1)} of ${total} MB`
+          : state === "done" ? '<span class="ok"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Downloaded</span> · 4.2 MB'
+          : "PDF · 4.2 MB";
+      }
+
+      // Example only: replace with a request to your API, reading response.body.getReader() chunks against Content-Length.
+      async function fetchFile(onProgress, signal) {
+        let loaded = 0;
+        while (loaded < 1) {
+          await new Promise((r) => setTimeout(r, 140));
+          if (signal.aborted) throw new DOMException("Cancelled", "AbortError");
+          loaded = Math.min(1, loaded + 0.05 + Math.random() * 0.07);
+          onProgress(loaded);
+        }
+      }
+
+      btn.addEventListener("click", async () => {
+        if (btn.dataset.state === "done") return; // Example only: open the saved file here.
+        if (!["idle", "failed"].includes(btn.dataset.state)) return; // ENG-02: ignore presses mid-flight
+        controller = new AbortController();
+        render("working", 0);
+        try {
+          await fetchFile((p) => render("working", p), controller.signal);
+          render("done", 1);
+        } catch (err) { render(err.name === "AbortError" ? "idle" : "failed"); btn.focus(); }
+      });
+      cancel.addEventListener("click", () => controller && controller.abort());
+    })();
+
+    // FBK-15, ENG-09: delete at once, keep an Undo window whose countdown is scheduled against real time.
+    (() => {
+      const WINDOW = 8000;
+      const list = document.getElementById("files");
+      const count = document.getElementById("file-count");
+      const toast = document.getElementById("undo-toast");
+      const ringBar = document.getElementById("ring-bar");
+      const ringN = document.getElementById("ring-n");
+      const nameEl = document.getElementById("undo-name");
+      const live = document.getElementById("del-live");
+      let pending = null; // { row, next, deadline, left, timer }
+
+      const updateCount = () => { const n = list.children.length; count.textContent = n + (n === 1 ? " file" : " files"); };
+
+      function tick() {
+        if (!pending || pending.left != null) return;
+        const left = pending.deadline - Date.now();
+        if (left <= 0) return commit();
+        ringN.textContent = Math.ceil(left / 1000);
+        ringBar.style.setProperty("--elapsed", (1 - left / WINDOW).toFixed(3));
+        pending.timer = setTimeout(tick, left % 1000 || 1000);
+      }
+
+      function remove(row, windowMs = WINDOW) {
+        if (pending) commit();
+        const hadFocus = row.contains(document.activeElement);
+        const focusNext = row.nextElementSibling || row.previousElementSibling;
+        pending = { row, next: row.nextElementSibling, deadline: Date.now() + windowMs, left: null };
+        row.remove();
+        updateCount();
+        nameEl.textContent = row.dataset.name;
+        toast.dataset.open = "true";
+        live.textContent = `Deleted ${row.dataset.name}. Undo is available for ${WINDOW / 1000} seconds.`;
+        if (hadFocus && focusNext) focusNext.querySelector("button").focus(); // keep focus in the list
+        tick();
+      }
+
+      function close() { clearTimeout(pending.timer); pending = null; toast.dataset.open = "false"; }
+      function commit() {
+        // Example only: replace with a request to your API that deletes pending.row.dataset.name.
+        close();
+      }
+      function undo() {
+        if (!pending) return;
+        const { row, next } = pending;
+        list.insertBefore(row, next && next.parentNode === list ? next : null); // restore at original position
+        updateCount();
+        live.textContent = `Restored ${row.dataset.name}`;
+        close();
+        row.querySelector("button").focus();
+      }
+
+      list.addEventListener("click", (e) => { const b = e.target.closest(".del"); if (b) remove(b.closest("li")); });
+      document.getElementById("undo-btn").addEventListener("click", undo);
+      document.getElementById("undo-close").addEventListener("click", () => pending && commit());
+      // Pause the countdown while the toast is hovered or focused (FBK-04)
+      const pause = () => { if (pending && pending.left == null) { clearTimeout(pending.timer); pending.left = pending.deadline - Date.now(); } };
+      const resume = () => { if (pending && pending.left != null && !toast.matches(":hover, :focus-within")) { pending.deadline = Date.now() + pending.left; pending.left = null; tick(); } };
+      toast.addEventListener("pointerenter", pause); toast.addEventListener("focusin", pause);
+      toast.addEventListener("pointerleave", resume); toast.addEventListener("focusout", () => setTimeout(resume));
+
+      // The sheet opens mid-way through an undo window so the countdown is visible.
+      remove(document.getElementById("row-brand"), 5000);
+    })();
+
+    // ENG-01: split button menu as a simple disclosure (Escape and outside click close it).
+    (() => {
+      const toggle = document.getElementById("split-toggle");
+      const menu = document.getElementById("split-menu");
+      const set = (open) => { toggle.setAttribute("aria-expanded", String(open)); menu.hidden = !open; };
+      toggle.addEventListener("click", () => set(toggle.getAttribute("aria-expanded") !== "true"));
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !menu.hidden) { set(false); toggle.focus(); } });
+      document.addEventListener("click", (e) => { if (!e.target.closest(".split")) set(false); });
+    })();
+  </script>
+</body>
+</html>

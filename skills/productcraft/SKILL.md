@@ -4,7 +4,7 @@ description: Sora Labs app-building and hardening skill with one router over tas
 license: MIT
 metadata:
   author: Sora Labs
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # ProductCraft: one skill, purpose-built modules
@@ -17,7 +17,7 @@ metadata:
 |---|---|---|
 | New UI, redesign, clean up AI-looking frontend | `modules/ui-distiller/GUIDE.md`; `modules/ui-distiller/references/design-rules.md`; `modules/product-design.md`; `modules/ui-rules.md` | Find the job-to-be-done; restructure priorities; edit layout/tokens; verify real screenshots |
 | Buttons, controls, motion, feedback, toasts, modals | `modules/interaction-feedback.md` | Implement honest states, keyboard, reduced motion, recovery |
-| Screen-level visual details: spacing, type, color, dark mode, buttons, form fields, navigation, icons, microcopy, settings, dashboards | `modules/ui-rules.md`, then only the matching `references/ui-rules/<category>.md` files | Apply the matching rules through the project's own tokens and components; cite rule IDs |
+| Screen-level visual details: spacing, type, color, dark mode, buttons, form fields, navigation, icons, microcopy, settings, dashboards | `modules/ui-rules.md`, then only the matching `references/ui-rules/<category>.md` files; for a matching surface, the page listed in `examples/README.md` | Apply the matching rules through the project's own tokens and components; cite rule IDs |
 | Forms, signup, OTP, checkout, search, password input | `modules/forms-conversion.md` | Validate at usable moments, clarify errors, preserve data and secure boundaries |
 | Data-heavy tools, tables, calendars, Kanban, chat, uploads, command palettes | `modules/data-and-product-surfaces.md` | Implement domain-specific layouts and interaction guarantees |
 | Mobile responsiveness or translation/RTL | `modules/responsive-accessibility.md` | Test target sizes, sheets, focus, text expansion, semantics |
@@ -59,6 +59,7 @@ metadata:
 - `references/pattern-index.json`: machine-readable pattern index.
 - `modules/language-choice.md`: when and how to offer Rust, the trade-offs to state, and what to do with either answer.
 - `modules/ui-rules.md` and `references/ui-rules/`: UI rulebook with IDs (for example `BTN-02`), one file per category; `references/ui-rules-index.json` is its machine-readable index.
+- `examples/`: original reference screens (dashboards, auth, settings, navigation, charts, cards, forms, feedback, commerce, pricing, mobile, messaging, onboarding, brand) in self-contained HTML that cites rule IDs; `examples/README.md` is the index. Reference code to adapt, not a theme to copy.
 - `assets/review-template.md`: implementation evidence summary template.
 
 ## Execution priority when several modules apply

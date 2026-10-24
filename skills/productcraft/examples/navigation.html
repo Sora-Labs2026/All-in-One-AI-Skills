@@ -1,0 +1,993 @@
+<!doctype html>
+<!-- ProductCraft example: navigation. Original Sora Labs example, MIT License.
+     Demonstrates: NAV-01, NAV-02, NAV-03, NAV-04, NAV-05, NAV-06, NAV-08, NAV-09, NAV-10, NAV-12, NAV-13,
+     NAV-14, NAV-15, NAV-17, ICO-01, ICO-03, ICO-04, CMP-11, BTN-01, BTN-09, COL-07, DRK-09, ENG-05,
+     LAY-01, TYP-09 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440,focus=#tb-b-q">
+  <title>ProductCraft example: Navigation</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    /* ---------- Sheet grid: 12 columns so sidebars and wide bars get the room they need ---------- */
+    .nav-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .span-4 { grid-column: span 4; }
+    .span-5 { grid-column: span 5; }
+    .span-7 { grid-column: span 7; }
+    .span-8 { grid-column: span 8; }
+    .span-12 { grid-column: 1 / -1; }
+    .nav-grid .variant-stage { flex: 1; }
+    /* A themed stage must re-read the text token, or children inherit the light body color */
+    .variant-stage[data-theme="dark"] { color: var(--text); }
+
+    /* One icon family: 24px grid, 1.75 stroke, round caps (ICO-01) */
+    .i {
+      width: 20px; height: 20px; flex: none;
+      fill: none; stroke: currentColor; stroke-width: 1.75;
+      stroke-linecap: round; stroke-linejoin: round;
+    }
+    .logo { width: 28px; height: 28px; flex: none; }
+    .logo .bg { fill: var(--accent); }
+    .logo .fg { fill: none; stroke: var(--on-accent); stroke-width: 2.4; stroke-linecap: round; }
+    .logo .dot { fill: var(--on-accent); }
+
+    kbd {
+      display: inline-grid; place-items: center;
+      min-width: 22px; height: 20px; padding: 0 6px;
+      border: 1px solid var(--border); border-radius: 6px;
+      background: var(--surface); color: var(--text-3);
+      font: 600 var(--text-xs)/1 var(--font);
+    }
+
+    /* Tooltip: shown on hover and keyboard focus; its text is the control's accessible name (CMP-11, ICO-04) */
+    .tip,
+    .sb[data-collapsed="true"] .sb-text {
+      position: absolute; z-index: 10;
+      left: calc(100% + 12px); top: 50%;
+      transform: translate(-4px, -50%);
+      padding: var(--space-1) var(--space-2);
+      border-radius: 6px;
+      background: var(--text); color: var(--surface);
+      font-size: var(--text-sm); font-weight: 600; line-height: 20px; white-space: nowrap;
+      box-shadow: var(--shadow-lg);
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+    }
+    .tip.below { left: 50%; top: calc(100% + 8px); transform: translate(-50%, -4px); }
+    :is(button, a):is(:hover, :focus-visible) > .tip,
+    .sb[data-collapsed="true"] :is(.sb-link, .sb-ws, .sb-account):is(:hover, :focus-visible) .sb-text,
+    .sb[data-collapsed="true"] .tip-demo .sb-text { opacity: 1; transform: translate(0, -50%); }
+    :is(button, a):is(:hover, :focus-visible) > .tip.below { transform: translate(-50%, 0); }
+
+    /* ---------- App frame used by v1 and v2 ---------- */
+    .app {
+      display: flex; width: 100%; height: 720px;
+      background: var(--bg);
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+    }
+    .app-main {
+      flex: 1; min-width: 0; overflow: hidden;
+      display: flex; flex-direction: column; gap: var(--space-4);
+      padding: var(--space-5);
+      border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+    }
+    .pg-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+    .pg-title { font-size: var(--text-xl); font-weight: 700; line-height: 1.25; }
+    .pg-head .subtle { margin-top: var(--space-1); }
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: var(--space-3); }
+    .kpi { padding: var(--space-4); }
+    .kpi-label { font-size: var(--text-sm); color: var(--text-2); }
+    .kpi-value { font-size: var(--text-xl); font-weight: 700; line-height: 1.3; margin: var(--space-1) 0; }
+    .kpi .delta { flex-wrap: wrap; column-gap: var(--space-1); }
+    .kpi .delta span { color: var(--text-2); font-weight: 500; white-space: nowrap; }
+    .toplist { padding: var(--space-4) var(--space-4) var(--space-2); }
+    .toplist ol { list-style: none; margin: var(--space-3) 0 0; padding: 0; }
+    .toplist li {
+      display: flex; justify-content: space-between; gap: var(--space-3);
+      padding: var(--space-3) 0; border-top: 1px solid var(--border); font-size: var(--text-sm);
+    }
+    .toplist li span:first-child { color: var(--text); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .toplist li span:last-child { color: var(--text-2); }
+
+    /* ---------- Sidebar (NAV-08): logo + toggle, workspace, search, labeled sections, settings, account ---------- */
+    .sb {
+      position: relative; z-index: 2;
+      width: 248px; flex: none;
+      display: flex; flex-direction: column; gap: var(--space-3);
+      padding: var(--space-3);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    }
+    .sb.standalone { height: 720px; border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
+    .sb-top { display: flex; align-items: center; justify-content: space-between; min-height: 40px; padding-left: var(--space-1); }
+    .sb-logo { display: flex; align-items: center; gap: var(--space-2); color: var(--text); font-size: var(--text-lg); font-weight: 700; }
+    .sb-logo:hover { text-decoration: none; }
+    .sb-toggle { position: relative; }
+
+    .sb-ws, .sb-account {
+      position: relative;
+      display: flex; align-items: center; gap: var(--space-3);
+      width: 100%; padding: var(--space-2);
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      background: var(--surface); text-align: left; cursor: pointer;
+    }
+    .sb-ws:hover, .sb-account:hover { background: var(--surface-2); }
+    .sb-ws .sb-text, .sb-account .sb-text { flex: 1; min-width: 0; }
+    .sb-ws strong, .sb-account strong { display: block; font-size: var(--text-sm); font-weight: 600; line-height: 1.35; }
+    .sb-ws small, .sb-account small { display: block; font-size: var(--text-xs); color: var(--text-3); line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sb-ws > .i, .sb-account > .i { width: 16px; height: 16px; color: var(--text-3); }
+    .ws-tile {
+      display: grid; place-items: center; flex: none;
+      width: 32px; height: 32px; border-radius: var(--radius-sm);
+      /* White on both gradient stops is above 5:1 (COL-11) */
+      background: linear-gradient(135deg, #0f766e, #4f46e5);
+      color: #ffffff; font-size: var(--text-sm); font-weight: 700;
+    }
+    .ws-tile.pay { background: linear-gradient(135deg, #4338ca, #7c3aed); }
+
+    .sb-search { position: relative; }
+    .sb-search > .i { position: absolute; left: 10px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+    .sb-search input {
+      width: 100%; height: 36px; padding: 0 var(--space-7) 0 34px;
+      border: 1px solid transparent; border-radius: var(--radius-sm);
+      background: var(--surface-2); font-size: var(--text-sm);
+    }
+    .sb-search input::placeholder { color: var(--text-3); }
+    .sb-search kbd { position: absolute; right: var(--space-2); top: 50%; transform: translateY(-50%); }
+    .sb .sb-search-btn { display: none; }
+    .sb-jump {
+      display: flex; align-items: center; gap: var(--space-2);
+      width: 100%; height: 36px; padding: 0 var(--space-2) 0 10px;
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: var(--surface-2); color: var(--text-3); font-size: var(--text-sm); cursor: pointer;
+    }
+    .sb-jump .i { width: 18px; height: 18px; }
+    .sb-jump kbd { margin-left: auto; }
+
+    .sb-nav { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: var(--space-4); }
+    .sb-nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+    .sb-label { padding: 0 10px; margin-bottom: var(--space-1); font-size: var(--text-xs); font-weight: 600; line-height: 20px; color: var(--text-3); }
+    .sb-end { margin-top: auto; }
+
+    .sb-link {
+      position: relative;
+      display: flex; align-items: center; gap: var(--space-3);
+      width: 100%; min-height: 36px; padding: 0 10px;
+      border: 0; border-radius: var(--radius-sm);
+      background: transparent; color: var(--text-2);
+      font-size: var(--text-md); font-weight: 500; text-align: left; cursor: pointer;
+    }
+    .sb-link .i { color: var(--text-3); }
+    /* Hover is neutral; active is tinted, bold and accent-colored, so the two never look alike (NAV-03, NAV-14) */
+    .sb-link:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    .sb-link[aria-current="page"] { background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; }
+    .sb-link[aria-current="page"] .i { color: var(--accent-ink); }
+    .count {
+      margin-left: auto; min-width: 22px; padding: 0 6px;
+      border-radius: var(--radius-pill);
+      background: var(--neutral-soft); color: var(--text-2);
+      font-size: var(--text-xs); font-weight: 600; line-height: 20px; text-align: center;
+    }
+    .sb-link:hover .count { background: var(--surface); }
+    .sb-caret { margin-left: auto; width: 16px !important; height: 16px !important; transition: transform var(--dur-fast) var(--ease-out); }
+    .sb-link[aria-expanded="false"] .sb-caret { transform: rotate(-90deg); }
+
+    /* Second level, connected by a thin guide line aligned to the parent icon (NAV-09) */
+    .sb-nav .sb-sub { position: relative; margin: 2px 0 var(--space-1) 19px; padding-left: var(--space-3); }
+    .sb-sub::before { content: ""; position: absolute; left: 0; top: var(--space-1); bottom: var(--space-1); width: 1px; background: var(--border); }
+    .sb-sub .sb-link { min-height: 32px; padding-left: var(--space-2); font-size: var(--text-sm); }
+    .sb-sub[hidden] { display: none; }
+    .swatch { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+
+    .sb-promo {
+      position: relative;
+      padding: var(--space-4);
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      background: var(--surface-2);
+    }
+    .sb-promo h3 { font-size: var(--text-sm); }
+    .sb-promo p { margin-top: var(--space-1); font-size: var(--text-xs); color: var(--text-2); }
+    .sb-promo .close { position: absolute; top: var(--space-2); right: var(--space-2); width: 32px; height: 32px; }
+    .sb-promo .close .i { width: 16px; height: 16px; }
+    .meter { height: 6px; margin: var(--space-3) 0; border-radius: var(--radius-pill); background: var(--neutral-soft); overflow: hidden; }
+    .meter span { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+    .btn-sm { min-height: 32px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+
+    /* ---------- Collapsed rail (NAV-13): 72px, same items, tooltips, kept active state and counts ---------- */
+    .sb[data-collapsed="true"] { width: 72px; padding: var(--space-3) var(--space-4); }
+    .sb[data-collapsed="true"] .sb-top { flex-direction: column; gap: var(--space-2); padding-left: 0; }
+    .sb[data-collapsed="true"] .sb-hide,
+    .sb[data-collapsed="true"] .sb-search,
+    .sb[data-collapsed="true"] .sb-sub,
+    .sb[data-collapsed="true"] .sb-caret,
+    .sb[data-collapsed="true"] .sb-promo,
+    .sb[data-collapsed="true"] .sb-ws > .i,
+    .sb[data-collapsed="true"] .sb-account > .i { display: none; }
+    .sb[data-collapsed="true"] .sb-search-btn { display: flex; }
+    .sb[data-collapsed="true"] :is(.sb-link, .sb-ws, .sb-account) {
+      justify-content: center; width: 40px; min-height: 40px; padding: 0; margin: 0 auto;
+    }
+    .sb[data-collapsed="true"] :is(.sb-ws, .sb-account) { border-color: transparent; }
+    .sb[data-collapsed="true"] .sb-label { height: 1px; margin: 0 var(--space-2) var(--space-2); padding: 0; font-size: 0; background: var(--border); }
+    .sb[data-collapsed="true"] .count {
+      position: absolute; top: 0; right: -4px;
+      min-width: 18px; padding: 0 5px; line-height: 18px;
+      background: var(--accent); color: var(--on-accent);
+      box-shadow: 0 0 0 2px var(--surface);
+    }
+    .sb[data-collapsed="true"] .sb-nav { gap: var(--space-2); }
+    .sb[data-collapsed="true"] .sb-nav ul { gap: var(--space-1); }
+
+    /* ---------- v3 top bar ---------- */
+    .topbars { width: 100%; display: grid; gap: var(--space-5); }
+    .state-tag { display: block; margin-bottom: var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .tb {
+      position: relative;
+      display: flex; align-items: center; gap: var(--space-6);
+      height: 64px; padding: 0 var(--space-4) 0 var(--space-5);
+      background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+    .tb-links { display: flex; align-items: center; gap: var(--space-1); height: 100%; list-style: none; margin: 0; padding: 0; }
+    .tb-links > li { position: relative; }
+    .tb-link {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 40px; padding: 0 var(--space-3);
+      border: 0; border-radius: var(--radius-sm);
+      background: transparent; color: var(--text-2);
+      font-size: var(--text-md); font-weight: 500; cursor: pointer;
+    }
+    .tb-link:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    /* Reserve the bold width so the active label never shifts its neighbors */
+    .lbl { display: inline-grid; }
+    .lbl::after { content: attr(data-text); height: 0; overflow: hidden; visibility: hidden; font-weight: 600; }
+    .tb-link[aria-current="page"] { color: var(--text); font-weight: 600; }
+    .tb-link[aria-current="page"]::after {
+      content: ""; position: absolute; left: var(--space-3); right: var(--space-3); bottom: -11px;
+      height: 2px; border-radius: 2px 2px 0 0; background: var(--accent);
+    }
+    .tb-link .i { width: 16px; height: 16px; color: var(--text-3); transition: transform var(--dur-fast) var(--ease-out); }
+    .tb-link[aria-expanded="true"] { background: var(--surface-2); color: var(--text); }
+    .tb-link[aria-expanded="true"] .i { transform: rotate(180deg); }
+
+    .tb-menu {
+      position: absolute; z-index: 5; top: calc(100% + 12px); left: 0;
+      width: 600px; padding: var(--space-2);
+      display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-1);
+      list-style: none; margin: 0;
+      background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+    }
+    .tb-menu[hidden] { display: none; }
+    .menu-item { display: flex; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-sm); color: var(--text); }
+    .menu-item:hover { background: var(--surface-2); text-decoration: none; }
+    .menu-icon { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--accent-ink); }
+    .menu-item strong { display: block; font-size: var(--text-sm); font-weight: 600; }
+    .menu-item small { display: block; font-size: var(--text-xs); color: var(--text-2); }
+    .menu-foot { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; margin-top: var(--space-1); padding: var(--space-3); border-radius: var(--radius-sm); background: var(--surface-2); font-size: var(--text-sm); color: var(--text-2); }
+    .menu-foot a { font-weight: 600; }
+
+    .tb-actions { margin-left: auto; display: flex; align-items: center; gap: var(--space-2); }
+    .tb-actions .icon-btn { position: relative; }
+    .badge {
+      position: absolute; top: 4px; right: 4px;
+      min-width: 16px; padding: 0 4px; border-radius: var(--radius-pill);
+      background: var(--danger); color: #ffffff; box-shadow: 0 0 0 2px var(--surface);
+      font-size: 11px; font-weight: 700; line-height: 16px; text-align: center;
+    }
+    .search-trigger {
+      position: relative;
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      height: 40px; padding: 0 var(--space-2) 0 10px;
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: var(--surface); color: var(--text-2); cursor: pointer;
+    }
+    .search-trigger:hover { background: var(--surface-2); color: var(--text); }
+    .search-trigger[hidden] { display: none; }
+    .tb-search {
+      position: relative;
+      display: flex; align-items: center; gap: var(--space-2);
+      width: 340px; height: 40px; padding: 0 var(--space-1) 0 10px;
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: var(--surface);
+      transform-origin: right center;
+      animation: search-in 220ms var(--ease-out);
+    }
+    .tb-search[hidden] { display: none; }
+    .tb-search > .i { color: var(--text-3); width: 18px; height: 18px; }
+    .tb-search input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; font-size: var(--text-sm); outline: none; }
+    .tb-search input::-webkit-search-cancel-button { appearance: none; }
+    .tb-search input::placeholder { color: var(--text-3); }
+    .tb-search .clear { width: 32px; height: 32px; }
+    .tb-search .clear .i { width: 16px; height: 16px; }
+    /* The field takes focus, so the ring lives on the wrapper instead of the bare input */
+    .tb-search:focus-within { border-color: var(--accent); outline: 2px solid var(--focus); outline-offset: 2px; }
+    @keyframes search-in { from { opacity: 0; transform: translateX(8px); } }
+    .avatar-btn { position: relative; display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; }
+
+    /* ---------- v5 in-page navigation set ---------- */
+    .page-card {
+      width: 100%;
+      padding: var(--space-5) var(--space-5) var(--space-4);
+      background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+    .crumbs ol { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); list-style: none; margin: 0; padding: 0; font-size: var(--text-sm); }
+    .crumbs li { display: flex; align-items: center; gap: var(--space-1); }
+    .crumbs a { padding: var(--space-1) 6px; margin: 0 -6px; border-radius: 6px; color: var(--text-2); }
+    .crumbs a:hover { color: var(--text); background: var(--surface-2); text-decoration: none; }
+    .crumbs li + li a { margin-left: 0; }
+    .crumbs .sep { width: 16px; height: 16px; color: var(--text-3); }
+    .crumbs [aria-current="page"] { padding: var(--space-1) 6px; color: var(--text); font-weight: 600; }
+    .rep-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-4); }
+    .rep-head h2 { font-size: var(--text-xl); font-weight: 700; }
+    .rep-head p { margin-top: var(--space-1); color: var(--text-2); font-size: var(--text-sm); }
+
+    .tabs { display: flex; gap: var(--space-5); margin-top: var(--space-4); border-bottom: 1px solid var(--border); }
+    .tab {
+      position: relative;
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      height: 44px; padding: 0; border: 0; background: none;
+      color: var(--text-2); font-size: var(--text-md); font-weight: 500; cursor: pointer;
+    }
+    .tab:hover { color: var(--text); }
+    .tab[aria-selected="true"] { color: var(--text); font-weight: 600; }
+    .tab[aria-selected="true"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; border-radius: 2px 2px 0 0; background: var(--accent); }
+    .tab .count { margin: 0; font-weight: 600; }
+    .tab[aria-selected="true"] .count { background: var(--accent-soft); color: var(--accent-ink); }
+    .panel { padding-top: var(--space-2); }
+    .panel[hidden] { display: none; }
+    .panel-note { padding: var(--space-5) 0; color: var(--text-2); }
+
+    .tx { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    .tx th { padding: var(--space-3); border-bottom: 1px solid var(--border); text-align: left; font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .tx td { padding: 10px var(--space-3); border-bottom: 1px solid var(--border); color: var(--text-2); vertical-align: middle; }
+    .tx th:first-child, .tx td:first-child { padding-left: 0; }
+    .tx th:last-child, .tx td:last-child { padding-right: 0; text-align: right; }
+    .tx td:first-child { color: var(--text); font-weight: 600; }
+    .tx td:last-child { color: var(--text); font-weight: 600; }
+    .who { display: flex; align-items: center; gap: var(--space-2); color: var(--text); }
+    .who .avatar { width: 24px; height: 24px; font-size: 10px; }
+
+    .pager { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-top: var(--space-4); }
+    .pager p { font-size: var(--text-sm); color: var(--text-2); }
+    .pager ul { display: flex; align-items: center; gap: var(--space-1); list-style: none; margin: 0; padding: 0; }
+    .pg {
+      display: inline-flex; align-items: center; justify-content: center; gap: var(--space-1);
+      min-width: 36px; height: 36px; padding: 0 var(--space-2);
+      border-radius: var(--radius-sm); color: var(--text-2);
+      font-size: var(--text-sm); font-weight: 600;
+    }
+    .pg:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    .pg[aria-current="page"] { background: var(--accent-soft); color: var(--accent-ink); box-shadow: inset 0 0 0 1px var(--accent); }
+    .pg-step { border: 1px solid var(--border); padding: 0 var(--space-3); }
+    .pg-step .i { width: 16px; height: 16px; }
+    .pg-gap { display: inline-grid; place-items: center; min-width: 24px; color: var(--text-3); }
+  </style>
+</head>
+<body>
+  <!-- Icon sprite: one outline family, referenced with <use> (ICO-01) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></symbol>
+    <symbol id="i-inbox" viewBox="0 0 24 24"><path d="M4 13h4l1.5 3h5l1.5-3h4"/><path d="M6.2 5.5h11.6L20 13v5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18v-5z"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 16.5v-5"/><path d="M12 16.5V7"/><path d="M17 16.5v-8"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4l2 2h8a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5z"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.5"/><path d="M3 19.5c.8-3 3.2-4.5 6-4.5s5.2 1.5 6 4.5"/><path d="M16 5.2a3.5 3.5 0 0 1 0 6.6"/><path d="M18 15.3c1.4.6 2.5 1.9 3 4.2"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M7 3.5h7l4.5 4.5v11A1.5 1.5 0 0 1 17 20.5H7A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z"/><path d="M14 3.5V8h4.5"/><path d="M9 13h6M9 16.5h4"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M7 4h10a1 1 0 0 1 1 1v15l-6-4-6 4V5a1 1 0 0 1 1-1z"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><path d="M10.2 5.7L10.5 3.2L13.5 3.2L13.8 5.7L15.2 6.2L17.2 4.8L19.2 6.8L17.8 8.8L18.3 10.2L20.8 10.5L20.8 13.5L18.3 13.8L17.8 15.2L19.2 17.2L17.2 19.2L15.2 17.8L13.8 18.3L13.5 20.8L10.5 20.8L10.2 18.3L8.8 17.8L6.8 19.2L4.8 17.2L6.2 15.2L5.7 13.8L3.2 13.5L3.2 10.5L5.7 10.2L6.2 8.8L4.8 6.8L6.8 4.8L8.8 6.2Z"/><circle cx="12" cy="12" r="2.6"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.6a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.5"/><path d="M12 17h.01" stroke-width="2.4"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></symbol>
+    <symbol id="i-chev-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-chev-right" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-updown" viewBox="0 0 24 24"><path d="m8 9 4-4 4 4M8 15l4 4 4-4"/></symbol>
+    <symbol id="i-panel" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></symbol>
+    <symbol id="i-bank" viewBox="0 0 24 24"><path d="M3.5 9 12 4.5 20.5 9z"/><path d="M6 9.5v7M10 9.5v7M14 9.5v7M18 9.5v7M3.5 19.5h17"/></symbol>
+    <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3.5h12v17l-2-1.3-2 1.3-2-1.3-2 1.3-2-1.3-2 1.3z"/><path d="M9 8.5h6M9 12h6M9 15.5h3.5"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m11 12 8.5-8.5M16.5 6.5 19 9M14 9l2 2"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l2.8-2.8a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-2.8 2.8a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H14a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3.5l1.8 5.2 5.2 1.8-5.2 1.8L12 17.5l-1.8-5.2L5 10.5l5.2-1.8z"/><path d="M18.5 16v4M16.5 18h4"/></symbol>
+    <symbol id="i-buoy" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5"/><path d="m6 6 3.5 3.5M14.5 14.5 18 18M18 6l-3.5 3.5M9.5 14.5 6 18"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="m8.5 8-4 4 4 4M15.5 8l4 4-4 4"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5M5 19.5h14"/></symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="2"/><rect x="13.5" y="3.5" width="7" height="7" rx="2"/><rect x="3.5" y="13.5" width="7" height="7" rx="2"/><path d="M17 13.5v7M13.5 17h7"/></svg>
+          ProductCraft · Example screens
+        </span>
+        <h1>Navigation</h1>
+        <p>Sidebars that collapse without losing wayfinding, a top bar with in-place search, and in-page navigation: breadcrumbs, tabs and pagination.</p>
+      </div>
+    </header>
+
+    <div class="variants nav-grid">
+
+      <!-- v1: expanded sidebar -->
+      <section class="variant span-7" aria-label="Version 1: expanded sidebar">
+        <div class="variant-label"><span class="v">v1</span> Expanded sidebar</div>
+        <div class="variant-stage">
+          <div class="app">
+            <aside class="sb" id="sb1" data-collapsed="false" aria-label="Sidebar">
+              <div class="sb-top">
+                <a class="sb-logo" href="#" aria-label="Sora Analytics home">
+                  <svg class="logo" viewBox="0 0 28 28" aria-hidden="true"><rect class="bg" width="28" height="28" rx="8"/><path class="fg" d="M8 18c2.6-5.3 9.4-5.3 12 0"/><circle class="dot" cx="14" cy="10" r="2.2"/></svg>
+                  <span class="sb-hide">Sora</span>
+                </a>
+                <button class="icon-btn sb-toggle" type="button" aria-expanded="true" aria-controls="sb1">
+                  <svg class="i" aria-hidden="true"><use href="#i-panel"/></svg>
+                  <span class="tip">Collapse sidebar</span>
+                </button>
+              </div>
+
+              <button class="sb-ws" type="button" aria-haspopup="menu" aria-expanded="false">
+                <span class="ws-tile" aria-hidden="true">G</span>
+                <span class="sb-text"><strong>Growth team</strong><small>Pro · 12 members</small></span>
+                <svg class="i" aria-hidden="true"><use href="#i-updown"/></svg>
+              </button>
+
+              <div class="sb-search">
+                <label class="visually-hidden" for="sb1-q">Search pages</label>
+                <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+                <input id="sb1-q" type="search" placeholder="Search" aria-keyshortcuts="/">
+                <kbd aria-hidden="true">/</kbd>
+              </div>
+              <button class="sb-link sb-search-btn" type="button" data-expand-search>
+                <svg class="i" aria-hidden="true"><use href="#i-search"/></svg><span class="sb-text">Search</span>
+              </button>
+
+              <nav class="sb-nav" aria-label="Main">
+                <div>
+                  <h3 class="sb-label" id="sb1-l1">Workspace</h3>
+                  <ul aria-labelledby="sb1-l1">
+                    <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg><span class="sb-text">Home</span></a></li>
+                    <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-inbox"/></svg><span class="sb-text">Inbox</span><span class="count"><span class="num">12</span><span class="visually-hidden"> unread</span></span></a></li>
+                    <li><a class="sb-link" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#i-chart"/></svg><span class="sb-text">Analytics</span></a></li>
+                    <li>
+                      <button class="sb-link" type="button" aria-expanded="true" aria-controls="sb1-projects" data-group>
+                        <svg class="i" aria-hidden="true"><use href="#i-folder"/></svg><span class="sb-text">Projects</span>
+                        <svg class="i sb-caret" aria-hidden="true"><use href="#i-chev-down"/></svg>
+                      </button>
+                      <ul class="sb-sub" id="sb1-projects">
+                        <li><a class="sb-link" href="#"><span class="swatch" style="background:#0f766e" aria-hidden="true"></span>Website refresh</a></li>
+                        <li><a class="sb-link" href="#"><span class="swatch" style="background:#b45309" aria-hidden="true"></span>Mobile app</a></li>
+                        <li><a class="sb-link" href="#"><span class="swatch" style="background:#7c3aed" aria-hidden="true"></span>Q4 campaign</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 class="sb-label" id="sb1-l2">Library</h3>
+                  <ul aria-labelledby="sb1-l2">
+                    <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg><span class="sb-text">Reports</span></a></li>
+                    <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg><span class="sb-text">Customers</span><span class="count"><span class="num">3</span><span class="visually-hidden"> new</span></span></a></li>
+                  </ul>
+                </div>
+                <ul class="sb-end">
+                  <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-gear"/></svg><span class="sb-text">Settings</span></a></li>
+                  <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-help"/></svg><span class="sb-text">Help &amp; support</span></a></li>
+                </ul>
+              </nav>
+
+              <button class="sb-account" type="button" aria-haspopup="menu" aria-expanded="false">
+                <span class="avatar" aria-hidden="true">PN</span>
+                <span class="sb-text"><strong>Priya Nair</strong><small>priya@example.com</small></span>
+                <svg class="i" aria-hidden="true"><use href="#i-updown"/></svg>
+              </button>
+            </aside>
+
+            <div class="app-main">
+              <div class="pg-head">
+                <div><h2 class="pg-title">Analytics</h2><p class="subtle">Growth team · Last 30 days</p></div>
+                <button class="btn btn-primary btn-sm" type="button">New report</button>
+              </div>
+              <div class="kpis">
+                <div class="card kpi">
+                  <p class="kpi-label">Active users</p>
+                  <p class="kpi-value num">18,420</p>
+                  <p class="delta delta-good"><svg class="i" aria-hidden="true"><use href="#i-up"/></svg>+6.2% <span>vs last month</span></p>
+                </div>
+                <div class="card kpi">
+                  <p class="kpi-label">Conversion</p>
+                  <p class="kpi-value num">3.8%</p>
+                  <p class="delta delta-bad"><svg class="i" aria-hidden="true"><use href="#i-down"/></svg>−0.4 pts <span>vs last month</span></p>
+                </div>
+              </div>
+              <div class="card toplist">
+                <h3>Top pages</h3>
+                <ol>
+                  <li><span>/pricing</span><span class="num">4,210 views</span></li>
+                  <li><span>/signup</span><span class="num">3,180 views</span></li>
+                  <li><span>/docs/getting-started</span><span class="num">2,940 views</span></li>
+                  <li><span>/blog/q3-update</span><span class="num">1,760 views</span></li>
+                  <li><span>/customers</span><span class="num">1,215 views</span></li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>NAV-08</code> <code>NAV-03</code> <code>NAV-09</code> <code>NAV-14</code> <code>NAV-15</code> <code>NAV-06</code> <code>ICO-03</code> <code>COL-07</code></p>
+      </section>
+
+      <!-- v2: collapsed icon rail of the same nav -->
+      <section class="variant span-5" aria-label="Version 2: collapsed icon rail">
+        <div class="variant-label"><span class="v">v2</span> Collapsed rail with tooltips</div>
+        <div class="variant-stage">
+          <div class="app">
+            <aside class="sb" id="sb2" data-collapsed="true" aria-label="Sidebar">
+              <div class="sb-top">
+                <a class="sb-logo" href="#" aria-label="Sora Analytics home">
+                  <svg class="logo" viewBox="0 0 28 28" aria-hidden="true"><rect class="bg" width="28" height="28" rx="8"/><path class="fg" d="M8 18c2.6-5.3 9.4-5.3 12 0"/><circle class="dot" cx="14" cy="10" r="2.2"/></svg>
+                  <span class="sb-hide">Sora</span>
+                </a>
+                <button class="icon-btn sb-toggle" type="button" aria-expanded="false" aria-controls="sb2">
+                  <svg class="i" aria-hidden="true"><use href="#i-panel"/></svg>
+                  <span class="tip">Expand sidebar</span>
+                </button>
+              </div>
+
+              <button class="sb-ws" type="button" aria-haspopup="menu" aria-expanded="false">
+                <span class="ws-tile" aria-hidden="true">G</span>
+                <span class="sb-text"><strong>Growth team</strong><small>Pro · 12 members</small></span>
+                <svg class="i" aria-hidden="true"><use href="#i-updown"/></svg>
+              </button>
+
+              <div class="sb-search">
+                <label class="visually-hidden" for="sb2-q">Search pages</label>
+                <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+                <input id="sb2-q" type="search" placeholder="Search" aria-keyshortcuts="/">
+                <kbd aria-hidden="true">/</kbd>
+              </div>
+              <button class="sb-link sb-search-btn" type="button" data-expand-search>
+                <svg class="i" aria-hidden="true"><use href="#i-search"/></svg><span class="sb-text">Search</span>
+              </button>
+
+              <nav class="sb-nav" aria-label="Main">
+                <div>
+                  <h3 class="sb-label" id="sb2-l1">Workspace</h3>
+                  <ul aria-labelledby="sb2-l1">
+                    <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg><span class="sb-text">Home</span></a></li>
+                    <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-inbox"/></svg><span class="sb-text">Inbox</span><span class="count"><span class="num">12</span><span class="visually-hidden"> unread</span></span></a></li>
+                    <li><a class="sb-link" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#i-chart"/></svg><span class="sb-text">Analytics</span></a></li>
+                    <li>
+                      <button class="sb-link tip-demo" type="button" aria-expanded="false" aria-controls="sb2-projects" data-group>
+                        <svg class="i" aria-hidden="true"><use href="#i-folder"/></svg><span class="sb-text">Projects</span>
+                        <svg class="i sb-caret" aria-hidden="true"><use href="#i-chev-down"/></svg>
+                      </button>
+                      <ul class="sb-sub" id="sb2-projects" hidden>
+                        <li><a class="sb-link" href="#"><span class="swatch" style="background:#0f766e" aria-hidden="true"></span>Website refresh</a></li>
+                        <li><a class="sb-link" href="#"><span class="swatch" style="background:#b45309" aria-hidden="true"></span>Mobile app</a></li>
+                        <li><a class="sb-link" href="#"><span class="swatch" style="background:#7c3aed" aria-hidden="true"></span>Q4 campaign</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 class="sb-label" id="sb2-l2">Library</h3>
+                  <ul aria-labelledby="sb2-l2">
+                    <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg><span class="sb-text">Reports</span></a></li>
+                    <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg><span class="sb-text">Customers</span><span class="count"><span class="num">3</span><span class="visually-hidden"> new</span></span></a></li>
+                  </ul>
+                </div>
+                <ul class="sb-end">
+                  <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-gear"/></svg><span class="sb-text">Settings</span></a></li>
+                  <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-help"/></svg><span class="sb-text">Help &amp; support</span></a></li>
+                </ul>
+              </nav>
+
+              <button class="sb-account" type="button" aria-haspopup="menu" aria-expanded="false">
+                <span class="avatar" aria-hidden="true">PN</span>
+                <span class="sb-text"><strong>Priya Nair</strong><small>priya@example.com</small></span>
+                <svg class="i" aria-hidden="true"><use href="#i-updown"/></svg>
+              </button>
+            </aside>
+
+            <div class="app-main">
+              <div class="pg-head">
+                <div><h2 class="pg-title">Analytics</h2><p class="subtle">Growth team · Last 30 days</p></div>
+                <button class="btn btn-primary btn-sm" type="button">New report</button>
+              </div>
+              <div class="kpis">
+                <div class="card kpi">
+                  <p class="kpi-label">Active users</p>
+                  <p class="kpi-value num">18,420</p>
+                  <p class="delta delta-good"><svg class="i" aria-hidden="true"><use href="#i-up"/></svg>+6.2% <span>vs last month</span></p>
+                </div>
+                <div class="card kpi">
+                  <p class="kpi-label">Conversion</p>
+                  <p class="kpi-value num">3.8%</p>
+                  <p class="delta delta-bad"><svg class="i" aria-hidden="true"><use href="#i-down"/></svg>−0.4 pts <span>vs last month</span></p>
+                </div>
+              </div>
+              <div class="card toplist">
+                <h3>Top pages</h3>
+                <ol>
+                  <li><span>/pricing</span><span class="num">4,210 views</span></li>
+                  <li><span>/signup</span><span class="num">3,180 views</span></li>
+                  <li><span>/docs/getting-started</span><span class="num">2,940 views</span></li>
+                  <li><span>/blog/q3-update</span><span class="num">1,760 views</span></li>
+                  <li><span>/customers</span><span class="num">1,215 views</span></li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>NAV-13</code> <code>NAV-08</code> <code>NAV-02</code> <code>ICO-04</code> <code>CMP-11</code> <code>NAV-03</code></p>
+      </section>
+
+      <!-- v3: top navigation bar -->
+      <section class="variant span-12" aria-label="Version 3: top navigation bar">
+        <div class="variant-label"><span class="v">v3</span> Top bar: dropdown and in-place search</div>
+        <div class="variant-stage">
+          <div class="topbars">
+            <div data-topbar>
+              <span class="state-tag">Resources menu open</span>
+              <header class="tb">
+                <a class="sb-logo" href="#" aria-label="Sora Analytics home">
+                  <svg class="logo" viewBox="0 0 28 28" aria-hidden="true"><rect class="bg" width="28" height="28" rx="8"/><path class="fg" d="M8 18c2.6-5.3 9.4-5.3 12 0"/><circle class="dot" cx="14" cy="10" r="2.2"/></svg>
+                  <span>Sora</span>
+                </a>
+                <nav aria-label="Main">
+                  <ul class="tb-links">
+                    <li><a class="tb-link" href="#"><span class="lbl" data-text="Overview">Overview</span></a></li>
+                    <li><a class="tb-link" href="#" aria-current="page"><span class="lbl" data-text="Analytics">Analytics</span></a></li>
+                    <li><a class="tb-link" href="#"><span class="lbl" data-text="Customers">Customers</span></a></li>
+                    <li><a class="tb-link" href="#"><span class="lbl" data-text="Reports">Reports</span></a></li>
+                    <li>
+                      <button class="tb-link" type="button" aria-expanded="true" aria-controls="res-a" data-disclosure>
+                        Resources <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg>
+                      </button>
+                      <ul class="tb-menu" id="res-a">
+                        <li><a class="menu-item" href="#"><span class="menu-icon"><svg class="i" aria-hidden="true"><use href="#i-book"/></svg></span><span><strong>Guides</strong><small>Step-by-step setup for every report</small></span></a></li>
+                        <li><a class="menu-item" href="#"><span class="menu-icon"><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg></span><span><strong>What’s new</strong><small>Release notes, updated every week</small></span></a></li>
+                        <li><a class="menu-item" href="#"><span class="menu-icon"><svg class="i" aria-hidden="true"><use href="#i-buoy"/></svg></span><span><strong>Help center</strong><small>Answers from the support team</small></span></a></li>
+                        <li><a class="menu-item" href="#"><span class="menu-icon"><svg class="i" aria-hidden="true"><use href="#i-code"/></svg></span><span><strong>API reference</strong><small>Endpoints, limits and examples</small></span></a></li>
+                        <li class="menu-foot"><span>Need a hand with setup?</span><a href="#">Contact support</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </nav>
+                <div class="tb-actions">
+                  <button class="search-trigger" type="button" aria-label="Search" aria-expanded="false" aria-controls="tb-a-search" aria-keyshortcuts="/" data-search-trigger>
+                    <svg class="i" aria-hidden="true"><use href="#i-search"/></svg><kbd aria-hidden="true">/</kbd>
+                    <span class="tip below" aria-hidden="true">Search</span>
+                  </button>
+                  <div class="tb-search" id="tb-a-search" hidden>
+                    <label class="visually-hidden" for="tb-a-q">Search reports and customers</label>
+                    <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+                    <input id="tb-a-q" type="search" placeholder="Search reports, customers…" autocomplete="off">
+                    <kbd aria-hidden="true">Esc</kbd>
+                    <button class="icon-btn clear" type="button" aria-label="Clear search"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+                  </div>
+                  <button class="icon-btn" type="button">
+                    <svg class="i" aria-hidden="true"><use href="#i-bell"/></svg>
+                    <span class="tip below">Notifications</span>
+                    <span class="badge num">3<span class="visually-hidden"> unread</span></span>
+                  </button>
+                  <button class="avatar-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+                    <span class="avatar" aria-hidden="true">AS</span><span class="tip below">Account menu</span>
+                  </button>
+                </div>
+              </header>
+            </div>
+
+            <div data-topbar style="margin-top: 184px">
+              <span class="state-tag">Search expanded and focused</span>
+              <header class="tb">
+                <a class="sb-logo" href="#" aria-label="Sora Analytics home">
+                  <svg class="logo" viewBox="0 0 28 28" aria-hidden="true"><rect class="bg" width="28" height="28" rx="8"/><path class="fg" d="M8 18c2.6-5.3 9.4-5.3 12 0"/><circle class="dot" cx="14" cy="10" r="2.2"/></svg>
+                  <span>Sora</span>
+                </a>
+                <nav aria-label="Main">
+                  <ul class="tb-links">
+                    <li><a class="tb-link" href="#"><span class="lbl" data-text="Overview">Overview</span></a></li>
+                    <li><a class="tb-link" href="#" aria-current="page"><span class="lbl" data-text="Analytics">Analytics</span></a></li>
+                    <li><a class="tb-link" href="#"><span class="lbl" data-text="Customers">Customers</span></a></li>
+                    <li><a class="tb-link" href="#"><span class="lbl" data-text="Reports">Reports</span></a></li>
+                    <li>
+                      <button class="tb-link" type="button" aria-expanded="false" aria-controls="res-b" data-disclosure>
+                        Resources <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg>
+                      </button>
+                      <ul class="tb-menu" id="res-b" hidden>
+                        <li><a class="menu-item" href="#"><span class="menu-icon"><svg class="i" aria-hidden="true"><use href="#i-book"/></svg></span><span><strong>Guides</strong><small>Step-by-step setup for every report</small></span></a></li>
+                        <li><a class="menu-item" href="#"><span class="menu-icon"><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg></span><span><strong>What’s new</strong><small>Release notes, updated every week</small></span></a></li>
+                        <li><a class="menu-item" href="#"><span class="menu-icon"><svg class="i" aria-hidden="true"><use href="#i-buoy"/></svg></span><span><strong>Help center</strong><small>Answers from the support team</small></span></a></li>
+                        <li><a class="menu-item" href="#"><span class="menu-icon"><svg class="i" aria-hidden="true"><use href="#i-code"/></svg></span><span><strong>API reference</strong><small>Endpoints, limits and examples</small></span></a></li>
+                        <li class="menu-foot"><span>Need a hand with setup?</span><a href="#">Contact support</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </nav>
+                <div class="tb-actions">
+                  <button class="search-trigger" type="button" aria-label="Search" aria-expanded="true" aria-controls="tb-b-search" aria-keyshortcuts="/" data-search-trigger hidden>
+                    <svg class="i" aria-hidden="true"><use href="#i-search"/></svg><kbd aria-hidden="true">/</kbd>
+                    <span class="tip below" aria-hidden="true">Search</span>
+                  </button>
+                  <div class="tb-search" id="tb-b-search">
+                    <label class="visually-hidden" for="tb-b-q">Search reports and customers</label>
+                    <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
+                    <input id="tb-b-q" type="search" placeholder="Search reports, customers…" value="Retention by cohort" autocomplete="off">
+                    <kbd aria-hidden="true">Esc</kbd>
+                    <button class="icon-btn clear" type="button" aria-label="Clear search"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+                  </div>
+                  <button class="icon-btn" type="button">
+                    <svg class="i" aria-hidden="true"><use href="#i-bell"/></svg>
+                    <span class="tip below">Notifications</span>
+                    <span class="badge num">3<span class="visually-hidden"> unread</span></span>
+                  </button>
+                  <button class="avatar-btn" type="button" aria-haspopup="menu" aria-expanded="false">
+                    <span class="avatar" aria-hidden="true">AS</span><span class="tip below">Account menu</span>
+                  </button>
+                </div>
+              </header>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>NAV-06</code> <code>NAV-03</code> <code>NAV-12</code> <code>NAV-17</code> <code>BTN-09</code> <code>ICO-04</code> <code>NAV-01</code></p>
+      </section>
+
+      <!-- v4: dark sidebar with one promo card -->
+      <section class="variant span-4" aria-label="Version 4: dark sidebar with upgrade card">
+        <div class="variant-label"><span class="v">v4</span> Dark sidebar with upgrade card</div>
+        <div class="variant-stage dark" data-theme="dark">
+          <aside class="sb standalone" id="sb4" data-collapsed="false" aria-label="Sidebar">
+            <div class="sb-top">
+              <a class="sb-logo" href="#" aria-label="Sora Pay home">
+                <svg class="logo" viewBox="0 0 28 28" aria-hidden="true"><rect class="bg" width="28" height="28" rx="8"/><path class="fg" d="M8 18c2.6-5.3 9.4-5.3 12 0"/><circle class="dot" cx="14" cy="10" r="2.2"/></svg>
+                <span class="sb-hide">Sora Pay</span>
+              </a>
+              <button class="icon-btn sb-toggle" type="button" aria-expanded="true" aria-controls="sb4">
+                <svg class="i" aria-hidden="true"><use href="#i-panel"/></svg>
+                <span class="tip">Collapse sidebar</span>
+              </button>
+            </div>
+
+            <button class="sb-jump sb-hide" type="button" aria-keyshortcuts="Control+K">
+              <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>Search or jump to…<kbd aria-hidden="true">Ctrl K</kbd>
+            </button>
+            <button class="sb-link sb-search-btn" type="button" data-expand-search>
+              <svg class="i" aria-hidden="true"><use href="#i-search"/></svg><span class="sb-text">Search</span>
+            </button>
+
+            <nav class="sb-nav" aria-label="Main">
+              <div>
+                <h3 class="sb-label" id="sb4-l1">Payments</h3>
+                <ul aria-labelledby="sb4-l1">
+                  <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg><span class="sb-text">Home</span></a></li>
+                  <li><a class="sb-link" href="#" aria-current="page"><svg class="i" aria-hidden="true"><use href="#i-card"/></svg><span class="sb-text">Payments</span></a></li>
+                  <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-bank"/></svg><span class="sb-text">Payouts</span></a></li>
+                  <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-receipt"/></svg><span class="sb-text">Invoices</span><span class="count"><span class="num">4</span><span class="visually-hidden"> due</span></span></a></li>
+                  <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-users"/></svg><span class="sb-text">Customers</span></a></li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="sb-label" id="sb4-l2">Developers</h3>
+                <ul aria-labelledby="sb4-l2">
+                  <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-key"/></svg><span class="sb-text">API keys</span></a></li>
+                  <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-link"/></svg><span class="sb-text">Webhooks</span><span class="count"><span class="num">2</span><span class="visually-hidden"> failing</span></span></a></li>
+                </ul>
+              </div>
+
+              <div class="sb-end">
+                <!-- One compact promo, above settings and account; hidden in the rail (NAV-10) -->
+                <div class="sb-promo" role="region" aria-labelledby="promo-title" data-promo>
+                  <h3 id="promo-title">Starter plan</h3>
+                  <p><span class="num">820</span> of <span class="num">1,000</span> invoices used this month</p>
+                  <div class="meter" role="meter" aria-labelledby="promo-title" aria-valuemin="0" aria-valuemax="1000" aria-valuenow="820" aria-valuetext="820 of 1,000 invoices used"><span style="width: 82%"></span></div>
+                  <a class="btn btn-secondary btn-sm" href="#">Upgrade plan</a>
+                  <button class="icon-btn close" type="button" aria-label="Dismiss upgrade card" data-dismiss><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+                </div>
+                <ul style="margin-top: var(--space-3)">
+                  <li><a class="sb-link" href="#"><svg class="i" aria-hidden="true"><use href="#i-gear"/></svg><span class="sb-text">Settings</span></a></li>
+                </ul>
+              </div>
+            </nav>
+
+            <button class="sb-account" type="button" aria-haspopup="menu" aria-expanded="false">
+              <span class="ws-tile pay" aria-hidden="true">LB</span>
+              <span class="sb-text"><strong>Leo Brandt</strong><small>leo@example.com</small></span>
+              <svg class="i" aria-hidden="true"><use href="#i-updown"/></svg>
+            </button>
+          </aside>
+        </div>
+        <p class="rule-ids">Rules: <code>NAV-10</code> <code>NAV-08</code> <code>NAV-03</code> <code>DRK-09</code> <code>BTN-01</code> <code>BTN-09</code> <code>ENG-05</code></p>
+      </section>
+
+      <!-- v5: in-page navigation set -->
+      <section class="variant span-8" aria-label="Version 5: breadcrumbs, tabs and pagination">
+        <div class="variant-label"><span class="v">v5</span> Breadcrumbs, in-page tabs and pagination</div>
+        <div class="variant-stage">
+          <div class="page-card">
+            <nav class="crumbs" aria-label="Breadcrumb">
+              <ol>
+                <li><a href="#">Sora Analytics</a></li>
+                <li><svg class="i sep" aria-hidden="true"><use href="#i-chev-right"/></svg><a href="#">Reports</a></li>
+                <li><svg class="i sep" aria-hidden="true"><use href="#i-chev-right"/></svg><a href="#">Revenue</a></li>
+                <li><svg class="i sep" aria-hidden="true"><use href="#i-chev-right"/></svg><span aria-current="page">Q3 2026</span></li>
+              </ol>
+            </nav>
+
+            <div class="rep-head">
+              <div>
+                <h2>Q3 2026 revenue</h2>
+                <p>Updated Oct 23 · Owned by Jordan Reyes</p>
+              </div>
+              <button class="btn btn-secondary btn-sm" type="button"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Export CSV</button>
+            </div>
+
+            <div class="tabs" role="tablist" aria-label="Report sections">
+              <button class="tab" role="tab" id="tab-sum" aria-selected="false" aria-controls="panel-sum" tabindex="-1"><span class="lbl" data-text="Summary">Summary</span></button>
+              <button class="tab" role="tab" id="tab-tx" aria-selected="true" aria-controls="panel-tx"><span class="lbl" data-text="Transactions">Transactions</span><span class="count num">482</span></button>
+              <button class="tab" role="tab" id="tab-ref" aria-selected="false" aria-controls="panel-ref" tabindex="-1"><span class="lbl" data-text="Refunds">Refunds</span><span class="count num">12</span></button>
+              <button class="tab" role="tab" id="tab-notes" aria-selected="false" aria-controls="panel-notes" tabindex="-1"><span class="lbl" data-text="Notes">Notes</span></button>
+            </div>
+
+            <div class="panel" role="tabpanel" id="panel-sum" aria-labelledby="tab-sum" tabindex="0" hidden>
+              <p class="panel-note">Revenue reached <strong class="num">$184,920</strong> in Q3, up 8.4% from Q2. Most growth came from annual plans.</p>
+            </div>
+            <div class="panel" role="tabpanel" id="panel-tx" aria-labelledby="tab-tx" tabindex="0">
+              <table class="tx">
+                <thead><tr><th scope="col">Order</th><th scope="col">Customer</th><th scope="col">Date</th><th scope="col">Status</th><th scope="col">Amount</th></tr></thead>
+                <tbody>
+                  <tr><td class="num">#SL-1042</td><td><span class="who"><span class="avatar" aria-hidden="true">AS</span>Avery Stone</span></td><td>Sep 30</td><td><span class="pill pill-success">Paid</span></td><td class="num">$240.00</td></tr>
+                  <tr><td class="num">#SL-1041</td><td><span class="who"><span class="avatar" aria-hidden="true">JR</span>Jordan Reyes</span></td><td>Sep 29</td><td><span class="pill pill-success">Paid</span></td><td class="num">$86.50</td></tr>
+                  <tr><td class="num">#SL-1040</td><td><span class="who"><span class="avatar" aria-hidden="true">PN</span>Priya Nair</span></td><td>Sep 29</td><td><span class="pill pill-neutral">Refunded</span></td><td class="num">$1,120.00</td></tr>
+                  <tr><td class="num">#SL-1039</td><td><span class="who"><span class="avatar" aria-hidden="true">LB</span>Leo Brandt</span></td><td>Sep 28</td><td><span class="pill pill-warning">Pending</span></td><td class="num">$64.00</td></tr>
+                  <tr><td class="num">#SL-1038</td><td><span class="who"><span class="avatar" aria-hidden="true">SO</span>Sam Okafor</span></td><td>Sep 27</td><td><span class="pill pill-success">Paid</span></td><td class="num">$310.00</td></tr>
+                  <tr><td class="num">#SL-1037</td><td><span class="who"><span class="avatar" aria-hidden="true">HK</span>Hana Kim</span></td><td>Sep 27</td><td><span class="pill pill-danger">Failed</span></td><td class="num">$45.90</td></tr>
+                  <tr><td class="num">#SL-1036</td><td><span class="who"><span class="avatar" aria-hidden="true">OC</span>Owen Clarke</span></td><td>Sep 26</td><td><span class="pill pill-success">Paid</span></td><td class="num">$129.00</td></tr>
+                  <tr><td class="num">#SL-1035</td><td><span class="who"><span class="avatar" aria-hidden="true">ZA</span>Zara Ahmed</span></td><td>Sep 26</td><td><span class="pill pill-success">Paid</span></td><td class="num">$72.40</td></tr>
+                </tbody>
+              </table>
+              <div class="pager">
+                <p>Showing <span class="num">33–40</span> of <span class="num">482</span> transactions</p>
+                <nav aria-label="Pagination">
+                  <ul>
+                    <li><a class="pg pg-step" href="#" rel="prev"><svg class="i" aria-hidden="true"><use href="#i-arrow-left"/></svg>Previous</a></li>
+                    <li><a class="pg num" href="#" aria-label="Page 1">1</a></li>
+                    <li><span class="pg-gap" aria-hidden="true">…</span></li>
+                    <li><a class="pg num" href="#" aria-label="Page 4">4</a></li>
+                    <li><a class="pg num" href="#" aria-label="Page 5" aria-current="page">5</a></li>
+                    <li><a class="pg num" href="#" aria-label="Page 6">6</a></li>
+                    <li><span class="pg-gap" aria-hidden="true">…</span></li>
+                    <li><a class="pg num" href="#" aria-label="Page 61">61</a></li>
+                    <li><a class="pg pg-step" href="#" rel="next">Next<svg class="i" aria-hidden="true"><use href="#i-arrow-right"/></svg></a></li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+            <div class="panel" role="tabpanel" id="panel-ref" aria-labelledby="tab-ref" tabindex="0" hidden>
+              <p class="panel-note"><span class="num">12</span> refunds this quarter, totaling <strong class="num">$2,480.00</strong>.</p>
+            </div>
+            <div class="panel" role="tabpanel" id="panel-notes" aria-labelledby="tab-notes" tabindex="0" hidden>
+              <p class="panel-note">Nina Park: “Annual plan upgrades doubled after the pricing page change on Aug 14.”</p>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>NAV-04</code> <code>NAV-05</code> <code>NAV-15</code> <code>NAV-03</code> <code>COL-07</code> <code>TYP-09</code></p>
+      </section>
+
+    </div>
+  </main>
+
+  <script>
+    // NAV-13: one button collapses the sidebar to a rail; aria-expanded and the visible/accessible name flip together.
+    function setCollapsed(sb, collapsed) {
+      const btn = sb.querySelector('.sb-toggle');
+      sb.dataset.collapsed = String(collapsed);
+      btn.setAttribute('aria-expanded', String(!collapsed));
+      btn.querySelector('.tip').textContent = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+    }
+    document.querySelectorAll('.sb-toggle').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const sb = btn.closest('.sb');
+        setCollapsed(sb, sb.dataset.collapsed !== 'true');
+      });
+    });
+
+    // NAV-09 / NAV-17: the Projects parent is a disclosure button; in the rail it first expands the sidebar.
+    document.querySelectorAll('[data-group]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const sb = btn.closest('.sb');
+        const list = document.getElementById(btn.getAttribute('aria-controls'));
+        const open = sb.dataset.collapsed === 'true' ? true : btn.getAttribute('aria-expanded') !== 'true';
+        if (sb.dataset.collapsed === 'true') setCollapsed(sb, false);
+        btn.setAttribute('aria-expanded', String(open));
+        list.hidden = !open;
+      });
+    });
+
+    // NAV-13: the rail's search icon expands the sidebar and moves focus into the field.
+    document.querySelectorAll('[data-expand-search]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const sb = btn.closest('.sb');
+        setCollapsed(sb, false);
+        sb.querySelector('.sb-search input, .sb-jump').focus();
+      });
+    });
+
+    // NAV-10 / ENG-05: dismissing the promo removes it and hands focus to the next link.
+    document.querySelectorAll('[data-dismiss]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const card = btn.closest('[data-promo]');
+        const next = card.parentElement.querySelector('ul .sb-link');
+        card.remove();
+        if (next) next.focus();
+      });
+    });
+
+    // NAV-17: Resources opens as a disclosure; Escape or an outside click closes it, focus returns to the trigger.
+    document.querySelectorAll('[data-disclosure]').forEach((btn) => {
+      const menu = document.getElementById(btn.getAttribute('aria-controls'));
+      const set = (open) => { btn.setAttribute('aria-expanded', String(open)); menu.hidden = !open; };
+      btn.addEventListener('click', () => set(btn.getAttribute('aria-expanded') !== 'true'));
+      menu.addEventListener('keydown', (e) => { if (e.key === 'Escape') { set(false); btn.focus(); } });
+      btn.addEventListener('keydown', (e) => { if (e.key === 'Escape') set(false); });
+      document.addEventListener('click', (e) => {
+        if (!btn.parentElement.contains(e.target) && btn.getAttribute('aria-expanded') === 'true') set(false);
+      });
+    });
+
+    // NAV-12: search opens in place and takes focus; Escape closes it and returns focus to the trigger.
+    document.querySelectorAll('[data-topbar]').forEach((bar) => {
+      const trigger = bar.querySelector('[data-search-trigger]');
+      const field = document.getElementById(trigger.getAttribute('aria-controls'));
+      const input = field.querySelector('input');
+      const open = () => { trigger.setAttribute('aria-expanded', 'true'); trigger.hidden = true; field.hidden = false; input.focus(); };
+      const close = () => { trigger.setAttribute('aria-expanded', 'false'); field.hidden = true; trigger.hidden = false; trigger.focus(); };
+      trigger.addEventListener('click', open);
+      input.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+      field.querySelector('.clear').addEventListener('click', () => { input.value = ''; input.focus(); });
+      bar.openSearch = open;
+    });
+    // BTN-09: the visible "/" hint is a real shortcut (here it opens the first bar's search).
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== '/' || e.target.closest('input, textarea')) return;
+      e.preventDefault();
+      document.querySelector('[data-topbar]').openSearch();
+    });
+
+    // NAV-15: in-page tabs use a roving tabindex and arrow keys; each tab shows its own panel.
+    document.querySelectorAll('[role="tablist"]').forEach((list) => {
+      const tabs = [...list.querySelectorAll('[role="tab"]')];
+      const select = (tab) => {
+        tabs.forEach((t) => {
+          const on = t === tab;
+          t.setAttribute('aria-selected', String(on));
+          t.tabIndex = on ? 0 : -1;
+          document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+        });
+        tab.focus();
+      };
+      list.addEventListener('click', (e) => { const t = e.target.closest('[role="tab"]'); if (t) select(t); });
+      list.addEventListener('keydown', (e) => {
+        const i = tabs.indexOf(document.activeElement);
+        const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+        if (next === undefined) return;
+        e.preventDefault();
+        select(tabs[(next + tabs.length) % tabs.length]);
+      });
+    });
+  </script>
+</body>
+</html>

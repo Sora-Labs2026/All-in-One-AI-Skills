@@ -19,6 +19,12 @@ class ProductCraftTest(unittest.TestCase):
   self.assertEqual(sum(c['rules'] for c in ui['categories']),len(ids))
   self.assertTrue(all(r['why'] and r['do'] and r['avoid'] for r in ui['rules']))
   self.assertTrue(all((ROOT/c['file']).is_file() for c in ui['categories']))
+ def test_reference_screens(self):
+  pages=sorted((ROOT/'examples').glob('*.html'))
+  self.assertGreater(len(pages),0)
+  index=(ROOT/'examples'/'README.md').read_text()
+  self.assertTrue(all(f'`{p.name}`' in index for p in pages))
+  self.assertFalse(any('://' in p.read_text().replace('http://www.w3.org/2000/svg','') for p in pages))
  def test_exactly_one_skill(self):
   self.assertEqual([p.relative_to(ROOT).as_posix() for p in ROOT.rglob('SKILL.md')],['SKILL.md'])
 if __name__=='__main__':unittest.main()

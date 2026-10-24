@@ -1,0 +1,417 @@
+<!doctype html>
+<!-- ProductCraft example: dashboard-v3 (bento overview, teal accent). Original Sora Labs example, MIT License.
+     Demonstrates: LAY-14, LAY-01, LAY-02, LAY-05, LAY-08, TYP-02, TYP-09, COL-01, COL-02, COL-07, CMP-05, CMP-13,
+     CMP-15, CMP-17, CMP-18, CMP-20, CMP-26, CMP-29, CMP-31, NAV-03, NAV-07, NAV-12, FBK-06, ICO-04, ICO-07, SCR-01,
+     SCR-06 -->
+<html lang="en" data-accent="teal">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Bento overview dashboard</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    :root {
+      /* Derived from the one accent token, so a new data-accent re-themes everything (CMP-26) */
+      --accent-track: color-mix(in srgb, var(--accent) 16%, var(--surface));
+      --accent-line: color-mix(in srgb, var(--accent) 24%, transparent);
+    }
+
+    /* Top navigation */
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); }
+    .topbar-inner {
+      position: relative; display: flex; align-items: center; gap: var(--space-7);
+      max-width: 1280px; height: 64px; margin: 0 auto; padding: 0 var(--space-6);
+    }
+    .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--text); font-weight: 700; }
+    .brand:hover { text-decoration: none; }
+    .brand svg { width: 32px; height: 32px; }
+    .brand .tile { fill: var(--accent); }
+    .brand .sun { fill: none; stroke: var(--on-accent); stroke-width: 2.5; stroke-linecap: round; }
+    .main-nav { align-self: stretch; }
+    .links { display: flex; height: 100%; gap: var(--space-5); list-style: none; margin: 0; padding: 0; }
+    .links a {
+      position: relative; display: flex; align-items: center; height: 100%;
+      color: var(--text-2); font-size: var(--text-md); font-weight: 500;
+    }
+    .links a:hover { color: var(--text); text-decoration: none; }
+    /* Active link: strongest ink, heavier weight and an accent underline (NAV-03) */
+    .links a[aria-current="page"] { color: var(--text); font-weight: 600; }
+    .links a[aria-current="page"]::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+      border-radius: 2px 2px 0 0; background: var(--accent);
+    }
+    .actions { position: relative; display: flex; align-items: center; gap: var(--space-2); margin-left: auto; }
+    .avatar-btn { display: grid; place-items: center; width: 40px; height: 40px; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; }
+    .avatar-btn:focus-visible { border-radius: 50%; }
+
+    /* Search expands in place over empty space, takes focus, closes on Escape (NAV-12) */
+    .search {
+      position: absolute; right: calc(100% + var(--space-2)); top: 50%;
+      display: flex; align-items: center; gap: var(--space-2);
+      width: 360px; height: 40px; padding: 0 var(--space-1) 0 var(--space-3);
+      border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); box-shadow: var(--shadow-sm);
+      opacity: 0; visibility: hidden; transform: translate(16px, -50%);
+      transition: opacity var(--dur-med) var(--ease-out), transform var(--dur-med) var(--ease-out), visibility 0s linear var(--dur-med);
+    }
+    .search.is-open { opacity: 1; visibility: visible; transform: translate(0, -50%); transition-delay: 0s; }
+    .search svg { width: 18px; height: 18px; color: var(--text-3); flex: none; }
+    .search input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; font-size: var(--text-sm); outline: none; }
+    .search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-line); }
+    .search .icon-btn { width: 32px; height: 32px; }
+    .search .icon-btn svg { width: 16px; height: 16px; color: inherit; }
+    .search input::-webkit-search-cancel-button { display: none; }
+    .kbd { padding: 0 var(--space-1); border: 1px solid var(--border); border-radius: 4px; font-size: var(--text-xs); color: var(--text-3); line-height: 18px; }
+
+    /* Page */
+    .page { max-width: 1280px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-8); }
+    .page-head { margin-bottom: var(--space-5); }
+    .page-head h1 { margin-bottom: var(--space-1); }
+
+    /* Bento: 12 columns, one gap, one radius, one padding; one leading tile (LAY-14) */
+    .bento { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-4); }
+    .tile {
+      display: flex; flex-direction: column; min-width: 0;
+      padding: var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      background: var(--surface); box-shadow: var(--shadow-sm);
+    }
+    .t-goal { grid-column: 1 / span 5; grid-row: 1 / span 2; background: var(--accent-soft); border-color: var(--accent-line); }
+    .t-customers { grid-column: 6 / span 4; }
+    .t-conversion { grid-column: 10 / span 3; }
+    .t-product { grid-column: 6 / span 3; }
+    .t-traffic { grid-column: 9 / span 4; }
+    .t-tasks { grid-column: 1 / span 5; }
+    .t-activity { grid-column: 6 / span 7; }
+
+    .tile-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
+    .tile-head h2 { font-size: var(--text-md); }
+    .tile-head .subtle { white-space: nowrap; }
+    .tile-link { font-size: var(--text-sm); font-weight: 600; }
+    .big { font-size: var(--text-2xl); font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+    .big .unit { font-size: var(--text-lg); color: var(--text-2); letter-spacing: 0; }
+    .stat-foot { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2); }
+
+    /* Leading tile: goal ring drawn with pathLength="1" (ICO-07, FBK-06) */
+    .goal-body { flex: 1; display: grid; grid-template-columns: 224px minmax(0, 1fr); align-items: center; gap: var(--space-5); padding: var(--space-2) 0 var(--space-5); }
+    .ring-wrap { position: relative; width: 224px; height: 224px; }
+    .ring { width: 224px; height: 224px; display: block; }
+    .ring circle { fill: none; stroke-width: 10; }
+    .ring .track { stroke: var(--accent-track); }
+    .ring .progress { stroke: var(--accent); stroke-linecap: round; }
+    .ring .pace { stroke: var(--text); stroke-width: 2.5; stroke-linecap: round; }
+    .ring-center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+    .ring-center .big { font-size: var(--text-2xl); }
+    .ring-center .subtle { color: var(--text-2); }
+    .goal-figure { font-size: var(--text-2xl); font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+    .goal-of { font-size: var(--text-md); color: var(--text-2); margin-bottom: var(--space-4); }
+    .goal-keys { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .goal-keys li { display: flex; align-items: center; gap: var(--space-2); white-space: nowrap; }
+    .goal-keys .num { margin-left: auto; font-weight: 600; color: var(--text); }
+    .k-progress { width: 12px; height: 12px; border-radius: 4px; background: var(--accent); }
+    .k-pace { width: 12px; height: 2.5px; border-radius: 2px; background: var(--text); }
+    .goal-status { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding-top: var(--space-4); border-top: 1px solid var(--accent-line); }
+    .goal-status p { font-size: var(--text-sm); color: var(--text-2); }
+
+    /* Sparkline (CMP-17) */
+    .spark { display: block; width: 100%; height: 56px; margin-top: auto; padding-top: var(--space-4); overflow: visible; }
+    .spark .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .spark .area { fill: var(--accent); opacity: 0.1; }
+
+    .conv-meta { margin-top: auto; padding-top: var(--space-4); font-size: var(--text-sm); color: var(--text-2); }
+
+    /* Top product with an abstract product image */
+    .product { display: flex; gap: var(--space-4); align-items: center; }
+    .product-img { flex: none; width: 88px; height: 88px; border-radius: var(--radius-md); }
+    .product-name { font-weight: 600; }
+    .product-price { margin-top: var(--space-1); font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .product-stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-top: auto; padding-top: var(--space-4); border-top: 1px solid var(--border); }
+    .product-stats dt { font-size: var(--text-xs); color: var(--text-3); }
+    .product-stats dd { margin: 0; font-size: var(--text-lg); font-weight: 700; }
+    .product-body { display: flex; flex-direction: column; flex: 1; gap: var(--space-4); }
+
+    /* Traffic sources: labeled horizontal bars with values (CMP-18) */
+    .bars { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+    .bars li { display: grid; grid-template-columns: 72px minmax(0, 1fr) 40px; align-items: center; gap: var(--space-3); font-size: var(--text-sm); }
+    .bars .label { color: var(--text-2); }
+    /* Bars scale to the largest share; no full-width track, so a bar never reads as "out of 100%" */
+    .bars .track { height: 12px; }
+    .bars .fill { display: block; width: calc(var(--v) / 38 * 100%); height: 100%; border-radius: 4px; background: var(--accent); }
+    .bars .val { text-align: right; font-weight: 600; }
+
+    /* Checklist from real checkboxes with a live count (CMP-31) */
+    .progress { height: 6px; border-radius: var(--radius-pill); background: var(--surface-2); margin-bottom: var(--space-3); }
+    .progress span { display: block; height: 100%; width: calc(var(--done) / var(--total) * 100%); border-radius: var(--radius-pill); background: var(--accent); transition: width var(--dur-med) var(--ease-out); }
+    .tasks { list-style: none; margin: 0; padding: 0; }
+    .tasks li + li { border-top: 1px solid var(--border); }
+    .tasks label { display: flex; align-items: center; gap: var(--space-3); min-height: 48px; cursor: pointer; font-size: var(--text-md); }
+    .tasks input { width: 18px; height: 18px; margin: 0; flex: none; accent-color: var(--accent); cursor: pointer; }
+    .tasks .due { margin-left: auto; font-size: var(--text-xs); color: var(--text-3); white-space: nowrap; }
+    .tasks input:checked + .task-text { color: var(--text-3); text-decoration: line-through; }
+
+    /* Team activity rows: avatar, two lines, trailing time (CMP-20, CMP-29) */
+    .feed { list-style: none; margin: 0; padding: 0; }
+    .feed li { display: flex; align-items: center; gap: var(--space-3); min-height: 64px; padding: var(--space-2) 0; }
+    .feed li + li { border-top: 1px solid var(--border); }
+    .feed .avatar { width: 36px; height: 36px; background: var(--surface-2); color: var(--text-2); }
+    .feed .text { min-width: 0; flex: 1; font-size: var(--text-md); color: var(--text-2); }
+    .feed .text strong { color: var(--text); font-weight: 600; }
+    .feed .sub { display: block; font-size: var(--text-sm); color: var(--text-3); }
+    .feed time { font-size: var(--text-sm); color: var(--text-3); white-space: nowrap; }
+
+    @media (max-width: 1100px) {
+      .bento { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .t-goal { grid-column: 1 / -1; grid-row: auto; }
+      .t-customers, .t-conversion, .t-product, .t-traffic { grid-column: span 3; }
+      .t-tasks, .t-activity { grid-column: 1 / -1; }
+    }
+    @media (max-width: 760px) {
+      .topbar-inner { flex-wrap: wrap; height: auto; gap: 0 var(--space-4); padding: var(--space-3) var(--space-4) 0; }
+      .main-nav { order: 3; width: 100%; min-width: 0; }
+      .links { height: 48px; overflow-x: auto; }
+      .links a { white-space: nowrap; }
+      .search { width: min(280px, calc(100vw - 120px)); }
+      .page { padding: var(--space-5) var(--space-4) var(--space-7); }
+      .bento { grid-template-columns: minmax(0, 1fr); }
+      .bento > .tile { grid-column: 1 / -1; }
+      .goal-body { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+      .goal-text { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#" aria-label="Sora Shop home">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect class="tile" width="32" height="32" rx="8"/><path class="sun" d="M9.5 19.5a6.5 6.5 0 0 1 13 0"/><path class="sun" d="M7.5 23.5h17"/></svg>
+        <span>Sora Shop</span>
+      </a>
+      <nav class="main-nav" aria-label="Main">
+        <ul class="links">
+          <li><a href="#" aria-current="page">Overview</a></li>
+          <li><a href="#">Orders</a></li>
+          <li><a href="#">Products</a></li>
+          <li><a href="#">Customers</a></li>
+          <li><a href="#">Reports</a></li>
+        </ul>
+      </nav>
+      <div class="actions">
+        <form class="search" id="search" role="search" onsubmit="return false" inert>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+          <label class="visually-hidden" for="q">Search Sora Shop</label>
+          <input id="q" type="search" placeholder="Search orders, products, customers" autocomplete="off">
+          <span class="kbd" aria-hidden="true">Esc</span>
+          <button class="icon-btn" type="button" id="search-clear" aria-label="Clear search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+          </button>
+        </form>
+        <button class="icon-btn" type="button" id="search-toggle" aria-label="Search" aria-expanded="false" aria-controls="search" title="Search (/)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+        </button>
+        <!-- Account entry point in the same place on every screen (NAV-07) -->
+        <button class="avatar-btn" type="button" aria-label="Account menu, Hana Kim" aria-haspopup="menu">
+          <span class="avatar" aria-hidden="true">HK</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="page-head">
+      <h1>Good afternoon, Hana</h1>
+      <p class="muted">October so far. Seven days left to reach the monthly goal.</p>
+    </div>
+
+    <div class="bento">
+      <!-- Leading tile: the only accent-soft fill, the largest figure (LAY-05, LAY-14) -->
+      <section class="tile t-goal" aria-labelledby="goal-title">
+        <div class="tile-head">
+          <h2 id="goal-title">Monthly revenue goal</h2>
+          <span class="pill pill-neutral">7 days left</span>
+        </div>
+        <div class="goal-body">
+          <div class="ring-wrap">
+            <svg class="ring" viewBox="0 0 120 120" role="img" aria-label="72% of the monthly goal reached; 77% expected by today">
+              <g transform="rotate(-90 60 60)">
+                <circle class="track" cx="60" cy="60" r="50"/>
+                <circle class="progress" cx="60" cy="60" r="50" pathLength="1" stroke-dasharray="0.724 1"/>
+              </g>
+              <!-- Pace tick at 77.4% of the circle (24 of 31 days), measured clockwise from 12 o'clock -->
+              <line class="pace" x1="18.48" y1="53.69" x2="2.66" y2="51.29"/>
+            </svg>
+            <div class="ring-center" aria-hidden="true">
+              <span class="big num">72%</span>
+              <span class="subtle">of goal</span>
+            </div>
+          </div>
+          <div class="goal-text">
+            <p class="goal-figure num">$72,400</p>
+            <p class="goal-of">of <span class="num">$100,000</span> this month</p>
+            <ul class="goal-keys">
+              <li><span class="k-progress" aria-hidden="true"></span>Reached so far<span class="num">72.4%</span></li>
+              <li><span class="k-pace" aria-hidden="true"></span>Expected by today<span class="num">77.4%</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="goal-status">
+          <span class="pill pill-warning">Slightly behind pace</span>
+          <p>About <span class="num">$3,950</span> a day closes the gap by October 31.</p>
+        </div>
+      </section>
+
+      <section class="tile t-customers" aria-labelledby="cust-title">
+        <div class="tile-head">
+          <h2 id="cust-title">New customers</h2>
+          <span class="subtle">Last 30 days</span>
+        </div>
+        <p class="big num">1,248</p>
+        <p class="stat-foot">
+          <span class="delta delta-good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span class="num">+8.3%</span></span>
+          <span class="subtle">vs September</span>
+        </p>
+        <svg class="spark" viewBox="0 0 300 40" preserveAspectRatio="none" aria-hidden="true">
+          <path class="area" d="M0 30 L25 28 L50 31 L75 24 L100 26 L125 20 L150 22 L175 16 L200 18 L225 12 L250 14 L275 8 L300 6 L300 40 L0 40 Z"/>
+          <path class="line" vector-effect="non-scaling-stroke" d="M0 30 L25 28 L50 31 L75 24 L100 26 L125 20 L150 22 L175 16 L200 18 L225 12 L250 14 L275 8 L300 6"/>
+        </svg>
+      </section>
+
+      <section class="tile t-conversion" aria-labelledby="conv-title">
+        <div class="tile-head">
+          <h2 id="conv-title">Conversion rate</h2>
+        </div>
+        <p class="big num">3.6<span class="unit">%</span></p>
+        <p class="stat-foot">
+          <span class="delta delta-good"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span class="num">+0.4 pts</span></span>
+          <span class="subtle">vs September</span>
+        </p>
+        <p class="conv-meta"><span class="num">1,484</span> orders from <span class="num">41,220</span> sessions</p>
+      </section>
+
+      <section class="tile t-product" aria-labelledby="prod-title">
+        <div class="tile-head">
+          <h2 id="prod-title">Top product</h2>
+          <span class="pill pill-neutral">#1 in October</span>
+        </div>
+        <div class="product-body">
+          <div class="product">
+            <!-- Abstract product image: a mug built from SVG shapes, no photo needed -->
+            <svg class="product-img" viewBox="0 0 88 88" role="img" aria-label="Aster ceramic mug in sand">
+              <defs>
+                <linearGradient id="mug-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6efe6"/><stop offset="1" stop-color="#eadfd0"/></linearGradient>
+                <linearGradient id="mug-body" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d9c3a5"/><stop offset="0.55" stop-color="#ead9c1"/><stop offset="1" stop-color="#c9ad89"/></linearGradient>
+              </defs>
+              <rect width="88" height="88" rx="12" fill="url(#mug-bg)"/>
+              <ellipse cx="42" cy="68" rx="24" ry="4" fill="#d8c8b2"/>
+              <path d="M58 36h4a8 8 0 0 1 0 16h-4" fill="none" stroke="#c9ad89" stroke-width="5"/>
+              <path d="M22 26h40v34a8 8 0 0 1-8 8H30a8 8 0 0 1-8-8z" fill="url(#mug-body)"/>
+              <ellipse cx="42" cy="26" rx="20" ry="4" fill="#bfa27e"/>
+              <path d="M28 40c4 2 8 2 12 0s8-2 12 0" fill="none" stroke="#0f766e" stroke-width="2" stroke-linecap="round" opacity="0.55"/>
+            </svg>
+            <div>
+              <p class="product-name">Aster ceramic mug</p>
+              <p class="subtle">Sand · 350 ml</p>
+              <p class="product-price num">$27.00</p>
+            </div>
+          </div>
+          <dl class="product-stats">
+            <div><dt>Units sold</dt><dd class="num">412</dd></div>
+            <div><dt>Revenue</dt><dd class="num">$11,124</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="tile t-traffic" aria-labelledby="traffic-title">
+        <div class="tile-head">
+          <h2 id="traffic-title">Traffic sources</h2>
+          <span class="subtle"><span class="num">41,220</span> sessions</span>
+        </div>
+        <ul class="bars">
+          <li><span class="label">Direct</span><span class="track" role="img" aria-label="38%"><span class="fill" style="--v: 38"></span></span><span class="val num">38%</span></li>
+          <li><span class="label">Search</span><span class="track" role="img" aria-label="27%"><span class="fill" style="--v: 27"></span></span><span class="val num">27%</span></li>
+          <li><span class="label">Social</span><span class="track" role="img" aria-label="18%"><span class="fill" style="--v: 18"></span></span><span class="val num">18%</span></li>
+          <li><span class="label">Email</span><span class="track" role="img" aria-label="11%"><span class="fill" style="--v: 11"></span></span><span class="val num">11%</span></li>
+          <li><span class="label">Referral</span><span class="track" role="img" aria-label="6%"><span class="fill" style="--v: 6"></span></span><span class="val num">6%</span></li>
+        </ul>
+      </section>
+
+      <section class="tile t-tasks" aria-labelledby="tasks-title">
+        <div class="tile-head">
+          <h2 id="tasks-title">This week</h2>
+          <span class="subtle" id="task-count" aria-live="polite"><span class="num">3</span> of <span class="num">5</span> completed</span>
+        </div>
+        <div class="progress" id="task-progress" style="--done: 3; --total: 5" aria-hidden="true"><span></span></div>
+        <ul class="tasks" id="tasks">
+          <li><label><input type="checkbox" checked><span class="task-text">Approve October payouts</span><span class="due">Mon</span></label></li>
+          <li><label><input type="checkbox" checked><span class="task-text">Restock Aster mugs in sand</span><span class="due">Tue</span></label></li>
+          <li><label><input type="checkbox" checked><span class="task-text">Reply to 4 product reviews</span><span class="due">Wed</span></label></li>
+          <li><label><input type="checkbox"><span class="task-text">Schedule the winter sale email</span><span class="due">Fri</span></label></li>
+          <li><label><input type="checkbox"><span class="task-text">Review December shipping rates</span><span class="due">Sat</span></label></li>
+        </ul>
+      </section>
+
+      <section class="tile t-activity" aria-labelledby="activity-title">
+        <div class="tile-head">
+          <h2 id="activity-title">Team activity</h2>
+          <a href="#" class="tile-link">View log</a>
+        </div>
+        <ul class="feed">
+          <li>
+            <span class="avatar" aria-hidden="true">PN</span>
+            <p class="text"><strong>Priya Nair</strong> published <strong>Aster ceramic mug, moss</strong><span class="sub">Products</span></p>
+            <time datetime="2026-10-24T14:08">12 min ago</time>
+          </li>
+          <li>
+            <span class="avatar" aria-hidden="true">LB</span>
+            <p class="text"><strong>Leo Brandt</strong> refunded order <strong class="num">#SL-1045</strong><span class="sub">Orders · $39.90 to the original card</span></p>
+            <time datetime="2026-10-24T13:31">49 min ago</time>
+          </li>
+          <li>
+            <span class="avatar" aria-hidden="true">NP</span>
+            <p class="text"><strong>Nina Park</strong> replied to a review of <strong>Linen table runner</strong><span class="sub">Reviews</span></p>
+            <time datetime="2026-10-24T11:52">2 hr ago</time>
+          </li>
+          <li>
+            <span class="avatar" aria-hidden="true">MS</span>
+            <p class="text"><strong>Mateo Silva</strong> updated shipping rates for <strong>3 regions</strong><span class="sub">Settings</span></p>
+            <time datetime="2026-10-24T09:15">5 hr ago</time>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </main>
+
+<script>
+  // Checklist count and progress follow the real checkboxes; the count sits in a polite live region (CMP-31).
+  const boxes = [...document.querySelectorAll("#tasks input")];
+  const count = document.getElementById("task-count");
+  const bar = document.getElementById("task-progress");
+  function updateTasks() {
+    const done = boxes.filter((b) => b.checked).length;
+    count.textContent = `${done} of ${boxes.length} completed`;
+    bar.style.setProperty("--done", done);
+    bar.style.setProperty("--total", boxes.length);
+  }
+  boxes.forEach((b) => b.addEventListener("change", updateTasks));
+
+  // Search expands in place, moves focus into the field, and closes on Escape or outside click (NAV-12).
+  const toggle = document.getElementById("search-toggle");
+  const form = document.getElementById("search");
+  const input = document.getElementById("q");
+  function setSearch(open, { restoreFocus = true } = {}) {
+    form.classList.toggle("is-open", open);
+    form.inert = !open;
+    toggle.setAttribute("aria-expanded", String(open));
+    if (open) input.focus();
+    else if (restoreFocus) toggle.focus();
+  }
+  toggle.addEventListener("click", () => setSearch(toggle.getAttribute("aria-expanded") !== "true"));
+  document.getElementById("search-clear").addEventListener("click", () => { input.value = ""; input.focus(); });
+  form.addEventListener("keydown", (e) => { if (e.key === "Escape") setSearch(false); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "/" && !form.classList.contains("is-open") && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); setSearch(true); }
+  });
+  document.addEventListener("pointerdown", (e) => {
+    if (form.classList.contains("is-open") && !form.contains(e.target) && !toggle.contains(e.target)) setSearch(false, { restoreFocus: false });
+  });
+</script>
+</body>
+</html>
