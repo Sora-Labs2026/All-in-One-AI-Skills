@@ -1,8 +1,8 @@
 <!doctype html>
 <!-- ProductCraft example: dashboard-v9 (credit score and financial health, "Sora Pay"). Original Sora Labs example, MIT License.
-     Demonstrates: SCR-01, SCR-02, SCR-23, LAY-02, LAY-04, LAY-05, LAY-08, TYP-07, TYP-09, COL-06, COL-07, CMP-10,
-     CMP-17, CMP-18, CMP-20, CMP-23, DRK-02, DRK-03, DRK-04, DRK-05, DRK-06, DRK-09, BTN-01, BTN-14, BTN-16, ICO-03,
-     ICO-04, COP-10, COP-12, ENG-07, ENG-10, NAV-03 -->
+     Demonstrates: SCR-01, SCR-02, SCR-23, LAY-02, LAY-04, LAY-05, LAY-08, TYP-07, TYP-09, COL-01, COL-06, COL-07,
+     CMP-10, CMP-17, CMP-18, CMP-20, CMP-23, DRK-01, DRK-02, DRK-03, DRK-04, DRK-05, DRK-06, DRK-09, BTN-01, BTN-14,
+     BTN-16, ICO-03, ICO-04, COP-10, COP-12, ENG-07, ENG-10, NAV-03 -->
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
@@ -110,7 +110,7 @@
     .util-note { font-size: var(--text-xs); color: var(--text-3); }
     .effect { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-4); }
     .effect .k { font-size: var(--text-sm); color: var(--text-2); }
-    .effect .v { font-size: var(--text-lg); font-weight: 700; }
+    .effect .v { font-size: var(--text-lg); font-weight: 700; white-space: nowrap; }
     .fine { margin-top: var(--space-1); font-size: var(--text-xs); color: var(--text-3); }
     .next-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-5); }
     .next-actions .btn-primary { flex: 1; min-height: 48px; }
@@ -172,7 +172,8 @@
     }
     @media (max-width: 640px) {
       .topbar-inner, .page { padding-left: var(--space-4); padding-right: var(--space-4); }
-      .mask-toggle .txt { display: none; }
+      /* Label stays in the accessibility tree when the button shrinks to its icon (ICO-04) */
+      .mask-toggle .txt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
       .card { padding: var(--space-5); }
       .score { font-size: 72px; }
       .card-head { flex-direction: column; }

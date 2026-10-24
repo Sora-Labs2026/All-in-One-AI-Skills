@@ -169,8 +169,10 @@
     .step:focus-visible { border-radius: 50%; }
     .step svg { width: 20px; height: 20px; }
     .step[aria-disabled="true"] { opacity: 0.45; cursor: not-allowed; }
-    .heat-state { display: flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 20px; font-size: var(--text-sm); font-weight: 600; color: var(--text); text-align: center; }
-    .heat-state svg { width: 16px; height: 16px; color: var(--accent-ink); flex: none; }
+    .heat-state { flex: 1; display: grid; justify-items: center; gap: 2px; min-height: 40px; text-align: center; }
+    .heat-state strong { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-md); }
+    .heat-state strong svg { width: 16px; height: 16px; color: var(--accent-ink); flex: none; }
+    .heat-state small { font-size: var(--text-xs); color: var(--text-3); }
     .thermo-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: auto; padding-top: var(--space-4); border-top: 1px solid var(--border); text-align: center; }
     .thermo-stats div + div { border-left: 1px solid var(--border); }
     .thermo-stats dt { font-size: var(--text-xs); color: var(--text-3); }
@@ -185,7 +187,7 @@
     .energy-sum { display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-4); }
     .energy-sum .big { font-size: var(--text-2xl); font-weight: 700; line-height: 1.2; }
     .energy-sum .big .unit { font-size: var(--text-md); color: var(--text-2); }
-    .bars-wrap { display: grid; grid-template-columns: 52px minmax(0, 1fr); grid-template-rows: 264px auto; margin-top: var(--space-5); }
+    .bars-wrap { display: grid; grid-template-columns: 52px minmax(0, 1fr); grid-template-rows: 296px auto; margin-top: var(--space-5); }
     .y-axis, .x-axis { position: relative; font-size: var(--text-xs); color: var(--text-3); }
     .y-axis span { position: absolute; right: var(--space-3); bottom: calc(var(--p) * 1% - 8px); line-height: 16px; white-space: nowrap; }
     .x-axis { grid-column: 2; height: 24px; }
@@ -363,9 +365,9 @@
           <button class="step" type="button" id="raise" aria-label="Raise target by 0.5 degrees"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></button>
         </div>
         <dl class="thermo-stats thermo-gap">
-          <div><dt>Inside</dt><dd class="num">20.5 °C</dd></div>
           <div><dt>Humidity</dt><dd class="num">46%</dd></div>
-          <div><dt>Heat pump</dt><dd class="num">940 W</dd></div>
+          <div><dt>Heat pump now</dt><dd class="num">940 W</dd></div>
+          <div><dt>Heating today</dt><dd class="num">6.1 kWh</dd></div>
         </dl>
       </section>
     </div>
@@ -585,7 +587,10 @@
       : "Open since 13:50, 42 min. The radiator under it is still heating, losing about 0.3 kWh an hour.";
     document.getElementById("heat-off").hidden = off;
   }
-  document.getElementById("heat-off").addEventListener("click", () => setDevice("g-radiator", false));
+  document.getElementById("heat-off").addEventListener("click", () => {
+    setDevice("g-radiator", false);
+    document.querySelector("[data-show-room]").focus(); // the pressed button is now hidden, so keep focus in the alert
+  });
 
   // Power now: lights and small loads grouped, the heat pump from the meter; the total is the sum of rows (COP-08, TYP-09).
   const STANDBY = 177; // router, hub, chargers on standby
@@ -636,8 +641,12 @@
     const diff = target - CURRENT;
     const state = document.getElementById("heat-state");
     const flame = '<path d="M12 3.5c1 3 4.5 4.5 4.5 9a4.5 4.5 0 0 1-9 0c0-2 1-3.5 2-4.5.3 1.5 1 2.5 2 2.5 0-2.5-1-4.5.5-7z"/>';
-    state.innerHTML = diff > 0 ? svgIcon(flame) : "";
-    state.append(diff > 0 ? `Heating · about ${Math.round((diff / 2) * 60)} min to go` : diff === 0 ? "Holding at target" : "Idle · warmer than target");
+    const word = el("strong");
+    if (diff > 0) word.innerHTML = svgIcon(flame);
+    word.append(diff > 0 ? "Heating" : diff === 0 ? "Holding" : "Idle");
+    const limit = target >= MAX ? `Highest setting is ${temp.format(MAX)} °C` : target <= MIN ? `Lowest setting is ${temp.format(MIN)} °C` : "";
+    const why = el("small", null, limit || (diff > 0 ? `About ${Math.round((diff / 2) * 60)} min to ${temp.format(target)} °C` : diff === 0 ? "Room is at target" : "Room is warmer than target"));
+    state.replaceChildren(word, why);
     [["lower", target <= MIN], ["raise", target >= MAX]].forEach(([id, stop]) => document.getElementById(id).setAttribute("aria-disabled", String(stop)));
   }
   document.getElementById("lower").addEventListener("click", () => { if (target > MIN) { target -= 0.5; renderTarget(); } });
