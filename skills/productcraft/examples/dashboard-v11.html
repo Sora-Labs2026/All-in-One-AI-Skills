@@ -475,7 +475,9 @@
     const read = el("p", "mini-read");
     read.setAttribute("aria-live", "polite");
 
-    const table = el("table", "visually-hidden");
+    const hidden = el("div", "visually-hidden");
+    const table = el("table");
+    hidden.append(table);
     table.append(el("caption", null, m.title + " in " + m.unit + ", weekly average"));
     m.values.forEach((v, i) => { const tr = el("tr"); const th = el("th", null, "Week of " + weeks[i]); th.scope = "row"; tr.append(th, el("td", null, fmt.format(v))); table.append(tr); });
 
@@ -491,7 +493,7 @@
     plot.addEventListener("keydown", (e) => { const s = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (s) { e.preventDefault(); show(index + s); } });
     show(index);
 
-    box.append(h, value, foot, el("p", "metric-context", m.goalLabel), plot, axis, read, table);
+    box.append(h, value, foot, el("p", "metric-context", m.goalLabel), plot, axis, read, hidden);
     return box;
   }));
 </script>

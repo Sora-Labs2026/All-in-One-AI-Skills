@@ -1,8 +1,8 @@
 <!doctype html>
 <!-- ProductCraft example: dashboard-v5 (sales forecast CRM, light, top navigation, ink accent). Original Sora Labs example, MIT License.
      Demonstrates: SCR-01, LAY-05, LAY-01, LAY-02, LAY-08, TYP-02, TYP-09, COL-01, COL-02, COL-06, COL-07, CMP-13,
-     CMP-17, CMP-18, CMP-19, CMP-26, NAV-03, NAV-06, NAV-07, NAV-15, BTN-01, BTN-07, BTN-09, FBK-06, FBK-18, COP-08,
-     COP-10, ICO-04, ENG-07, SCR-02, FRM-01 -->
+     CMP-17, CMP-18, CMP-19, CMP-20, CMP-26, NAV-03, NAV-06, NAV-07, NAV-15, BTN-01, BTN-07, BTN-09, FBK-06, FBK-18,
+     COP-08, COP-10, ENG-07, SCR-02, FRM-01 -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -528,7 +528,7 @@
     li.append(el("span", "rank num", String(i + 1)), av, body, val); return li;
   }));
 
-  // Deals table: render from data, sort from header buttons, keep aria-sort on the sorted column (CMP-19, NAV-15 native semantics)
+  // Deals table: render from data, sort from header buttons, keep aria-sort on the sorted column (CMP-19, ENG-07)
   const stageOrder = ["Discovery", "Proposal", "Negotiation"];
   const deals = [
     { name: "Harbor Point Logistics", what: "Fleet expansion", owner: "Priya Nair", initials: "PN", stage: "Negotiation", fc: "Commit", close: "2026-11-06", value: 186000, next: "Legal redlines", nextDate: "2026-10-27" },
@@ -585,6 +585,12 @@
   renderDeals();
   const commitSum = deals.filter((d) => d.fc === "Commit").reduce((s, d) => s + d.value, 0);
   const bestSum = deals.filter((d) => d.fc === "Best case").reduce((s, d) => s + d.value, 0);
+  // Ctrl+K (or Cmd+K) reaches search from anywhere, as the hint on the control says (BTN-09).
+  // Example only: open your command palette here instead of moving focus.
+  document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); document.querySelector(".search-btn").focus(); }
+  });
+
   document.getElementById("deals-sum").innerHTML = `Showing 7 of 38 · <strong class="num">${usd.format(commitSum)}</strong> commit and <strong class="num">${usd.format(bestSum)}</strong> best case`;
 </script>
 </body>

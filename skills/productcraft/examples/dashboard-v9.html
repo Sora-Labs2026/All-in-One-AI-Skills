@@ -152,7 +152,7 @@
 
     /* Factors: leading icon, name and detail, value, impact in words + icon, rating pill (CMP-20, ICO-03, COL-07) */
     .factors { list-style: none; margin: var(--space-4) 0 0; padding: 0; }
-    .factor { display: grid; grid-template-columns: 40px minmax(0, 1fr) 128px 96px; align-items: center; gap: var(--space-4); min-height: 68px; padding: var(--space-3) 0; }
+    .factor { display: grid; grid-template-columns: 40px minmax(0, 1fr) 128px 96px; align-items: center; gap: var(--space-4); min-height: 64px; padding: var(--space-3) 0; }
     .factor + .factor { border-top: 1px solid var(--border); }
     .f-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-md); background: var(--surface-2); color: var(--text-2); }
     .f-name { font-weight: 600; color: var(--text); }
@@ -298,7 +298,7 @@
           <div class="plot" id="plot" tabindex="0" role="group" aria-roledescription="chart" aria-label="Score history. Use the left and right arrow keys to read each month." aria-describedby="hist-summary">
             <div id="grid" aria-hidden="true"></div>
             <svg viewBox="0 0 600 248" preserveAspectRatio="none" aria-hidden="true">
-              <defs><linearGradient id="wash" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c6f15a" stop-opacity="0.16"/><stop offset="1" stop-color="#c6f15a" stop-opacity="0"/></linearGradient></defs>
+              <defs><linearGradient id="wash" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c6f15a" stop-opacity="0.12"/><stop offset="1" stop-color="#c6f15a" stop-opacity="0"/></linearGradient></defs>
               <path class="series-area" id="area"/>
               <path class="series-line" id="line" vector-effect="non-scaling-stroke"/>
             </svg>

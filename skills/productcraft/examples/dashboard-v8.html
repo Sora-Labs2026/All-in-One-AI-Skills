@@ -92,19 +92,22 @@
     .notice .btn { margin-top: var(--space-3); min-height: 36px; font-size: var(--text-sm); }
 
     /* Filters: labeled search, multi-select role chips (aria-pressed), single-select status (radiogroup) (CMP-23, FRM-01) */
-    .people-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); }
+    .people-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+    .people-title { display: flex; align-items: baseline; gap: var(--space-4); flex-wrap: wrap; }
+    .field.field-inline { display: flex; align-items: center; gap: var(--space-3); }
+    .field-inline label { font-size: var(--text-sm); }
     .people-head h2 { display: flex; align-items: baseline; gap: var(--space-2); }
     .people-head .total { font-size: var(--text-md); font-weight: 500; color: var(--text-3); }
-    .result { font-size: var(--text-sm); color: var(--text-2); display: flex; align-items: center; gap: var(--space-3); }
+    .result { font-size: var(--text-sm); color: var(--text-2); display: flex; align-items: center; gap: var(--space-2); min-height: 32px; }
     .result .btn { min-height: 32px; padding: 0 var(--space-2); font-size: var(--text-sm); }
     .result .btn[hidden] { display: none; }
-    .filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-4) var(--space-5); margin-top: var(--space-3); }
+    .filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-4) var(--space-6); margin-top: var(--space-4); }
     .field, .chip-group { display: grid; gap: var(--space-2); }
     .field label, .group-label { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
     .search { position: relative; }
     .search svg.i { position: absolute; left: 10px; top: 10px; width: 16px; height: 16px; color: var(--text-3); pointer-events: none; }
     .search input {
-      width: 208px; min-height: 36px; padding: 0 var(--space-3) 0 34px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+      width: 240px; min-height: 36px; padding: 0 var(--space-3) 0 34px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
       background: var(--surface); font-size: var(--text-sm); color: var(--text);
     }
     .search input:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
@@ -173,6 +176,7 @@
     .invite-actions .btn { min-height: 32px; padding: 0 var(--space-3); font-size: var(--text-sm); min-width: 104px; }
     .invite-actions .btn svg { width: 16px; height: 16px; }
     .invite-actions .btn-ghost { min-width: 0; }
+    .invite-actions .btn[data-state="sent"] { opacity: 1; cursor: default; color: var(--success); }
     .spinner { width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -190,7 +194,8 @@
       .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .search input { width: 100%; }
       .field { width: 100%; }
-      .people-head { flex-direction: column; gap: var(--space-1); }
+      .people-head { flex-direction: column; align-items: stretch; gap: var(--space-3); }
+      .field-inline .search { flex: 1; }
       .invite { grid-template-columns: 32px minmax(0, 1fr); }
       .invite-actions { grid-column: 2; }
     }
@@ -284,33 +289,35 @@
     <!-- People: filters with real selection semantics, then a grid of person cards -->
     <section aria-labelledby="people-title">
       <div class="people-head">
-        <h2 id="people-title">People <span class="total num">10</span></h2>
-        <p class="result"><span id="result" aria-live="polite">Showing all 10 people</span><button class="btn btn-ghost" type="button" id="clear" hidden>Clear filters</button></p>
-      </div>
-      <div class="filters">
-        <div class="field">
-          <label for="q">Name or email</label>
+        <div class="people-title">
+          <h2 id="people-title">People <span class="total num">10</span></h2>
+          <p class="result"><span id="result" aria-live="polite">Showing all 10 people</span><button class="btn btn-ghost" type="button" id="clear" hidden>Clear filters</button></p>
+        </div>
+        <div class="field field-inline">
+          <label for="q">Search</label>
           <div class="search">
             <svg class="i" aria-hidden="true"><use href="#i-search"/></svg>
-            <input id="q" type="search" autocomplete="off" placeholder="e.g. hana">
+            <input id="q" type="search" autocomplete="off" placeholder="Name or email">
           </div>
         </div>
+      </div>
+      <div class="filters">
         <div class="chip-group">
           <span class="group-label" id="role-label">Role, one or more</span>
           <div class="chips" role="group" aria-labelledby="role-label" id="roles">
-            <button class="chip" type="button" aria-pressed="false" data-role="Owner"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Owner <span class="n num">1</span></button>
-            <button class="chip" type="button" aria-pressed="false" data-role="Admin"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Admin <span class="n num">2</span></button>
-            <button class="chip" type="button" aria-pressed="false" data-role="Member"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Member <span class="n num">5</span></button>
-            <button class="chip" type="button" aria-pressed="false" data-role="Guest"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Guest <span class="n num">2</span></button>
+            <button class="chip" type="button" aria-pressed="false" data-role="Owner"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Owner <span class="n num">1</span></button>
+            <button class="chip" type="button" aria-pressed="false" data-role="Admin"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Admin <span class="n num">2</span></button>
+            <button class="chip" type="button" aria-pressed="false" data-role="Member"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Member <span class="n num">5</span></button>
+            <button class="chip" type="button" aria-pressed="false" data-role="Guest"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Guest <span class="n num">2</span></button>
           </div>
         </div>
         <div class="chip-group">
           <span class="group-label" id="status-label">Status</span>
           <div class="chips" role="radiogroup" aria-labelledby="status-label" id="statuses">
-            <button class="chip" type="button" role="radio" aria-checked="true" tabindex="0" data-status=""><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Any</button>
-            <button class="chip" type="button" role="radio" aria-checked="false" tabindex="-1" data-status="Active"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Active <span class="n num">8</span></button>
-            <button class="chip" type="button" role="radio" aria-checked="false" tabindex="-1" data-status="Inactive"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Inactive <span class="n num">1</span></button>
-            <button class="chip" type="button" role="radio" aria-checked="false" tabindex="-1" data-status="Suspended"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Suspended <span class="n num">1</span></button>
+            <button class="chip" type="button" role="radio" aria-checked="true" tabindex="0" data-status=""><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Any</button>
+            <button class="chip" type="button" role="radio" aria-checked="false" tabindex="-1" data-status="Active"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Active <span class="n num">8</span></button>
+            <button class="chip" type="button" role="radio" aria-checked="false" tabindex="-1" data-status="Inactive"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Inactive <span class="n num">1</span></button>
+            <button class="chip" type="button" role="radio" aria-checked="false" tabindex="-1" data-status="Suspended"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Suspended <span class="n num">1</span></button>
           </div>
         </div>
       </div>
@@ -517,6 +524,7 @@
         btn.querySelector(".spinner").replaceWith(icon);
         icon.innerHTML = '<use href="#i-check"/>';
         label.textContent = "Sent";
+        btn.dataset.state = "sent";
         btn.closest(".invite").querySelector("[data-meta]").textContent = "Member · resent just now by Priya Nair · expires Sat, Oct 31";
         document.getElementById("invite-status").textContent = `Invite resent to ${btn.dataset.resend}.`;
       }, 900);

@@ -2,7 +2,7 @@
 <!-- ProductCraft example: overlays. Original Sora Labs example, MIT License.
      Demonstrates: CMP-12, CMP-14, CMP-16, CMP-23, CMP-25, FBK-08, BTN-01, BTN-05, BTN-09, BTN-10, COP-01, COP-10,
      ENG-01, ENG-05, FRM-01, FRM-02, FRM-05, FRM-06, FRM-12, ICO-03, ICO-04, DRK-03, DRK-09, MOB-01, MOB-04,
-     MOB-11, SCR-20 -->
+     MOB-11, MOT-01, SCR-20 -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -15,6 +15,7 @@
     :root { --field-border: #8a909c; --scrim: rgba(15, 23, 42, 0.45); }
     [data-theme="dark"] { --field-border: #6b7280; }
     [hidden] { display: none !important; }
+    textarea { font: inherit; color: inherit; }
 
     .sheet-header h1 { margin-top: var(--space-2); }
     .variant > .variant-stage { flex: 1 0 auto; padding: var(--space-5); grid-template-columns: minmax(0, 1fr); }
@@ -56,7 +57,7 @@
     .file-ic .i { width: 18px; height: 18px; }
 
     /* v1 document behind the menu */
-    .v1 .app { --h: 412px; }
+    .v1 .app { --h: 476px; }
     .avatars { display: flex; }
     .avatars .avatar { width: 28px; height: 28px; font-size: 11px; border: 2px solid var(--surface); }
     .avatars .avatar + .avatar { margin-left: -8px; }
@@ -70,25 +71,25 @@
     .v1 .menu { top: 56px; right: var(--space-3); }
 
     /* v2 dark file list with a context menu at the pointer (DRK-03: the menu is the lightest surface) */
-    .v2 .app { --h: 412px; }
+    .v2 .app { --h: 476px; }
     .v2 [data-theme="dark"] .menu { background: #262b36; border-color: rgba(255, 255, 255, 0.1); }
     .v2 [data-theme="dark"] .menu [role="menuitem"]:hover, .v2 [data-theme="dark"] .menu [role="menuitem"]:focus { background: rgba(255, 255, 255, 0.07); }
     .v2 [data-theme="dark"] .menu .danger:hover, .v2 [data-theme="dark"] .menu .danger:focus { background: var(--danger-soft); }
     .files { margin: 0; padding: var(--space-1) 0; list-style: none; }
-    .files li { display: grid; grid-template-columns: 36px minmax(0, 1fr) 96px 68px 36px; align-items: center; gap: var(--space-3); min-height: 52px; padding: 0 var(--space-3) 0 var(--space-5); }
+    .files li { display: grid; grid-template-columns: 36px minmax(0, 1fr) 64px 64px 36px; align-items: center; gap: var(--space-3); min-height: 52px; padding: 0 var(--space-3) 0 var(--space-5); }
     .files li + li { border-top: 1px solid var(--border); }
     .files li[aria-current="true"], .files li.ctx { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
     .files a { min-width: 0; color: var(--text); font-size: var(--text-sm); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .files .meta { font-size: var(--text-xs); color: var(--text-2); }
     .files .size { text-align: right; }
-    .files-head { display: grid; grid-template-columns: 36px minmax(0, 1fr) 96px 68px 36px; gap: var(--space-3); padding: var(--space-2) var(--space-3) var(--space-2) var(--space-5); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); border-bottom: 1px solid var(--border); }
+    .files-head { display: grid; grid-template-columns: 36px minmax(0, 1fr) 64px 64px 36px; gap: var(--space-3); padding: var(--space-2) var(--space-3) var(--space-2) var(--space-5); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); border-bottom: 1px solid var(--border); }
     .files-head .r { text-align: right; }
     .files-hint { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-2) var(--space-5); border-top: 1px solid var(--border); background: var(--surface-2); font-size: var(--text-xs); color: var(--text-2); }
     .files-hint kbd, .hint kbd { display: inline-block; padding: 0 5px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; font: 600 11px/16px var(--font); color: var(--text-2); }
     .cursor { position: absolute; z-index: 6; width: 18px; height: 22px; pointer-events: none; }
 
     /* v3 destructive dialog: native <dialog>, named object, consequences, typed confirmation (FBK-08) */
-    .v3 .app { --h: 500px; background: var(--bg); }
+    .v3 .app { --h: 548px; background: var(--bg); }
     .page-pad { padding: var(--space-5); display: grid; gap: var(--space-4); }
     .setting-card { padding: var(--space-4) var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
     .setting-card h4 { margin: 0; font-size: var(--text-md); }
@@ -122,14 +123,15 @@
     .page-status { margin-top: calc(-1 * var(--space-2)); font-size: var(--text-sm); font-weight: 600; color: var(--success); }
 
     /* v4 drawer over an inert page (ENG-05) */
-    .v4 .app { --h: 500px; }
+    .v4 .app { --h: 548px; }
     .members { margin: 0; padding: var(--space-1) 0; list-style: none; }
     .members li { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); min-height: 56px; padding: 0 var(--space-5); }
     .members li + li { border-top: 1px solid var(--border); }
     .members b { display: block; font-size: var(--text-sm); }
     .members small { display: block; font-size: var(--text-xs); color: var(--text-3); }
     .members .role { font-size: var(--text-sm); color: var(--text-2); }
-    .drawer { position: absolute; top: 0; right: 0; bottom: 0; z-index: 3; display: flex; flex-direction: column; width: 344px; background: var(--surface); border-left: 1px solid var(--border); box-shadow: var(--shadow-lg); animation: slide var(--dur-med) var(--ease-out); }
+    .drawer { position: absolute; top: 0; right: 0; bottom: 0; z-index: 3; display: flex; flex-direction: column; width: 344px; background: var(--surface); border-left: 1px solid var(--border); box-shadow: var(--shadow-lg); }
+    .drawer.entering { animation: slide var(--dur-med) var(--ease-out); }
     @keyframes slide { from { transform: translateX(24px); opacity: 0; } }
     .drawer-head { display: flex; align-items: flex-start; gap: var(--space-2); padding: var(--space-4) var(--space-3) var(--space-3) var(--space-5); }
     .drawer-head .grow { flex: 1; }
@@ -151,7 +153,7 @@
     .err-text { display: flex; align-items: center; gap: 4px; margin-top: 6px; font-size: var(--text-xs); font-weight: 600; color: var(--danger); }
 
     /* v5 filter popover anchored to its trigger (CMP-12, CMP-25) */
-    .v5 .app { --h: 664px; background: var(--bg); }
+    .v5 .app { --h: 680px; background: var(--bg); }
     .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--border); background: var(--surface); }
     .anchor { position: relative; }
     .count-badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); font-size: var(--text-xs); font-weight: 700; }
@@ -193,18 +195,22 @@
     /* v6 phone: chat with a bottom sheet of actions (SCR-20) */
     .v6 .phone { height: 680px; color: var(--text); }
     .v6 .phone-body { position: relative; }
+    .chat { display: flex; flex-direction: column; height: 100%; }
+    .chat-head { position: relative; z-index: 1; }
+    .chat-head::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 40px; background: linear-gradient(var(--bg), transparent); pointer-events: none; }
     .chat-head { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-3) var(--space-2) var(--space-1); border-bottom: 1px solid var(--border); background: var(--surface); }
     .chat-head .icon-btn { width: 44px; height: 44px; color: var(--text); }
     .chat-head b { display: block; font-size: var(--text-md); }
     .chat-head small { display: block; font-size: var(--text-xs); color: var(--text-3); }
-    .thread { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); }
+    .thread { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: var(--space-2); padding: var(--space-4) var(--space-4) calc(var(--sheet-h, 0px) + var(--space-4)); overflow: hidden; }
     .day { align-self: center; font-size: var(--text-xs); color: var(--text-3); }
     .bubble { max-width: 78%; padding: var(--space-2) var(--space-3); border-radius: 18px; font-size: var(--text-md); line-height: 1.4; }
     .bubble.them { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 6px; }
     .bubble.me { align-self: flex-end; border: 0; background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 6px; text-align: left; font: inherit; font-size: var(--text-md); line-height: 1.4; cursor: pointer; }
     .bubble time { display: block; margin-top: 2px; font-size: 11px; opacity: 0.85; }
     .bubble.lifted { position: relative; z-index: 3; box-shadow: 0 0 0 3px var(--surface), var(--shadow-lg); }
-    .bsheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; padding: var(--space-2) var(--space-4) max(var(--space-3), env(safe-area-inset-bottom)); border-radius: 20px 20px 0 0; background: var(--bg); box-shadow: 0 -8px 24px -8px rgba(15, 23, 42, 0.25); animation: up var(--dur-med) var(--ease-out); }
+    .bsheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; padding: var(--space-2) var(--space-4) max(var(--space-3), env(safe-area-inset-bottom)); border-radius: 20px 20px 0 0; background: var(--bg); box-shadow: 0 -8px 24px -8px rgba(15, 23, 42, 0.25); }
+    .bsheet.entering { animation: up var(--dur-med) var(--ease-out); }
     @keyframes up { from { transform: translateY(24px); opacity: 0; } }
     .grabber { display: block; width: 36px; height: 4px; margin: 0 auto var(--space-2); border-radius: 2px; background: var(--field-border); }
     .bsheet h3 { padding-bottom: var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--text-2); text-align: center; }
@@ -245,7 +251,6 @@
     <symbol id="i-chev-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
     <symbol id="i-reply" viewBox="0 0 24 24"><path d="M9 7L4 12l5 5"/><path d="M4 12h10a6 6 0 0 1 6 6"/></symbol>
     <symbol id="i-forward" viewBox="0 0 24 24"><path d="M15 7l5 5-5 5"/><path d="M20 12H10a6 6 0 0 0-6 6"/></symbol>
-    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 6 3 3H7l3-3z"/><path d="M12 13v7"/></symbol>
     <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 15V4"/><path d="M7 9l5-5 5 5"/><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></symbol>
   </svg>
 
@@ -317,15 +322,15 @@
             </div>
             <div class="files-head" aria-hidden="true"><span></span><span>Name</span><span>Modified</span><span class="r">Size</span><span></span></div>
             <ul class="files" id="v2-files" aria-label="Files in Brand assets">
-              <li class="ctx" data-name="brand-guidelines.pdf"><span class="file-ic" aria-hidden="true" style="background: var(--danger-soft); color: var(--danger)"><svg class="i"><use href="#i-doc"/></svg></span><a href="#">brand-guidelines.pdf</a><span class="meta">Oct 22 · Nina Park</span><span class="meta size num">4.2 MB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="true" aria-controls="m2" aria-label="Actions for brand-guidelines.pdf" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
-              <li data-name="logo-kit.zip"><span class="file-ic" aria-hidden="true" style="background: var(--warning-soft); color: var(--warning)"><svg class="i"><use href="#i-archive"/></svg></span><a href="#">logo-kit.zip</a><span class="meta">Oct 20 · Avery Stone</span><span class="meta size num">18.6 MB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="m2" aria-label="Actions for logo-kit.zip" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
-              <li data-name="launch-banner.png"><span class="file-ic" aria-hidden="true" style="background: var(--success-soft); color: var(--success)"><svg class="i"><use href="#i-image"/></svg></span><a href="#">launch-banner.png</a><span class="meta">Oct 19 · Hana Kim</span><span class="meta size num">2.4 MB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="m2" aria-label="Actions for launch-banner.png" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
-              <li data-name="color-tokens.json"><span class="file-ic" aria-hidden="true"><svg class="i"><use href="#i-code"/></svg></span><a href="#">color-tokens.json</a><span class="meta">Oct 15 · Leo Brandt</span><span class="meta size num">12 KB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="m2" aria-label="Actions for color-tokens.json" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
-              <li data-name="voice-and-tone.pdf"><span class="file-ic" aria-hidden="true" style="background: var(--danger-soft); color: var(--danger)"><svg class="i"><use href="#i-doc"/></svg></span><a href="#">voice-and-tone.pdf</a><span class="meta">Oct 9 · Priya Nair</span><span class="meta size num">388 KB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="m2" aria-label="Actions for voice-and-tone.pdf" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
+              <li class="ctx" data-name="brand-guidelines.pdf"><span class="file-ic" aria-hidden="true" style="background: var(--danger-soft); color: var(--danger)"><svg class="i"><use href="#i-doc"/></svg></span><a href="#">brand-guidelines.pdf</a><span class="meta">Oct 22</span><span class="meta size num">4.2 MB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="true" aria-controls="m2" aria-label="Actions for brand-guidelines.pdf" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
+              <li data-name="logo-kit.zip"><span class="file-ic" aria-hidden="true" style="background: var(--warning-soft); color: var(--warning)"><svg class="i"><use href="#i-archive"/></svg></span><a href="#">logo-kit.zip</a><span class="meta">Oct 20</span><span class="meta size num">18.6 MB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="m2" aria-label="Actions for logo-kit.zip" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
+              <li data-name="launch-banner.png"><span class="file-ic" aria-hidden="true" style="background: var(--success-soft); color: var(--success)"><svg class="i"><use href="#i-image"/></svg></span><a href="#">launch-banner.png</a><span class="meta">Oct 19</span><span class="meta size num">2.4 MB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="m2" aria-label="Actions for launch-banner.png" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
+              <li data-name="color-tokens.json"><span class="file-ic" aria-hidden="true"><svg class="i"><use href="#i-code"/></svg></span><a href="#">color-tokens.json</a><span class="meta">Oct 15</span><span class="meta size num">12 KB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="m2" aria-label="Actions for color-tokens.json" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
+              <li data-name="voice-and-tone.pdf"><span class="file-ic" aria-hidden="true" style="background: var(--danger-soft); color: var(--danger)"><svg class="i"><use href="#i-doc"/></svg></span><a href="#">voice-and-tone.pdf</a><span class="meta">Oct 9</span><span class="meta size num">388 KB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="m2" aria-label="Actions for voice-and-tone.pdf" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
             </ul>
             <p class="files-hint">Right-click a file, press <kbd>Shift</kbd> <kbd>F10</kbd>, or use the <span class="visually-hidden">Actions</span><span aria-hidden="true">⋯</span> button</p>
-            <svg class="cursor" id="v2-cursor" viewBox="0 0 18 22" aria-hidden="true" style="left: 248px; top: 118px"><path d="M1.5 1.5v16l4.2-3.9 2.9 6.6 2.8-1.2-2.9-6.5H14z" fill="#ffffff" stroke="#0f1115" stroke-width="1.4" stroke-linejoin="round"/></svg>
-            <div class="menu" id="m2" role="menu" aria-label="Actions for brand-guidelines.pdf" style="left: 256px; top: 128px">
+            <svg class="cursor" id="v2-cursor" viewBox="0 0 18 22" aria-hidden="true" style="left: 246px; top: 124px"><path d="M1.5 1.5v16l4.2-3.9 2.9 6.6 2.8-1.2-2.9-6.5H14z" fill="#ffffff" stroke="#0f1115" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            <div class="menu" id="m2" role="menu" aria-label="Actions for brand-guidelines.pdf" style="left: 250px; top: 132px">
               <button type="button" role="menuitem" tabindex="-1" aria-keyshortcuts="Enter"><svg class="i" aria-hidden="true"><use href="#i-open"/></svg>Open<kbd aria-hidden="true">Enter</kbd></button>
               <button type="button" role="menuitem" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-share"/></svg>Share…</button>
               <button type="button" role="menuitem" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-link"/></svg>Copy link</button>
@@ -491,7 +496,7 @@
                       </div>
                     </fieldset>
                   </div>
-                  <div class="pop-foot"><button class="btn btn-primary" type="button" id="v5-apply">Show <span class="num" id="v5-total">134</span> orders</button></div>
+                  <div class="pop-foot"><button class="btn btn-primary" type="button" id="v5-apply"><span>Show <span class="num" id="v5-total">134</span> orders</span></button></div>
                 </div>
               </div>
               <span class="chip" data-chip="paid">Paid<button type="button" aria-label="Remove filter: Paid"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></span>
@@ -509,6 +514,7 @@
                 <li><span class="num">#SL-1054</span><span>Mateo Silva</span><span><span class="pill pill-success">Paid</span></span><span class="r num">$154.00</span></li>
                 <li><span class="num">#SL-1052</span><span>Zara Ahmed</span><span><span class="pill pill-neutral">Refunded</span></span><span class="r num">$47.50</span></li>
                 <li><span class="num">#SL-1051</span><span>Leo Brandt</span><span><span class="pill pill-success">Paid</span></span><span class="r num">$93.10</span></li>
+                <li><span class="num">#SL-1049</span><span>Jordan Reyes</span><span><span class="pill pill-success">Paid</span></span><span class="r num">$71.35</span></li>
               </ul>
             </section>
             <p class="visually-hidden" role="status" id="v5-live"></p>
@@ -545,7 +551,6 @@
                   <li><button type="button"><svg class="i" aria-hidden="true"><use href="#i-reply"/></svg>Reply</button></li>
                   <li><button type="button"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Copy text</button></li>
                   <li><button type="button"><svg class="i" aria-hidden="true"><use href="#i-forward"/></svg>Forward</button></li>
-                  <li><button type="button"><svg class="i" aria-hidden="true"><use href="#i-pin"/></svg>Pin in chat</button></li>
                   <li><button type="button"><svg class="i" aria-hidden="true"><use href="#i-pencil"/></svg>Edit<span class="note">for 13 more min</span></button></li>
                 </ul>
                 <ul class="acts">
@@ -686,6 +691,7 @@
       const email = document.getElementById("v4-email"), err = document.getElementById("v4-email-err"), status = document.getElementById("v4-status");
       const setOpen = (open) => {
         drawer.hidden = !open; scrim.hidden = !open; page.inert = open;
+        drawer.classList.toggle("entering", open); // MOT-01: slide and fade with transform and opacity only
         if (open) email.focus(); else trigger.focus();
       };
       trigger.addEventListener("click", () => setOpen(true));
@@ -761,11 +767,15 @@
     // v6 SCR-20, MOB-11: tap or long-press the message to open the sheet; Cancel, Escape or the scrim close it.
     (() => {
       const sheet = document.getElementById("v6-sheet"), scrim = document.getElementById("v6-scrim"), chat = document.getElementById("v6-chat"), msg = document.getElementById("v6-msg");
+      // Keep the pressed message in view right above the sheet (SCR-20).
+      const fit = () => chat.style.setProperty("--sheet-h", sheet.hidden ? "0px" : sheet.offsetHeight + "px");
       const setOpen = (open) => {
-        sheet.hidden = !open; scrim.hidden = !open; chat.inert = open;
+        sheet.hidden = !open; scrim.hidden = !open; chat.inert = open; fit();
+        sheet.classList.toggle("entering", open);
         msg.classList.toggle("lifted", open); msg.setAttribute("aria-expanded", String(open));
         if (open) sheet.querySelector("button").focus(); else msg.focus();
       };
+      fit();
       let timer;
       msg.addEventListener("pointerdown", () => { timer = setTimeout(() => setOpen(true), 500); });
       ["pointerup", "pointerleave", "pointercancel"].forEach((n) => msg.addEventListener(n, () => clearTimeout(timer)));

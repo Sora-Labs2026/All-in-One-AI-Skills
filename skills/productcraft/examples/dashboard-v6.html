@@ -1,8 +1,7 @@
 <!doctype html>
 <!-- ProductCraft example: dashboard-v6 (learning home, warm accent, sidebar plus week panel). Original Sora Labs example, MIT License.
-     Demonstrates: SCR-01, LAY-05, LAY-01, LAY-02, LAY-08, TYP-02, TYP-07, TYP-09, COL-01, COL-02, COL-07, COL-14,
-     CMP-15, CMP-18, CMP-20, CMP-26, NAV-03, NAV-08, BTN-01, BTN-08, FBK-06, FRM-22, COP-01, COP-10, ICO-03, ICO-07,
-     ENG-07, ENG-09, SCR-02 -->
+     Demonstrates: SCR-01, LAY-05, LAY-01, LAY-02, TYP-02, TYP-07, TYP-09, COL-01, COL-02, COL-07, COL-14, CMP-15,
+     CMP-18, CMP-26, NAV-03, NAV-08, BTN-01, BTN-08, FBK-06, FRM-01, FRM-22, COP-01, COP-10, ICO-03, ENG-07 -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -60,6 +59,7 @@
     .nav .swatch { width: 20px; height: 20px; flex: none; border-radius: 6px; }
     .nav .course-link { font-size: var(--text-sm); }
     .side-foot { margin-top: auto; display: grid; gap: var(--space-3); }
+    .menu-btn { display: none; }
     .me { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--border); }
     .me .avatar { width: 36px; height: 36px; background: var(--accent-soft); color: var(--accent-ink); }
     .me strong { display: block; font-size: var(--text-sm); }
@@ -192,7 +192,7 @@
     .chart-key svg { width: 14px; height: 14px; color: var(--success); }
     .chart-key i { width: 16px; height: 0; border-top: 1.5px dashed var(--text-3); }
 
-    /* Deadlines: days left as the leading figure, then title, course and date (CMP-20) */
+    /* Deadlines: days left as the leading figure with its unit, then title, date and course (TYP-09) */
     .deadlines { list-style: none; margin: var(--space-3) 0 0; padding: 0; }
     .deadline { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: var(--space-3); min-height: 68px; border-top: 1px solid var(--border); }
     .deadline:first-child { border-top: 0; }
@@ -216,7 +216,10 @@
       .app { grid-template-columns: minmax(0, 1fr); }
       .side { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); }
       .side-inner { position: static; min-height: 0; flex-direction: row; align-items: center; justify-content: space-between; }
+      .side-inner { flex-wrap: wrap; gap: var(--space-2); }
       .side nav, .side-foot { display: none; }
+      .menu-btn { display: inline-grid; }
+      .side.is-open nav { display: block; flex: 1 1 100%; padding-bottom: var(--space-2); }
       .week { grid-column: 1; }
       .courses { grid-template-columns: minmax(0, 1fr); }
     }
@@ -241,7 +244,10 @@
         <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#b4532a"/><path d="M9.5 19.5a6.5 6.5 0 0 1 13 0M7.5 23.5h17" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/></svg>
         Sora Learn
       </a>
-      <nav aria-label="Main" class="side-nav">
+      <button class="icon-btn menu-btn" type="button" id="menu" aria-expanded="false" aria-controls="side-main side-courses" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav aria-label="Main" class="side-nav" id="side-main">
         <ul class="nav">
           <li><a href="#" aria-current="page">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 4l8.5 6.5V20h-5.5v-5.5h-6V20H3.5z"/></svg>Home</a></li>
@@ -257,7 +263,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9.5" r="5.5"/><path d="m9 14.5-1.5 6 4.5-2 4.5 2-1.5-6"/></svg>Certificates</a></li>
         </ul>
       </nav>
-      <nav aria-labelledby="courses-label" class="side-nav">
+      <nav aria-labelledby="courses-label" class="side-nav" id="side-courses">
         <p class="nav-label" id="courses-label">In progress</p>
         <ul class="nav">
           <li><a href="#" class="course-link"><span class="swatch" style="background: var(--c-sql)" aria-hidden="true"></span>Data Analysis with SQL</a></li>
@@ -409,7 +415,7 @@
 </div>
 
 <script>
-  // Raw data, formatted at render time (ENG-07). Today is fixed for the example; use the real date in your app (ENG-09).
+  // Raw data, formatted at render time (ENG-07). Today is fixed for the example; use the real date in your app.
   const today = Date.UTC(2026, 9, 24);
   const day = 86400000;
   const fmt = (opts) => new Intl.DateTimeFormat("en-US", { timeZone: "UTC", ...opts });
@@ -509,7 +515,7 @@
     tr.append(th, el("td", null, m + " min" + (i === weeks.length - 1 ? " so far" : "")), el("td", null, i === weeks.length - 1 ? "In progress" : m >= goal ? "Yes" : "No")); return tr;
   }));
 
-  // Deadlines: days left computed from the due date, nearest first (CMP-20)
+  // Deadlines: days left computed from the due date, nearest first (ENG-07)
   const deadlines = [
     { kind: "Assignment", title: "Quarterly sales report", course: "sql", due: Date.UTC(2026, 9, 27) },
     { kind: "Quiz", title: "Color and contrast", course: "ux", due: Date.UTC(2026, 9, 29) },
@@ -528,6 +534,15 @@
     li.setAttribute("aria-label", `${d.kind}: ${d.title}, due ${fmt({ weekday: "long", month: "long", day: "numeric" }).format(d.due)}, ${left} days left`);
     li.append(tile, body); return li;
   }));
+
+  // Phone widths: the sidebar becomes a disclosure behind a named menu button (NAV-08).
+  const menu = document.getElementById("menu");
+  menu.addEventListener("click", () => {
+    const open = menu.getAttribute("aria-expanded") !== "true";
+    menu.setAttribute("aria-expanded", String(open));
+    menu.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    menu.closest(".side").classList.toggle("is-open", open);
+  });
 
   // Reminder switch: role="switch" + aria-checked, applies at once (FRM-22).
   // Example only: replace with a request to your API to save the reminder preference.
