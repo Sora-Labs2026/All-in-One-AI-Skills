@@ -71,3 +71,30 @@ Typefaces, type scale, weight, size, line length, letter spacing and text color.
 - **Do:** Define named text styles (eyebrow, H1, H2, body, caption, price) and apply them everywhere.
 - **Do:** Give every value with the same role the same size, weight and color.
 - **Avoid:** Coloring each highlighted word or price differently for variety.
+
+## TYP-09. Set numbers for comparison
+
+**Why:** In finance and dashboard views the figures are the content, and they must align and compare at a glance.
+
+- **Do:** Use font-variant-numeric: tabular-nums and right-align amounts in lists and tables.
+- **Do:** Keep one decimal precision per column, and set currency symbols and units slightly smaller than the number.
+- **Do:** Pair a large key figure with its unit and a plain qualifier ("120 bpm, normal"), plus a gauge or range when thresholds matter.
+- **Avoid:** Lone numbers with no unit or meaning, or mixed precision within one column.
+
+## TYP-10. Keep text as real, selectable text
+
+**Why:** Text drawn into images, canvas or CSS content is hard to select, translate, search or read aloud.
+
+- **Do:** Put headings, messages and receipts in HTML, and use CSS only to style them.
+- **Do:** Layer decorative canvas or 3D effects behind or above real text with pointer-events: none.
+- **Avoid:** User-facing messages in ::before or ::after content, or receipts and confirmations rendered as flat images.
+
+## TYP-11. Use display and novelty type only as accents
+
+**Why:** Oversized, condensed, dot-matrix or split-word type adds energy but loses legibility quickly.
+
+- **Do:** Limit display type to short headlines (2-5 words) sized with clamp(), for example clamp(3rem, 10vw, 10rem), with line-height around 0.9-1.
+- **Do:** Use novelty numerals only for one or two large figures (32px or more) and keep a plain label beside them.
+- **Do:** When a headline is split or partly muted for effect, keep the full text as the accessible name and keep the muted part at 3:1 or better.
+- **Avoid:** Display or dot-matrix faces for body text, small labels, tables or placeholders.
+- **Avoid:** Display type over busy photography without a scrim.

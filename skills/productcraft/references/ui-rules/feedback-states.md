@@ -80,3 +80,96 @@ Responsiveness, progress, outcome messages, confirmations and empty screens. Rul
 - **Do:** Offer templates, examples or import options where relevant, and keep navigation visible.
 - **Do:** Write different messages for "nothing created yet", "no search results" and "failed to load" (with a retry).
 - **Avoid:** A bare "No data" message on a blank screen, or several competing buttons.
+
+## FBK-10. Show progress inside the button for async actions
+
+**Why:** Feedback in the exact place the user clicked prevents double submits and doubt.
+
+- **Do:** On activation, swap the label for a present-progressive verb with a spinner ("Signing in...", "Placing order...") or a percentage for measurable work.
+- **Do:** Set aria-busy, block re-submission and keep the button width fixed while the label changes.
+- **Do:** On success show a short confirmation state ("Added" with a check) for about 1.5-2s; on failure restore the button and show an inline error.
+- **Avoid:** Spinner-only buttons with no text, or buttons that stay active during the request.
+
+## FBK-11. Never show success before the server confirms
+
+**Why:** A success animation that runs on a timer can contradict what actually happened, especially for payments and orders.
+
+- **Do:** Start processing visuals when the request starts and show the verdict only when the real result arrives.
+- **Do:** Design the failure path as carefully as success: distinct label, color and icon, and a retry.
+- **Do:** Let animations celebrate a change that already happened, never delay the state change itself.
+- **Avoid:** Fixed setTimeout waits before or instead of the real request.
+
+## FBK-12. Report progress honestly
+
+**Why:** Progress that jumps backwards, races ahead or keeps moving during a stall erodes trust.
+
+- **Do:** Drive determinate progress from real work (for example bytes read from response.body.getReader() against Content-Length) and keep it monotonic.
+- **Do:** Keep the bar indeterminate when the total is unknown, never show 100% before the work is finished, and show a stalled state if nothing arrives for about a second.
+- **Do:** Expose role="progressbar" with aria-valuenow once determinate, show percent text, and offer Cancel (for example through AbortController).
+- **Avoid:** Fixed-duration fills unrelated to the work.
+
+## FBK-13. Give code verification explicit states
+
+**Why:** After the last digit, people need to see that the code is being checked and what happened.
+
+- **Do:** Move through entering, checking (inputs locked, aria-busy), verified (success color, check, next step) and error (message plus icon, digits cleared and focus back in the first box).
+- **Do:** Announce state changes through a polite live region, using role="alert" for the error.
+- **Do:** Stop the resend countdown once verification succeeds.
+- **Avoid:** Signaling the result with glow color or a shake alone.
+
+## FBK-14. Keep the app shell steady while content loads
+
+**Why:** Blank flashes and full-page spinners between views jolt the eye and hide the layout.
+
+- **Do:** Keep navigation and headers mounted and swap only the content region, using skeletons at the real sizes and positions.
+- **Do:** Delay any spinner by about 300ms so fast loads show nothing, match the current theme's background, and set aria-busy on the loading region.
+- **Do:** Reserve space for images and charts (aspect-ratio, fixed heights) so nothing shifts when data arrives.
+- **Avoid:** A white loading screen inside a dark app, or long blur-in effects after the data is ready.
+
+## FBK-15. Prefer undo over confirmation for reversible deletes
+
+**Why:** An undo window is faster than a dialog and still protects against mistakes.
+
+- **Do:** Remove the item immediately, update counts, and show a status toast ("Deleted brand-assets.zip") with Undo and a visible countdown, committing when it expires.
+- **Do:** Restore undone items at their original position, and name the target in icon-only delete buttons.
+- **Avoid:** Modal confirmations for actions that can be undone, or undo windows too short to reach.
+
+## FBK-16. Confirm add-to-cart without interrupting
+
+**Why:** Shoppers want proof the item was added and a path to the cart, not a modal that ends browsing.
+
+- **Do:** Update the cart count at once, switch the add button to "Added" briefly, and announce it through a polite live region.
+- **Do:** Show a toast or a persistent "View cart" pill with the count, keeping any toast for at least 2-4s and pausing it on hover or focus.
+- **Avoid:** Forcing a cart drawer or page open on every add, or confirmations shorter than a second.
+
+## FBK-17. Name the state of long-running and sensing tasks
+
+**Why:** For background jobs, voice input and camera capture, users need to know whether the system is working, listening, done or stuck.
+
+- **Do:** Show a distinct status line per state (working on step X, listening, thinking, done, failed with retry), with the indicator animating only while active.
+- **Do:** For capture tasks, give live positioning guidance and numeric progress, plus manual entry or upload as a fallback.
+- **Do:** Mirror changes in a polite live region and swap control labels and aria-pressed with the state.
+- **Avoid:** Animation or color as the only sign that a microphone is live or a job failed.
+
+## FBK-18. Make exceptions stand out with more than color
+
+**Why:** In monitoring and operational lists, out-of-range records must be visible at a glance.
+
+- **Do:** Give exceptions a strong treatment plus an explicit text or icon marker, and offer a filter or sort that brings them to the top.
+- **Do:** Show "last updated" times for live data and briefly tint newly arrived rows.
+- **Avoid:** A red fill as the only signal, or small white text on saturated red without a contrast check.
+
+## FBK-19. Keep splash screens and preloaders honest and short
+
+**Why:** A launch screen only earns its delay if it reflects real loading.
+
+- **Do:** Tie any progress to real asset loading, finish within about 1-2s, continue automatically and let users skip.
+- **Do:** Match the native launch background to the first screen to avoid a flash, and show a brand intro at most once per session.
+- **Avoid:** Fake percentage counters that hold back content that has already loaded.
+
+## FBK-20. Keep interface sounds opt-in
+
+**Why:** Unexpected audio is disruptive, especially in shared spaces.
+
+- **Do:** Keep UI sounds off by default, provide a visible sound toggle with aria-pressed in a consistent place, and remember the choice.
+- **Avoid:** Playing sound on load or on the first interaction without an obvious control.

@@ -10,7 +10,7 @@ Each skill in this repository is a folder of instructions, references, scripts a
 
 | Skill | Version | What it does |
 |---|---|---|
-| [**ProductCraft**](skills/productcraft/README.md) | 1.2.0 | Builds and hardens app UIs with one routed skill: design hierarchy, a screen-level UI rulebook, honest interaction feedback, forms and checkout, data views, mobile and accessibility, ethical conversion, auth-abuse defense, a 20-control security baseline and pre-launch security review, backed by a UI/UX pattern library. |
+| [**ProductCraft**](skills/productcraft/README.md) | 1.3.0 | Builds and hardens app UIs with one routed skill: design hierarchy, a screen-level UI rulebook, honest interaction feedback, forms and checkout, data views, mobile and accessibility, ethical conversion, auth-abuse defense, a 20-control security baseline and pre-launch security review, backed by a UI/UX pattern library. |
 
 ## ProductCraft
 
@@ -24,7 +24,8 @@ ProductCraft helps an agent build interfaces that show the important thing first
 - **Ethical persuasion**: conversion without fake urgency, fake social proof or hidden fees
 - **Credential Shield**: defense against credential stuffing and password spraying on login, OTP, MFA and reset flows
 - **LaunchGuard**: five-gate pre-launch security review with a PASS / FAIL / NOT_VERIFIED evidence report, plus a 20-control security baseline covering API keys, Git secrets, row-level security, server-side auth, record access, field tampering, session cookies, password hashing, login rate limits, bot protection, query parameterization, input validation, output escaping, file uploads, API responses, security headers, HTTPS and dependency scanning
-- **UI rules**: a rulebook of screen-level rules with IDs (such as `BTN-02`) covering spacing, typography, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy and common screens
+- **UI rules**: a rulebook of screen-level rules with IDs (such as `BTN-02`) covering spacing, typography, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, common screens, motion, front-end engineering and brand identity
+- **Language choice**: for new projects, services or performance-critical components, asks once whether to use Rust and states the trade-offs (faster runtime, slower compiles, more AI tokens, no automatic page-load gain)
 - **Pattern library**: UI/UX patterns, each with a principle, an implementation rule and a guardrail
 
 Full details, example prompts and limitations are in the [ProductCraft README](skills/productcraft/README.md).

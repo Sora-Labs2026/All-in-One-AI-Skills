@@ -4,73 +4,73 @@
       "prefix": "LAY",
       "file": "references/ui-rules/layout-spacing.md",
       "title": "Layout and spacing",
-      "rules": 13
+      "rules": 16
     },
     {
       "prefix": "TYP",
       "file": "references/ui-rules/typography.md",
       "title": "Typography",
-      "rules": 8
+      "rules": 11
     },
     {
       "prefix": "COL",
       "file": "references/ui-rules/color-contrast.md",
       "title": "Color and contrast",
-      "rules": 9
+      "rules": 14
     },
     {
       "prefix": "DRK",
       "file": "references/ui-rules/dark-mode.md",
       "title": "Dark mode",
-      "rules": 8
+      "rules": 11
     },
     {
       "prefix": "BTN",
       "file": "references/ui-rules/buttons-cta.md",
       "title": "Buttons and calls to action",
-      "rules": 9
+      "rules": 16
     },
     {
       "prefix": "FRM",
       "file": "references/ui-rules/forms-inputs.md",
       "title": "Forms and inputs",
-      "rules": 16
+      "rules": 28
     },
     {
       "prefix": "NAV",
       "file": "references/ui-rules/navigation.md",
       "title": "Navigation",
-      "rules": 11
+      "rules": 17
     },
     {
       "prefix": "MOB",
       "file": "references/ui-rules/mobile-touch.md",
       "title": "Mobile and touch",
-      "rules": 8
+      "rules": 11
     },
     {
       "prefix": "FBK",
       "file": "references/ui-rules/feedback-states.md",
       "title": "Feedback, loading and empty states",
-      "rules": 9
+      "rules": 20
     },
     {
       "prefix": "CMP",
       "file": "references/ui-rules/components.md",
       "title": "Components and design system",
-      "rules": 16
+      "rules": 32
     },
     {
       "prefix": "ICO",
       "file": "references/ui-rules/icons-imagery.md",
       "title": "Icons and imagery",
-      "rules": 6
+      "rules": 11
     },
     {
       "prefix": "COP",
       "file": "references/ui-rules/copy-microcopy.md",
       "title": "Copy and microcopy",
-      "rules": 6
+      "rules": 14
     },
     {
       "prefix": "PRN",
@@ -82,13 +82,31 @@
       "prefix": "SCR",
       "file": "references/ui-rules/screen-patterns.md",
       "title": "Screen patterns",
-      "rules": 11
+      "rules": 25
     },
     {
       "prefix": "STY",
       "file": "references/ui-rules/style-options.md",
       "title": "Style options",
-      "rules": 10
+      "rules": 15
+    },
+    {
+      "prefix": "MOT",
+      "file": "references/ui-rules/motion.md",
+      "title": "Motion and animation",
+      "rules": 20
+    },
+    {
+      "prefix": "ENG",
+      "file": "references/ui-rules/engineering.md",
+      "title": "Front-end engineering",
+      "rules": 13
+    },
+    {
+      "prefix": "BRD",
+      "file": "references/ui-rules/branding.md",
+      "title": "Brand identity",
+      "rules": 5
     }
   ],
   "rules": [
@@ -287,6 +305,50 @@
       "note": "Scale the values proportionally for other device sizes; read safe areas at runtime."
     },
     {
+      "id": "LAY-14",
+      "category": "layout-spacing",
+      "title": "Bento grids need one leading tile",
+      "why": "Mixed-size tiles read as one system only when gaps, radii and padding are identical and one tile clearly leads.",
+      "do": [
+        "Lay out with CSS Grid (for example repeat(12, 1fr) or grid-template-areas) and let tiles span columns and rows.",
+        "Use one gap value, one radius token and one inner padding for every tile.",
+        "Give exactly one tile the lead (larger, or the only accent fill) and collapse to a single column with that tile first on mobile."
+      ],
+      "avoid": [
+        "Several radii, gaps or shadow styles on one screen, or several bright tiles competing for attention."
+      ],
+      "note": null
+    },
+    {
+      "id": "LAY-15",
+      "category": "layout-spacing",
+      "title": "Adapt the layout to each device class",
+      "why": "Stretching a phone layout to desktop wastes space, and shrinking a desktop layout onto a phone crowds it.",
+      "do": [
+        "Switch patterns at breakpoints or container queries (around 600px and 1024px): phone with one column and bottom navigation, tablet with a side rail and two panes, desktop with a sidebar and multi-column grid.",
+        "Keep components and tokens shared across breakpoints so it still reads as one product.",
+        "For split layouts such as sign-in beside an illustration, drop or shrink the visual on mobile so the form comes first."
+      ],
+      "avoid": [
+        "Proportionally shrinking a desktop split layout onto a phone."
+      ],
+      "note": null
+    },
+    {
+      "id": "LAY-16",
+      "category": "layout-spacing",
+      "title": "Scale spacing from a reference design, never the user's text size",
+      "why": "Scaling lengths from a reference frame keeps proportions, but text must still follow the user's accessibility settings.",
+      "do": [
+        "Use flexible layout primitives (flex, grid, constraints) for structure and scale only spacing and radii if needed.",
+        "Respect the platform text scale (for example MediaQuery textScaler or rem units) and clamp only extreme values."
+      ],
+      "avoid": [
+        "Shrinking all fonts with screen width, or assuming one phone size fits tablets and split screen."
+      ],
+      "note": "Pixel-scaling helpers are debated; responsive layout is the better default."
+    },
+    {
       "id": "TYP-01",
       "category": "typography",
       "title": "Use one or two typefaces and build hierarchy inside them",
@@ -400,6 +462,51 @@
       ],
       "avoid": [
         "Coloring each highlighted word or price differently for variety."
+      ],
+      "note": null
+    },
+    {
+      "id": "TYP-09",
+      "category": "typography",
+      "title": "Set numbers for comparison",
+      "why": "In finance and dashboard views the figures are the content, and they must align and compare at a glance.",
+      "do": [
+        "Use font-variant-numeric: tabular-nums and right-align amounts in lists and tables.",
+        "Keep one decimal precision per column, and set currency symbols and units slightly smaller than the number.",
+        "Pair a large key figure with its unit and a plain qualifier (\"120 bpm, normal\"), plus a gauge or range when thresholds matter."
+      ],
+      "avoid": [
+        "Lone numbers with no unit or meaning, or mixed precision within one column."
+      ],
+      "note": null
+    },
+    {
+      "id": "TYP-10",
+      "category": "typography",
+      "title": "Keep text as real, selectable text",
+      "why": "Text drawn into images, canvas or CSS content is hard to select, translate, search or read aloud.",
+      "do": [
+        "Put headings, messages and receipts in HTML, and use CSS only to style them.",
+        "Layer decorative canvas or 3D effects behind or above real text with pointer-events: none."
+      ],
+      "avoid": [
+        "User-facing messages in ::before or ::after content, or receipts and confirmations rendered as flat images."
+      ],
+      "note": null
+    },
+    {
+      "id": "TYP-11",
+      "category": "typography",
+      "title": "Use display and novelty type only as accents",
+      "why": "Oversized, condensed, dot-matrix or split-word type adds energy but loses legibility quickly.",
+      "do": [
+        "Limit display type to short headlines (2-5 words) sized with clamp(), for example clamp(3rem, 10vw, 10rem), with line-height around 0.9-1.",
+        "Use novelty numerals only for one or two large figures (32px or more) and keep a plain label beside them.",
+        "When a headline is split or partly muted for effect, keep the full text as the accessible name and keep the muted part at 3:1 or better."
+      ],
+      "avoid": [
+        "Display or dot-matrix faces for body text, small labels, tables or placeholders.",
+        "Display type over busy photography without a scrim."
       ],
       "note": null
     },
@@ -535,6 +642,78 @@
       "note": null
     },
     {
+      "id": "COL-10",
+      "category": "color-contrast",
+      "title": "Keep focus and pending colors apart from verdict colors",
+      "why": "When red and green appear only for results, users read success and failure instantly; tinting focus or waiting states the same way misleads.",
+      "do": [
+        "Show focus, progress and waiting states with a neutral or brand color, using lightness, an outline or a glow.",
+        "Switch to the success or error token only once the result is known, and pair it with an icon and text."
+      ],
+      "avoid": [
+        "A red outline on a merely focused field, or green and red tints on states that are still pending."
+      ],
+      "note": null
+    },
+    {
+      "id": "COL-11",
+      "category": "color-contrast",
+      "title": "Check text on accent fills and gradients",
+      "why": "Light accents such as lime, yellow, orange and cyan often fail with white text, and gradients fail at their lightest stop.",
+      "do": [
+        "Define an on-accent text token for each accent (near-black on light accents, white on dark ones).",
+        "Check labels against the lightest stop of any gradient, and darken the stops or switch text color until it passes.",
+        "When accents are sampled from imagery or brand material, darken or lighten them until text reaches 4.5:1 against the real background."
+      ],
+      "avoid": [
+        "White text on lime, yellow or orange fills, or a gradient button whose label fades out at one end."
+      ],
+      "note": null
+    },
+    {
+      "id": "COL-12",
+      "category": "color-contrast",
+      "title": "Give translucent surfaces a contrast floor",
+      "why": "Text on frosted or translucent panels changes contrast with whatever sits behind it.",
+      "do": [
+        "Pair backdrop-filter blur (about 12-24px) with a semi-opaque tint and a 1px light border, and raise the tint until text passes 4.5:1 against the worst-case background.",
+        "Provide an opaque fallback under @supports not (backdrop-filter: blur(1px)) and @media (prefers-reduced-transparency: reduce).",
+        "Use regular or medium weights for small text and keep the number of stacked blurred layers low."
+      ],
+      "avoid": [
+        "Secondary text or placeholders at 30-60% white on glass over photos or video."
+      ],
+      "note": null
+    },
+    {
+      "id": "COL-13",
+      "category": "color-contrast",
+      "title": "Change the fill, not the ink, for errors on colored controls",
+      "why": "Red text on a colored button can drop near 1:1 contrast, while a red fill with white text stays readable.",
+      "do": [
+        "Switch the control's background token to the error color and keep the foreground white or near-black as needed.",
+        "Pair the color change with an icon and a short caption."
+      ],
+      "avoid": [
+        "Recoloring only the label or icon red on a colored button."
+      ],
+      "note": null
+    },
+    {
+      "id": "COL-14",
+      "category": "color-contrast",
+      "title": "Keep category tints soft and consistent",
+      "why": "Pastel backgrounds can separate categories quietly if the mapping is stable and text stays readable.",
+      "do": [
+        "Assign each category one pastel background with dark text and reuse the mapping in every tile, card and panel.",
+        "Pair the tint with a label or icon so the category is clear without color."
+      ],
+      "avoid": [
+        "Mid-gray text on pastel fills, or a category color that changes between views."
+      ],
+      "note": null
+    },
+    {
       "id": "DRK-01",
       "category": "dark-mode",
       "title": "Build dark mode as its own palette, not an inversion",
@@ -645,6 +824,50 @@
       ],
       "avoid": [
         "A black logo disappearing on a dark card."
+      ],
+      "note": null
+    },
+    {
+      "id": "DRK-09",
+      "category": "dark-mode",
+      "title": "Separate dark surfaces with hairlines and one bright primary",
+      "why": "On near-black screens, depth reads best from lighter surfaces and faint borders, and one bright action anchors the screen.",
+      "do": [
+        "Separate cards and popovers with 1px borders at about 6-12% white in addition to lighter surface steps.",
+        "Make the primary action a light or single-accent fill and keep secondary actions outlined or ghost.",
+        "Raise small label grays until they reach 4.5:1."
+      ],
+      "avoid": [
+        "Several competing accents on one dark screen, or light-theme drop shadows used as the elevation cue."
+      ],
+      "note": null
+    },
+    {
+      "id": "DRK-10",
+      "category": "dark-mode",
+      "title": "Name the theme toggle and tune each theme",
+      "why": "A theme switch must say what it does, and effects tuned for one theme rarely work unchanged in the other.",
+      "do": [
+        "Make the toggle a button with role=\"switch\" and aria-checked, or aria-pressed, plus a visible label or accessible name naming the mode.",
+        "Default to prefers-color-scheme, persist the choice, and swap a full token set (text, surfaces, CTA, glows, shadows) per theme.",
+        "Re-check hero text and primary button contrast in every theme."
+      ],
+      "avoid": [
+        "Icon-only toggles without a name, or one CTA color that loses contrast in the other theme."
+      ],
+      "note": null
+    },
+    {
+      "id": "DRK-11",
+      "category": "dark-mode",
+      "title": "Keep theme transitions brief and optional",
+      "why": "A transition that grows from the toggle links cause and effect, but it must never slow the switch down.",
+      "do": [
+        "Wrap the theme change in document.startViewTransition() and expand ::view-transition-new(root) with clip-path from a circle at the toggle's center.",
+        "Swap instantly when the API is missing or prefers-reduced-motion is set, and keep any reveal under about 500ms."
+      ],
+      "avoid": [
+        "Full-screen overlays that block input during the change."
       ],
       "note": null
     },
@@ -779,6 +1002,105 @@
         "Shortcut chips on touch-only devices, or shortcuts documented nowhere in the UI."
       ],
       "note": null
+    },
+    {
+      "id": "BTN-10",
+      "category": "buttons-cta",
+      "title": "Explain unavailable actions instead of silently disabling them",
+      "why": "A plain disabled button cannot take focus and does not say what is missing.",
+      "do": [
+        "Use aria-disabled=\"true\" so the button stays focusable, and on activation move focus to the first invalid field.",
+        "Show a short live hint near the button that says what is still needed, and update it as fields become valid.",
+        "Let the primary label follow the state (Print, Re-print, Print next) and tint the suggested next action."
+      ],
+      "avoid": [
+        "Disabled buttons with no explanation, or actions that stay clickable and fail silently."
+      ],
+      "note": null
+    },
+    {
+      "id": "BTN-11",
+      "category": "buttons-cta",
+      "title": "Keep the main action reachable",
+      "why": "A persistent, high-contrast primary action converts better than one buried in the hero.",
+      "do": [
+        "Place the main action as a filled button at the right of a sticky header, paired with at most one quieter secondary in the hero.",
+        "Size any floating help or chat button at 48-56px with an accessible name, clear of content and safe areas."
+      ],
+      "avoid": [
+        "Several filled buttons of equal weight, or floating buttons that cover form fields or the last line of content."
+      ],
+      "note": null
+    },
+    {
+      "id": "BTN-12",
+      "category": "buttons-cta",
+      "title": "Give hover and press feedback without moving the hit box",
+      "why": "Subtle scale or lift confirms a target, but if the element under the pointer moves, hover flickers and clicks miss.",
+      "do": [
+        "Use small changes (hover scale about 1.03-1.05, press about 0.95, card lift 2-5px) over about 150ms ease-out.",
+        "Animate an inner layer and keep the outer button or link box still.",
+        "Name the animated properties in transition-property and mirror the effect on :focus-visible."
+      ],
+      "avoid": [
+        "transition: all, wobble effects on every button, or hover as the only way to reveal an action."
+      ],
+      "note": null
+    },
+    {
+      "id": "BTN-13",
+      "category": "buttons-cta",
+      "title": "Write identity-provider buttons consistently",
+      "why": "Recognizable, consistently worded provider buttons speed sign-in without competing with the main path.",
+      "do": [
+        "Use \"Continue with <provider>\" text with the provider's logo, at equal width and at least 48px tall on mobile, under an \"or\" divider.",
+        "Follow each provider's button guidelines and give any icon-only variant an accessible name."
+      ],
+      "avoid": [
+        "Unlabeled logo circles, or provider buttons styled louder than the primary sign-in when email is the main path."
+      ],
+      "note": null
+    },
+    {
+      "id": "BTN-14",
+      "category": "buttons-cta",
+      "title": "Put the amount in purchase buttons",
+      "why": "Showing the total inside the button makes the commitment explicit and removes a scan step.",
+      "do": [
+        "Label purchase buttons with the verb and the exact amount (\"Pay $248.00\", \"Add to order, $14.00\") and update it as quantity changes.",
+        "Place a quantity stepper beside it with labeled minus and plus buttons of at least 44x44px."
+      ],
+      "avoid": [
+        "A generic \"Continue\" on the final charge step, or a button amount that disagrees with the summary."
+      ],
+      "note": null
+    },
+    {
+      "id": "BTN-15",
+      "category": "buttons-cta",
+      "title": "Add friction only for the riskiest choice",
+      "why": "Confirmation proportional to consequence protects users without slowing ordinary choices.",
+      "do": [
+        "When the user selects the most severe option, reveal an acknowledgement checkbox that states the consequence in plain words, and keep the action disabled until it is checked.",
+        "Relabel the action to describe the consequence and switch it to the warning style."
+      ],
+      "avoid": [
+        "Confirmation steps on every option."
+      ],
+      "note": null
+    },
+    {
+      "id": "BTN-16",
+      "category": "buttons-cta",
+      "title": "Never make the decline option evasive",
+      "why": "Buttons that move away, shrink or cannot be pressed remove real choice and block keyboard, touch and motor-impaired users.",
+      "do": [
+        "Give accept and decline stable positions and equal reachability, and differentiate them only by emphasis."
+      ],
+      "avoid": [
+        "A \"No\" button that jumps away on hover, or an \"accept\" option that grows each time the user tries to decline."
+      ],
+      "note": "Acceptable only as an obvious joke in a toy; in consent, payment or account flows it is a dark pattern."
     },
     {
       "id": "FRM-01",
@@ -1016,6 +1338,181 @@
       "note": null
     },
     {
+      "id": "FRM-17",
+      "category": "forms-inputs",
+      "title": "Build one-time-code entry that accepts typing, paste and autofill",
+      "why": "Codes arrive by keyboard, clipboard and OS autofill; boxes that only handle keystrokes force people to retype.",
+      "do": [
+        "Use one real input (styled as boxes) or one input per box, with inputmode=\"numeric\", autocomplete=\"one-time-code\", pattern=\"[0-9]*\" and maxlength.",
+        "Spread a pasted code across all boxes, auto-advance on each digit, step back on Backspace in an empty box, and submit automatically on the last digit (say so in the helper text).",
+        "Give the group a label (role=\"group\" or fieldset) and each box a name such as \"Digit 2 of 4\"; drive the box count from one constant used in the copy as well.",
+        "Optionally request SMS codes with the WebOTP API (navigator.credentials.get with otp transport \"sms\")."
+      ],
+      "avoid": [
+        "type=\"number\" (spinners, lost leading zeros), blocked paste, or a heading that says 4 digits beside 6 boxes."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-18",
+      "category": "forms-inputs",
+      "title": "Wire sign-in fields for password managers",
+      "why": "Correct field semantics let browsers and password managers fill credentials, which removes most sign-in friction.",
+      "do": [
+        "Use a real form with visible labels, type=\"email\" with autocomplete=\"username\" (or \"email\"), and autocomplete=\"current-password\" on sign-in or \"new-password\" on sign-up.",
+        "In native apps set the platform equivalents (for example keyboardType=\"email-address\", autoCapitalize=\"none\", textContentType and secureTextEntry).",
+        "Put \"Forgot password?\" beside the password field, state the duration on any \"remember me\" option, and carry the typed email across when switching between sign-in and sign-up."
+      ],
+      "avoid": [
+        "Marking a sign-in password as new-password, or bare inputs with no type, label or autocomplete."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-19",
+      "category": "forms-inputs",
+      "title": "Add a show-password toggle and keep password rules visible",
+      "why": "Revealing what was typed reduces errors, and rules that vanish on the first keystroke cause failed submissions.",
+      "do": [
+        "Make the toggle a button type=\"button\" inside the field's trailing edge with aria-label (\"Show password\") and aria-pressed, swapping the input type without moving the caret.",
+        "Keep rules such as \"8 characters or more\" in persistent helper text linked with aria-describedby.",
+        "If you show a strength meter, pair the color with a text label and estimate strength with a pattern-aware estimator rather than length times character-set size."
+      ],
+      "avoid": [
+        "A non-focusable eye icon, or rules stated only in the placeholder."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-20",
+      "category": "forms-inputs",
+      "title": "Collect PINs and amounts with a clear keypad and a live readout",
+      "why": "Money and PIN entry need large keys, a visible value and a second check for invisible typos.",
+      "do": [
+        "Show the amount large and centered with any converted value beneath it, updating on each key.",
+        "Prefer a native input with inputmode=\"decimal\" (amounts) or inputmode=\"numeric\" (PINs); if a custom keypad is required, use real buttons of at least 48px with labels for symbol keys and also accept hardware keyboards.",
+        "Mask PINs as filling dots, use autocomplete=\"new-password\" for creation, and follow \"Create PIN\" with \"Confirm PIN\", clearing both and explaining on mismatch."
+      ],
+      "avoid": [
+        "Echoing PIN digits in plain text, or a custom keypad as the only input path."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-21",
+      "category": "forms-inputs",
+      "title": "Make upload zones state their limits and track each file",
+      "why": "Uploads fail in many ways; stating limits up front and showing per-file status prevents surprises.",
+      "do": [
+        "Show accepted types, size limit and file count in the zone, and accept drop, paste and a real file input behind a visible browse button.",
+        "Highlight the zone on dragenter and dragover, and list each file with name, size and progress, then done or failed with a reason and a retry.",
+        "Show an aggregate summary (\"3 of 4 uploaded, 1 failed\") with clear and per-file remove controls that have accessible names."
+      ],
+      "avoid": [
+        "Drag-and-drop as the only route, silent rejection, or failed files dropped from the list."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-22",
+      "category": "forms-inputs",
+      "title": "Write settings toggles as full rows that apply immediately",
+      "why": "Each switch should say what it does, take effect at once and be easy to hit.",
+      "do": [
+        "Build each row as a label, a one-line description and a trailing switch (role=\"switch\" with aria-checked, or a native checkbox styled as a switch), with the whole row as the target.",
+        "Show the on state by knob position and fill, not color alone, and offer undo or confirmation for security-sensitive changes."
+      ],
+      "avoid": [
+        "Switches with no visible label, or switches whose change only applies after a separate Save."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-23",
+      "category": "forms-inputs",
+      "title": "Prefill quick-add forms with sensible defaults",
+      "why": "Option rows with realistic defaults let people create an item by typing one field.",
+      "do": [
+        "Put the single required field first and focused, and show the other options as rows with an icon, label, current value and chevron that open pickers.",
+        "Choose defaults that cover the common case and show them as real values."
+      ],
+      "avoid": [
+        "Turning every option into a required step, or chevron rows that are not tappable."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-24",
+      "category": "forms-inputs",
+      "title": "Make date and time pickers show context and valid ranges",
+      "why": "Scheduling is easier when people see the surrounding week or month and cannot pick impossible ranges.",
+      "do": [
+        "Use a week strip (day name above date, selected day filled, today marked differently) for near-term dates, with arrows for other weeks and a way to open a full calendar.",
+        "Bind the end date's minimum to the start date, use a two-thumb slider or paired fields for time windows, and echo the choice in plain words (\"3 days, Fri 7 to Mon 10\").",
+        "Give each day a full-date accessible name and aria-selected or aria-pressed, with targets of at least 40-44px."
+      ],
+      "avoid": [
+        "Return dates earlier than pick-up dates, or selected days marked by color alone."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-25",
+      "category": "forms-inputs",
+      "title": "Wire payment card fields for autofill and verification",
+      "why": "Autofill tokens and formatting cut card-entry time and errors.",
+      "do": [
+        "Use autocomplete=\"cc-name\", \"cc-number\", \"cc-exp\" and \"cc-csc\" with inputmode=\"numeric\", group the number as the user types, show the detected network and use an MM / YY expiry.",
+        "Prefer the payment provider's hosted fields, and label the pay button with the exact amount and a short security note."
+      ],
+      "avoid": [
+        "type=\"number\" for card numbers, or a decorative card preview as the only place the entered data is visible."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-26",
+      "category": "forms-inputs",
+      "title": "Show recent and saved values under search-like inputs",
+      "why": "Many entries repeat; showing recents removes typing entirely.",
+      "do": [
+        "List recent or saved values (places, contacts, searches) under the field with an icon, bold name and muted detail, filtering as the user types.",
+        "Set enterkeyhint and suitable autocomplete values on the inputs."
+      ],
+      "avoid": [
+        "Hiding recents until the user starts typing."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-27",
+      "category": "forms-inputs",
+      "title": "Keep native semantics under custom-styled controls",
+      "why": "However decorative a slider, knob or switch looks, keyboard and assistive-technology users need it to behave like the real control.",
+      "do": [
+        "Style the native element (input type=\"range\" with appearance: none, a checkbox for switches), or use role=\"slider\" or role=\"switch\" with the matching aria-value or aria-checked attributes and full keyboard support.",
+        "Show the value as text with units and expose it through aria-valuetext (\"96 dB, loud\"), and keep thumbs at least 44px.",
+        "Communicate thresholds or danger zones with a label and marker, not only a color gradient."
+      ],
+      "avoid": [
+        "Div-only sliders or drag-only knobs."
+      ],
+      "note": null
+    },
+    {
+      "id": "FRM-28",
+      "category": "forms-inputs",
+      "title": "Verify on the server and send credentials only to your own backend",
+      "why": "Client-side checks can be bypassed, and generic form builders are not built to receive passwords.",
+      "do": [
+        "Verify one-time codes, totals and permissions on the server, and post sign-in forms to your own authentication endpoint over HTTPS."
+      ],
+      "avoid": [
+        "Hard-coded codes compared in client code, or passwords collected through a third-party form embed."
+      ],
+      "note": null
+    },
+    {
       "id": "NAV-01",
       "category": "navigation",
       "title": "Use one primary navigation pattern",
@@ -1176,6 +1673,93 @@
       "note": null
     },
     {
+      "id": "NAV-12",
+      "category": "navigation",
+      "title": "Expand search in place, with focus and an easy exit",
+      "why": "Folding search into an icon saves space only if the field opens instantly, takes focus and closes predictably.",
+      "do": [
+        "Make the trigger a button with aria-label=\"Search\" and aria-expanded; on activation expand the field over about 200-250ms and move focus into it.",
+        "Use input type=\"search\" with a specific placeholder, a labeled clear button, and close on Escape or outside click with focus returned to the trigger.",
+        "Reserve or overlay the space so neighboring links do not jump, and optionally offer a shortcut such as / or Ctrl/Cmd+K with a visible hint."
+      ],
+      "avoid": [
+        "Search that opens on hover only, or an expanded field covering links that stay tabbable underneath."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-13",
+      "category": "navigation",
+      "title": "Collapse sidebars without losing wayfinding",
+      "why": "A collapsed rail frees space, but people still need to see where they are and what each icon means.",
+      "do": [
+        "Toggle with a button that has aria-expanded, aria-controls and a name that flips between \"Collapse sidebar\" and \"Expand sidebar\".",
+        "Keep the active highlight, section dividers and accessible counts in rail mode, with tooltips on hover and keyboard focus.",
+        "Animate width over about 200-300ms while fading labels first, persist the choice, default to the rail on medium widths and an off-canvas drawer on phones."
+      ],
+      "avoid": [
+        "Collapsed badges that become an unlabeled dot, or labels hidden with no tooltip or accessible name."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-14",
+      "category": "navigation",
+      "title": "Derive the active item from the URL",
+      "why": "When the active state comes from the route, it can never disagree with what is on screen.",
+      "do": [
+        "Use the router's link component (for example a NavLink) so the active class and aria-current=\"page\" follow the current route.",
+        "Generate navigation items from one data array of name, path and icon.",
+        "Make hover and active look different so people do not lose their place while moving the pointer."
+      ],
+      "avoid": [
+        "A separate piece of state for the active tab that can drift from the URL."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-15",
+      "category": "navigation",
+      "title": "Use navigation semantics for sections and tab semantics for panels",
+      "why": "Screen readers announce these differently, and each needs different keyboard behavior.",
+      "do": [
+        "Use nav with links and aria-current=\"page\" for app sections, including bottom tab bars.",
+        "Use role=\"tablist\", role=\"tab\" with aria-selected and aria-controls, a roving tabindex and arrow keys only for in-page panels."
+      ],
+      "avoid": [
+        "role=\"tablist\" with no tab panels, or tabs built from divs with click handlers."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-16",
+      "category": "navigation",
+      "title": "Hide bars on scroll only with a threshold",
+      "why": "Hiding navigation while reading down and restoring it on scroll up gives content room without losing wayfinding.",
+      "do": [
+        "Hide the bottom or top bar after a meaningful downward scroll (about 10px or more) and restore it on any upward scroll or at the top.",
+        "Keep the title bar pinned (position: sticky) and keep labels on the restored bar."
+      ],
+      "avoid": [
+        "Toggling the bar on tiny scroll jitters."
+      ],
+      "note": null
+    },
+    {
+      "id": "NAV-17",
+      "category": "navigation",
+      "title": "Open submenus as disclosures, not hover traps",
+      "why": "Nested sections must open for keyboard and touch users and stay open while the pointer crosses gaps.",
+      "do": [
+        "Make the parent a button with aria-expanded controlling a list of links, visually attached to its parent, closing on Escape and outside click.",
+        "Highlight the current child item."
+      ],
+      "avoid": [
+        "Hover-only flyouts that collapse when the pointer crosses a gap."
+      ],
+      "note": null
+    },
+    {
       "id": "MOB-01",
       "category": "mobile-touch",
       "title": "Make touch targets at least 44pt",
@@ -1287,6 +1871,50 @@
       ],
       "avoid": [
         "Bursts of near-identical notifications or generic marketing pushes to everyone."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOB-09",
+      "category": "mobile-touch",
+      "title": "Keep forms clear of the keyboard and system bars",
+      "why": "On phones the keyboard covers half the screen, and inputs under it or the status bar break forms on real devices.",
+      "do": [
+        "Wrap native forms in a keyboard-avoiding container with a scroll view that keeps taps working while the keyboard is up, and pad content with the runtime safe-area insets.",
+        "Chain fields with a \"next\" return key and make the last field submit.",
+        "On the web, let the form scroll and use scroll-padding with env(safe-area-inset-*) so the focused field and the submit button stay visible."
+      ],
+      "avoid": [
+        "Fixed-height centered columns that cannot scroll when the keyboard opens, or hard-coded status-bar heights."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOB-10",
+      "category": "mobile-touch",
+      "title": "Give small custom controls a real role and a larger hit area",
+      "why": "Tiny checkboxes and inline links are hard to hit and invisible to screen readers without roles and state.",
+      "do": [
+        "Extend hit areas with padding or hit slop (about 6-10px) so small links approach 44pt.",
+        "Give custom checkboxes accessibilityRole=\"checkbox\" with a checked state, or use a native checkbox with a label, and make the label part of the same target."
+      ],
+      "avoid": [
+        "A checkbox built from a plain view with only a press handler, or a tappable square whose label is not tappable."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOB-11",
+      "category": "mobile-touch",
+      "title": "Always pair gestures with a tap alternative",
+      "why": "Swipe, hold, slide and drag gestures are undiscoverable for some people and impossible for others.",
+      "do": [
+        "Label both outcomes of a swipe as real buttons (for example \"False\" and \"True\") and support arrow keys.",
+        "Reserve slide-to-confirm and press-and-hold for rare, deliberate commitments, show a progress ring while holding, and also accept tap-then-confirm or Enter.",
+        "Add a short hint near any non-standard gesture (\"Pull and release\")."
+      ],
+      "avoid": [
+        "Swipe-only answers, slide-only buttons for routine actions, or drag as the only way to complete a task."
       ],
       "note": null
     },
@@ -1419,6 +2047,165 @@
       ],
       "avoid": [
         "A bare \"No data\" message on a blank screen, or several competing buttons."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-10",
+      "category": "feedback-states",
+      "title": "Show progress inside the button for async actions",
+      "why": "Feedback in the exact place the user clicked prevents double submits and doubt.",
+      "do": [
+        "On activation, swap the label for a present-progressive verb with a spinner (\"Signing in...\", \"Placing order...\") or a percentage for measurable work.",
+        "Set aria-busy, block re-submission and keep the button width fixed while the label changes.",
+        "On success show a short confirmation state (\"Added\" with a check) for about 1.5-2s; on failure restore the button and show an inline error."
+      ],
+      "avoid": [
+        "Spinner-only buttons with no text, or buttons that stay active during the request."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-11",
+      "category": "feedback-states",
+      "title": "Never show success before the server confirms",
+      "why": "A success animation that runs on a timer can contradict what actually happened, especially for payments and orders.",
+      "do": [
+        "Start processing visuals when the request starts and show the verdict only when the real result arrives.",
+        "Design the failure path as carefully as success: distinct label, color and icon, and a retry.",
+        "Let animations celebrate a change that already happened, never delay the state change itself."
+      ],
+      "avoid": [
+        "Fixed setTimeout waits before or instead of the real request."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-12",
+      "category": "feedback-states",
+      "title": "Report progress honestly",
+      "why": "Progress that jumps backwards, races ahead or keeps moving during a stall erodes trust.",
+      "do": [
+        "Drive determinate progress from real work (for example bytes read from response.body.getReader() against Content-Length) and keep it monotonic.",
+        "Keep the bar indeterminate when the total is unknown, never show 100% before the work is finished, and show a stalled state if nothing arrives for about a second.",
+        "Expose role=\"progressbar\" with aria-valuenow once determinate, show percent text, and offer Cancel (for example through AbortController)."
+      ],
+      "avoid": [
+        "Fixed-duration fills unrelated to the work."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-13",
+      "category": "feedback-states",
+      "title": "Give code verification explicit states",
+      "why": "After the last digit, people need to see that the code is being checked and what happened.",
+      "do": [
+        "Move through entering, checking (inputs locked, aria-busy), verified (success color, check, next step) and error (message plus icon, digits cleared and focus back in the first box).",
+        "Announce state changes through a polite live region, using role=\"alert\" for the error.",
+        "Stop the resend countdown once verification succeeds."
+      ],
+      "avoid": [
+        "Signaling the result with glow color or a shake alone."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-14",
+      "category": "feedback-states",
+      "title": "Keep the app shell steady while content loads",
+      "why": "Blank flashes and full-page spinners between views jolt the eye and hide the layout.",
+      "do": [
+        "Keep navigation and headers mounted and swap only the content region, using skeletons at the real sizes and positions.",
+        "Delay any spinner by about 300ms so fast loads show nothing, match the current theme's background, and set aria-busy on the loading region.",
+        "Reserve space for images and charts (aspect-ratio, fixed heights) so nothing shifts when data arrives."
+      ],
+      "avoid": [
+        "A white loading screen inside a dark app, or long blur-in effects after the data is ready."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-15",
+      "category": "feedback-states",
+      "title": "Prefer undo over confirmation for reversible deletes",
+      "why": "An undo window is faster than a dialog and still protects against mistakes.",
+      "do": [
+        "Remove the item immediately, update counts, and show a status toast (\"Deleted brand-assets.zip\") with Undo and a visible countdown, committing when it expires.",
+        "Restore undone items at their original position, and name the target in icon-only delete buttons."
+      ],
+      "avoid": [
+        "Modal confirmations for actions that can be undone, or undo windows too short to reach."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-16",
+      "category": "feedback-states",
+      "title": "Confirm add-to-cart without interrupting",
+      "why": "Shoppers want proof the item was added and a path to the cart, not a modal that ends browsing.",
+      "do": [
+        "Update the cart count at once, switch the add button to \"Added\" briefly, and announce it through a polite live region.",
+        "Show a toast or a persistent \"View cart\" pill with the count, keeping any toast for at least 2-4s and pausing it on hover or focus."
+      ],
+      "avoid": [
+        "Forcing a cart drawer or page open on every add, or confirmations shorter than a second."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-17",
+      "category": "feedback-states",
+      "title": "Name the state of long-running and sensing tasks",
+      "why": "For background jobs, voice input and camera capture, users need to know whether the system is working, listening, done or stuck.",
+      "do": [
+        "Show a distinct status line per state (working on step X, listening, thinking, done, failed with retry), with the indicator animating only while active.",
+        "For capture tasks, give live positioning guidance and numeric progress, plus manual entry or upload as a fallback.",
+        "Mirror changes in a polite live region and swap control labels and aria-pressed with the state."
+      ],
+      "avoid": [
+        "Animation or color as the only sign that a microphone is live or a job failed."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-18",
+      "category": "feedback-states",
+      "title": "Make exceptions stand out with more than color",
+      "why": "In monitoring and operational lists, out-of-range records must be visible at a glance.",
+      "do": [
+        "Give exceptions a strong treatment plus an explicit text or icon marker, and offer a filter or sort that brings them to the top.",
+        "Show \"last updated\" times for live data and briefly tint newly arrived rows."
+      ],
+      "avoid": [
+        "A red fill as the only signal, or small white text on saturated red without a contrast check."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-19",
+      "category": "feedback-states",
+      "title": "Keep splash screens and preloaders honest and short",
+      "why": "A launch screen only earns its delay if it reflects real loading.",
+      "do": [
+        "Tie any progress to real asset loading, finish within about 1-2s, continue automatically and let users skip.",
+        "Match the native launch background to the first screen to avoid a flash, and show a brand intro at most once per session."
+      ],
+      "avoid": [
+        "Fake percentage counters that hold back content that has already loaded."
+      ],
+      "note": null
+    },
+    {
+      "id": "FBK-20",
+      "category": "feedback-states",
+      "title": "Keep interface sounds opt-in",
+      "why": "Unexpected audio is disruptive, especially in shared spaces.",
+      "do": [
+        "Keep UI sounds off by default, provide a visible sound toggle with aria-pressed in a consistent place, and remember the choice."
+      ],
+      "avoid": [
+        "Playing sound on load or on the first interaction without an obvious control."
       ],
       "note": null
     },
@@ -1653,6 +2440,231 @@
       "note": null
     },
     {
+      "id": "CMP-17",
+      "category": "components",
+      "title": "Give KPI tiles a fixed anatomy",
+      "why": "Dashboards are scanned tile by tile; a fixed structure makes every number interpretable at a glance.",
+      "do": [
+        "Order each tile as a small label, a large value with tabular numerals, then a delta with arrow, sign and comparison period (\"+4.9% vs last month\"), with an optional icon or sparkline.",
+        "Render tiles from a data array of raw values mapped to one component, formatting with Intl.NumberFormat at render time.",
+        "Add a hover lift only when the tile opens a detail view, and give it a focus style too."
+      ],
+      "avoid": [
+        "Up or down shown by green and red alone, hover lift on non-interactive tiles, or preformatted strings that cannot be sorted."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-18",
+      "category": "components",
+      "title": "Make charts answer one question and reveal exact values",
+      "why": "A chart is only useful if the reader knows what it shows, over what period, and can read exact values.",
+      "do": [
+        "Give each chart a title, a one-line summary, a time-range control and labeled axes, and highlight the current or key series while muting the rest.",
+        "Show exact values in tooltips on hover and keyboard focus, put the total in the center of donuts, and list values beside legend entries.",
+        "Provide a text or table alternative and wrap charts in a responsive container."
+      ],
+      "avoid": [
+        "Color-only legends, tiny low-contrast axis labels, glossy or 3D bars that distort comparison, or entrance animations replayed on every refresh."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-19",
+      "category": "components",
+      "title": "Build operational tables for triage",
+      "why": "Lists are read by status and recency; those must be scannable without decoding.",
+      "do": [
+        "Use real table markup with th scope=\"col\", right-aligned numbers with tabular numerals, and status pills with words.",
+        "Add filter tabs with counts above the table, show relative times with the absolute timestamp in a time element, and highlight the selected row with aria-selected beside a detail pane."
+      ],
+      "avoid": [
+        "Column widths that jump when the selection changes, or status shown by a colored dot alone."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-20",
+      "category": "components",
+      "title": "Give list rows a leading visual, two lines and a trailing value",
+      "why": "A consistent row anatomy makes transactions, devices and people lists scannable.",
+      "do": [
+        "Place an avatar, logo or icon first, primary text above secondary text, and the key value right-aligned at the end.",
+        "Keep signs on money values (-$24.00, +$240.00) with tabular numerals, group long lists under date headers, and keep tappable rows at least 48px tall."
+      ],
+      "avoid": [
+        "Red and green as the only difference between debits and credits, or truncated trailing values."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-21",
+      "category": "components",
+      "title": "Keep product cards comparable",
+      "why": "Uniform cards let shoppers compare quickly across a grid.",
+      "do": [
+        "Use a fixed image aspect-ratio with object-fit: cover, then category, name, price (right-aligned or accent), rating with its count, and one add action with an accessible name that includes the product.",
+        "Make the title the card's link and keep the add button outside the link; use grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) for the grid."
+      ],
+      "avoid": [
+        "Price or the add action shown only on hover, varying image heights, or nested interactive elements."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-22",
+      "category": "components",
+      "title": "Give carousels controls, position and a pause",
+      "why": "Rotating content hides information, so people need control over it.",
+      "do": [
+        "Provide labeled previous and next buttons, a position indicator (\"3 of 8\"), keyboard arrows and scroll snapping.",
+        "Pause on hover and focus and offer a pause control if anything autoplays; treat 3D coverflow as optional styling over the same controls."
+      ],
+      "avoid": [
+        "Autoplay without a way to stop it, drag as the only way to move, or the only copy of critical information inside a carousel."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-23",
+      "category": "components",
+      "title": "Give segmented controls and chips real selection semantics",
+      "why": "Compact toggles are fast, but assistive technology must know what is selected.",
+      "do": [
+        "Use native radios or role=\"radiogroup\" with role=\"radio\" and aria-checked for single choice, and toggle buttons with aria-pressed or checkboxes for multi-select chips.",
+        "Move selection with arrow keys using a roving tabindex, and show the selected state with fill plus a check or weight change.",
+        "Let horizontal chip rows scroll with the last chip peeking past the edge."
+      ],
+      "avoid": [
+        "ARIA roles without the matching keyboard behavior, or a faint tint as the only selected cue."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-24",
+      "category": "components",
+      "title": "Make swatch pickers named radio groups",
+      "why": "Swatches are single-choice inputs and must be operable and named like one.",
+      "do": [
+        "Build them as a radio group, give each swatch a text name, and mark the selected one with an offset ring plus the visible variant name.",
+        "Keep the hit area at least 44px even when the visible dot is small, and update an accent token so the whole product view reflects the choice."
+      ],
+      "avoid": [
+        "Unnamed color dots, or a per-variant accent that fails contrast on its background."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-25",
+      "category": "components",
+      "title": "Keep the current selection visible and removable",
+      "why": "People should always see what they picked and be able to undo it without reopening a menu.",
+      "do": [
+        "Show the selected value in the trigger, or as a chip with a labeled remove button.",
+        "Announce changes in a polite live region and use listbox or menu semantics with Escape returning focus to the trigger."
+      ],
+      "avoid": [
+        "Replacing the labeled trigger with an unlabeled icon once a value is chosen."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-26",
+      "category": "components",
+      "title": "Route accents through one token per theme or variant",
+      "why": "When every accent use reads one custom property, re-theming and per-item colors stay consistent.",
+      "do": [
+        "Define the accent once (for example --accent) and set it per theme or variant with a data attribute, using it for text, fills, borders, glows and focus.",
+        "Check each variant's accent against its own background."
+      ],
+      "avoid": [
+        "Repeating accent hex values across many rules."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-27",
+      "category": "components",
+      "title": "Use a large fixed radius for pills",
+      "why": "A fixed large radius keeps semicircular ends at any width, while 50% turns wide elements into ellipses.",
+      "do": [
+        "Use border-radius: 999px for pills, chips, pill buttons and indicators."
+      ],
+      "avoid": [
+        "border-radius: 50% on non-square elements."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-28",
+      "category": "components",
+      "title": "Prefer the native share sheet",
+      "why": "The system share sheet lists the user's own apps; a custom icon row is only a fallback.",
+      "do": [
+        "Call navigator.share when navigator.canShare allows it, and otherwise expand a row of labeled share targets plus \"Copy link\" with immediate confirmation."
+      ],
+      "avoid": [
+        "Unlabeled brand icons, or a share row that opens on hover."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-29",
+      "category": "components",
+      "title": "Give feeds and notifications a fixed item anatomy",
+      "why": "A predictable order makes long feeds and notification lists scannable.",
+      "do": [
+        "Show avatar, name, relative time and an overflow menu with an accessible name, then body text clamped to 2-3 lines with an in-place \"See more\", then media and reactions with counts.",
+        "For notifications, put the actor in bold, the action text and a relative time, entering with a short slide and fade."
+      ],
+      "avoid": [
+        "Wrapping a card that contains buttons in one big link, or autoplaying video with sound."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-30",
+      "category": "components",
+      "title": "Lay out media players in the familiar order",
+      "why": "Familiar control order lets people operate a player without hunting.",
+      "do": [
+        "Show artwork, title and artist, a progress bar with elapsed and total time, then shuffle, previous, a larger play or pause, next and repeat.",
+        "Give icon buttons accessible names and reflect toggles such as shuffle and repeat with aria-pressed."
+      ],
+      "avoid": [
+        "A play button the same size and weight as the secondary controls."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-31",
+      "category": "components",
+      "title": "Build checklists from real checkboxes with a live count",
+      "why": "Clear done states and a running tally give a sense of progress.",
+      "do": [
+        "Use labeled checkboxes, show done items with a check, line-through and reduced emphasis, and update \"3 of 8 completed\" in a polite live region.",
+        "Name delete buttons after their item and offer undo."
+      ],
+      "avoid": [
+        "Deleting with no undo, or low-contrast placeholder text on dark surfaces."
+      ],
+      "note": null
+    },
+    {
+      "id": "CMP-32",
+      "category": "components",
+      "title": "Lay out receipts and money summaries for checking",
+      "why": "Financial summaries must be easy to verify line by line.",
+      "do": [
+        "Use label and value rows with tabular numerals and right-aligned amounts, listing subtotal, discount (with a minus sign), fees, tax with its rate and a bold total, plus a reference number.",
+        "Render receipts as real text that can be selected, printed or downloaded."
+      ],
+      "avoid": [
+        "Marking discounts by red alone, or decoration that covers the figures."
+      ],
+      "note": null
+    },
+    {
       "id": "ICO-01",
       "category": "icons-imagery",
       "title": "Use one icon family and one style",
@@ -1732,6 +2744,76 @@
       ],
       "avoid": [
         "Stretched images (object-fit: fill) or automatic center crops that cut off faces or products."
+      ],
+      "note": null
+    },
+    {
+      "id": "ICO-07",
+      "category": "icons-imagery",
+      "title": "Normalize SVG strokes for progress and scaling",
+      "why": "A few SVG attributes keep line weights stable when graphics scale and make progress strokes trivial to drive.",
+      "do": [
+        "Set pathLength=\"1\" and drive stroke-dasharray and stroke-dashoffset in 0-1 units for rings, borders and draw-on lines.",
+        "Add vector-effect=\"non-scaling-stroke\" to strokes in responsively scaled SVGs, and transform-box: fill-box on parts that rotate or scale around their own center.",
+        "Start rings at 12 o'clock with a -90 degree rotation and round line caps."
+      ],
+      "avoid": [
+        "Calling getTotalLength every frame, or a solid spinning ring for something that is not loading."
+      ],
+      "note": null
+    },
+    {
+      "id": "ICO-08",
+      "category": "icons-imagery",
+      "title": "Switch from outline to filled for hover and active icons",
+      "why": "Swapping an outline icon for its filled version is a clear, low-cost state change.",
+      "do": [
+        "Use outline icons at rest and filled or tinted versions for hover, selected and :focus-visible, with the label weight increased.",
+        "Transition only the properties that change (color, opacity, transform) for about 200-300ms."
+      ],
+      "avoid": [
+        "transition: all, or hover animation as the only sign of interactivity on touch devices."
+      ],
+      "note": null
+    },
+    {
+      "id": "ICO-09",
+      "category": "icons-imagery",
+      "title": "Ship a still fallback for animated illustrations",
+      "why": "Animated illustrations can fail to load or need pausing; a still frame keeps the page meaningful.",
+      "do": [
+        "Include a static image of the key frame alongside any Lottie or canvas animation, with the alt text on one of them and the other aria-hidden.",
+        "Show the still when scripts fail or prefers-reduced-motion is set."
+      ],
+      "avoid": [
+        "An empty box until the animation library loads."
+      ],
+      "note": null
+    },
+    {
+      "id": "ICO-10",
+      "category": "icons-imagery",
+      "title": "Generate repeated SVG parts in code",
+      "why": "Radial or repeated details are easier to tune when generated in a loop than drawn by hand.",
+      "do": [
+        "Create nodes with document.createElementNS(\"http://www.w3.org/2000/svg\", \"rect\"), rotate each by i * 360 / count, build once, then animate the group with one transform.",
+        "Draw evenly spaced ticks with one circle and a dash pattern where possible."
+      ],
+      "avoid": [
+        "document.createElement for SVG elements (they land in the HTML namespace and do not render), or one DOM node per tick when a dash pattern would do."
+      ],
+      "note": null
+    },
+    {
+      "id": "ICO-11",
+      "category": "icons-imagery",
+      "title": "Keep pixel art crisp",
+      "why": "Default smoothing blurs pixel art and bitmap-style lettering.",
+      "do": [
+        "Set image-rendering: pixelated on scaled sprites and canvases and scale by whole-number factors."
+      ],
+      "avoid": [
+        "Fractional scaling of pixel assets, or pixel fonts for body text."
       ],
       "note": null
     },
@@ -1817,6 +2899,116 @@
       ],
       "avoid": [
         "All-caps primary buttons or long all-caps labels."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-07",
+      "category": "copy-microcopy",
+      "title": "Say where the code went and when it can be resent",
+      "why": "Naming the destination and the wait prevents duplicate requests and doubt about the address used.",
+      "do": [
+        "State the code length and the masked destination (\"4-digit code sent to ••• 0142\") with a link to change it.",
+        "Keep \"Resend\" visibly disabled during a cooldown with a live label (\"Resend in 0:24\") and enable it at zero.",
+        "Announce only when resend becomes available, not every second."
+      ],
+      "avoid": [
+        "Hiding the resend option until the timer ends, or styling enabled and disabled resend identically."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-08",
+      "category": "copy-microcopy",
+      "title": "Format numbers with one locale everywhere",
+      "why": "Mixed separators make amounts ambiguous (99.560 next to 14,867).",
+      "do": [
+        "Format every number and currency through Intl.NumberFormat with one locale, including chart axes, tooltips and tables.",
+        "Use compact notation (\"$164.4K\") for axis ticks and donut centers and full precision in tooltips and details."
+      ],
+      "avoid": [
+        "Hand-built number strings, mixed decimal marks, or currency symbols on some values but not others."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-09",
+      "category": "copy-microcopy",
+      "title": "After success, relabel with the outcome or the next step",
+      "why": "A button that still says \"Send\" after sending invites a second click.",
+      "do": [
+        "Switch to a past-tense confirmation (\"Sent\", \"Added\", \"Downloaded\") with a check, or to the obvious next action (\"Open file\").",
+        "Make the confirmation visually quieter than the original call to action."
+      ],
+      "avoid": [
+        "Leaving the original verb in place after success."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-10",
+      "category": "copy-microcopy",
+      "title": "Translate raw numbers into consequences",
+      "why": "People act on outcomes (\"safe for 2 hours\") more than on units (\"88 dB\").",
+      "do": [
+        "Pair a technical value with a plain-language consequence and a status word (Quiet, Loud, Danger), computed from a documented model."
+      ],
+      "avoid": [
+        "The raw number alone, or alarmist copy the model does not support."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-11",
+      "category": "copy-microcopy",
+      "title": "State offer conditions up front",
+      "why": "Deals feel trustworthy when dates and limits are visible before the click.",
+      "do": [
+        "Show the discount with a one-line benefit, its validity dates or channel limits, and a link to the terms.",
+        "Show the original price struck through (s or del) beside the new one and the saving."
+      ],
+      "avoid": [
+        "Conditions hidden in fine print after the click, or \"limited time\" claims that keep reappearing."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-12",
+      "category": "copy-microcopy",
+      "title": "Make trust and data-safety statements specific",
+      "why": "In finance and data products, concrete statements about access and control build trust before people connect accounts.",
+      "do": [
+        "Use a few short cards, each with an icon, a 2-3 word title and one specific sentence (for example read-only access, encrypted connections, how to disconnect).",
+        "Place them next to the step that asks for access."
+      ],
+      "avoid": [
+        "Vague security claims, or low-contrast gray body text in those cards."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-13",
+      "category": "copy-microcopy",
+      "title": "Show ratings with their scale and sample size",
+      "why": "A bare star count is not believable; scale and count are.",
+      "do": [
+        "Show the rating with its scale (4.9/5) and a real count of reviews or users, and link to the reviews."
+      ],
+      "avoid": [
+        "Ratings with no scale or count, or invented figures."
+      ],
+      "note": null
+    },
+    {
+      "id": "COP-14",
+      "category": "copy-microcopy",
+      "title": "Explain unusual interactions in two or three words",
+      "why": "When a control is not a standard button, a tiny instruction prevents confusion.",
+      "do": [
+        "Place a short, quiet instruction beside the affordance (\"Pull and release\", \"Hold to confirm\") and provide a click or keyboard alternative."
+      ],
+      "avoid": [
+        "Relying on users to discover a gesture with no hint."
       ],
       "note": null
     },
@@ -2063,6 +3255,209 @@
       "note": null
     },
     {
+      "id": "SCR-12",
+      "category": "screen-patterns",
+      "title": "Lay out sign-in screens predictably",
+      "why": "A familiar sign-in layout lets people and password managers finish quickly.",
+      "do": [
+        "Order the card as heading and one-line subtitle, fields, \"remember me\" with its duration beside \"Forgot password?\", full-width primary button, an \"or continue with\" divider, equal-width provider buttons, then a sign-up link.",
+        "On desktop, cap the form column at about 360-420px beside an optional visual panel; on mobile show the form first.",
+        "Keep the same shell for follow-up steps (code entry, password reset) so the flow feels continuous."
+      ],
+      "avoid": [
+        "Essential copy only in a decorative panel that disappears on mobile, or looping animation beside the form."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-13",
+      "category": "screen-patterns",
+      "title": "Never gate a core task behind a playful interaction",
+      "why": "People who came to sign in or pay should not have to discover a gesture or wait for a character first.",
+      "do": [
+        "Render the form or main action on load, and let any playful element run alongside it as optional decoration.",
+        "If a reveal interaction is kept, also offer a visible, keyboard-operable button and a skip."
+      ],
+      "avoid": [
+        "Hiding a sign-in form until the user pulls a cord, finds a hidden control or completes a game."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-14",
+      "category": "screen-patterns",
+      "title": "Give every onboarding step one job and a way back",
+      "why": "Onboarding completes best when each step is short, predictable and skippable where optional.",
+      "do": [
+        "Keep a back control top-left, Skip top-right on optional steps, a progress bar or dots with an accessible \"Step 2 of 4\", and one full-width primary button in the same bottom position.",
+        "Ask one question per screen, disable Continue until a required choice is made, and keep answers when users go back.",
+        "End with a preview of the personalized result and one clear final action."
+      ],
+      "avoid": [
+        "Demanding account creation before showing any value when it can be deferred."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-15",
+      "category": "screen-patterns",
+      "title": "Show every fee before payment",
+      "why": "Revealing costs only at the end destroys trust and causes disputes.",
+      "do": [
+        "Number checkout sections on one page, render shipping and payment choices as card-shaped radios with price deltas, and keep a sticky order summary that recalculates instantly.",
+        "Before an irreversible payment, show a review sheet listing the amount, each fee and the total, then a processing state, then a confirmation with a copyable reference.",
+        "Echo the selected payment method (masked) beside the final button, and collapse the summary into a bar on mobile."
+      ],
+      "avoid": [
+        "Fees revealed only after payment, pre-ticked consent to save a card, or double submission while processing."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-16",
+      "category": "screen-patterns",
+      "title": "Order product detail panels by the buying decision",
+      "why": "The buy box should answer what, how much, which variant and when it arrives.",
+      "do": [
+        "Show breadcrumb, name, price with rating and review count, and a short description, then variant radios whose legend names the selection, a quantity stepper and a full-width add button.",
+        "Update the total live as options change, show delivery or pickup time near it, and put details, dimensions and care in tabs or accordions below."
+      ],
+      "avoid": [
+        "Color-only swatches, stepper buttons under 44x44px, or price changes revealed only at checkout."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-17",
+      "category": "screen-patterns",
+      "title": "State price, trial and terms plainly on paywalls",
+      "why": "Trust and conversion improve when the price, trial length and cancellation terms sit beside the button.",
+      "do": [
+        "Show plan cards with price per period, a clear selected state and a few benefits; name the action and its terms on the button (\"Start 7-day free trial\").",
+        "Put \"Cancel anytime, charged after 7 days\" and \"Restore purchases\" under the button, and keep the close control visible."
+      ],
+      "avoid": [
+        "Fake countdowns, reappearing \"one-time\" offers, or a hidden or delayed close button."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-18",
+      "category": "screen-patterns",
+      "title": "Make error pages explain and offer a way forward",
+      "why": "An error page is a dead end unless it says what happened in plain words.",
+      "do": [
+        "Use a small eyebrow with the code, a plain headline (\"Page not found\"), one sentence of explanation, a primary action home and a secondary \"Go back\".",
+        "On 401 offer sign-in; on 403 explain access and how to request it.",
+        "Keep illustrations decorative and below the actions."
+      ],
+      "avoid": [
+        "Jokes in place of an explanation, or animated error pages with no navigation."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-19",
+      "category": "screen-patterns",
+      "title": "Structure messaging around list, thread and composer",
+      "why": "Seeing conversations and the open thread together speeds triage.",
+      "do": [
+        "Show conversations with avatar, name, one-line preview, time and an unread badge; highlight the open one.",
+        "Align bubbles by sender, pin the composer with labeled attach and send buttons (send disabled while empty), and collapse to one pane with Back on narrow screens."
+      ],
+      "avoid": [
+        "Unread or presence shown by a colored dot alone."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-20",
+      "category": "screen-patterns",
+      "title": "Keep context visible with bottom sheets",
+      "why": "A sheet over a map or list holds the current step while the context stays visible and actions stay in thumb reach.",
+      "do": [
+        "Use a sheet with a visible handle and snap points, a short status headline, and the primary action pinned at its bottom.",
+        "In live-service flows show ETA, progress and identifying details (name, photo, vehicle) so users can verify the provider, with call, message and cancel actions (cancel confirmed).",
+        "For quick-create sheets, name the context in the subtitle and offer equal-width Cancel and Save, dismissible by swipe, Escape or Cancel."
+      ],
+      "avoid": [
+        "A primary action that scrolls out of view inside the sheet, or a floating button that covers the last item."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-21",
+      "category": "screen-patterns",
+      "title": "Make order confirmations complete and lasting",
+      "why": "Buyers need to know what they bought, how they paid and when it arrives.",
+      "do": [
+        "Show a success icon, \"Order confirmed\", the order number, payment method with the last four digits, the items and a delivery tracker.",
+        "Offer a secondary action such as \"Order another\" or \"View receipt\"."
+      ],
+      "avoid": [
+        "Confirmation only as a transient animation or toast, or a celebration longer than a second before the details."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-22",
+      "category": "screen-patterns",
+      "title": "Order landing pages the way visitors evaluate",
+      "why": "A familiar section order helps visitors judge a product quickly.",
+      "do": [
+        "Use navigation with one call to action, a hero with one primary action, then features, a short numbered \"how it works\" (3-4 steps), proof, FAQ, a closing call to action and the footer.",
+        "Keep price and the purchase action within the first viewport for single-product pages."
+      ],
+      "avoid": [
+        "Burying price and purchase after long storytelling sections."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-23",
+      "category": "screen-patterns",
+      "title": "Mask sensitive values on finance screens",
+      "why": "Balances and card numbers are often viewed in public.",
+      "do": [
+        "Show card numbers as bullets with the last four digits and never the full number on overview screens.",
+        "Offer an eye toggle beside balances (aria-pressed, \"Hide balance\") and remember the choice.",
+        "Lead finance home screens with the balance, labeled quick actions and recent activity."
+      ],
+      "avoid": [
+        "Icon-only quick actions, or full card number and expiry shown together."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-24",
+      "category": "screen-patterns",
+      "title": "Design assistant surfaces around the user's data",
+      "why": "An assistant is most useful when it shows what it can do and answers next to the data it describes.",
+      "do": [
+        "Offer 2-4 suggestion chips above a composer with a labeled send button, and group history by recency.",
+        "Show a live status line while the assistant works, stream replies into a polite live region, and include the period and source for any figure it reports.",
+        "Dock the panel beside the data rather than over it, and let users dismiss it."
+      ],
+      "avoid": [
+        "Floating orbs or mascots that cover data, or generated figures without their time range."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-25",
+      "category": "screen-patterns",
+      "title": "Anchor overlays on immersive views to the corners",
+      "why": "Overlays on 3D, map or video canvases must leave the center clear and stay readable over moving imagery.",
+      "do": [
+        "Anchor legends, minimaps and live readouts to corners with safe-area insets, on translucent backing plates.",
+        "Make legends collapsible and offer on-screen or touch controls alongside keyboard keys."
+      ],
+      "avoid": [
+        "Bare text floating on a busy scene, or keyboard-only controls."
+      ],
+      "note": null
+    },
+    {
       "id": "STY-01",
       "category": "style-options",
       "title": "Commit to one visual style",
@@ -2199,6 +3594,615 @@
       ],
       "avoid": [
         "Overlaps that hide content or shrink touch targets."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-11",
+      "category": "style-options",
+      "title": "Editorial and calm styles",
+      "why": "An editorial or calm look comes from scale contrast and restraint, not decoration.",
+      "do": [
+        "Use one grotesk or a serif display face for large titles beside small metadata, a monochrome or warm neutral base and one accent for the active item.",
+        "For calm or wellbeing products, slow the pace with short single-sentence steps that still have a Continue button."
+      ],
+      "avoid": [
+        "Extra accents and heavy shadows, or steps that auto-advance without user control."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-12",
+      "category": "style-options",
+      "title": "Decorative canvas, WebGL and particle effects",
+      "why": "Particle systems, 3D scenes and simulations are expensive and must never degrade the page or hide content.",
+      "do": [
+        "Cap particle counts, lazy-load 3D libraries, cap devicePixelRatio around 1.5-2 and pause rendering when off-screen or when the tab is hidden.",
+        "Keep headlines and navigation as real DOM elements, mark the canvas aria-hidden and provide a static fallback for reduced motion, low-power devices and missing WebGL."
+      ],
+      "avoid": [
+        "Unbounded particle arrays, or navigation that depends on exploring a 3D scene."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-13",
+      "category": "style-options",
+      "title": "Playful novelty interactions",
+      "why": "Mascots, physics toys and skeuomorphic gimmicks delight once but slow down repeated tasks.",
+      "do": [
+        "Reserve them for low-frequency moments such as a confirmation or a first visit, keep the underlying control standard, and mark the decoration aria-hidden.",
+        "Drive characters from one derived state (for example covering their eyes while the password field is focused) and serve a static pose under reduced motion."
+      ],
+      "avoid": [
+        "Delaying focus, typing or submission for an animation, or putting instructions only in a character's speech bubble."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-14",
+      "category": "style-options",
+      "title": "Ambient gradient light",
+      "why": "Soft gradient light behind a hero or form adds atmosphere without image weight.",
+      "do": [
+        "Stack a few radial gradients over a dark base, keep any motion slow and paused under reduced motion, and keep text off the brightest area."
+      ],
+      "avoid": [
+        "High-contrast animated backgrounds behind body text."
+      ],
+      "note": null
+    },
+    {
+      "id": "STY-15",
+      "category": "style-options",
+      "title": "Glass refraction with SVG filters",
+      "why": "A displacement map bends what is behind a panel, which reads as real glass more convincingly than blur alone.",
+      "do": [
+        "Apply an feDisplacementMap through backdrop-filter: url(#glass) as progressive enhancement over a plain blur fallback, with colorful structure behind the panel.",
+        "Keep every safeguard from the translucent-surface contrast rule."
+      ],
+      "avoid": [
+        "Relying on url() backdrop filters, which only some engines support, or glass over a flat background."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-01",
+      "category": "motion",
+      "title": "Animate transform and opacity",
+      "why": "Transform and opacity run on the compositor; animating layout properties forces reflow on every frame.",
+      "do": [
+        "Move, scale and fade with transform and opacity, and fill meters with transform: scaleX() from transform-origin: left.",
+        "Use the individual translate, scale and rotate properties when several sources (hover, keyframes, script) animate one element, and give each property one owner.",
+        "When a rounded pill must change length without squashing its ends, animate width on that one element with contain: layout style."
+      ],
+      "avoid": [
+        "Animating top, left, width or height on many elements, or several sources writing the transform shorthand at once."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-02",
+      "category": "motion",
+      "title": "Keep a duration budget",
+      "why": "Consistent, short durations keep interfaces responsive; long sequences belong only to rare moments.",
+      "do": [
+        "Use about 100-300ms for micro feedback, 200-450ms for panels, morphs and route changes, and finish staggered entrances within about 600ms.",
+        "Keep celebrations under about 1.2s per segment and let users skip them.",
+        "Keep the next view usable immediately while decorative motion finishes."
+      ],
+      "avoid": [
+        "Multi-second animation on routine actions, or blocking input until an animation ends."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-03",
+      "category": "motion",
+      "title": "Match easing to the motion",
+      "why": "Easing tells people whether something is arriving, leaving or physical.",
+      "do": [
+        "Use ease-out for entrances and responses, ease-in for exits, and a spring or springy curve (linear() or an overshooting cubic-bezier) only for physical or celebratory moments.",
+        "Store easings and durations as tokens and reuse them."
+      ],
+      "avoid": [
+        "Bouncy overshoot on navigation people use constantly, or \"spring\" as a CSS timing keyword (it is not valid)."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-04",
+      "category": "motion",
+      "title": "Reduced motion removes decoration, never the state change",
+      "why": "Vestibular-sensitive users need motion off while still seeing what changed.",
+      "do": [
+        "Wrap travel, parallax, 3D flips, loops and pointer-follow effects in @media (prefers-reduced-motion: no-preference), or check matchMedia in script.",
+        "Under reduced motion jump straight to end states, still updating counts, labels and icons, and replace looping loaders with a static indicator plus text."
+      ],
+      "avoid": [
+        "Infinite decorative animation with no reduced-motion path, or skipping the state update along with the animation."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-05",
+      "category": "motion",
+      "title": "Pause what nobody can see",
+      "why": "Animation loops that keep running off-screen or after motion settles waste battery and main-thread time.",
+      "do": [
+        "Start requestAnimationFrame loops on demand and stop them once values settle.",
+        "Pause loops when the element is off-screen (IntersectionObserver) or the tab is hidden (visibilitychange)."
+      ],
+      "avoid": [
+        "Perpetual loops for effects that are idle or invisible."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-06",
+      "category": "motion",
+      "title": "Stagger related entrances briefly",
+      "why": "A short stagger gives grouped elements a readable order instead of everything popping at once.",
+      "do": [
+        "Offset siblings by about 40-80ms, animating opacity plus a small translate (8-24px) or scale (0.96 to 1), and stagger only the first few items of long lists.",
+        "Use animation-fill-mode: backwards on delayed entrances so items wait invisibly instead of flashing.",
+        "Keep content visible by default and add the hidden start state only when scripts run and motion is allowed."
+      ],
+      "avoid": [
+        "Staggering dozens of items one by one, or content hidden until scripts load."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-07",
+      "category": "motion",
+      "title": "Morph one element instead of crossfading two",
+      "why": "When the same surface grows into the next state, people keep track of where they are; crossfades create muddy double images.",
+      "do": [
+        "Use the View Transitions API (document.startViewTransition with a shared view-transition-name) or FLIP to grow a button into its panel and shrink it back.",
+        "Let the container settle first (about 250-450ms), then fade the inner content (about 150ms), with the anchor fixed at the trigger."
+      ],
+      "avoid": [
+        "Scaling text during a morph, stacking two headlines in place, or chaining several morphs without user input."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-08",
+      "category": "motion",
+      "title": "Use FLIP for layout changes",
+      "why": "Measuring first and animating only transform gives smooth layout transitions without layout thrash.",
+      "do": [
+        "Measure with getBoundingClientRect, apply the change, compute the offset and play element.animate() from the inverted transform back to none.",
+        "Measure an untransformed wrapper, because a rotated or scaled element reports its bounding box, not its real size.",
+        "Animate new items from where they came from, such as the drop point of an upload."
+      ],
+      "avoid": [
+        "Moving elements by animating left, top or width."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-09",
+      "category": "motion",
+      "title": "Move one shared indicator between items",
+      "why": "A single highlight that glides between options explains a change of selection better than items flashing on and off.",
+      "do": [
+        "Render one indicator (pill, underline or dot) and move it with transform to the active item, about 180-250ms ease-out or a soft spring.",
+        "Keep it behind the label so text keeps its contrast, and jump without the slide under reduced motion."
+      ],
+      "avoid": [
+        "Re-mounting a separate indicator per item, or animating its left and width every frame."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-10",
+      "category": "motion",
+      "title": "Sequence animations on real completion events",
+      "why": "Chained guessed timeouts drift out of sync; completion events keep multi-step sequences correct and cancellable.",
+      "do": [
+        "Await element.animate(...).finished, or listen for animationend and transitionend filtered by name, before the next step.",
+        "For multi-part scenes, run every part on one shared duration with keyframe percentages, and end state changes from the animation events.",
+        "Give each phase a state class or data attribute so it is easy to reverse or skip."
+      ],
+      "avoid": [
+        "Nested setTimeout chains or fixed waits that drift from the CSS durations."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-11",
+      "category": "motion",
+      "title": "Register custom properties you animate",
+      "why": "Unregistered custom properties cannot interpolate, so color and number tweens snap halfway.",
+      "do": [
+        "Declare them with @property (syntax \"<number>\", \"<color>\", \"<percentage>\", with initial-value) and transition or animate them directly.",
+        "Drive several visuals (position, shadow, color, glow) from one registered variable with calc() so they stay consistent.",
+        "Keep calc() types valid and provide an instant fallback where @property is unsupported."
+      ],
+      "avoid": [
+        "Expecting plain custom properties to animate, or type-mismatched calc() that silently drops the whole declaration."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-12",
+      "category": "motion",
+      "title": "Use springs for interruptible physical motion",
+      "why": "Damped springs feel physical and can be interrupted mid-motion, unlike fixed-duration tweens.",
+      "do": [
+        "Integrate with the frame's delta time (v += (-k * x - c * v) * dt; x += v * dt) and stop when position and velocity fall below a small threshold.",
+        "Write spring results into custom properties or transforms, and use CSS linear() spring approximations where a fixed end point is enough.",
+        "Keep simple on and off visuals near-instant; springs are for movement."
+      ],
+      "avoid": [
+        "Frame-rate-dependent integration without delta time, or long wobbly settles on primary navigation."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-13",
+      "category": "motion",
+      "title": "Move content in the direction of navigation",
+      "why": "Content that slides the way the user went preserves spatial orientation.",
+      "do": [
+        "Compute the direction from the old and new index and slide the outgoing view out on that side while the next enters from the other.",
+        "Overlap the tweens slightly and use a strong ease-out."
+      ],
+      "avoid": [
+        "Sliding the same way whether the user went forward or back."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-14",
+      "category": "motion",
+      "title": "Animate changing numbers without jitter",
+      "why": "Counting to a new value signals fresh data, but changing digit widths make the layout twitch.",
+      "do": [
+        "Tween over about 500-1000ms with ease-out, format each frame with Intl.NumberFormat, and use tabular numerals with a minimum width.",
+        "Expose only the final value to assistive technology and show it immediately under reduced motion."
+      ],
+      "avoid": [
+        "Counters inside live regions (every frame gets announced), or replaying the count on every visit or re-render."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-15",
+      "category": "motion",
+      "title": "Use clip-path for reveals and shape morphs",
+      "why": "Clip-path reveals are cheap and can grow a dot into a fill or open a panel from the tap point without layout work.",
+      "do": [
+        "Animate between shapes of the same function (inset to inset, circle to circle) expressed in lengths, for example circle(0 at x y) to circle(150% at x y).",
+        "Use negative inset values so focus rings and shadows are not clipped, and keep clipped content out of the focus order until revealed."
+      ],
+      "avoid": [
+        "Mixing shape functions, which snaps instead of animating."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-16",
+      "category": "motion",
+      "title": "Treat scroll-driven effects as enhancement",
+      "why": "Scroll-linked motion can tell a product story, but content must work without it and scrolling must stay native.",
+      "do": [
+        "Use animation-timeline: view() with animation-range where supported, or IntersectionObserver, animating only transform and opacity.",
+        "For pinned stages use position: sticky inside a tall section with 100svh height, provide a skip link, and show static images under reduced motion."
+      ],
+      "avoid": [
+        "Scroll-jacking, changing scroll speed, or unrevealed text left too faint to read."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-17",
+      "category": "motion",
+      "title": "Never make people wait for decoration",
+      "why": "Animation that holds back a real result or the next input costs time on every use.",
+      "do": [
+        "Send the request immediately and let any themed animation play alongside it, using a short minimum display time only to avoid flicker.",
+        "Keep the actual state change (item in cart, signed in, sent) independent of the animation finishing."
+      ],
+      "avoid": [
+        "Artificial delays before network calls, or multi-second sequences in front of frequent actions."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-18",
+      "category": "motion",
+      "title": "Enable pointer-driven effects only for fine pointers",
+      "why": "Tilt, cursor labels and parallax need a precise pointer and get in the way elsewhere.",
+      "do": [
+        "Enable them only when matchMedia(\"(hover: hover) and (pointer: fine)\") matches, batch updates in requestAnimationFrame, and keep angles small.",
+        "Settle the effect while a field inside is focused, and keep the system cursor visible."
+      ],
+      "avoid": [
+        "Running these effects on touch devices or under reduced motion."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-19",
+      "category": "motion",
+      "title": "Make long-running motion pausable",
+      "why": "Anything that moves for more than five seconds alongside other content must be stoppable.",
+      "do": [
+        "Give marquees, autoplaying video and looping backgrounds a pause control, pause on hover and focus, and stop them under reduced motion.",
+        "Autoplay video only muted, with playsinline and a poster image."
+      ],
+      "avoid": [
+        "Unmuted autoplay, or essential information only inside a moving ticker."
+      ],
+      "note": null
+    },
+    {
+      "id": "MOT-20",
+      "category": "motion",
+      "title": "Split text for animation without breaking screen readers",
+      "why": "Wrapping each word or letter in an element makes screen readers spell text out unless the full string is preserved.",
+      "do": [
+        "Put the full text in an aria-label on the container and aria-hidden on the generated spans.",
+        "Animate words and letters with separate wrappers so transforms do not overwrite each other, and limit split animation to short headlines."
+      ],
+      "avoid": [
+        "Per-letter animation on body copy, or split spans exposed to assistive technology."
+      ],
+      "note": null
+    },
+    {
+      "id": "ENG-01",
+      "category": "engineering",
+      "title": "Start from native elements",
+      "why": "Native elements bring focus, keyboard activation, form behavior and correct announcements for free.",
+      "do": [
+        "Use button type=\"button\" for actions, a href for navigation, mailto links and downloads (a download), and a real form with a submit button.",
+        "Check that forms work unstyled and without scripts, then layer validation and animation on top, adding novalidate only when your script replaces native messages."
+      ],
+      "avoid": [
+        "Div click handlers, or role=\"button\" without tabindex and key handling."
+      ],
+      "note": null
+    },
+    {
+      "id": "ENG-02",
+      "category": "engineering",
+      "title": "Model async controls as a state machine",
+      "why": "Download, pay, send and add buttons have mutually exclusive states; independent flags allow impossible combinations and double submissions.",
+      "do": [
+        "Declare the allowed transitions (idle to working to done or failed, and back) and reflect the current state in one data-state attribute that all styling reads.",
+        "Ignore activation unless the state allows it, set aria-busy and disabled or aria-disabled while working, and auto-reset after a short confirmation when the action repeats."
+      ],
+      "avoid": [
+        "Separate loading, success and error booleans that can all be true, or a second click restarting the request mid-flight."
+      ],
+      "note": null
+    },
+    {
+      "id": "ENG-03",
+      "category": "engineering",
+      "title": "Keep button size stable across label changes",
+      "why": "Swapping \"Pay\" for \"Done\" changes width and shifts the layout under the pointer.",
+      "do": [
+        "Render every state label in the same grid cell (display: grid with each label at grid-area: 1 / 1) and show the active one with visibility, so the widest sets the size.",
+        "Hide inactive labels from assistive technology and announce the new state in a live region; keep icon-only phases named (aria-label=\"Pay $248.00\")."
+      ],
+      "avoid": [
+        "Replacing the label text and letting the button resize, or exposing all stacked labels to screen readers at once."
+      ],
+      "note": null
+    },
+    {
+      "id": "ENG-04",
+      "category": "engineering",
+      "title": "Keep the hit box still and animate an inner layer",
+      "why": "If the element receiving pointer events moves, hover flickers and clicks miss.",
+      "do": [
+        "Give the outer link or button a fixed box and apply transforms to an inner span, driving state from a data attribute set on pointerenter and pointerleave."
+      ],
+      "avoid": [
+        "Scaling or translating the element that receives pointer events."
+      ],
+      "note": null
+    },
+    {
+      "id": "ENG-05",
+      "category": "engineering",
+      "title": "Make hidden and covered content inert",
+      "why": "Content that is visually hidden or covered must not take focus or be read out.",
+      "do": [
+        "Set inert on inactive panes, covered forms and non-current wizard steps, switching it at the moment content is fully covered, then move focus to the first field of the new view.",
+        "Make the page behind an open dialog or sheet inert, and restore focus to the trigger on close."
+      ],
+      "avoid": [
+        "Visually hidden but focusable fields, or aria-hidden on containers that hold focusable controls."
+      ],
+      "note": null
+    },
+    {
+      "id": "ENG-06",
+      "category": "engineering",
+      "title": "Drive one root state attribute",
+      "why": "One state on the component root keeps visuals, tokens and semantics in sync.",
+      "do": [
+        "Toggle a single class or data attribute on the root and style descendants from it.",
+        "Update inert and aria attributes in the same function that changes the state."
+      ],
+      "avoid": [
+        "Scattered per-element flags that can contradict each other."
+      ],
+      "note": null
+    },
+    {
+      "id": "ENG-07",
+      "category": "engineering",
+      "title": "Render repeated UI from data and format at render time",
+      "why": "Defining tiles, rows and menus as data keeps markup consistent and values computable.",
+      "do": [
+        "Map arrays of raw values ({ title, value, change, icon }) to one component with stable keys.",
+        "Store numbers and dates raw and format them at render with Intl.NumberFormat and Intl.DateTimeFormat."
+      ],
+      "avoid": [
+        "Copy-pasted near-identical markup per item, or preformatted strings that cannot be sorted or summed."
+      ],
+      "note": null
+    },
+    {
+      "id": "ENG-08",
+      "category": "engineering",
+      "title": "Enhance heavy visuals progressively",
+      "why": "Canvas, WebGL and animation libraries can fail or load late; the interface must stay usable and themable without them.",
+      "do": [
+        "Ship a CSS or static fallback and remove it only after the enhanced version has painted.",
+        "Keep colors and sizes in CSS custom properties and read them from script with getComputedStyle.",
+        "Lazy-load heavy libraries and show loading progress for large assets."
+      ],
+      "avoid": [
+        "Hard-coded colors and sizes in script, or a selected state that disappears when scripts fail."
+      ],
+      "note": null
+    },
+    {
+      "id": "ENG-09",
+      "category": "engineering",
+      "title": "Schedule clocks and countdowns against real time",
+      "why": "Interval timers drift; scheduling against the wall clock keeps displays accurate.",
+      "do": [
+        "Schedule each tick for the next whole second (1000 - Date.now() % 1000 ms) and read the time again from Date.",
+        "Render times in a time element with tabular numerals and keep rotating hands moving forward.",
+        "Announce only meaningful thresholds, never every tick."
+      ],
+      "avoid": [
+        "setInterval counting its own ticks, or a live region on a clock that changes every second."
+      ],
+      "note": null
+    },
+    {
+      "id": "ENG-10",
+      "category": "engineering",
+      "title": "Persist interface preferences safely",
+      "why": "Theme, sidebar, sound and similar choices should survive reloads without breaking when storage is unavailable.",
+      "do": [
+        "Store small preferences in localStorage wrapped in try/catch and fall back to defaults when it fails.",
+        "Read system preferences (prefers-color-scheme, prefers-reduced-motion) for first-run defaults."
+      ],
+      "avoid": [
+        "Crashing or blocking rendering when storage is blocked."
+      ],
+      "note": null
+    },
+    {
+      "id": "ENG-11",
+      "category": "engineering",
+      "title": "Package reusable widgets as custom elements",
+      "why": "A custom element configured by attributes drops into any stack without a build step.",
+      "do": [
+        "Register the element as a module, configure it through attributes, reflect its state on the host and style states with :host([state=\"done\"])."
+      ],
+      "avoid": [
+        "Shipping test-only attributes (such as simulated progress) without a real progress source."
+      ],
+      "note": null
+    },
+    {
+      "id": "ENG-12",
+      "category": "engineering",
+      "title": "Match system chrome to the theme and clean up listeners",
+      "why": "Status-bar colors, orientation locks and leaked listeners cause flashes, jank and memory leaks in apps.",
+      "do": [
+        "Initialize the shell before the first frame (preload assets, set transparent system bars with icon brightness from the active theme).",
+        "Lock orientation only when the layout truly cannot adapt, and dispose controllers, listeners and subscriptions when screens close."
+      ],
+      "avoid": [
+        "Hard-coded dark status-bar icons in both themes, or listeners left running after a screen is gone."
+      ],
+      "note": null
+    },
+    {
+      "id": "ENG-13",
+      "category": "engineering",
+      "title": "Test the flows users depend on",
+      "why": "Automated flow tests catch regressions in the screens people use most.",
+      "do": [
+        "Write integration or end-to-end tests that launch the app, walk the main paths (browse, detail, checkout; sign in, verify) and assert visible text and states.",
+        "Cover the failure path (wrong code, declined payment) as well as success."
+      ],
+      "avoid": [
+        "Relying only on manual tapping in a simulator."
+      ],
+      "note": null
+    },
+    {
+      "id": "BRD-01",
+      "category": "branding",
+      "title": "Build the mark on a grid and document clear space",
+      "why": "A documented construction and exclusion zone keeps the mark consistent from billboards to favicons.",
+      "do": [
+        "Construct the symbol and wordmark from simple geometry on guides for baseline, cap height and shared stroke widths.",
+        "Define clear space as a multiple of a mark element, a minimum size, and lockups: symbol plus wordmark, symbol only, and a reversed version for photos and saturated backgrounds."
+      ],
+      "avoid": [
+        "Stretching, recoloring or crowding the mark, or placing it on busy photography without a scrim."
+      ],
+      "note": null
+    },
+    {
+      "id": "BRD-02",
+      "category": "branding",
+      "title": "Design app icons for small sizes",
+      "why": "An icon must stay recognizable beside other icons, on any wallpaper and at tiny sizes.",
+      "do": [
+        "Center one bold symbol at roughly 55-65% of the icon width on a solid background with strong figure-ground contrast.",
+        "Preview it at home-screen and settings sizes beside common icons on light, dark and photo wallpapers, and check monochrome and tinted variants."
+      ],
+      "avoid": [
+        "Full wordmarks, thin strokes or fine detail inside the icon, or gradients that turn muddy when small."
+      ],
+      "note": null
+    },
+    {
+      "id": "BRD-03",
+      "category": "branding",
+      "title": "Document the palette with roles, values and approved pairs",
+      "why": "A named palette with roles keeps color consistent across print, web and product.",
+      "do": [
+        "Give each color a name, HEX and RGB values and a role (background, text, accent, secondary), and expose them as design tokens in code.",
+        "Record which text-on-color pairs are approved, with their contrast ratios.",
+        "Prefer a soft near-black over pure black for brand dark."
+      ],
+      "avoid": [
+        "Small white text on mid-tone brand colors, or palette value labels printed in near-invisible tints."
+      ],
+      "note": null
+    },
+    {
+      "id": "BRD-04",
+      "category": "branding",
+      "title": "Apply the identity the same way everywhere",
+      "why": "Recognition comes from a few rules repeated on every touchpoint.",
+      "do": [
+        "Reuse the same symbol, palette tokens, typeface and image treatment across the product, website, social profiles, print and merchandise.",
+        "Carry a signature product element into marketing mockups so product and brand match."
+      ],
+      "avoid": [
+        "New accent colors, logo variants or image treatments per channel."
+      ],
+      "note": null
+    },
+    {
+      "id": "BRD-05",
+      "category": "branding",
+      "title": "Write tone of voice as positions on scales",
+      "why": "Placing the voice on a few spectra gives writers a concrete target for interface copy.",
+      "do": [
+        "Define 3-5 scales (funny to serious, formal to casual, enthusiastic to matter-of-fact) and mark the brand's position on each.",
+        "Translate positions into concrete copy rules with examples, such as warm but precise for money and no jokes in payment errors."
+      ],
+      "avoid": [
+        "Voice described only as vague adjectives with no examples."
       ],
       "note": null
     }

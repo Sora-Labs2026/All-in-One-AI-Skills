@@ -69,3 +69,29 @@ Dark palettes, elevation, text tiers, accents, states and theme choice. Rule IDs
 - **Do:** Provide a light logo variant or an SVG that uses currentColor.
 - **Do:** Replace shadow-based separation with lighter surfaces or borders in the dark theme.
 - **Avoid:** A black logo disappearing on a dark card.
+
+## DRK-09. Separate dark surfaces with hairlines and one bright primary
+
+**Why:** On near-black screens, depth reads best from lighter surfaces and faint borders, and one bright action anchors the screen.
+
+- **Do:** Separate cards and popovers with 1px borders at about 6-12% white in addition to lighter surface steps.
+- **Do:** Make the primary action a light or single-accent fill and keep secondary actions outlined or ghost.
+- **Do:** Raise small label grays until they reach 4.5:1.
+- **Avoid:** Several competing accents on one dark screen, or light-theme drop shadows used as the elevation cue.
+
+## DRK-10. Name the theme toggle and tune each theme
+
+**Why:** A theme switch must say what it does, and effects tuned for one theme rarely work unchanged in the other.
+
+- **Do:** Make the toggle a button with role="switch" and aria-checked, or aria-pressed, plus a visible label or accessible name naming the mode.
+- **Do:** Default to prefers-color-scheme, persist the choice, and swap a full token set (text, surfaces, CTA, glows, shadows) per theme.
+- **Do:** Re-check hero text and primary button contrast in every theme.
+- **Avoid:** Icon-only toggles without a name, or one CTA color that loses contrast in the other theme.
+
+## DRK-11. Keep theme transitions brief and optional
+
+**Why:** A transition that grows from the toggle links cause and effect, but it must never slow the switch down.
+
+- **Do:** Wrap the theme change in document.startViewTransition() and expand ::view-transition-new(root) with clip-path from a circle at the toggle's center.
+- **Do:** Swap instantly when the API is missing or prefers-reduced-motion is set, and keep any reveal under about 500ms.
+- **Avoid:** Full-screen overlays that block input during the change.

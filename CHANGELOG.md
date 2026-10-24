@@ -1,5 +1,10 @@
 # Changelog
 
+## ProductCraft 1.3.0 (2026-10-24)
+
+- Expanded the UI rulebook to 285 rules in 18 categories. New categories: `MOT` motion and animation, `ENG` front-end engineering and `BRD` brand identity. Existing categories gained rules for one-time codes, sign-in fields, uploads, async button states, honest progress, KPI tiles, charts, tables, carousels, expandable search, collapsible sidebars, checkout, paywalls, error pages and more. Existing rule IDs are unchanged.
+- Added `modules/language-choice.md`: for a new project, service or performance-critical component whose language is not fixed, ProductCraft asks once whether to use Rust, states the trade-offs (faster runtime, slower compiles, more AI tokens, no automatic page-load gain), and remembers the answer.
+
 ## ProductCraft 1.2.0 (2026-10-23)
 
 - Added the UI rulebook: `modules/ui-rules.md` routes to 146 screen-level rules in 15 category files under `references/ui-rules/`, with a machine-readable index. Every rule has an ID (for example `BTN-02`), why it matters, what to do and what to avoid.

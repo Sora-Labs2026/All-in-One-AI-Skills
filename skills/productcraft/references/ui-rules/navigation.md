@@ -96,3 +96,54 @@ Navigation patterns, labels, active states, sidebars, breadcrumbs and convention
 - **Do:** Make each tab's hit area fill its whole column, with a 2-4px gap between icon and label.
 - **Do:** Pad the bar's bottom with env(safe-area-inset-bottom) or the platform equivalent, and add bottom padding to the scroll content so the bar never covers it.
 - **Avoid:** Labels sitting on the home indicator, or only the icon glyph being tappable.
+
+## NAV-12. Expand search in place, with focus and an easy exit
+
+**Why:** Folding search into an icon saves space only if the field opens instantly, takes focus and closes predictably.
+
+- **Do:** Make the trigger a button with aria-label="Search" and aria-expanded; on activation expand the field over about 200-250ms and move focus into it.
+- **Do:** Use input type="search" with a specific placeholder, a labeled clear button, and close on Escape or outside click with focus returned to the trigger.
+- **Do:** Reserve or overlay the space so neighboring links do not jump, and optionally offer a shortcut such as / or Ctrl/Cmd+K with a visible hint.
+- **Avoid:** Search that opens on hover only, or an expanded field covering links that stay tabbable underneath.
+
+## NAV-13. Collapse sidebars without losing wayfinding
+
+**Why:** A collapsed rail frees space, but people still need to see where they are and what each icon means.
+
+- **Do:** Toggle with a button that has aria-expanded, aria-controls and a name that flips between "Collapse sidebar" and "Expand sidebar".
+- **Do:** Keep the active highlight, section dividers and accessible counts in rail mode, with tooltips on hover and keyboard focus.
+- **Do:** Animate width over about 200-300ms while fading labels first, persist the choice, default to the rail on medium widths and an off-canvas drawer on phones.
+- **Avoid:** Collapsed badges that become an unlabeled dot, or labels hidden with no tooltip or accessible name.
+
+## NAV-14. Derive the active item from the URL
+
+**Why:** When the active state comes from the route, it can never disagree with what is on screen.
+
+- **Do:** Use the router's link component (for example a NavLink) so the active class and aria-current="page" follow the current route.
+- **Do:** Generate navigation items from one data array of name, path and icon.
+- **Do:** Make hover and active look different so people do not lose their place while moving the pointer.
+- **Avoid:** A separate piece of state for the active tab that can drift from the URL.
+
+## NAV-15. Use navigation semantics for sections and tab semantics for panels
+
+**Why:** Screen readers announce these differently, and each needs different keyboard behavior.
+
+- **Do:** Use nav with links and aria-current="page" for app sections, including bottom tab bars.
+- **Do:** Use role="tablist", role="tab" with aria-selected and aria-controls, a roving tabindex and arrow keys only for in-page panels.
+- **Avoid:** role="tablist" with no tab panels, or tabs built from divs with click handlers.
+
+## NAV-16. Hide bars on scroll only with a threshold
+
+**Why:** Hiding navigation while reading down and restoring it on scroll up gives content room without losing wayfinding.
+
+- **Do:** Hide the bottom or top bar after a meaningful downward scroll (about 10px or more) and restore it on any upward scroll or at the top.
+- **Do:** Keep the title bar pinned (position: sticky) and keep labels on the restored bar.
+- **Avoid:** Toggling the bar on tiny scroll jitters.
+
+## NAV-17. Open submenus as disclosures, not hover traps
+
+**Why:** Nested sections must open for keyboard and touch users and stay open while the pointer crosses gaps.
+
+- **Do:** Make the parent a button with aria-expanded controlling a list of links, visually attached to its parent, closing on Escape and outside click.
+- **Do:** Highlight the current child item.
+- **Avoid:** Hover-only flyouts that collapse when the pointer crosses a gap.

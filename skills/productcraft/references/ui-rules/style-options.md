@@ -84,3 +84,42 @@ Optional visual treatments. Use only when the brand or the request calls for the
 
 - **Do:** Let avatars overlap cover images with a ring in the surface color, and use overlapping avatar stacks for groups of people.
 - **Avoid:** Overlaps that hide content or shrink touch targets.
+
+## STY-11. Editorial and calm styles
+
+**Why:** An editorial or calm look comes from scale contrast and restraint, not decoration.
+
+- **Do:** Use one grotesk or a serif display face for large titles beside small metadata, a monochrome or warm neutral base and one accent for the active item.
+- **Do:** For calm or wellbeing products, slow the pace with short single-sentence steps that still have a Continue button.
+- **Avoid:** Extra accents and heavy shadows, or steps that auto-advance without user control.
+
+## STY-12. Decorative canvas, WebGL and particle effects
+
+**Why:** Particle systems, 3D scenes and simulations are expensive and must never degrade the page or hide content.
+
+- **Do:** Cap particle counts, lazy-load 3D libraries, cap devicePixelRatio around 1.5-2 and pause rendering when off-screen or when the tab is hidden.
+- **Do:** Keep headlines and navigation as real DOM elements, mark the canvas aria-hidden and provide a static fallback for reduced motion, low-power devices and missing WebGL.
+- **Avoid:** Unbounded particle arrays, or navigation that depends on exploring a 3D scene.
+
+## STY-13. Playful novelty interactions
+
+**Why:** Mascots, physics toys and skeuomorphic gimmicks delight once but slow down repeated tasks.
+
+- **Do:** Reserve them for low-frequency moments such as a confirmation or a first visit, keep the underlying control standard, and mark the decoration aria-hidden.
+- **Do:** Drive characters from one derived state (for example covering their eyes while the password field is focused) and serve a static pose under reduced motion.
+- **Avoid:** Delaying focus, typing or submission for an animation, or putting instructions only in a character's speech bubble.
+
+## STY-14. Ambient gradient light
+
+**Why:** Soft gradient light behind a hero or form adds atmosphere without image weight.
+
+- **Do:** Stack a few radial gradients over a dark base, keep any motion slow and paused under reduced motion, and keep text off the brightest area.
+- **Avoid:** High-contrast animated backgrounds behind body text.
+
+## STY-15. Glass refraction with SVG filters
+
+**Why:** A displacement map bends what is behind a panel, which reads as real glass more convincingly than blur alone.
+
+- **Do:** Apply an feDisplacementMap through backdrop-filter: url(#glass) as progressive enhancement over a plain blur fallback, with colorful structure behind the panel.
+- **Do:** Keep every safeguard from the translucent-surface contrast rule.
+- **Avoid:** Relying on url() backdrop filters, which only some engines support, or glass over a flat background.

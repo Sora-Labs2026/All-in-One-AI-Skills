@@ -142,3 +142,106 @@ Labels, layout, controls, validation and multi-step forms. Rule IDs use the `FRM
 - **Do:** Provide a toolbar with bold, italic, underline, lists, link and image, plus a compact floating toolbar on text selection.
 - **Do:** Explain where the content will appear and end with a secondary Cancel and a primary Save.
 - **Avoid:** Raw markup for basic formatting in consumer-facing editors, or equally weighted Cancel and Save buttons.
+
+## FRM-17. Build one-time-code entry that accepts typing, paste and autofill
+
+**Why:** Codes arrive by keyboard, clipboard and OS autofill; boxes that only handle keystrokes force people to retype.
+
+- **Do:** Use one real input (styled as boxes) or one input per box, with inputmode="numeric", autocomplete="one-time-code", pattern="[0-9]*" and maxlength.
+- **Do:** Spread a pasted code across all boxes, auto-advance on each digit, step back on Backspace in an empty box, and submit automatically on the last digit (say so in the helper text).
+- **Do:** Give the group a label (role="group" or fieldset) and each box a name such as "Digit 2 of 4"; drive the box count from one constant used in the copy as well.
+- **Do:** Optionally request SMS codes with the WebOTP API (navigator.credentials.get with otp transport "sms").
+- **Avoid:** type="number" (spinners, lost leading zeros), blocked paste, or a heading that says 4 digits beside 6 boxes.
+
+## FRM-18. Wire sign-in fields for password managers
+
+**Why:** Correct field semantics let browsers and password managers fill credentials, which removes most sign-in friction.
+
+- **Do:** Use a real form with visible labels, type="email" with autocomplete="username" (or "email"), and autocomplete="current-password" on sign-in or "new-password" on sign-up.
+- **Do:** In native apps set the platform equivalents (for example keyboardType="email-address", autoCapitalize="none", textContentType and secureTextEntry).
+- **Do:** Put "Forgot password?" beside the password field, state the duration on any "remember me" option, and carry the typed email across when switching between sign-in and sign-up.
+- **Avoid:** Marking a sign-in password as new-password, or bare inputs with no type, label or autocomplete.
+
+## FRM-19. Add a show-password toggle and keep password rules visible
+
+**Why:** Revealing what was typed reduces errors, and rules that vanish on the first keystroke cause failed submissions.
+
+- **Do:** Make the toggle a button type="button" inside the field's trailing edge with aria-label ("Show password") and aria-pressed, swapping the input type without moving the caret.
+- **Do:** Keep rules such as "8 characters or more" in persistent helper text linked with aria-describedby.
+- **Do:** If you show a strength meter, pair the color with a text label and estimate strength with a pattern-aware estimator rather than length times character-set size.
+- **Avoid:** A non-focusable eye icon, or rules stated only in the placeholder.
+
+## FRM-20. Collect PINs and amounts with a clear keypad and a live readout
+
+**Why:** Money and PIN entry need large keys, a visible value and a second check for invisible typos.
+
+- **Do:** Show the amount large and centered with any converted value beneath it, updating on each key.
+- **Do:** Prefer a native input with inputmode="decimal" (amounts) or inputmode="numeric" (PINs); if a custom keypad is required, use real buttons of at least 48px with labels for symbol keys and also accept hardware keyboards.
+- **Do:** Mask PINs as filling dots, use autocomplete="new-password" for creation, and follow "Create PIN" with "Confirm PIN", clearing both and explaining on mismatch.
+- **Avoid:** Echoing PIN digits in plain text, or a custom keypad as the only input path.
+
+## FRM-21. Make upload zones state their limits and track each file
+
+**Why:** Uploads fail in many ways; stating limits up front and showing per-file status prevents surprises.
+
+- **Do:** Show accepted types, size limit and file count in the zone, and accept drop, paste and a real file input behind a visible browse button.
+- **Do:** Highlight the zone on dragenter and dragover, and list each file with name, size and progress, then done or failed with a reason and a retry.
+- **Do:** Show an aggregate summary ("3 of 4 uploaded, 1 failed") with clear and per-file remove controls that have accessible names.
+- **Avoid:** Drag-and-drop as the only route, silent rejection, or failed files dropped from the list.
+
+## FRM-22. Write settings toggles as full rows that apply immediately
+
+**Why:** Each switch should say what it does, take effect at once and be easy to hit.
+
+- **Do:** Build each row as a label, a one-line description and a trailing switch (role="switch" with aria-checked, or a native checkbox styled as a switch), with the whole row as the target.
+- **Do:** Show the on state by knob position and fill, not color alone, and offer undo or confirmation for security-sensitive changes.
+- **Avoid:** Switches with no visible label, or switches whose change only applies after a separate Save.
+
+## FRM-23. Prefill quick-add forms with sensible defaults
+
+**Why:** Option rows with realistic defaults let people create an item by typing one field.
+
+- **Do:** Put the single required field first and focused, and show the other options as rows with an icon, label, current value and chevron that open pickers.
+- **Do:** Choose defaults that cover the common case and show them as real values.
+- **Avoid:** Turning every option into a required step, or chevron rows that are not tappable.
+
+## FRM-24. Make date and time pickers show context and valid ranges
+
+**Why:** Scheduling is easier when people see the surrounding week or month and cannot pick impossible ranges.
+
+- **Do:** Use a week strip (day name above date, selected day filled, today marked differently) for near-term dates, with arrows for other weeks and a way to open a full calendar.
+- **Do:** Bind the end date's minimum to the start date, use a two-thumb slider or paired fields for time windows, and echo the choice in plain words ("3 days, Fri 7 to Mon 10").
+- **Do:** Give each day a full-date accessible name and aria-selected or aria-pressed, with targets of at least 40-44px.
+- **Avoid:** Return dates earlier than pick-up dates, or selected days marked by color alone.
+
+## FRM-25. Wire payment card fields for autofill and verification
+
+**Why:** Autofill tokens and formatting cut card-entry time and errors.
+
+- **Do:** Use autocomplete="cc-name", "cc-number", "cc-exp" and "cc-csc" with inputmode="numeric", group the number as the user types, show the detected network and use an MM / YY expiry.
+- **Do:** Prefer the payment provider's hosted fields, and label the pay button with the exact amount and a short security note.
+- **Avoid:** type="number" for card numbers, or a decorative card preview as the only place the entered data is visible.
+
+## FRM-26. Show recent and saved values under search-like inputs
+
+**Why:** Many entries repeat; showing recents removes typing entirely.
+
+- **Do:** List recent or saved values (places, contacts, searches) under the field with an icon, bold name and muted detail, filtering as the user types.
+- **Do:** Set enterkeyhint and suitable autocomplete values on the inputs.
+- **Avoid:** Hiding recents until the user starts typing.
+
+## FRM-27. Keep native semantics under custom-styled controls
+
+**Why:** However decorative a slider, knob or switch looks, keyboard and assistive-technology users need it to behave like the real control.
+
+- **Do:** Style the native element (input type="range" with appearance: none, a checkbox for switches), or use role="slider" or role="switch" with the matching aria-value or aria-checked attributes and full keyboard support.
+- **Do:** Show the value as text with units and expose it through aria-valuetext ("96 dB, loud"), and keep thumbs at least 44px.
+- **Do:** Communicate thresholds or danger zones with a label and marker, not only a color gradient.
+- **Avoid:** Div-only sliders or drag-only knobs.
+
+## FRM-28. Verify on the server and send credentials only to your own backend
+
+**Why:** Client-side checks can be bypassed, and generic form builders are not built to receive passwords.
+
+- **Do:** Verify one-time codes, totals and permissions on the server, and post sign-in forms to your own authentication endpoint over HTTPS.
+- **Avoid:** Hard-coded codes compared in client code, or passwords collected through a third-party form embed.

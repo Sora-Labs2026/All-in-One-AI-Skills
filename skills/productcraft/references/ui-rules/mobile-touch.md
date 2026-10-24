@@ -70,3 +70,29 @@ Touch targets, thumb reach, safe areas, margins and device sizes. Rule IDs use t
 - **Do:** Send only notifications with clear value, written short and specific, and targeted to the relevant users.
 - **Do:** Let users control categories and frequency, batch updates and respect quiet hours.
 - **Avoid:** Bursts of near-identical notifications or generic marketing pushes to everyone.
+
+## MOB-09. Keep forms clear of the keyboard and system bars
+
+**Why:** On phones the keyboard covers half the screen, and inputs under it or the status bar break forms on real devices.
+
+- **Do:** Wrap native forms in a keyboard-avoiding container with a scroll view that keeps taps working while the keyboard is up, and pad content with the runtime safe-area insets.
+- **Do:** Chain fields with a "next" return key and make the last field submit.
+- **Do:** On the web, let the form scroll and use scroll-padding with env(safe-area-inset-*) so the focused field and the submit button stay visible.
+- **Avoid:** Fixed-height centered columns that cannot scroll when the keyboard opens, or hard-coded status-bar heights.
+
+## MOB-10. Give small custom controls a real role and a larger hit area
+
+**Why:** Tiny checkboxes and inline links are hard to hit and invisible to screen readers without roles and state.
+
+- **Do:** Extend hit areas with padding or hit slop (about 6-10px) so small links approach 44pt.
+- **Do:** Give custom checkboxes accessibilityRole="checkbox" with a checked state, or use a native checkbox with a label, and make the label part of the same target.
+- **Avoid:** A checkbox built from a plain view with only a press handler, or a tappable square whose label is not tappable.
+
+## MOB-11. Always pair gestures with a tap alternative
+
+**Why:** Swipe, hold, slide and drag gestures are undiscoverable for some people and impossible for others.
+
+- **Do:** Label both outcomes of a swipe as real buttons (for example "False" and "True") and support arrow keys.
+- **Do:** Reserve slide-to-confirm and press-and-hold for rare, deliberate commitments, show a progress ring while holding, and also accept tap-then-confirm or Enter.
+- **Do:** Add a short hint near any non-standard gesture ("Pull and release").
+- **Avoid:** Swipe-only answers, slide-only buttons for routine actions, or drag as the only way to complete a task.

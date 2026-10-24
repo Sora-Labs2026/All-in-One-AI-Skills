@@ -54,7 +54,7 @@ def check(root):
         for r in ui_rules:
             missing=[f for f in UI_RULE_FIELDS if not r.get(f)]
             if missing: failures.append(f"UI rule {r.get('id')} missing {', '.join(missing)}")
-    for p in ['WORKSPACE-SETUP-PROMPT.txt','README.md','LICENSE','modules/product-design.md','modules/interaction-feedback.md','modules/forms-conversion.md','modules/data-and-product-surfaces.md','modules/responsive-accessibility.md','modules/ethical-persuasion.md','assets/review-template.md','modules/launchguard/references/security-baseline.md','modules/ui-rules.md']:
+    for p in ['WORKSPACE-SETUP-PROMPT.txt','README.md','LICENSE','modules/product-design.md','modules/interaction-feedback.md','modules/forms-conversion.md','modules/data-and-product-surfaces.md','modules/responsive-accessibility.md','modules/ethical-persuasion.md','assets/review-template.md','modules/launchguard/references/security-baseline.md','modules/ui-rules.md','modules/language-choice.md']:
         if not (root/p).is_file(): failures.append('missing '+p)
     for slug in ['ui-distiller','credential-shield','launchguard']:
         d=root/'modules'/slug

@@ -82,3 +82,61 @@ Hierarchy, states, sizing, placement and labels. Rule IDs use the `BTN-` prefix;
 - **Do:** Render the shortcut as a small kbd chip inside or beside the button, styled quieter than the label.
 - **Do:** Show the platform's modifier (Cmd on macOS, Ctrl elsewhere) and mirror it in the tooltip and aria-keyshortcuts.
 - **Avoid:** Shortcut chips on touch-only devices, or shortcuts documented nowhere in the UI.
+
+## BTN-10. Explain unavailable actions instead of silently disabling them
+
+**Why:** A plain disabled button cannot take focus and does not say what is missing.
+
+- **Do:** Use aria-disabled="true" so the button stays focusable, and on activation move focus to the first invalid field.
+- **Do:** Show a short live hint near the button that says what is still needed, and update it as fields become valid.
+- **Do:** Let the primary label follow the state (Print, Re-print, Print next) and tint the suggested next action.
+- **Avoid:** Disabled buttons with no explanation, or actions that stay clickable and fail silently.
+
+## BTN-11. Keep the main action reachable
+
+**Why:** A persistent, high-contrast primary action converts better than one buried in the hero.
+
+- **Do:** Place the main action as a filled button at the right of a sticky header, paired with at most one quieter secondary in the hero.
+- **Do:** Size any floating help or chat button at 48-56px with an accessible name, clear of content and safe areas.
+- **Avoid:** Several filled buttons of equal weight, or floating buttons that cover form fields or the last line of content.
+
+## BTN-12. Give hover and press feedback without moving the hit box
+
+**Why:** Subtle scale or lift confirms a target, but if the element under the pointer moves, hover flickers and clicks miss.
+
+- **Do:** Use small changes (hover scale about 1.03-1.05, press about 0.95, card lift 2-5px) over about 150ms ease-out.
+- **Do:** Animate an inner layer and keep the outer button or link box still.
+- **Do:** Name the animated properties in transition-property and mirror the effect on :focus-visible.
+- **Avoid:** transition: all, wobble effects on every button, or hover as the only way to reveal an action.
+
+## BTN-13. Write identity-provider buttons consistently
+
+**Why:** Recognizable, consistently worded provider buttons speed sign-in without competing with the main path.
+
+- **Do:** Use "Continue with <provider>" text with the provider's logo, at equal width and at least 48px tall on mobile, under an "or" divider.
+- **Do:** Follow each provider's button guidelines and give any icon-only variant an accessible name.
+- **Avoid:** Unlabeled logo circles, or provider buttons styled louder than the primary sign-in when email is the main path.
+
+## BTN-14. Put the amount in purchase buttons
+
+**Why:** Showing the total inside the button makes the commitment explicit and removes a scan step.
+
+- **Do:** Label purchase buttons with the verb and the exact amount ("Pay $248.00", "Add to order, $14.00") and update it as quantity changes.
+- **Do:** Place a quantity stepper beside it with labeled minus and plus buttons of at least 44x44px.
+- **Avoid:** A generic "Continue" on the final charge step, or a button amount that disagrees with the summary.
+
+## BTN-15. Add friction only for the riskiest choice
+
+**Why:** Confirmation proportional to consequence protects users without slowing ordinary choices.
+
+- **Do:** When the user selects the most severe option, reveal an acknowledgement checkbox that states the consequence in plain words, and keep the action disabled until it is checked.
+- **Do:** Relabel the action to describe the consequence and switch it to the warning style.
+- **Avoid:** Confirmation steps on every option.
+
+## BTN-16. Never make the decline option evasive
+
+**Why:** Buttons that move away, shrink or cannot be pressed remove real choice and block keyboard, touch and motor-impaired users.
+
+- **Do:** Give accept and decline stable positions and equal reachability, and differentiate them only by emphasis.
+- **Avoid:** A "No" button that jumps away on hover, or an "accept" option that grows each time the user tries to decline.
+- **Note:** Acceptable only as an obvious joke in a toy; in consent, payment or account flows it is a dark pattern.
