@@ -223,7 +223,8 @@
     .ac { position: relative; flex: 1; display: flex; justify-content: flex-end; }
     .ac-trigger { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 40px; padding: 0 var(--space-2) 0 var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-2); font-size: var(--text-sm); cursor: pointer; }
     .ac-trigger[hidden] { display: none; }
-    .ac-box { position: relative; width: 100%; max-width: 340px; transform-origin: right center; animation: ac-in var(--dur-med) var(--ease-out); }
+    .ac-box { position: relative; width: 100%; max-width: 340px; transform-origin: right center; }
+    .ac-box.is-opening { animation: ac-in var(--dur-med) var(--ease-out); }
     .ac-box[hidden] { display: none; }
     @keyframes ac-in { from { opacity: 0; transform: scaleX(0.9); } }
     .ac-list { position: absolute; z-index: 2; top: calc(100% + var(--space-2)); left: 0; right: 0; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-lg); }
@@ -806,8 +807,9 @@
       function setOpen(open) {
         box.hidden = !open; trigger.hidden = open;
         trigger.setAttribute('aria-expanded', String(open)); input.setAttribute('aria-expanded', String(open));
-        if (open) { render(); input.focus(); } else trigger.focus();
+        if (open) { box.classList.add('is-opening'); render(); input.focus(); } else trigger.focus();
       }
+      box.addEventListener('animationend', () => box.classList.remove('is-opening'));
       input.addEventListener('input', render);
       input.addEventListener('keydown', (e) => {
         const options = [...list.querySelectorAll('[role="option"]')];
