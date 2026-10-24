@@ -224,7 +224,9 @@
       .stat-list > div { padding-bottom: var(--space-4); }
       .legend { flex-wrap: wrap; }
       .card-head { flex-wrap: wrap; }
-      .segmented { width: 100%; overflow-x: auto; }
+      .segmented { max-width: 100%; overflow-x: auto; }
+      .segmented button { flex: none; white-space: nowrap; }
+      .x-axis span:nth-last-child(2) { display: none; }
       .content-table .col-subs, .content-table .col-rev { display: none; }
       .content-table th, .content-table td { padding-left: var(--space-3); padding-right: var(--space-3); }
       .ret-bar { width: 56px; }

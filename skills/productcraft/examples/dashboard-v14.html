@@ -548,8 +548,9 @@
     });
     node("line", { class: "axis", x1: pad.l, x2: W - pad.r, y1: H - pad.b, y2: H - pad.b }, svg);
     // X labels: every 3 hours for hourly ranges
+    const every = n > 12 ? (W < 600 ? 6 : 3) : 1;
     d.labels.forEach((lab, i) => {
-      if (n > 12 && i % 3) return;
+      if (i % every) return;
       node("text", { x: x(i), y: H - 8, "text-anchor": i === 0 ? "start" : "middle" }, svg, lab);
     });
     // Band
@@ -559,7 +560,7 @@
     let cap = `M${x(0)} ${y(d.capacity[0])}`;
     d.capacity.forEach((c, i) => { if (i) cap += ` L${(x(i - 1) + x(i)) / 2} ${y(d.capacity[i - 1])} L${(x(i - 1) + x(i)) / 2} ${y(c)} L${x(i)} ${y(c)}`; });
     node("path", { class: "line-cap", d: cap }, svg);
-    node("text", { class: "cap-label", x: W - pad.r, y: y(d.capacity[n - 1]) - 6, "text-anchor": "end" }, svg, `Capacity ${mw.format(d.capacity[n - 1])} MW`);
+    node("text", { class: "cap-label", x: pad.l + 6, y: y(d.capacity[0]) - 6 }, svg, `Capacity ${mw.format(d.capacity[0])} MW`);
     // Forecast and actual
     node("polyline", { class: "line-forecast", points: d.forecast.map((v, i) => `${x(i)},${y(v)}`).join(" ") }, svg);
     if (d.actual.length) node("polyline", { class: "line-actual", points: d.actual.map((v, i) => `${x(i)},${y(v)}`).join(" ") }, svg);

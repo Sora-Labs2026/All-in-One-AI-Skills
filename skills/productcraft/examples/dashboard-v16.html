@@ -53,7 +53,7 @@
     .page-head h1 { margin-bottom: var(--space-1); }
     .summary { display: flex; flex-wrap: wrap; gap: var(--space-2); }
     .sync { font-size: var(--text-sm); color: var(--text-2); }
-    .col { display: grid; gap: var(--space-5); align-content: start; min-width: 0; }
+    .col { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-5); align-content: start; min-width: 0; }
     .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
     .card-head p { font-size: var(--text-sm); color: var(--text-2); }
 
@@ -131,6 +131,8 @@
     /* Vitals trend (CMP-18): one series, normal band, out-of-range points marked by position, ring and tooltip word */
     .trend-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-3); }
     .trend-head p { font-size: var(--text-sm); color: var(--text-2); }
+    .trend-head .segmented { max-width: 100%; overflow-x: auto; }
+    .trend-head .segmented button { white-space: nowrap; }
     .chart { position: relative; height: 240px; border-radius: var(--radius-sm); }
     .chart svg { display: block; width: 100%; height: 100%; overflow: visible; }
     .chart text { font-size: 11px; fill: var(--text-2); }
@@ -469,7 +471,7 @@
     });
     node("text", { class: "band-label", x: pad.l + 8, y: y(m.ok[1]) + 15 }, svg, `Normal ${m.fmt(m.ok[0])}–${m.fmt(m.ok[1])} ${m.unit}`);
     node("line", { class: "axis", x1: pad.l, x2: W - pad.r, y1: H - pad.b, y2: H - pad.b }, svg);
-    [120, 240, 360, 480, 600, 720, 840].forEach((t) => node("text", { x: x(t), y: H - 6, "text-anchor": "middle" }, svg, `${String(t / 60).padStart(2, "0")}:00`));
+    (W < 560 ? [120, 360, 600, 840] : [120, 240, 360, 480, 600, 720, 840]).forEach((t) => node("text", { x: x(t), y: H - 6, "text-anchor": "middle" }, svg, `${String(t / 60).padStart(2, "0")}:00`));
     node("polyline", { class: "line", points: times.map((t, i) => `${x(t)},${y(m.values[i])}`).join(" ") }, svg);
     if (cursor !== null) node("line", { class: "cursor", x1: x(times[cursor]), x2: x(times[cursor]), y1: pad.t, y2: H - pad.b }, svg);
     times.forEach((t, i) => {
