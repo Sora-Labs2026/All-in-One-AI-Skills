@@ -563,7 +563,7 @@
   </main>
 
   <script>
-    // CMP-14, P42-style menu keyboard: arrows, Home/End and first-letter jumps move focus; Escape and Tab close; focus returns to the trigger.
+    // CMP-14: menu keyboard: arrows, Home/End and first-letter jumps move focus; Escape and Tab close; focus returns to the trigger.
     function menuKeys(menu, close) {
       const items = () => [...menu.querySelectorAll('[role="menuitem"]')];
       menu.addEventListener("keydown", (e) => {
