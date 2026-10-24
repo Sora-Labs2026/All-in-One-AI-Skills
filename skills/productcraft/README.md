@@ -1,6 +1,6 @@
 # ProductCraft
 
-**A Sora Labs Agent Skill** · version 1.2.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
+**A Sora Labs Agent Skill** · version 1.3.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
 
 ProductCraft is one installable skill that teaches a coding agent to build product interfaces that **show the important thing first, respond honestly, work on every device, and are secured where it matters**. It routes each task to only the modules that task needs, so a table change reads the table guidance, an auth change reads the auth-defense module, and a launch reads the five-gate security review.
 
@@ -19,7 +19,8 @@ It is a coding skill, not a theme pack, component gallery or security certificat
 | **Ethical persuasion** | Funnels, copy and engagement without fake urgency, fake social proof or hidden fees | `modules/ethical-persuasion.md` |
 | **Credential Shield** | Login, OTP/MFA, password reset, credential stuffing and password spraying defense | `modules/credential-shield/GUIDE.md` |
 | **LaunchGuard** | Pre-launch five-gate security review plus a 20-control security baseline: secrets, user data, authorization, payments, release go/no-go | `modules/launchguard/GUIDE.md` |
-| **UI rules** | A rulebook of screen-level rules with IDs (spacing, type, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, screens) | `modules/ui-rules.md` |
+| **UI rules** | A rulebook of screen-level rules with IDs (spacing, type, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, screens, motion, front-end engineering, brand identity) | `modules/ui-rules.md` |
+| **Language choice** | Offers Rust for new projects, services or performance-critical components, with honest trade-offs, and remembers the answer | `modules/language-choice.md` |
 | **Pattern library** | One principle, one implementation rule and one guardrail for each UI/UX pattern | `references/pattern-library.md` |
 
 The pattern library covers foundations, feedback, forms, interaction, navigation, responsive layout, data views, conversion, safety and advanced patterns such as live presence, chat and view transitions. A machine-readable version is in `references/pattern-index.json`.
@@ -40,6 +41,7 @@ The pattern library covers foundations, feedback, forms, interaction, navigation
 | Login abuse, MFA, password reset | Credential Shield |
 | API routes, data access, queries, uploads, cookies, headers, dependencies | The matching LaunchGuard security-baseline controls |
 | Launch, payments, user data, privileged operations | LaunchGuard |
+| A new project, service or performance-critical component with no language fixed | Language choice (asks once about Rust) |
 | A broad, ambiguous product task | Product design + interaction, then only what is relevant |
 
 The security modules are conditional. A copy or CSS tweak does not trigger a full audit.
@@ -98,7 +100,7 @@ write the report with PASS / FAIL / NOT_VERIFIED evidence.
 
 Add this to your project's `CLAUDE.md` or `AGENTS.md` so the agent keeps using ProductCraft on future work:
 
-> For significant frontend creation/redesign, UI interaction changes, complex forms, tables, dashboards, mobile layouts, or workflow UX, invoke the project-local ProductCraft skill and selectively read the matching design and interaction modules. Prioritize essential content, remove unnecessary visual noise, preserve accessible keyboard/touch behavior and real async/error handling. Use ethically transparent conversion techniques only; never fake scarcity, typing, fees, progress, social proof or server confirmations. For changes to auth/OTP/password recovery, consult its bundled Credential Shield module. For release preparation and changes to privileged operations, money, user data or production security, consult its bundled LaunchGuard module and check the matching security-baseline controls, or run the full five-gate review when shipping. Never apply the whole pattern library or run a full security audit on trivial copy/CSS edits. Keep reports honest and do not modify production secrets, cloud policy, live data or deployments without explicit authorization.
+> For significant frontend creation/redesign, UI interaction changes, complex forms, tables, dashboards, mobile layouts, or workflow UX, invoke the project-local ProductCraft skill and selectively read the matching design and interaction modules. Prioritize essential content, remove unnecessary visual noise, preserve accessible keyboard/touch behavior and real async/error handling. Use ethically transparent conversion techniques only; never fake scarcity, typing, fees, progress, social proof or server confirmations. For changes to auth/OTP/password recovery, consult its bundled Credential Shield module. For release preparation and changes to privileged operations, money, user data or production security, consult its bundled LaunchGuard module and check the matching security-baseline controls, or run the full five-gate review when shipping. Never apply the whole pattern library or run a full security audit on trivial copy/CSS edits. Keep reports honest and do not modify production secrets, cloud policy, live data or deployments without explicit authorization. For a new project, service or performance-critical component whose language is not yet fixed, ask once whether to write it in Rust, stating the trade-offs (faster runtime, slower compiles, more AI tokens, no automatic page-load gain) per its language-choice module.
 
 ## Built-in guardrails
 
@@ -129,6 +131,9 @@ Add this to your project's `CLAUDE.md` or `AGENTS.md` so the agent keeps using P
 | `PRN` | UX principles |
 | `SCR` | Screen patterns |
 | `STY` | Style options |
+| `MOT` | Motion and animation |
+| `ENG` | Front-end engineering |
+| `BRD` | Brand identity |
 
 ## Security baseline
 
@@ -190,6 +195,7 @@ productcraft/
 │   ├── responsive-accessibility.md
 │   ├── ethical-persuasion.md
 │   ├── ui-rules.md              # routes to the UI rulebook
+│   ├── language-choice.md       # when and how to offer Rust
 │   ├── ui-distiller/            # guide + design rules, patterns, quality gate
 │   ├── credential-shield/       # guide, references, policy example, simulator, tests
 │   └── launchguard/             # guide, security baseline, references, scanner, tests, report templates

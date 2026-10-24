@@ -1,6 +1,6 @@
 # UI rules
 
-Screen-level rules for the details that make an interface feel finished: spacing, type, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy and common screens. Each rule has an ID (for example `BTN-02`) and states why it matters, what to do and what to avoid. Rules live in `../references/ui-rules/`, one file per category; `../references/ui-rules-index.json` is the machine-readable index.
+Screen-level rules for the details that make an interface feel finished: spacing, type, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, common screens, motion, front-end engineering and brand identity. Each rule has an ID (for example `BTN-02`) and states why it matters, what to do and what to avoid. Rules live in `../references/ui-rules/`, one file per category; `../references/ui-rules-index.json` is the machine-readable index.
 
 Use this module together with [product-design.md](product-design.md) (what to show and in what order) and [interaction-feedback.md](interaction-feedback.md) (how controls behave). This module supplies the exact values and conventions.
 
@@ -29,11 +29,14 @@ Use this module together with [product-design.md](product-design.md) (what to sh
 | `COP` | `copy-microcopy.md` | Button labels, plain language, confirmations, casing |
 | `PRN` | `principles.md` | Choice load, ordering, chunking, conventions, enough detail |
 | `SCR` | `screen-patterns.md` | Dashboards, settings, search, onboarding, welcome and hero sections |
+| `MOT` | `motion.md` | Durations, easing, reduced motion, FLIP and morphs, springs, sequencing, scroll effects |
+| `ENG` | `engineering.md` | Native elements, async state machines, inert content, data-driven UI, progressive enhancement, tests |
+| `BRD` | `branding.md` | Logo construction, app icons, palettes, consistent application, tone of voice |
 | `STY` | `style-options.md` | Optional visual treatments, only when the brand or request asks for them |
 
 ## Baseline for almost every screen
 
-When a change touches a screen and nothing narrower applies, check at least: `LAY-01` spacing scale, `LAY-02` grouping by spacing, `LAY-05` one focal point, `TYP-02` type scale, `TYP-04` readable sizes, `COL-01` contrast, `COL-07` no color-only meaning, `BTN-01` one primary action, `BTN-02` button states, `MOB-01` touch targets, `FRM-01` visible labels, `FRM-11` inline errors, `FBK-01` immediate feedback and `COP-01` outcome labels.
+When a change touches a screen and nothing narrower applies, check at least: `LAY-01` spacing scale, `LAY-02` grouping by spacing, `LAY-05` one focal point, `TYP-02` type scale, `TYP-04` readable sizes, `COL-01` contrast, `COL-07` no color-only meaning, `BTN-01` one primary action, `BTN-02` button states, `MOB-01` touch targets, `FRM-01` visible labels, `FRM-11` inline errors, `FBK-01` immediate feedback, `COP-01` outcome labels, `MOT-04` reduced motion and `ENG-01` native elements.
 
 ## Precedence
 

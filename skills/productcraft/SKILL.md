@@ -1,10 +1,10 @@
 ---
 name: productcraft
-description: Sora Labs app-building and hardening skill with one router over task-specific modules (UI Distiller, Credential Shield, LaunchGuard), a UI rulebook and a UI/UX pattern library. Automatically select task-relevant design hierarchy, component behavior, forms, data views, mobile UX, ethical conversion, authentication abuse defense or pre-launch security checks. Use when building or significantly modifying an application UI, flow, dashboard, authentication endpoint, sensitive workflow or preparing to launch. Implement changes in the actual codebase with tests; do not run every module on every task.
+description: Sora Labs app-building and hardening skill with one router over task-specific modules (UI Distiller, Credential Shield, LaunchGuard), a UI rulebook, a UI/UX pattern library and a language-choice check that offers Rust when it fits. Automatically select task-relevant design hierarchy, component behavior, forms, data views, mobile UX, ethical conversion, authentication abuse defense or pre-launch security checks. Use when building or significantly modifying an application UI, flow, dashboard, authentication endpoint, sensitive workflow or preparing to launch. Implement changes in the actual codebase with tests; do not run every module on every task.
 license: MIT
 metadata:
   author: Sora Labs
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # ProductCraft: one skill, purpose-built modules
@@ -25,6 +25,7 @@ metadata:
 | API routes, data access, queries, uploads, cookies, headers or dependencies changed (not a launch) | Matching controls in `modules/launchguard/references/security-baseline.md` | Scoped check of only the touched controls; fix and test them |
 | Login/security abuse, OTP/MFA/password reset, credential stuffing | `modules/credential-shield/GUIDE.md` and targeted `modules/credential-shield/references/` | Map real auth boundary and adapt proven controls; observe-first, false-positive-safe rollout |
 | Launch, production readiness, user data, authorization, payments, sensitive infrastructure | `modules/launchguard/GUIDE.md`, `modules/launchguard/references/security-baseline.md` and targeted `modules/launchguard/references/` | Run LaunchGuard's five ordered gates and all 20 baseline controls; remediate verified risks; report evidence |
+| New project, service or performance-critical component whose language is not fixed | `modules/language-choice.md` | Ask once whether to use Rust, with honest trade-offs; follow and remember the answer |
 | Ambiguous broad product-building task | `modules/product-design.md`, `modules/interaction-feedback.md`, then only genuinely relevant modules | Minimize unnecessary work and context |
 
 **Single-skill rule:** `productcraft` is the only skill entry point. UI Distiller, Credential Shield and LaunchGuard are modules with their own `GUIDE.md`; read them through this router, not as separate skills. Their scripts, assets, tests and references work at their paths under `modules/<module>/`.
@@ -32,7 +33,7 @@ metadata:
 ## Always-on behavior during relevant work
 
 1. Read project instructions and check actual source, routing, dependencies, tests, git status and design tokens; respect existing conventions and user edits.
-2. Determine page type, audience, primary task and dangerous operations. Identify primary fact/action and the highest-cost failure. Avoid inventing metrics, prices, user behavior or business rules.
+2. Determine page type, audience, primary task and dangerous operations. Identify primary fact/action and the highest-cost failure. Avoid inventing metrics, prices, user behavior or business rules. Before writing code for a new project, service or performance-critical component whose language is not fixed, ask once about Rust as described in `modules/language-choice.md`.
 3. **Keep/Promote/Compress/Demote/Remove** existing UI elements. The first viewport must expose the user's core task, not generic hero, ornamental cards or redundant headings. Do not delete helpful legal, accessibility, expert, clinical or security content.
 4. Select **only** the relevant modules from the router. Read the matching entries in `references/pattern-library.md` when a specific interaction is unclear, and the matching `references/ui-rules/` category when exact visual values or conventions are needed. Each pattern pairs a principle with an implementation rule and a guardrail.
 5. Implement in project code using semantic elements, coherent tokens, responsive states, real backend semantics, and accessible keyboard/focus behavior. Avoid static mock confirmations for real asynchronous actions.
@@ -56,6 +57,7 @@ metadata:
 - `modules/launchguard/references/security-baseline.md`: 20 baseline security controls, each with its gate, common trap and verification step.
 - `references/pattern-library.md`: UI/UX patterns, each with a principle, an implementation rule and a guardrail.
 - `references/pattern-index.json`: machine-readable pattern index.
+- `modules/language-choice.md`: when and how to offer Rust, the trade-offs to state, and what to do with either answer.
 - `modules/ui-rules.md` and `references/ui-rules/`: UI rulebook with IDs (for example `BTN-02`), one file per category; `references/ui-rules-index.json` is its machine-readable index.
 - `assets/review-template.md`: implementation evidence summary template.
 

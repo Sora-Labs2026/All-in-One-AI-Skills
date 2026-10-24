@@ -122,3 +122,30 @@ Spacing scale, grouping, alignment, hierarchy and grids. Rule IDs use the `LAY-`
 - **Do:** Keep consent text 24px above a 56px full-width primary button that sits 16px above the keyboard or safe area.
 - **Avoid:** Using the same gap within and between groups, or letting the button touch the keyboard.
 - **Note:** Scale the values proportionally for other device sizes; read safe areas at runtime.
+
+## LAY-14. Bento grids need one leading tile
+
+**Why:** Mixed-size tiles read as one system only when gaps, radii and padding are identical and one tile clearly leads.
+
+- **Do:** Lay out with CSS Grid (for example repeat(12, 1fr) or grid-template-areas) and let tiles span columns and rows.
+- **Do:** Use one gap value, one radius token and one inner padding for every tile.
+- **Do:** Give exactly one tile the lead (larger, or the only accent fill) and collapse to a single column with that tile first on mobile.
+- **Avoid:** Several radii, gaps or shadow styles on one screen, or several bright tiles competing for attention.
+
+## LAY-15. Adapt the layout to each device class
+
+**Why:** Stretching a phone layout to desktop wastes space, and shrinking a desktop layout onto a phone crowds it.
+
+- **Do:** Switch patterns at breakpoints or container queries (around 600px and 1024px): phone with one column and bottom navigation, tablet with a side rail and two panes, desktop with a sidebar and multi-column grid.
+- **Do:** Keep components and tokens shared across breakpoints so it still reads as one product.
+- **Do:** For split layouts such as sign-in beside an illustration, drop or shrink the visual on mobile so the form comes first.
+- **Avoid:** Proportionally shrinking a desktop split layout onto a phone.
+
+## LAY-16. Scale spacing from a reference design, never the user's text size
+
+**Why:** Scaling lengths from a reference frame keeps proportions, but text must still follow the user's accessibility settings.
+
+- **Do:** Use flexible layout primitives (flex, grid, constraints) for structure and scale only spacing and radii if needed.
+- **Do:** Respect the platform text scale (for example MediaQuery textScaler or rem units) and clamp only extreme values.
+- **Avoid:** Shrinking all fonts with screen width, or assuming one phone size fits tablets and split screen.
+- **Note:** Pixel-scaling helpers are debated; responsive layout is the better default.

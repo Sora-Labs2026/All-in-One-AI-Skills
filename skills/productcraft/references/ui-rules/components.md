@@ -135,3 +135,132 @@ Foundations, tokens, core components, radius, elevation and common component pat
 
 - **Do:** Change the whole row when selected (accent fill or tint, stronger border) and keep a check or checkbox as a non-color cue.
 - **Avoid:** A selected row that looks identical to unselected ones except for a tiny checkbox.
+
+## CMP-17. Give KPI tiles a fixed anatomy
+
+**Why:** Dashboards are scanned tile by tile; a fixed structure makes every number interpretable at a glance.
+
+- **Do:** Order each tile as a small label, a large value with tabular numerals, then a delta with arrow, sign and comparison period ("+4.9% vs last month"), with an optional icon or sparkline.
+- **Do:** Render tiles from a data array of raw values mapped to one component, formatting with Intl.NumberFormat at render time.
+- **Do:** Add a hover lift only when the tile opens a detail view, and give it a focus style too.
+- **Avoid:** Up or down shown by green and red alone, hover lift on non-interactive tiles, or preformatted strings that cannot be sorted.
+
+## CMP-18. Make charts answer one question and reveal exact values
+
+**Why:** A chart is only useful if the reader knows what it shows, over what period, and can read exact values.
+
+- **Do:** Give each chart a title, a one-line summary, a time-range control and labeled axes, and highlight the current or key series while muting the rest.
+- **Do:** Show exact values in tooltips on hover and keyboard focus, put the total in the center of donuts, and list values beside legend entries.
+- **Do:** Provide a text or table alternative and wrap charts in a responsive container.
+- **Avoid:** Color-only legends, tiny low-contrast axis labels, glossy or 3D bars that distort comparison, or entrance animations replayed on every refresh.
+
+## CMP-19. Build operational tables for triage
+
+**Why:** Lists are read by status and recency; those must be scannable without decoding.
+
+- **Do:** Use real table markup with th scope="col", right-aligned numbers with tabular numerals, and status pills with words.
+- **Do:** Add filter tabs with counts above the table, show relative times with the absolute timestamp in a time element, and highlight the selected row with aria-selected beside a detail pane.
+- **Avoid:** Column widths that jump when the selection changes, or status shown by a colored dot alone.
+
+## CMP-20. Give list rows a leading visual, two lines and a trailing value
+
+**Why:** A consistent row anatomy makes transactions, devices and people lists scannable.
+
+- **Do:** Place an avatar, logo or icon first, primary text above secondary text, and the key value right-aligned at the end.
+- **Do:** Keep signs on money values (-$24.00, +$240.00) with tabular numerals, group long lists under date headers, and keep tappable rows at least 48px tall.
+- **Avoid:** Red and green as the only difference between debits and credits, or truncated trailing values.
+
+## CMP-21. Keep product cards comparable
+
+**Why:** Uniform cards let shoppers compare quickly across a grid.
+
+- **Do:** Use a fixed image aspect-ratio with object-fit: cover, then category, name, price (right-aligned or accent), rating with its count, and one add action with an accessible name that includes the product.
+- **Do:** Make the title the card's link and keep the add button outside the link; use grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) for the grid.
+- **Avoid:** Price or the add action shown only on hover, varying image heights, or nested interactive elements.
+
+## CMP-22. Give carousels controls, position and a pause
+
+**Why:** Rotating content hides information, so people need control over it.
+
+- **Do:** Provide labeled previous and next buttons, a position indicator ("3 of 8"), keyboard arrows and scroll snapping.
+- **Do:** Pause on hover and focus and offer a pause control if anything autoplays; treat 3D coverflow as optional styling over the same controls.
+- **Avoid:** Autoplay without a way to stop it, drag as the only way to move, or the only copy of critical information inside a carousel.
+
+## CMP-23. Give segmented controls and chips real selection semantics
+
+**Why:** Compact toggles are fast, but assistive technology must know what is selected.
+
+- **Do:** Use native radios or role="radiogroup" with role="radio" and aria-checked for single choice, and toggle buttons with aria-pressed or checkboxes for multi-select chips.
+- **Do:** Move selection with arrow keys using a roving tabindex, and show the selected state with fill plus a check or weight change.
+- **Do:** Let horizontal chip rows scroll with the last chip peeking past the edge.
+- **Avoid:** ARIA roles without the matching keyboard behavior, or a faint tint as the only selected cue.
+
+## CMP-24. Make swatch pickers named radio groups
+
+**Why:** Swatches are single-choice inputs and must be operable and named like one.
+
+- **Do:** Build them as a radio group, give each swatch a text name, and mark the selected one with an offset ring plus the visible variant name.
+- **Do:** Keep the hit area at least 44px even when the visible dot is small, and update an accent token so the whole product view reflects the choice.
+- **Avoid:** Unnamed color dots, or a per-variant accent that fails contrast on its background.
+
+## CMP-25. Keep the current selection visible and removable
+
+**Why:** People should always see what they picked and be able to undo it without reopening a menu.
+
+- **Do:** Show the selected value in the trigger, or as a chip with a labeled remove button.
+- **Do:** Announce changes in a polite live region and use listbox or menu semantics with Escape returning focus to the trigger.
+- **Avoid:** Replacing the labeled trigger with an unlabeled icon once a value is chosen.
+
+## CMP-26. Route accents through one token per theme or variant
+
+**Why:** When every accent use reads one custom property, re-theming and per-item colors stay consistent.
+
+- **Do:** Define the accent once (for example --accent) and set it per theme or variant with a data attribute, using it for text, fills, borders, glows and focus.
+- **Do:** Check each variant's accent against its own background.
+- **Avoid:** Repeating accent hex values across many rules.
+
+## CMP-27. Use a large fixed radius for pills
+
+**Why:** A fixed large radius keeps semicircular ends at any width, while 50% turns wide elements into ellipses.
+
+- **Do:** Use border-radius: 999px for pills, chips, pill buttons and indicators.
+- **Avoid:** border-radius: 50% on non-square elements.
+
+## CMP-28. Prefer the native share sheet
+
+**Why:** The system share sheet lists the user's own apps; a custom icon row is only a fallback.
+
+- **Do:** Call navigator.share when navigator.canShare allows it, and otherwise expand a row of labeled share targets plus "Copy link" with immediate confirmation.
+- **Avoid:** Unlabeled brand icons, or a share row that opens on hover.
+
+## CMP-29. Give feeds and notifications a fixed item anatomy
+
+**Why:** A predictable order makes long feeds and notification lists scannable.
+
+- **Do:** Show avatar, name, relative time and an overflow menu with an accessible name, then body text clamped to 2-3 lines with an in-place "See more", then media and reactions with counts.
+- **Do:** For notifications, put the actor in bold, the action text and a relative time, entering with a short slide and fade.
+- **Avoid:** Wrapping a card that contains buttons in one big link, or autoplaying video with sound.
+
+## CMP-30. Lay out media players in the familiar order
+
+**Why:** Familiar control order lets people operate a player without hunting.
+
+- **Do:** Show artwork, title and artist, a progress bar with elapsed and total time, then shuffle, previous, a larger play or pause, next and repeat.
+- **Do:** Give icon buttons accessible names and reflect toggles such as shuffle and repeat with aria-pressed.
+- **Avoid:** A play button the same size and weight as the secondary controls.
+
+## CMP-31. Build checklists from real checkboxes with a live count
+
+**Why:** Clear done states and a running tally give a sense of progress.
+
+- **Do:** Use labeled checkboxes, show done items with a check, line-through and reduced emphasis, and update "3 of 8 completed" in a polite live region.
+- **Do:** Name delete buttons after their item and offer undo.
+- **Avoid:** Deleting with no undo, or low-contrast placeholder text on dark surfaces.
+
+## CMP-32. Lay out receipts and money summaries for checking
+
+**Why:** Financial summaries must be easy to verify line by line.
+
+- **Do:** Use label and value rows with tabular numerals and right-aligned amounts, listing subtotal, discount (with a minus sign), fees, tax with its rate and a bold total, plus a reference number.
+- **Do:** Render receipts as real text that can be selected, printed or downloaded.
+- **Avoid:** Marking discounts by red alone, or decoration that covers the figures.

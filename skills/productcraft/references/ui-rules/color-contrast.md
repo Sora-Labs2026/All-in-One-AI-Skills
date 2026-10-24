@@ -80,3 +80,45 @@ Contrast minimums, palette discipline, emphasis and text on images. Rule IDs use
 - **Do:** Define a small set of named tokens (text-primary, text-secondary, border, surface) and reference only those.
 - **Do:** Search stylesheets for raw hex values and merge near-duplicates into the nearest token.
 - **Avoid:** Hard-coded one-off colors inside components.
+
+## COL-10. Keep focus and pending colors apart from verdict colors
+
+**Why:** When red and green appear only for results, users read success and failure instantly; tinting focus or waiting states the same way misleads.
+
+- **Do:** Show focus, progress and waiting states with a neutral or brand color, using lightness, an outline or a glow.
+- **Do:** Switch to the success or error token only once the result is known, and pair it with an icon and text.
+- **Avoid:** A red outline on a merely focused field, or green and red tints on states that are still pending.
+
+## COL-11. Check text on accent fills and gradients
+
+**Why:** Light accents such as lime, yellow, orange and cyan often fail with white text, and gradients fail at their lightest stop.
+
+- **Do:** Define an on-accent text token for each accent (near-black on light accents, white on dark ones).
+- **Do:** Check labels against the lightest stop of any gradient, and darken the stops or switch text color until it passes.
+- **Do:** When accents are sampled from imagery or brand material, darken or lighten them until text reaches 4.5:1 against the real background.
+- **Avoid:** White text on lime, yellow or orange fills, or a gradient button whose label fades out at one end.
+
+## COL-12. Give translucent surfaces a contrast floor
+
+**Why:** Text on frosted or translucent panels changes contrast with whatever sits behind it.
+
+- **Do:** Pair backdrop-filter blur (about 12-24px) with a semi-opaque tint and a 1px light border, and raise the tint until text passes 4.5:1 against the worst-case background.
+- **Do:** Provide an opaque fallback under @supports not (backdrop-filter: blur(1px)) and @media (prefers-reduced-transparency: reduce).
+- **Do:** Use regular or medium weights for small text and keep the number of stacked blurred layers low.
+- **Avoid:** Secondary text or placeholders at 30-60% white on glass over photos or video.
+
+## COL-13. Change the fill, not the ink, for errors on colored controls
+
+**Why:** Red text on a colored button can drop near 1:1 contrast, while a red fill with white text stays readable.
+
+- **Do:** Switch the control's background token to the error color and keep the foreground white or near-black as needed.
+- **Do:** Pair the color change with an icon and a short caption.
+- **Avoid:** Recoloring only the label or icon red on a colored button.
+
+## COL-14. Keep category tints soft and consistent
+
+**Why:** Pastel backgrounds can separate categories quietly if the mapping is stable and text stays readable.
+
+- **Do:** Assign each category one pastel background with dark text and reuse the mapping in every tile, card and panel.
+- **Do:** Pair the tint with a label or icon so the category is clear without color.
+- **Avoid:** Mid-gray text on pastel fills, or a category color that changes between views.
