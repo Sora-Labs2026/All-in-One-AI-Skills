@@ -49,6 +49,7 @@
     .chip-x svg { width: 16px; height: 16px; color: var(--text-2); }
     .link-btn { padding: 0; border: 0; background: none; color: var(--accent-ink); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
     .link-btn:hover { text-decoration: underline; }
+    [hidden] { display: none !important; }
     .icon-btn.sm { width: 32px; height: 32px; }
     .icon-btn.sm svg { width: 18px; height: 18px; }
 
@@ -63,7 +64,7 @@
     .field .icon-btn svg { width: 18px; height: 18px; }
 
     /* v1 command palette over a lightly dimmed, inert app (P69, ENG-05) */
-    .app-frame { position: relative; height: 468px; overflow: hidden; }
+    .app-frame { position: relative; height: 448px; overflow: hidden; }
     .app { display: grid; grid-template-columns: 208px minmax(0, 1fr); height: 100%; }
     .app-side { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4) var(--space-3); border-right: 1px solid var(--border); background: var(--surface); }
     .app-side .brand { margin: 0 var(--space-2) var(--space-4); }
@@ -81,7 +82,7 @@
     .app-kpi strong { display: block; margin-top: var(--space-1); font-size: var(--text-xl); }
     .app-chart { display: flex; align-items: flex-end; gap: var(--space-3); height: 200px; margin-top: var(--space-4); padding: var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
     .app-chart i { flex: 1; border-radius: 6px 6px 2px 2px; background: var(--surface-2); }
-    .scrim { position: absolute; inset: 0; background: rgba(4, 6, 8, 0.55); }
+    .scrim { position: absolute; inset: 0; background: rgba(4, 6, 8, 0.4); }
     .cmdk { position: absolute; top: var(--space-7); left: 50%; width: min(620px, calc(100% - 48px)); transform: translateX(-50%); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: var(--radius-lg); background: var(--surface-2); box-shadow: var(--shadow-lg); overflow: hidden; }
     .cmdk[hidden] { display: none; }
     .cmdk-field { display: flex; align-items: center; gap: var(--space-3); height: 56px; padding: 0 var(--space-3) 0 var(--space-4); border-bottom: 1px solid var(--border); }
@@ -90,9 +91,9 @@
     .cmdk-field input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; font-size: var(--text-lg); outline: none; }
     .cmdk-field input::placeholder { color: var(--text-3); }
     .cmdk-close { min-height: 28px; padding: 0 var(--space-2); border: 1px solid var(--border); border-radius: 6px; background: transparent; color: var(--text-2); font-size: var(--text-xs); font-weight: 600; cursor: pointer; }
-    .cmdk-list { max-height: 300px; padding: var(--space-2); overflow-y: auto; }
-    .cmdk-group-label { padding: var(--space-2) var(--space-3) var(--space-1); font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
-    .cmdk-opt { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); min-height: 40px; padding: 0 var(--space-3); border-radius: var(--radius-sm); cursor: pointer; }
+    .cmdk-list { position: relative; max-height: 320px; padding: var(--space-2); overflow-y: auto; }
+    .cmdk-group-label { padding: var(--space-2) var(--space-3) 2px; font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .cmdk-opt { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); min-height: 38px; padding: 0 var(--space-3); border-radius: var(--radius-sm); cursor: pointer; }
     .cmdk-opt > svg { width: 18px; height: 18px; color: var(--text-2); }
     .cmdk-opt .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--text-md); }
     .cmdk-opt .lbl small { margin-left: var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
@@ -117,17 +118,15 @@
     .facets-head { display: flex; align-items: center; justify-content: space-between; }
     .facets-head h4 { font-size: var(--text-md); }
     .facets fieldset { margin: 0; padding: var(--space-4) 0 0; border: 0; border-top: 1px solid var(--border); }
-    .facets legend { padding: 0; margin-bottom: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+    .facets legend { float: left; width: 100%; padding: 0; margin-bottom: var(--space-1); font-size: var(--text-sm); font-weight: 600; }
+    .facets legend + * { clear: both; }
     .check { display: flex; align-items: center; gap: var(--space-2); min-height: 30px; font-size: var(--text-sm); color: var(--text); cursor: pointer; }
     .check input { width: 16px; height: 16px; margin: 0; accent-color: var(--accent); }
     .check .num { margin-left: auto; font-size: var(--text-xs); color: var(--text-2); }
-    .price-range { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
-    .price-range label { display: grid; gap: 2px; font-size: var(--text-xs); color: var(--text-2); }
-    .price-range input { width: 100%; height: 36px; padding: 0 var(--space-2); border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--field-bg); font-size: var(--text-sm); }
     .res-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
-    .res-head h4 { font-size: var(--text-lg); font-weight: 600; }
+    .res-head h4 { font-size: var(--text-md); font-weight: 600; }
     .res-head h4 span { color: var(--text-2); font-weight: 400; }
-    .sort { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .sort { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-2); white-space: nowrap; }
     .sort select { min-height: 36px; padding: 0 var(--space-2); border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--field-bg); color: var(--text); }
     .applied { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-3); }
     .results { display: grid; margin-top: var(--space-3); border-top: 1px solid var(--border); }
@@ -147,8 +146,8 @@
 
     /* v3 grouped results with highlighted matches (mark), type filters with real pressed state (CMP-23) */
     .ws { padding: var(--space-4) var(--space-5) var(--space-5); background: var(--surface); }
-    .type-filters { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
-    .type-filters button { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface); color: var(--text-2); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .type-filters { display: flex; flex-wrap: wrap; gap: 6px; margin-top: var(--space-3); }
+    .type-filters button { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 10px; border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface); color: var(--text-2); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
     .type-filters button .num { font-weight: 400; color: var(--text-2); }
     .type-filters button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
     .type-filters button[aria-pressed="true"] .num { color: var(--accent-ink); }
@@ -194,7 +193,7 @@
     .m-body { display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-2) var(--space-4) 0; background: var(--surface); flex: 1; }
     .m-title { display: block; font-size: var(--text-xl); font-weight: 700; }
     .m-search { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); }
-    .m-search .field { flex: 1; min-height: 48px; border-radius: var(--radius-md); }
+    .m-search .field { flex: 1; min-width: 0; min-height: 48px; border-radius: var(--radius-md); }
     .m-search .btn { min-height: 44px; padding: 0 var(--space-2); color: var(--accent-ink); }
     .m-sec-head { display: flex; align-items: center; justify-content: space-between; }
     .m-sec-head h4 { font-size: var(--text-sm); font-weight: 600; }
@@ -220,11 +219,11 @@
     /* v6 inline autocomplete: expands in place, recents first, clear button, Escape closes (NAV-12) */
     .docs-top { position: relative; display: flex; align-items: center; gap: var(--space-5); height: 60px; padding: 0 var(--space-5); border-bottom: 1px solid var(--border); background: var(--surface); }
     .docs-top nav ul { display: flex; gap: var(--space-1); }
-    .docs-top nav a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .docs-top nav a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 var(--space-2); font-size: var(--text-sm); color: var(--text-2); white-space: nowrap; }
     .ac { position: relative; flex: 1; display: flex; justify-content: flex-end; }
     .ac-trigger { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 40px; padding: 0 var(--space-2) 0 var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--text-2); font-size: var(--text-sm); cursor: pointer; }
     .ac-trigger[hidden] { display: none; }
-    .ac-box { position: relative; width: 100%; max-width: 380px; transform-origin: right center; animation: ac-in var(--dur-med) var(--ease-out); }
+    .ac-box { position: relative; width: 100%; max-width: 340px; transform-origin: right center; animation: ac-in var(--dur-med) var(--ease-out); }
     .ac-box[hidden] { display: none; }
     @keyframes ac-in { from { opacity: 0; transform: scaleX(0.9); } }
     .ac-list { position: absolute; z-index: 2; top: calc(100% + var(--space-2)); left: 0; right: 0; padding: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-lg); }
@@ -411,13 +410,6 @@
                   <label class="check"><input type="checkbox">140 cm<span class="num">15</span></label>
                   <label class="check"><input type="checkbox">160 cm<span class="num">9</span></label>
                 </fieldset>
-                <fieldset>
-                  <legend>Price, USD</legend>
-                  <div class="price-range">
-                    <label>Min<input type="number" inputmode="numeric" min="0" placeholder="249"></label>
-                    <label>Max<input type="number" inputmode="numeric" min="0" placeholder="899"></label>
-                  </div>
-                </fieldset>
               </form>
 
               <section aria-labelledby="res-title">
@@ -444,7 +436,7 @@
                   <li class="result">
                     <span class="thumb top-white"><svg aria-hidden="true"><use href="#i-desk"/></svg></span>
                     <div>
-                      <h5><a href="#p2">Lift Compact standing desk, 120 cm</a></h5>
+                      <h5><a href="#p2">Lift Compact desk, 120 cm</a></h5>
                       <p class="meta">White top · single motor · 71–121 cm high</p>
                       <p class="line"><span class="rating"><svg aria-hidden="true"><use href="#i-star"/></svg><strong class="num">4.5</strong>/5 (143)</span><span>Delivery Thu, Oct 29</span></p>
                     </div>
@@ -462,7 +454,7 @@
                   <li class="result">
                     <span class="thumb top-black"><svg aria-hidden="true"><use href="#i-desk"/></svg></span>
                     <div>
-                      <h5><a href="#p4">Lift standing desk with drawer, 140 cm</a></h5>
+                      <h5><a href="#p4">Lift desk with drawer, 140 cm</a></h5>
                       <p class="meta">Black top · single motor · 71–121 cm high</p>
                       <p class="line"><span class="rating"><svg aria-hidden="true"><use href="#i-star"/></svg><strong class="num">4.4</strong>/5 (77)</span><span>Delivery Mon, Nov 2</span></p>
                     </div>
@@ -647,7 +639,7 @@
             <div class="window-bar"><i></i><i></i><i></i><span class="title">Sora Docs</span></div>
             <header class="docs-top">
               <span class="brand"><span class="logo"><svg aria-hidden="true"><use href="#i-mark"/></svg></span>Sora Docs</span>
-              <nav aria-label="Docs sections"><ul><li><a href="#guides">Guides</a></li><li><a href="#api">API reference</a></li><li><a href="#changelog">Changelog</a></li></ul></nav>
+              <nav aria-label="Docs sections"><ul><li><a href="#guides">Guides</a></li><li><a href="#api">API reference</a></li></ul></nav>
               <div class="ac" data-ac>
                 <button class="ac-trigger" type="button" aria-label="Search docs" aria-expanded="true" aria-controls="ac-box" aria-keyshortcuts="/" hidden><svg class="s" aria-hidden="true"><use href="#i-search"/></svg>Search<kbd>/</kbd></button>
                 <div class="ac-box" id="ac-box">
@@ -690,8 +682,15 @@
     // CMP-16 / combobox pattern: one option is "active" while focus stays in the input (aria-activedescendant).
     function setActive(input, options, next) {
       options.forEach((opt) => opt.setAttribute('aria-selected', String(opt === next)));
-      if (next) { input.setAttribute('aria-activedescendant', next.id); next.scrollIntoView({ block: 'nearest' }); }
+      if (next) { input.setAttribute('aria-activedescendant', next.id); keepVisible(next); }
       else input.removeAttribute('aria-activedescendant');
+    }
+    // Scroll only the list box, so the page and the demo frame never jump.
+    function keepVisible(opt) {
+      const box = opt.offsetParent;
+      if (!box || box.scrollHeight <= box.clientHeight) return;
+      if (opt.offsetTop < box.scrollTop) box.scrollTop = opt.offsetTop;
+      else if (opt.offsetTop + opt.offsetHeight > box.scrollTop + box.clientHeight) box.scrollTop = opt.offsetTop + opt.offsetHeight - box.clientHeight;
     }
     function step(input, options, dir) {
       const i = options.findIndex((opt) => opt.getAttribute('aria-selected') === 'true');

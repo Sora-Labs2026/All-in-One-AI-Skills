@@ -2,7 +2,7 @@
 <!-- ProductCraft example: dashboard-v12 (dark smart home). Original Sora Labs example, MIT License.
      Demonstrates: SCR-01, SCR-02, LAY-01, LAY-02, LAY-05, LAY-08, TYP-09, COL-01, COL-06, COL-07,
      DRK-01, DRK-02, DRK-03, DRK-04, DRK-05, DRK-06, DRK-09, NAV-03, NAV-08, NAV-15, FRM-22, FRM-27,
-     CMP-16, CMP-18, CMP-20, CMP-26, FBK-01, FBK-18, ICO-03, ICO-04, ICO-07, COP-08, COP-10, ENG-06, ENG-07, BTN-01 -->
+     CMP-16, CMP-18, CMP-20, CMP-26, FBK-01, FBK-18, ICO-03, ICO-04, ICO-07, COP-08, COP-09, COP-10, ENG-06, ENG-07, BTN-01, BTN-10 -->
 <html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
@@ -577,7 +577,7 @@
   });
   document.querySelector("[data-show-room]").addEventListener("click", (e) => selectTab(document.getElementById("tab-" + e.currentTarget.dataset.showRoom), true));
 
-  // Alert action: one primary that fixes the problem, then the alert relabels with the outcome (BTN-01, FBK-18).
+  // Alert action: one primary that fixes the problem, then the alert relabels with the outcome (BTN-01, FBK-18, COP-09).
   function renderWindowAlert() {
     const off = !byId["g-radiator"].on;
     const alert = document.getElementById("window-alert");
@@ -626,7 +626,8 @@
     }));
   }
 
-  // Thermostat: stepper in 0.5 degree steps between 16 and 26; state word and time to target follow (FRM-27, COP-10).
+  // Thermostat: stepper in 0.5 degree steps between 16 and 26; state word and time to target follow,
+  // and a stop says why it is unavailable (FRM-27, COP-10, BTN-10).
   const CURRENT = 20.5, MIN = 16, MAX = 26, SCALE = [10, 30];
   let target = 21.5;
   const dialFill = document.getElementById("dial-fill");
