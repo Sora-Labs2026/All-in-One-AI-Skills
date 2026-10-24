@@ -1,0 +1,780 @@
+<!doctype html>
+<!-- ProductCraft example: overlays. Original Sora Labs example, MIT License.
+     Demonstrates: CMP-12, CMP-14, CMP-16, CMP-23, CMP-25, FBK-08, BTN-01, BTN-05, BTN-09, BTN-10, COP-01, COP-10,
+     ENG-01, ENG-05, FRM-01, FRM-02, FRM-05, FRM-06, FRM-12, ICO-03, ICO-04, DRK-03, DRK-09, MOB-01, MOB-04,
+     MOB-11, SCR-20 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440,focus=#m1-duplicate">
+  <title>ProductCraft example: Menus and overlays</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    :root { --field-border: #8a909c; --scrim: rgba(15, 23, 42, 0.45); }
+    [data-theme="dark"] { --field-border: #6b7280; }
+    [hidden] { display: none !important; }
+
+    .sheet-header h1 { margin-top: var(--space-2); }
+    .variant > .variant-stage { flex: 1 0 auto; padding: var(--space-5); grid-template-columns: minmax(0, 1fr); }
+    .i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .btn .i { width: 18px; height: 18px; }
+    .btn-sm { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+    .icon-btn.sm { width: 36px; height: 36px; }
+    .icon-btn.sm .i { width: 18px; height: 18px; }
+    .icon-btn[aria-expanded="true"] { background: var(--surface-2); color: var(--text); }
+    .text-btn { display: inline-flex; align-items: center; min-height: 32px; padding: 0 var(--space-2); border: 0; border-radius: 6px; background: transparent; color: var(--accent-ink); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .text-btn:hover { background: var(--accent-soft); }
+    .btn-danger:hover { background: #991b1b; }
+    .btn-danger[aria-disabled="true"]:hover { background: var(--danger); }
+
+    /* App frame that hosts each overlay, so the overlay keeps its context */
+    .app { position: relative; width: 100%; height: var(--h, 420px); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); color: var(--text); overflow: hidden; box-shadow: var(--shadow-sm); }
+    .app-head { display: flex; align-items: center; gap: var(--space-3); min-height: 60px; padding: var(--space-2) var(--space-3) var(--space-2) var(--space-5); border-bottom: 1px solid var(--border); }
+    .app-head .grow { flex: 1; min-width: 0; }
+    .app-head h3 { font-size: var(--text-md); }
+    .crumb { font-size: var(--text-xs); color: var(--text-3); }
+    .scrim { position: absolute; inset: 0; z-index: 2; background: var(--scrim); }
+
+    /* Menus: grouped items, leading icons, quiet shortcut hints, destructive item last (CMP-14, BTN-09, ICO-03) */
+    .menu { position: absolute; z-index: 5; width: 272px; padding: var(--space-1); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); }
+    .m-ctx { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3) var(--space-3); }
+    .m-ctx .file-ic { width: 32px; height: 32px; }
+    .m-ctx b { display: block; font-size: var(--text-sm); }
+    .m-ctx small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .m-head { padding: var(--space-2) var(--space-3) var(--space-1); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .menu [role="menuitem"] { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 36px; padding: 0 var(--space-3); border: 0; border-radius: 6px; background: transparent; color: var(--text); font-size: var(--text-sm); text-align: left; cursor: pointer; }
+    .menu [role="menuitem"] .i { width: 18px; height: 18px; color: var(--text-2); }
+    .menu [role="menuitem"]:hover, .menu [role="menuitem"]:focus { background: var(--surface-2); outline: none; }
+    .menu [role="menuitem"]:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+    .menu kbd { margin-left: auto; font: 500 12px/1 var(--font); color: var(--text-3); letter-spacing: 0.02em; }
+    .menu [role="separator"] { height: 1px; margin: var(--space-1) calc(-1 * var(--space-1)); background: var(--border); }
+    .menu .danger, .menu .danger .i { color: var(--danger); }
+    .menu .danger:hover, .menu .danger:focus { background: var(--danger-soft); }
+    .file-ic { display: grid; place-items: center; flex: none; width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--accent-ink); }
+    .file-ic .i { width: 18px; height: 18px; }
+
+    /* v1 document behind the menu */
+    .v1 .app { --h: 412px; }
+    .avatars { display: flex; }
+    .avatars .avatar { width: 28px; height: 28px; font-size: 11px; border: 2px solid var(--surface); }
+    .avatars .avatar + .avatar { margin-left: -8px; }
+    .doc { padding: var(--space-5) var(--space-6); max-width: 520px; }
+    .doc .meta { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--text-3); }
+    .doc p.lead { margin-top: var(--space-4); font-size: var(--text-md); color: var(--text-2); }
+    .doc ul { margin: var(--space-4) 0 0; padding: 0; list-style: none; display: grid; gap: var(--space-2); font-size: var(--text-sm); }
+    .doc li { display: flex; align-items: center; gap: var(--space-2); }
+    .doc li .i { width: 18px; height: 18px; color: var(--success); }
+    .doc li.todo .i { color: var(--text-3); }
+    .v1 .menu { top: 56px; right: var(--space-3); }
+
+    /* v2 dark file list with a context menu at the pointer (DRK-03: the menu is the lightest surface) */
+    .v2 .app { --h: 412px; }
+    .v2 [data-theme="dark"] .menu { background: #262b36; border-color: rgba(255, 255, 255, 0.1); }
+    .v2 [data-theme="dark"] .menu [role="menuitem"]:hover, .v2 [data-theme="dark"] .menu [role="menuitem"]:focus { background: rgba(255, 255, 255, 0.07); }
+    .v2 [data-theme="dark"] .menu .danger:hover, .v2 [data-theme="dark"] .menu .danger:focus { background: var(--danger-soft); }
+    .files { margin: 0; padding: var(--space-1) 0; list-style: none; }
+    .files li { display: grid; grid-template-columns: 36px minmax(0, 1fr) 96px 68px 36px; align-items: center; gap: var(--space-3); min-height: 52px; padding: 0 var(--space-3) 0 var(--space-5); }
+    .files li + li { border-top: 1px solid var(--border); }
+    .files li[aria-current="true"], .files li.ctx { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+    .files a { min-width: 0; color: var(--text); font-size: var(--text-sm); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .files .meta { font-size: var(--text-xs); color: var(--text-2); }
+    .files .size { text-align: right; }
+    .files-head { display: grid; grid-template-columns: 36px minmax(0, 1fr) 96px 68px 36px; gap: var(--space-3); padding: var(--space-2) var(--space-3) var(--space-2) var(--space-5); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); border-bottom: 1px solid var(--border); }
+    .files-head .r { text-align: right; }
+    .files-hint { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--space-2) var(--space-5); border-top: 1px solid var(--border); background: var(--surface-2); font-size: var(--text-xs); color: var(--text-2); }
+    .files-hint kbd, .hint kbd { display: inline-block; padding: 0 5px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; font: 600 11px/16px var(--font); color: var(--text-2); }
+    .cursor { position: absolute; z-index: 6; width: 18px; height: 22px; pointer-events: none; }
+
+    /* v3 destructive dialog: native <dialog>, named object, consequences, typed confirmation (FBK-08) */
+    .v3 .app { --h: 500px; background: var(--bg); }
+    .page-pad { padding: var(--space-5); display: grid; gap: var(--space-4); }
+    .setting-card { padding: var(--space-4) var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+    .setting-card h4 { margin: 0; font-size: var(--text-md); }
+    .setting-card p { margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    .setting-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); }
+    .danger-zone { border-color: color-mix(in srgb, var(--danger) 35%, transparent); }
+    .btn-danger-outline { background: var(--surface); color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, transparent); }
+    .btn-danger-outline:hover { background: var(--danger-soft); }
+    .confirm { width: min(420px, calc(100% - 32px)); max-width: none; padding: 0; border: 0; border-radius: var(--radius-lg); background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); }
+    .confirm:not(:modal) { position: absolute; inset: 0; z-index: 3; margin: auto; }
+    .app:has(> .confirm[open]:not(:modal))::after { content: ""; position: absolute; inset: 0; z-index: 2; background: var(--scrim); }
+    .confirm::backdrop { background: var(--scrim); }
+    .confirm:modal { animation: rise var(--dur-med) var(--ease-out); }
+    @keyframes rise { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
+    .confirm form { display: grid; gap: var(--space-4); padding: var(--space-5); }
+    .d-top { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: var(--space-4); }
+    .d-icon { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--danger-soft); color: var(--danger); }
+    .d-icon .i { width: 22px; height: 22px; }
+    .confirm h3 { font-size: var(--text-lg); line-height: 1.3; }
+    .confirm p { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--text-2); }
+    .loss { margin: var(--space-2) 0 0; padding: 0; list-style: none; display: grid; gap: 2px; font-size: var(--text-sm); }
+    .loss li { display: flex; gap: var(--space-2); }
+    .loss li::before { content: ""; flex: none; width: 4px; height: 4px; margin-top: 9px; border-radius: 50%; background: var(--text-3); }
+    .field label { display: block; margin-bottom: 6px; font-size: var(--text-sm); font-weight: 600; }
+    .field input, .field textarea, .field select { width: 100%; min-height: 40px; padding: 0 var(--space-3); border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--surface); font-size: var(--text-md); }
+    .field textarea { min-height: 72px; padding: var(--space-2) var(--space-3); resize: vertical; line-height: 1.45; }
+    .field input:focus, .field textarea:focus { outline: 2px solid var(--focus); outline-offset: 0; border-color: var(--focus); }
+    .field .help { margin-top: 6px; font-size: var(--text-xs); color: var(--text-2); }
+    .field .opt { font-weight: 400; color: var(--text-3); }
+    .d-actions { display: flex; justify-content: flex-end; gap: var(--space-2); }
+    .page-status { margin-top: calc(-1 * var(--space-2)); font-size: var(--text-sm); font-weight: 600; color: var(--success); }
+
+    /* v4 drawer over an inert page (ENG-05) */
+    .v4 .app { --h: 500px; }
+    .members { margin: 0; padding: var(--space-1) 0; list-style: none; }
+    .members li { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); min-height: 56px; padding: 0 var(--space-5); }
+    .members li + li { border-top: 1px solid var(--border); }
+    .members b { display: block; font-size: var(--text-sm); }
+    .members small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .members .role { font-size: var(--text-sm); color: var(--text-2); }
+    .drawer { position: absolute; top: 0; right: 0; bottom: 0; z-index: 3; display: flex; flex-direction: column; width: 344px; background: var(--surface); border-left: 1px solid var(--border); box-shadow: var(--shadow-lg); animation: slide var(--dur-med) var(--ease-out); }
+    @keyframes slide { from { transform: translateX(24px); opacity: 0; } }
+    .drawer-head { display: flex; align-items: flex-start; gap: var(--space-2); padding: var(--space-4) var(--space-3) var(--space-3) var(--space-5); }
+    .drawer-head .grow { flex: 1; }
+    .drawer-head h3 { font-size: var(--text-lg); }
+    .drawer-head p { margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    .drawer form { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+    .drawer-body { flex: 1; display: grid; align-content: start; gap: var(--space-4); padding: var(--space-1) var(--space-5) var(--space-4); overflow: auto; }
+    .drawer-foot { display: flex; justify-content: flex-end; gap: var(--space-2); padding: var(--space-3) var(--space-5); border-top: 1px solid var(--border); background: var(--surface-2); }
+    fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+    legend { padding: 0; margin-bottom: 6px; font-size: var(--text-sm); font-weight: 600; }
+    .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+    .tile { position: relative; display: grid; gap: 2px; padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; }
+    .tile input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+    .tile b { font-size: var(--text-sm); }
+    .tile small { font-size: var(--text-xs); color: var(--text-2); line-height: 1.35; }
+    .tile:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+    .tile:has(input:checked) b { color: var(--accent-ink); }
+    .tile:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .err-text { display: flex; align-items: center; gap: 4px; margin-top: 6px; font-size: var(--text-xs); font-weight: 600; color: var(--danger); }
+
+    /* v5 filter popover anchored to its trigger (CMP-12, CMP-25) */
+    .v5 .app { --h: 664px; background: var(--bg); }
+    .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); padding: var(--space-3) var(--space-5); border-bottom: 1px solid var(--border); background: var(--surface); }
+    .anchor { position: relative; }
+    .count-badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); font-size: var(--text-xs); font-weight: 700; }
+    .chip { display: inline-flex; align-items: center; gap: 2px; min-height: 32px; padding: 0 2px 0 var(--space-3); border-radius: var(--radius-pill); background: var(--accent-soft); color: var(--accent-ink); font-size: var(--text-sm); font-weight: 600; }
+    .chip button { display: inline-grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; color: inherit; cursor: pointer; }
+    .chip button:hover { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+    .chip button .i { width: 14px; height: 14px; stroke-width: 2.25; }
+    .chip.fixed { padding-right: var(--space-3); background: var(--neutral-soft); color: var(--neutral-ink); }
+    .orders { margin: var(--space-4) var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+    .orders-head { display: flex; justify-content: space-between; padding: var(--space-3) var(--space-4); font-size: var(--text-sm); color: var(--text-2); border-bottom: 1px solid var(--border); }
+    .orders-head b { color: var(--text); }
+    .orders ul { margin: 0; padding: 0; list-style: none; }
+    .orders li { display: grid; grid-template-columns: 92px minmax(0, 1fr) 96px 84px; align-items: center; gap: var(--space-3); min-height: 52px; padding: 0 var(--space-4); font-size: var(--text-sm); }
+    .orders li + li { border-top: 1px solid var(--border); }
+    .orders .r { text-align: right; font-weight: 600; }
+    .pop { position: absolute; top: calc(100% + 10px); left: 0; z-index: 4; width: 312px; border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-lg); }
+    .pop::before { content: ""; position: absolute; top: -7px; left: 24px; width: 12px; height: 12px; background: var(--surface); border-left: 1px solid var(--border); border-top: 1px solid var(--border); transform: rotate(45deg); }
+    .pop-head { display: flex; align-items: center; justify-content: space-between; padding: var(--space-3) var(--space-3) var(--space-1) var(--space-4); }
+    .pop-head h3 { font-size: var(--text-md); }
+    .pop-body { display: grid; gap: var(--space-4); padding: var(--space-2) var(--space-4) var(--space-4); }
+    .checks { display: grid; }
+    .check-row { display: flex; align-items: center; gap: var(--space-3); min-height: 36px; padding: 0 var(--space-2); margin: 0 calc(-1 * var(--space-2)); border-radius: 6px; font-size: var(--text-sm); cursor: pointer; }
+    .check-row:hover { background: var(--surface-2); }
+    .check-row input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+    .check-row .n { margin-left: auto; color: var(--text-3); }
+    .seg { display: flex; padding: var(--space-1); gap: 2px; border-radius: var(--radius-sm); background: var(--surface-2); }
+    .seg label { position: relative; flex: 1; display: grid; place-items: center; min-height: 32px; border-radius: 6px; color: var(--text-2); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .seg label:has(input:checked) { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+    .seg label:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .range { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .money { position: relative; }
+    .money span { position: absolute; left: var(--space-3); bottom: 10px; color: var(--text-3); font-size: var(--text-sm); }
+    .money input { padding-left: 26px; font-variant-numeric: tabular-nums; }
+    .range .field label { font-weight: 400; color: var(--text-2); font-size: var(--text-xs); margin-bottom: 4px; }
+    .pop-foot { padding: var(--space-3) var(--space-4); border-top: 1px solid var(--border); }
+    .pop-foot .btn { width: 100%; }
+
+    /* v6 phone: chat with a bottom sheet of actions (SCR-20) */
+    .v6 .phone { height: 680px; color: var(--text); }
+    .v6 .phone-body { position: relative; }
+    .chat-head { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-3) var(--space-2) var(--space-1); border-bottom: 1px solid var(--border); background: var(--surface); }
+    .chat-head .icon-btn { width: 44px; height: 44px; color: var(--text); }
+    .chat-head b { display: block; font-size: var(--text-md); }
+    .chat-head small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .thread { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4); }
+    .day { align-self: center; font-size: var(--text-xs); color: var(--text-3); }
+    .bubble { max-width: 78%; padding: var(--space-2) var(--space-3); border-radius: 18px; font-size: var(--text-md); line-height: 1.4; }
+    .bubble.them { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 6px; }
+    .bubble.me { align-self: flex-end; border: 0; background: var(--accent); color: var(--on-accent); border-bottom-right-radius: 6px; text-align: left; font: inherit; font-size: var(--text-md); line-height: 1.4; cursor: pointer; }
+    .bubble time { display: block; margin-top: 2px; font-size: 11px; opacity: 0.85; }
+    .bubble.lifted { position: relative; z-index: 3; box-shadow: 0 0 0 3px var(--surface), var(--shadow-lg); }
+    .bsheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; padding: var(--space-2) var(--space-4) max(var(--space-3), env(safe-area-inset-bottom)); border-radius: 20px 20px 0 0; background: var(--bg); box-shadow: 0 -8px 24px -8px rgba(15, 23, 42, 0.25); animation: up var(--dur-med) var(--ease-out); }
+    @keyframes up { from { transform: translateY(24px); opacity: 0; } }
+    .grabber { display: block; width: 36px; height: 4px; margin: 0 auto var(--space-2); border-radius: 2px; background: var(--field-border); }
+    .bsheet h3 { padding-bottom: var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--text-2); text-align: center; }
+    .acts { margin: 0; padding: 0; list-style: none; border-radius: var(--radius-md); background: var(--surface); overflow: hidden; }
+    .acts + .acts { margin-top: var(--space-2); }
+    .acts li + li { border-top: 1px solid var(--border); }
+    .acts button { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 50px; padding: 0 var(--space-4); border: 0; background: transparent; color: var(--text); font-size: var(--text-md); text-align: left; cursor: pointer; }
+    .acts button:hover { background: var(--surface-2); }
+    .acts button:focus-visible { outline-offset: -2px; }
+    .acts .i { color: var(--text-2); }
+    .acts .danger, .acts .danger .i { color: var(--danger); }
+    .acts .note { margin-left: auto; font-size: var(--text-xs); color: var(--text-3); }
+    .sheet-cancel { width: 100%; min-height: 50px; margin-top: var(--space-2); border-radius: var(--radius-md); font-size: var(--text-md); }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.4" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/></symbol>
+    <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></symbol>
+    <symbol id="i-archive" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9"/><path d="M10 13h4"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="M9 8l-4 4 4 4M15 8l4 4-4 4"/></symbol>
+    <symbol id="i-open" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M10.3 4.3L2.6 18a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 4.3a2 2 0 0 0-3.4 0z"/><path d="M12 9.5v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-user-plus" viewBox="0 0 24 24"><circle cx="10" cy="8" r="4"/><path d="M3 20a7 7 0 0 1 14 0"/><path d="M19 8v6M16 11h6"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></symbol>
+    <symbol id="i-chev-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+    <symbol id="i-reply" viewBox="0 0 24 24"><path d="M9 7L4 12l5 5"/><path d="M4 12h10a6 6 0 0 1 6 6"/></symbol>
+    <symbol id="i-forward" viewBox="0 0 24 24"><path d="M15 7l5 5-5 5"/><path d="M20 12H10a6 6 0 0 0-6 6"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M9 4h6l-1 6 3 3H7l3-3z"/><path d="M12 13v7"/></symbol>
+    <symbol id="i-export" viewBox="0 0 24 24"><path d="M12 15V4"/><path d="M7 9l5-5 5 5"/><path d="M5 15v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4"/></symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="6"/><rect x="9" y="9" width="9" height="9" rx="2"/></svg>ProductCraft · Example screens</span>
+        <h1>Menus and overlays</h1>
+        <p>Dropdown and context menus, a destructive dialog, a drawer, a filter popover and a phone sheet. Each one names its context, closes with Escape and returns focus to what opened it.</p>
+      </div>
+      <p class="subtle">6 versions · light and dark</p>
+    </header>
+
+    <div class="variants cols-2">
+      <!-- v1: dropdown menu with sections, icons, shortcuts and a separated destructive item -->
+      <section class="variant v1" aria-labelledby="v1-title">
+        <h2 class="variant-label" id="v1-title"><span class="v">v1</span> Dropdown menu with sections and shortcuts</h2>
+        <div class="variant-stage">
+          <div class="app">
+            <div class="app-head">
+              <span class="file-ic" aria-hidden="true"><svg class="i"><use href="#i-doc"/></svg></span>
+              <div class="grow"><p class="crumb">Sora Docs · Marketing</p><h3>Q4 launch plan</h3></div>
+              <span class="avatars" aria-label="2 people editing: Nina Park and Jordan Reyes"><span class="avatar" aria-hidden="true">NP</span><span class="avatar" aria-hidden="true" style="background: var(--success-soft); color: var(--success)">JR</span></span>
+              <button class="btn btn-primary btn-sm" type="button">Share</button>
+              <button class="icon-btn" type="button" id="m1-btn" aria-haspopup="menu" aria-expanded="true" aria-controls="m1" aria-label="More actions for Q4 launch plan" title="More actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button>
+            </div>
+            <article class="doc">
+              <h3>Q4 launch plan</h3>
+              <p class="meta">Owner Nina Park · Due Mon, Nov 30</p>
+              <p class="lead">Ship the timeline view to every Sora Boards workspace by Nov 30, and get 40% of active teams to try it within two weeks.</p>
+              <ul>
+                <li><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Beta with 12 design partners</li>
+                <li><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Pricing page copy approved</li>
+                <li class="todo"><svg class="i" aria-hidden="true"><use href="#i-clock"/></svg>Launch email, due Nov 23</li>
+              </ul>
+            </article>
+            <div class="menu" id="m1" role="menu" aria-labelledby="m1-btn">
+              <div class="m-ctx" aria-hidden="true"><span class="file-ic"><svg class="i"><use href="#i-doc"/></svg></span><span><b>Q4 launch plan</b><small>Edited by Nina Park, 2 min ago</small></span></div>
+              <div role="separator"></div>
+              <p class="m-head" aria-hidden="true">Document</p>
+              <div role="group" aria-label="Document">
+                <button type="button" role="menuitem" tabindex="-1" aria-keyshortcuts="F2"><svg class="i" aria-hidden="true"><use href="#i-pencil"/></svg>Rename<kbd aria-hidden="true">F2</kbd></button>
+                <button type="button" role="menuitem" tabindex="-1" id="m1-duplicate" aria-keyshortcuts="Control+Alt+D" data-mod><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Duplicate<kbd aria-hidden="true">Ctrl Alt D</kbd></button>
+                <button type="button" role="menuitem" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-folder"/></svg>Move to…</button>
+              </div>
+              <div role="separator"></div>
+              <p class="m-head" aria-hidden="true">Share and export</p>
+              <div role="group" aria-label="Share and export">
+                <button type="button" role="menuitem" tabindex="-1" aria-keyshortcuts="Control+Alt+L" data-mod><svg class="i" aria-hidden="true"><use href="#i-link"/></svg>Copy link<kbd aria-hidden="true">Ctrl Alt L</kbd></button>
+                <button type="button" role="menuitem" tabindex="-1" aria-keyshortcuts="Control+Alt+H" data-mod><svg class="i" aria-hidden="true"><use href="#i-clock"/></svg>Version history<kbd aria-hidden="true">Ctrl Alt H</kbd></button>
+                <button type="button" role="menuitem" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Export as PDF</button>
+              </div>
+              <div role="separator"></div>
+              <button type="button" role="menuitem" tabindex="-1" class="danger"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>Move to trash</button>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-14</code> <code>BTN-09</code> <code>ICO-03</code> <code>ICO-04</code> <code>ENG-01</code></p>
+      </section>
+
+      <!-- v2: context menu on a list row, dark -->
+      <section class="variant v2" aria-labelledby="v2-title">
+        <h2 class="variant-label" id="v2-title"><span class="v">v2</span> Context menu on a file row, dark</h2>
+        <div class="variant-stage dark">
+          <div class="app" data-theme="dark" id="v2-app">
+            <div class="app-head">
+              <div class="grow"><p class="crumb">Sora Drive · Shared</p><h3>Brand assets</h3></div>
+              <span class="subtle num">5 files · 25.6 MB</span>
+            </div>
+            <div class="files-head" aria-hidden="true"><span></span><span>Name</span><span>Modified</span><span class="r">Size</span><span></span></div>
+            <ul class="files" id="v2-files" aria-label="Files in Brand assets">
+              <li class="ctx" data-name="brand-guidelines.pdf"><span class="file-ic" aria-hidden="true" style="background: var(--danger-soft); color: var(--danger)"><svg class="i"><use href="#i-doc"/></svg></span><a href="#">brand-guidelines.pdf</a><span class="meta">Oct 22 · Nina Park</span><span class="meta size num">4.2 MB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="true" aria-controls="m2" aria-label="Actions for brand-guidelines.pdf" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
+              <li data-name="logo-kit.zip"><span class="file-ic" aria-hidden="true" style="background: var(--warning-soft); color: var(--warning)"><svg class="i"><use href="#i-archive"/></svg></span><a href="#">logo-kit.zip</a><span class="meta">Oct 20 · Avery Stone</span><span class="meta size num">18.6 MB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="m2" aria-label="Actions for logo-kit.zip" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
+              <li data-name="launch-banner.png"><span class="file-ic" aria-hidden="true" style="background: var(--success-soft); color: var(--success)"><svg class="i"><use href="#i-image"/></svg></span><a href="#">launch-banner.png</a><span class="meta">Oct 19 · Hana Kim</span><span class="meta size num">2.4 MB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="m2" aria-label="Actions for launch-banner.png" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
+              <li data-name="color-tokens.json"><span class="file-ic" aria-hidden="true"><svg class="i"><use href="#i-code"/></svg></span><a href="#">color-tokens.json</a><span class="meta">Oct 15 · Leo Brandt</span><span class="meta size num">12 KB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="m2" aria-label="Actions for color-tokens.json" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
+              <li data-name="voice-and-tone.pdf"><span class="file-ic" aria-hidden="true" style="background: var(--danger-soft); color: var(--danger)"><svg class="i"><use href="#i-doc"/></svg></span><a href="#">voice-and-tone.pdf</a><span class="meta">Oct 9 · Priya Nair</span><span class="meta size num">388 KB</span><button class="icon-btn sm" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="m2" aria-label="Actions for voice-and-tone.pdf" title="Actions"><svg class="i" aria-hidden="true"><use href="#i-dots"/></svg></button></li>
+            </ul>
+            <p class="files-hint">Right-click a file, press <kbd>Shift</kbd> <kbd>F10</kbd>, or use the <span class="visually-hidden">Actions</span><span aria-hidden="true">⋯</span> button</p>
+            <svg class="cursor" id="v2-cursor" viewBox="0 0 18 22" aria-hidden="true" style="left: 248px; top: 118px"><path d="M1.5 1.5v16l4.2-3.9 2.9 6.6 2.8-1.2-2.9-6.5H14z" fill="#ffffff" stroke="#0f1115" stroke-width="1.4" stroke-linejoin="round"/></svg>
+            <div class="menu" id="m2" role="menu" aria-label="Actions for brand-guidelines.pdf" style="left: 256px; top: 128px">
+              <button type="button" role="menuitem" tabindex="-1" aria-keyshortcuts="Enter"><svg class="i" aria-hidden="true"><use href="#i-open"/></svg>Open<kbd aria-hidden="true">Enter</kbd></button>
+              <button type="button" role="menuitem" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-share"/></svg>Share…</button>
+              <button type="button" role="menuitem" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-link"/></svg>Copy link</button>
+              <button type="button" role="menuitem" tabindex="-1" aria-keyshortcuts="F2"><svg class="i" aria-hidden="true"><use href="#i-pencil"/></svg>Rename<kbd aria-hidden="true">F2</kbd></button>
+              <button type="button" role="menuitem" tabindex="-1"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Download</button>
+              <div role="separator"></div>
+              <button type="button" role="menuitem" tabindex="-1" class="danger" aria-keyshortcuts="Delete"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>Move to trash<kbd aria-hidden="true">Del</kbd></button>
+            </div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-14</code> <code>CMP-16</code> <code>MOB-11</code> <code>ICO-04</code> <code>DRK-03</code> <code>DRK-09</code></p>
+      </section>
+
+      <!-- v3: destructive confirmation with a working native dialog -->
+      <section class="variant v3" aria-labelledby="v3-title">
+        <h2 class="variant-label" id="v3-title"><span class="v">v3</span> Destructive confirmation dialog</h2>
+        <div class="variant-stage">
+          <div class="app">
+            <!-- The page behind is inert while the preview dialog is open; showModal() handles this itself (ENG-05) -->
+            <div class="v3-page" id="v3-page" inert>
+              <div class="app-head">
+                <div class="grow"><p class="crumb">Sora Projects · Settings</p><h3>Spring launch</h3></div>
+              </div>
+              <div class="page-pad">
+                <div class="setting-card"><h4>Project name</h4><p>Spring launch · created Mar 2, 2026 by Avery Stone</p></div>
+                <div class="setting-card"><h4>Members</h4><p>6 people can view and edit this project</p></div>
+                <div class="setting-card danger-zone">
+                  <div class="setting-row">
+                    <div><h4>Delete project</h4><p>Removes all tasks, files and history for everyone.</p></div>
+                    <button class="btn btn-danger-outline btn-sm" type="button" id="v3-trigger" aria-haspopup="dialog">Delete project…</button>
+                  </div>
+                </div>
+                <p class="page-status" id="v3-status" role="status"></p>
+              </div>
+            </div>
+            <!-- Preview: rendered open inline (non-modal) for the screenshot. The trigger opens it with showModal(). -->
+            <dialog class="confirm" id="v3-dialog" aria-labelledby="v3-d-title" aria-describedby="v3-d-desc" open>
+              <form method="dialog" id="v3-form">
+                <div class="d-top">
+                  <span class="d-icon" aria-hidden="true"><svg class="i"><use href="#i-warn"/></svg></span>
+                  <div>
+                    <h3 id="v3-d-title">Delete “Spring launch”?</h3>
+                    <div id="v3-d-desc">
+                      <p>This permanently deletes the project for all 6 members, including:</p>
+                      <ul class="loss num">
+                        <li>48 tasks and 212 comments</li>
+                        <li>12 files, 1.3 GB in total</li>
+                        <li>3 automations that run every weekday</li>
+                      </ul>
+                      <p>You can't undo this. <a href="#">Export a copy</a> first if you might need it.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="v3-name">Type <b>Spring launch</b> to confirm</label>
+                  <input id="v3-name" type="text" autocomplete="off" spellcheck="false" aria-describedby="v3-hint">
+                  <p class="help" id="v3-hint" aria-live="polite">Delete turns on when the name matches.</p>
+                </div>
+                <div class="d-actions">
+                  <button class="btn btn-secondary" type="button" id="v3-keep">Keep project</button>
+                  <button class="btn btn-danger" type="submit" value="delete" id="v3-delete" aria-disabled="true" aria-describedby="v3-hint">Delete project</button>
+                </div>
+              </form>
+            </dialog>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FBK-08</code> <code>CMP-12</code> <code>BTN-10</code> <code>COP-01</code> <code>COP-10</code> <code>ENG-05</code></p>
+      </section>
+
+      <!-- v4: side drawer with a short form and an inert background -->
+      <section class="variant v4" aria-labelledby="v4-title">
+        <h2 class="variant-label" id="v4-title"><span class="v">v4</span> Side drawer with a short form</h2>
+        <div class="variant-stage">
+          <div class="app" id="v4-app">
+            <div id="v4-page" inert>
+              <div class="app-head">
+                <div class="grow"><p class="crumb">Sora Boards · Design workspace</p><h3>Members</h3></div>
+                <button class="btn btn-primary btn-sm" type="button" id="v4-trigger" aria-haspopup="dialog"><svg class="i" aria-hidden="true"><use href="#i-user-plus"/></svg>Invite</button>
+              </div>
+              <ul class="members" aria-label="Members">
+                <li><span class="avatar" aria-hidden="true">AS</span><span><b>Avery Stone</b><small>avery.stone@example.com</small></span><span class="role">Admin</span></li>
+                <li><span class="avatar" aria-hidden="true">NP</span><span><b>Nina Park</b><small>nina.park@example.com</small></span><span class="role">Editor</span></li>
+                <li><span class="avatar" aria-hidden="true">MS</span><span><b>Mateo Silva</b><small>mateo.silva@example.com</small></span><span class="role">Editor</span></li>
+                <li><span class="avatar" aria-hidden="true">SO</span><span><b>Sam Okafor</b><small>sam.okafor@example.com</small></span><span class="role">Viewer</span></li>
+                <li><span class="avatar" aria-hidden="true">HK</span><span><b>Hana Kim</b><small>hana.kim@example.com</small></span><span class="role">Viewer</span></li>
+              </ul>
+            </div>
+            <div class="scrim" id="v4-scrim" aria-hidden="true"></div>
+            <aside class="drawer" id="v4-drawer" role="dialog" aria-modal="true" aria-labelledby="v4-d-title">
+              <div class="drawer-head">
+                <div class="grow"><h3 id="v4-d-title">Invite a teammate</h3><p>They get an email invite to the Design workspace.</p></div>
+                <button class="icon-btn sm" type="button" data-close aria-label="Close invite panel" title="Close"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+              </div>
+              <form id="v4-form" novalidate>
+                <div class="drawer-body">
+                  <div class="field">
+                    <label for="v4-email">Email address</label>
+                    <input id="v4-email" type="email" autocomplete="off" required value="zara.ahmed@example.com" aria-describedby="v4-email-err">
+                    <p class="err-text" id="v4-email-err" hidden></p>
+                  </div>
+                  <fieldset>
+                    <legend>Role</legend>
+                    <div class="tiles">
+                      <label class="tile"><input type="radio" name="v4-role" value="admin"><b>Admin</b><small>Members and billing</small></label>
+                      <label class="tile"><input type="radio" name="v4-role" value="editor" checked><b>Editor</b><small>Create and edit boards</small></label>
+                      <label class="tile"><input type="radio" name="v4-role" value="viewer"><b>Viewer</b><small>View and comment</small></label>
+                    </div>
+                  </fieldset>
+                  <div class="field">
+                    <label for="v4-msg">Message <span class="opt">(optional)</span></label>
+                    <textarea id="v4-msg" rows="3">Welcome aboard! Start with the Q4 launch board.</textarea>
+                  </div>
+                </div>
+                <div class="drawer-foot">
+                  <button class="btn btn-secondary" type="button" data-close>Cancel</button>
+                  <button class="btn btn-primary" type="submit">Send invite</button>
+                </div>
+              </form>
+            </aside>
+            <p class="visually-hidden" role="status" id="v4-status"></p>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>ENG-05</code> <code>CMP-12</code> <code>FRM-01</code> <code>FRM-02</code> <code>FRM-12</code> <code>FRM-06</code> <code>BTN-05</code></p>
+      </section>
+
+      <!-- v5: popover with filter controls, anchored to its trigger -->
+      <section class="variant v5" aria-labelledby="v5-title">
+        <h2 class="variant-label" id="v5-title"><span class="v">v5</span> Filter popover anchored to its trigger</h2>
+        <div class="variant-stage">
+          <div class="app">
+            <div class="app-head">
+              <div class="grow"><p class="crumb">Sora Shop · Orders</p><h3>Orders</h3></div>
+              <button class="btn btn-ghost btn-sm" type="button"><svg class="i" aria-hidden="true"><use href="#i-export"/></svg>Export</button>
+            </div>
+            <div class="toolbar">
+              <div class="anchor">
+                <button class="btn btn-secondary btn-sm" type="button" id="v5-btn" aria-haspopup="dialog" aria-expanded="true" aria-controls="v5-pop"><svg class="i" aria-hidden="true"><use href="#i-filter"/></svg>Filters <span class="count-badge num" id="v5-badge" aria-label="2 statuses applied">2</span></button>
+                <div class="pop" id="v5-pop" role="dialog" aria-labelledby="v5-pop-title">
+                  <div class="pop-head"><h3 id="v5-pop-title">Filter orders</h3><button class="text-btn" type="button" id="v5-clear">Clear all</button></div>
+                  <div class="pop-body">
+                    <fieldset>
+                      <legend>Status</legend>
+                      <div class="checks" id="v5-status">
+                        <label class="check-row"><input type="checkbox" value="paid" checked>Paid<span class="n num" data-n="paid">128</span></label>
+                        <label class="check-row"><input type="checkbox" value="processing">Processing<span class="n num" data-n="processing">14</span></label>
+                        <label class="check-row"><input type="checkbox" value="refunded" checked>Refunded<span class="n num" data-n="refunded">6</span></label>
+                        <label class="check-row"><input type="checkbox" value="cancelled">Cancelled<span class="n num" data-n="cancelled">3</span></label>
+                      </div>
+                    </fieldset>
+                    <fieldset>
+                      <legend>Placed in the last</legend>
+                      <div class="seg" id="v5-range">
+                        <label><input type="radio" name="v5-range" value="7">7 days</label>
+                        <label><input type="radio" name="v5-range" value="30" checked>30 days</label>
+                        <label><input type="radio" name="v5-range" value="90">90 days</label>
+                      </div>
+                    </fieldset>
+                    <fieldset>
+                      <legend>Order total</legend>
+                      <div class="range">
+                        <div class="field money"><label for="v5-min">Minimum</label><span aria-hidden="true">$</span><input id="v5-min" type="text" inputmode="decimal" autocomplete="off"></div>
+                        <div class="field money"><label for="v5-max">Maximum</label><span aria-hidden="true">$</span><input id="v5-max" type="text" inputmode="decimal" autocomplete="off"></div>
+                      </div>
+                    </fieldset>
+                  </div>
+                  <div class="pop-foot"><button class="btn btn-primary" type="button" id="v5-apply">Show <span class="num" id="v5-total">134</span> orders</button></div>
+                </div>
+              </div>
+              <span class="chip" data-chip="paid">Paid<button type="button" aria-label="Remove filter: Paid"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></span>
+              <span class="chip" data-chip="refunded">Refunded<button type="button" aria-label="Remove filter: Refunded"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></span>
+              <span class="chip fixed" id="v5-range-chip">Last 30 days</span>
+            </div>
+            <section class="orders" aria-labelledby="v5-list-title">
+              <div class="orders-head"><span id="v5-list-title"><b class="num" id="v5-shown">134</b> orders match</span><span>Newest first</span></div>
+              <ul>
+                <li><span class="num">#SL-1061</span><span>Priya Nair</span><span><span class="pill pill-success">Paid</span></span><span class="r num">$128.40</span></li>
+                <li><span class="num">#SL-1060</span><span>Owen Clarke</span><span><span class="pill pill-success">Paid</span></span><span class="r num">$64.00</span></li>
+                <li><span class="num">#SL-1058</span><span>Sam Okafor</span><span><span class="pill pill-neutral">Refunded</span></span><span class="r num">$39.90</span></li>
+                <li><span class="num">#SL-1057</span><span>Hana Kim</span><span><span class="pill pill-success">Paid</span></span><span class="r num">$212.75</span></li>
+                <li><span class="num">#SL-1055</span><span>Nina Park</span><span><span class="pill pill-success">Paid</span></span><span class="r num">$86.20</span></li>
+                <li><span class="num">#SL-1054</span><span>Mateo Silva</span><span><span class="pill pill-success">Paid</span></span><span class="r num">$154.00</span></li>
+                <li><span class="num">#SL-1052</span><span>Zara Ahmed</span><span><span class="pill pill-neutral">Refunded</span></span><span class="r num">$47.50</span></li>
+                <li><span class="num">#SL-1051</span><span>Leo Brandt</span><span><span class="pill pill-success">Paid</span></span><span class="r num">$93.10</span></li>
+              </ul>
+            </section>
+            <p class="visually-hidden" role="status" id="v5-live"></p>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-12</code> <code>CMP-25</code> <code>FRM-06</code> <code>CMP-23</code> <code>FRM-05</code> <code>BTN-01</code></p>
+      </section>
+
+      <!-- v6: mobile bottom sheet with an action list and Cancel -->
+      <section class="variant v6" aria-labelledby="v6-title">
+        <h2 class="variant-label" id="v6-title"><span class="v">v6</span> Phone: bottom sheet of message actions</h2>
+        <div class="variant-stage">
+          <div class="phone">
+            <div class="phone-status"><span>10:43</span><span class="icons" aria-hidden="true"><span></span><span></span></span></div>
+            <div class="phone-body">
+              <div class="chat" id="v6-chat" inert>
+                <div class="chat-head">
+                  <button class="icon-btn" type="button" aria-label="Back to chats"><svg class="i" aria-hidden="true"><use href="#i-chev-left"/></svg></button>
+                  <span class="avatar" aria-hidden="true">NP</span>
+                  <span><b>Nina Park</b><small>Active now</small></span>
+                </div>
+                <div class="thread">
+                  <p class="day">Today</p>
+                  <p class="bubble them">Morning! Are the Q4 numbers final?<time datetime="2026-10-24T10:36">10:36 AM</time></p>
+                  <p class="bubble them">No rush, the board meets Thursday.<time datetime="2026-10-24T10:38">10:38 AM</time></p>
+                  <button class="bubble me lifted" type="button" id="v6-msg" aria-haspopup="dialog" aria-expanded="true" aria-controls="v6-sheet">Sending the deck tonight, final numbers inside.<time datetime="2026-10-24T10:42">10:42 AM</time></button>
+                </div>
+              </div>
+              <div class="scrim" id="v6-scrim" aria-hidden="true"></div>
+              <div class="bsheet" id="v6-sheet" role="dialog" aria-modal="true" aria-labelledby="v6-sheet-title">
+                <span class="grabber" aria-hidden="true"></span>
+                <h3 id="v6-sheet-title">Your message · 10:42 AM</h3>
+                <ul class="acts">
+                  <li><button type="button"><svg class="i" aria-hidden="true"><use href="#i-reply"/></svg>Reply</button></li>
+                  <li><button type="button"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Copy text</button></li>
+                  <li><button type="button"><svg class="i" aria-hidden="true"><use href="#i-forward"/></svg>Forward</button></li>
+                  <li><button type="button"><svg class="i" aria-hidden="true"><use href="#i-pin"/></svg>Pin in chat</button></li>
+                  <li><button type="button"><svg class="i" aria-hidden="true"><use href="#i-pencil"/></svg>Edit<span class="note">for 13 more min</span></button></li>
+                </ul>
+                <ul class="acts">
+                  <li><button type="button" class="danger"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>Delete for everyone</button></li>
+                </ul>
+                <button class="btn btn-secondary sheet-cancel" type="button" id="v6-cancel">Cancel</button>
+              </div>
+            </div>
+            <div class="phone-home" aria-hidden="true"></div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>SCR-20</code> <code>MOB-01</code> <code>MOB-04</code> <code>MOB-11</code> <code>ICO-03</code> <code>ENG-05</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // CMP-14, P42-style menu keyboard: arrows, Home/End and first-letter jumps move focus; Escape and Tab close; focus returns to the trigger.
+    function menuKeys(menu, close) {
+      const items = () => [...menu.querySelectorAll('[role="menuitem"]')];
+      menu.addEventListener("keydown", (e) => {
+        const list = items(), i = list.indexOf(document.activeElement);
+        const to = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: list.length - 1 }[e.key];
+        if (to !== undefined) { e.preventDefault(); list[(to + list.length) % list.length].focus(); return; }
+        if (e.key === "Escape") { e.preventDefault(); close(true); return; }
+        if (e.key === "Tab") { close(false); return; }
+        if (e.key.length === 1 && /\S/.test(e.key)) {
+          const next = list.slice(i + 1).concat(list.slice(0, i + 1)).find((it) => it.textContent.trim().toLowerCase().startsWith(e.key.toLowerCase()));
+          if (next) next.focus();
+        }
+      });
+      menu.addEventListener("click", (e) => { if (e.target.closest('[role="menuitem"]')) close(true); });
+      return items;
+    }
+
+    // BTN-09: show the platform's modifier in the hint and in aria-keyshortcuts.
+    if (/Mac|iPhone|iPad/.test(navigator.userAgentData?.platform || navigator.platform)) {
+      document.querySelectorAll("[data-mod]").forEach((el) => {
+        el.setAttribute("aria-keyshortcuts", el.getAttribute("aria-keyshortcuts").replace("Control", "Meta"));
+        el.querySelector("kbd").textContent = el.querySelector("kbd").textContent.replace("Ctrl Alt", "⌘ ⌥");
+      });
+    }
+
+    // v1 dropdown: the trigger toggles the menu and the first item takes focus (ENG-01, CMP-14).
+    (() => {
+      const btn = document.getElementById("m1-btn"), menu = document.getElementById("m1");
+      const close = (refocus) => { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); if (refocus) btn.focus(); };
+      const items = menuKeys(menu, close);
+      const open = (last) => { menu.hidden = false; btn.setAttribute("aria-expanded", "true"); const l = items(); l[last ? l.length - 1 : 0].focus(); };
+      btn.addEventListener("click", () => (menu.hidden ? open() : close(false)));
+      btn.addEventListener("keydown", (e) => { if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); open(e.key === "ArrowUp"); } });
+      document.addEventListener("click", (e) => { if (!menu.hidden && !menu.contains(e.target) && !btn.contains(e.target)) close(false); });
+    })();
+
+    // v2 context menu: opens at the pointer and stays inside the frame; Shift+F10, the Menu key and the row button open it too (MOB-11).
+    (() => {
+      const app = document.getElementById("v2-app"), menu = document.getElementById("m2"), cursor = document.getElementById("v2-cursor");
+      const rows = [...document.querySelectorAll("#v2-files li")];
+      let row = rows[0];
+      const close = (refocus) => {
+        menu.hidden = true; cursor.hidden = true;
+        row.classList.remove("ctx");
+        row.querySelector("[aria-haspopup]").setAttribute("aria-expanded", "false");
+        if (refocus) row.querySelector("[aria-haspopup]").focus();
+      };
+      const items = menuKeys(menu, close);
+      const open = (r, x, y) => {
+        if (!menu.hidden) close(false);
+        row = r; row.classList.add("ctx");
+        row.querySelector("[aria-haspopup]").setAttribute("aria-expanded", "true");
+        menu.setAttribute("aria-label", "Actions for " + row.dataset.name);
+        menu.hidden = false;
+        // Collision check: flip left or up when the menu would leave the frame.
+        const box = app.getBoundingClientRect(), w = menu.offsetWidth, h = menu.offsetHeight;
+        const left = x + w > box.width - 8 ? x - w : x, top = y + h > box.height - 8 ? Math.max(8, y - h) : y;
+        menu.style.left = Math.max(8, left) + "px"; menu.style.top = top + "px";
+        items()[0].focus();
+      };
+      rows.forEach((r) => {
+        r.addEventListener("contextmenu", (e) => {
+          e.preventDefault();
+          const box = app.getBoundingClientRect();
+          open(r, e.clientX - box.left, e.clientY - box.top);
+        });
+        r.addEventListener("keydown", (e) => {
+          if ((e.shiftKey && e.key === "F10") || e.key === "ContextMenu") { e.preventDefault(); r.querySelector("[aria-haspopup]").click(); }
+        });
+        r.querySelector("[aria-haspopup]").addEventListener("click", (e) => {
+          const b = e.currentTarget.getBoundingClientRect(), box = app.getBoundingClientRect();
+          open(r, b.right - box.left - 272, b.bottom - box.top + 4);
+        });
+      });
+      document.addEventListener("click", (e) => { if (!menu.hidden && !menu.contains(e.target) && !e.target.closest("#v2-files [aria-haspopup]")) close(false); });
+    })();
+
+    // v3 FBK-08, BTN-10: Delete stays focusable but inactive until the typed name matches; Keep and Escape close safely.
+    (() => {
+      const dlg = document.getElementById("v3-dialog"), page = document.getElementById("v3-page");
+      const input = document.getElementById("v3-name"), del = document.getElementById("v3-delete");
+      const hint = document.getElementById("v3-hint"), trigger = document.getElementById("v3-trigger");
+      const name = "Spring launch";
+      const matches = () => input.value.trim() === name;
+      const reset = () => { input.value = ""; del.setAttribute("aria-disabled", "true"); hint.textContent = "Delete turns on when the name matches."; };
+      input.addEventListener("input", () => {
+        del.setAttribute("aria-disabled", String(!matches()));
+        hint.textContent = matches() ? "Name matches. Deleting can't be undone." : "Delete turns on when the name matches.";
+      });
+      del.addEventListener("click", (e) => {
+        if (matches()) return;
+        e.preventDefault();
+        hint.textContent = `Type ${name} exactly to delete this project.`;
+        input.focus();
+      });
+      document.getElementById("v3-keep").addEventListener("click", () => dlg.close("keep"));
+      dlg.addEventListener("close", () => {
+        page.inert = false;
+        if (dlg.returnValue === "delete") {
+          // Example only: replace with a request to your API that deletes the project, then route away.
+          document.getElementById("v3-status").textContent = `${name} was deleted.`;
+        }
+        reset();
+        trigger.focus();
+      });
+      // The preview is non-modal, so Escape is handled here; a modal dialog fires "cancel" on Escape by itself.
+      dlg.addEventListener("keydown", (e) => { if (e.key === "Escape" && !dlg.matches(":modal")) dlg.close("keep"); });
+      trigger.addEventListener("click", () => {
+        if (dlg.open) dlg.close();
+        dlg.returnValue = "";
+        dlg.showModal();
+        input.focus();
+      });
+    })();
+
+    // v4 ENG-05: the page behind the drawer is inert while it is open; focus moves in, and back to Invite on close.
+    (() => {
+      const drawer = document.getElementById("v4-drawer"), page = document.getElementById("v4-page"), scrim = document.getElementById("v4-scrim");
+      const trigger = document.getElementById("v4-trigger"), form = document.getElementById("v4-form");
+      const email = document.getElementById("v4-email"), err = document.getElementById("v4-email-err"), status = document.getElementById("v4-status");
+      const setOpen = (open) => {
+        drawer.hidden = !open; scrim.hidden = !open; page.inert = open;
+        if (open) email.focus(); else trigger.focus();
+      };
+      trigger.addEventListener("click", () => setOpen(true));
+      drawer.querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", () => setOpen(false)));
+      drawer.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const bad = !email.value.trim() ? "Enter an email address" : !email.checkValidity() ? "Use an address like name@example.com" : "";
+        email.setAttribute("aria-invalid", String(!!bad));
+        err.hidden = !bad;
+        err.innerHTML = bad ? `<svg class="i" aria-hidden="true" style="width:14px;height:14px"><use href="#i-alert"/></svg>${bad}` : "";
+        if (bad) { email.focus(); return; }
+        // Example only: replace with a request to your API that sends the invite.
+        status.textContent = `Invite sent to ${email.value.trim()}`;
+        setOpen(false);
+      });
+    })();
+
+    // v5 CMP-12, CMP-25: a non-blocking popover; counts follow the choices, Apply updates the removable chips.
+    (() => {
+      const counts = { 7: { paid: 31, processing: 9, refunded: 2, cancelled: 1 }, 30: { paid: 128, processing: 14, refunded: 6, cancelled: 3 }, 90: { paid: 402, processing: 22, refunded: 19, cancelled: 11 } };
+      const labels = { paid: "Paid", processing: "Processing", refunded: "Refunded", cancelled: "Cancelled" };
+      const btn = document.getElementById("v5-btn"), pop = document.getElementById("v5-pop"), live = document.getElementById("v5-live");
+      const boxes = [...document.querySelectorAll("#v5-status input")];
+      const range = () => document.querySelector('input[name="v5-range"]:checked').value;
+      const total = () => {
+        const c = counts[range()], on = boxes.filter((b) => b.checked);
+        return (on.length ? on : boxes).reduce((sum, b) => sum + c[b.value], 0);
+      };
+      const refresh = () => {
+        const c = counts[range()];
+        document.querySelectorAll("[data-n]").forEach((n) => (n.textContent = c[n.dataset.n]));
+        document.getElementById("v5-total").textContent = total();
+      };
+      const setOpen = (open, refocus) => {
+        pop.hidden = !open; btn.setAttribute("aria-expanded", String(open));
+        if (open) boxes[0].focus(); else if (refocus) btn.focus();
+      };
+      const renderChips = () => {
+        document.querySelectorAll("[data-chip]").forEach((c) => c.remove());
+        const anchor = document.getElementById("v5-range-chip");
+        boxes.filter((b) => b.checked).forEach((b) => {
+          const chip = document.createElement("span");
+          chip.className = "chip"; chip.dataset.chip = b.value;
+          chip.innerHTML = `${labels[b.value]}<button type="button" aria-label="Remove filter: ${labels[b.value]}"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>`;
+          anchor.before(chip);
+        });
+        const n = boxes.filter((b) => b.checked).length;
+        const badge = document.getElementById("v5-badge");
+        badge.hidden = !n; badge.textContent = n; badge.setAttribute("aria-label", `${n} statuses applied`);
+        document.getElementById("v5-range-chip").textContent = `Last ${range()} days`;
+        document.getElementById("v5-shown").textContent = total();
+        live.textContent = `${total()} orders match`;
+      };
+      boxes.forEach((b) => b.addEventListener("change", refresh));
+      document.querySelectorAll('input[name="v5-range"]').forEach((r) => r.addEventListener("change", refresh));
+      document.getElementById("v5-clear").addEventListener("click", () => { boxes.forEach((b) => (b.checked = false)); refresh(); });
+      document.getElementById("v5-apply").addEventListener("click", () => {
+        // Example only: replace with a request to your API for the filtered orders.
+        renderChips(); setOpen(false, true);
+      });
+      document.querySelector(".v5 .toolbar").addEventListener("click", (e) => {
+        const x = e.target.closest("[data-chip] button");
+        if (!x) return;
+        boxes.find((b) => b.value === x.parentElement.dataset.chip).checked = false;
+        refresh(); renderChips(); btn.focus();
+      });
+      btn.addEventListener("click", () => setOpen(pop.hidden));
+      pop.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false, true); });
+      document.addEventListener("click", (e) => { if (!pop.hidden && !e.target.closest(".v5 .anchor")) setOpen(false, false); });
+    })();
+
+    // v6 SCR-20, MOB-11: tap or long-press the message to open the sheet; Cancel, Escape or the scrim close it.
+    (() => {
+      const sheet = document.getElementById("v6-sheet"), scrim = document.getElementById("v6-scrim"), chat = document.getElementById("v6-chat"), msg = document.getElementById("v6-msg");
+      const setOpen = (open) => {
+        sheet.hidden = !open; scrim.hidden = !open; chat.inert = open;
+        msg.classList.toggle("lifted", open); msg.setAttribute("aria-expanded", String(open));
+        if (open) sheet.querySelector("button").focus(); else msg.focus();
+      };
+      let timer;
+      msg.addEventListener("pointerdown", () => { timer = setTimeout(() => setOpen(true), 500); });
+      ["pointerup", "pointerleave", "pointercancel"].forEach((n) => msg.addEventListener(n, () => clearTimeout(timer)));
+      msg.addEventListener("click", () => { if (sheet.hidden) setOpen(true); });
+      document.getElementById("v6-cancel").addEventListener("click", () => setOpen(false));
+      scrim.addEventListener("click", () => setOpen(false));
+      sheet.addEventListener("keydown", (e) => { if (e.key === "Escape") setOpen(false); });
+      sheet.querySelectorAll(".acts button").forEach((b) => b.addEventListener("click", () => setOpen(false)));
+    })();
+  </script>
+</body>
+</html>
