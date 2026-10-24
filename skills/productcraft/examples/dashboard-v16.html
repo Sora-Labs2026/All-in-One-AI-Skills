@@ -449,6 +449,7 @@
   const T0 = 120, T1 = 860;
   let metric = "hr", cursor = null;
   const statusOf = (m, v) => (v > m.ok[1] ? "High" : v < m.ok[0] ? "Low" : "In range");
+  const withUnit = (m, v) => `${m.fmt(v)}${m.unit === "%" ? "%" : ` ${m.unit}`}`;
   function node(tag, attrs, parent, text) {
     const n = document.createElementNS(NS, tag);
     Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v));
@@ -471,7 +472,7 @@
       node("line", { class: "grid", x1: pad.l, x2: W - pad.r, y1: y(t), y2: y(t) }, svg);
       node("text", { x: pad.l - 8, y: y(t) + 4, "text-anchor": "end" }, svg, m.fmt(t));
     });
-    node("text", { class: "band-label", x: pad.l + 8, y: y(m.ok[1]) + 15 }, svg, `Normal ${m.fmt(m.ok[0])}–${m.fmt(m.ok[1])} ${m.unit}`);
+    node("text", { class: "band-label", x: pad.l + 8, y: y(m.ok[1]) + 15 }, svg, `Normal ${m.fmt(m.ok[0])}–${withUnit(m, m.ok[1])}`);
     node("line", { class: "axis", x1: pad.l, x2: W - pad.r, y1: H - pad.b, y2: H - pad.b }, svg);
     (W < 560 ? [120, 360, 600, 840] : [120, 240, 360, 480, 600, 720, 840]).forEach((t) => node("text", { x: x(t), y: H - 6, "text-anchor": "middle" }, svg, `${String(t / 60).padStart(2, "0")}:00`));
     node("polyline", { class: "line", points: times.map((t, i) => `${x(t)},${y(m.values[i])}`).join(" ") }, svg);
@@ -481,13 +482,13 @@
       node("circle", { class: `pt${out ? " out" : ""}`, cx: x(t), cy: y(m.values[i]), r: i === cursor ? 6 : out ? 5 : 4 }, svg);
     });
     const last = m.values.length - 1, st = statusOf(m, m.values[last]);
-    node("text", { class: "last-label", x: x(times[last]) + 12, y: y(m.values[last]) - 2 }, svg, `${m.fmt(m.values[last])} ${m.unit}`);
+    node("text", { class: "last-label", x: x(times[last]) + 12, y: y(m.values[last]) - 2 }, svg, withUnit(m, m.values[last]));
     node("text", { x: x(times[last]) + 12, y: y(m.values[last]) + 13 }, svg, st === "In range" ? "In range" : `${st} · 14:05`);
     document.getElementById("trend-summary").textContent = m.summary;
     document.getElementById("chart-caption").textContent = `${m.name}, last 12 hours (${m.unit}); normal ${m.fmt(m.ok[0])} to ${m.fmt(m.ok[1])}`;
     document.querySelector("#chart-table tbody").replaceChildren(...times.map((t, i) => {
       const tr = document.createElement("tr");
-      tr.innerHTML = `<th scope="row">${hhmm(t)}</th><td>${m.fmt(m.values[i])} ${m.unit}</td><td>${statusOf(m, m.values[i])}</td>`;
+      tr.innerHTML = `<th scope="row">${hhmm(t)}</th><td>${withUnit(m, m.values[i])}</td><td>${statusOf(m, m.values[i])}</td>`;
       return tr;
     }));
   }
@@ -496,11 +497,11 @@
     render();
     const { m, W, x } = geo();
     const st = statusOf(m, m.values[i]);
-    tip.innerHTML = `<span class="num">${hhmm(times[i])}</span><b class="num">${m.fmt(m.values[i])} ${m.unit} · ${st}</b><span class="num">Normal ${m.fmt(m.ok[0])}–${m.fmt(m.ok[1])}</span>`;
+    tip.innerHTML = `<span class="num">${hhmm(times[i])}</span><b class="num">${withUnit(m, m.values[i])} · ${st}</b><span class="num">Normal ${m.fmt(m.ok[0])}–${m.fmt(m.ok[1])}</span>`;
     tip.hidden = false;
     const px = x(times[i]);
     tip.style.left = `${px + 170 > W ? px - 170 : px + 12}px`;
-    document.getElementById("chart-live").textContent = `${hhmm(times[i])}, ${m.name} ${m.fmt(m.values[i])} ${m.unit}, ${st}`;
+    document.getElementById("chart-live").textContent = `${hhmm(times[i])}, ${m.name} ${withUnit(m, m.values[i])}, ${st}`;
   }
   function hide() { cursor = null; tip.hidden = true; render(); }
   chart.addEventListener("pointermove", (e) => {

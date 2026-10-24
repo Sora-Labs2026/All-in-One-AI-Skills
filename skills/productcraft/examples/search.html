@@ -64,7 +64,7 @@
     .field .icon-btn svg { width: 18px; height: 18px; }
 
     /* v1 command palette over a lightly dimmed, inert app (P69, ENG-05) */
-    .app-frame { position: relative; height: 448px; overflow: hidden; }
+    .app-frame { position: relative; height: 464px; overflow: hidden; }
     .app { display: grid; grid-template-columns: 208px minmax(0, 1fr); height: 100%; }
     .app-side { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4) var(--space-3); border-right: 1px solid var(--border); background: var(--surface); }
     .app-side .brand { margin: 0 var(--space-2) var(--space-4); }
@@ -83,7 +83,7 @@
     .app-chart { display: flex; align-items: flex-end; gap: var(--space-3); height: 200px; margin-top: var(--space-4); padding: var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
     .app-chart i { flex: 1; border-radius: 6px 6px 2px 2px; background: var(--surface-2); }
     .scrim { position: absolute; inset: 0; background: rgba(4, 6, 8, 0.4); }
-    .cmdk { position: absolute; top: var(--space-7); left: 50%; width: min(620px, calc(100% - 48px)); transform: translateX(-50%); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: var(--radius-lg); background: var(--surface-2); box-shadow: var(--shadow-lg); overflow: hidden; }
+    .cmdk { position: absolute; top: var(--space-6); left: 50%; width: min(620px, calc(100% - 48px)); transform: translateX(-50%); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: var(--radius-lg); background: var(--surface-2); box-shadow: var(--shadow-lg); overflow: hidden; }
     .cmdk[hidden] { display: none; }
     .cmdk-field { display: flex; align-items: center; gap: var(--space-3); height: 56px; padding: 0 var(--space-3) 0 var(--space-4); border-bottom: 1px solid var(--border); }
     .cmdk-field:focus-within { box-shadow: inset 0 -2px 0 var(--accent); }
@@ -189,8 +189,8 @@
     .support .btn { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
 
     /* v5 mobile search: recents with remove, honest suggestions, 44px targets (FRM-26, MOB-01) */
-    .phone { height: 660px; margin: 0 auto; color: var(--text); }
-    .m-body { display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-2) var(--space-4) 0; background: var(--surface); flex: 1; }
+    .phone { height: 644px; margin: 0 auto; color: var(--text); }
+    .m-body { display: flex; flex-direction: column; gap: 20px; padding: var(--space-2) var(--space-4) 0; background: var(--surface); flex: 1; }
     .m-title { display: block; font-size: var(--text-xl); font-weight: 700; }
     .m-search { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); }
     .m-search .field { flex: 1; min-width: 0; min-height: 48px; border-radius: var(--radius-md); }
@@ -238,7 +238,7 @@
     .ac-empty { padding: var(--space-3) var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
     .ac-foot { display: flex; gap: var(--space-4); margin-top: var(--space-1); padding: var(--space-2) var(--space-2) var(--space-1); border-top: 1px solid var(--border); font-size: var(--text-xs); color: var(--text-2); }
     .ac-foot span { display: inline-flex; align-items: center; gap: var(--space-1); }
-    .docs { display: grid; grid-template-columns: 180px minmax(0, 1fr); height: 488px; background: var(--surface); }
+    .docs { display: grid; grid-template-columns: 180px minmax(0, 1fr); height: 548px; background: var(--surface); }
     .docs-nav { padding: var(--space-5) var(--space-4); border-right: 1px solid var(--border); }
     .docs-nav h5 { margin: 0 0 var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
     .docs-nav a { display: block; padding: 6px var(--space-2); border-radius: 6px; font-size: var(--text-sm); color: var(--text-2); }
@@ -249,6 +249,12 @@
     .docs-article p { max-width: 560px; margin-top: var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
     .docs-article pre { margin: var(--space-4) 0 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); background: var(--surface-2); font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text); overflow: hidden; }
     .status-line { margin-top: var(--space-2); font-size: var(--text-xs); color: var(--text-2); }
+    .docs-article h4 { margin-top: var(--space-5); font-size: var(--text-md); }
+    .states { width: 100%; max-width: 560px; margin-top: var(--space-2); border-collapse: collapse; font-size: var(--text-sm); }
+    .states th, .states td { padding: var(--space-2) var(--space-3) var(--space-2) 0; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+    .states th { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .states td { color: var(--text-2); }
+    .states code { font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--text); }
 
     @media (max-width: 760px) {
       .sheet { padding: var(--space-5) var(--space-4); }
@@ -261,7 +267,7 @@
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true">
-    <symbol id="i-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="5.5"/><path d="M15.5 15.5L19 19"/></symbol>
+    <symbol id="i-mark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16.5c3.5 0 4.5-9 14-9"/><path d="M5 11.5c2 0 3-3.5 6-4.5"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></symbol>
     <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></symbol>
     <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
@@ -668,6 +674,16 @@
                 <p>A payout moves your available balance to your bank account. Most payouts arrive in two business days; the first one can take up to seven.</p>
                 <p>Every payout lists the payments and fees it includes, so you can match it to your bank statement line by line.</p>
                 <pre><code>GET /v1/payouts?status=in_transit</code></pre>
+                <h4>Payout statuses</h4>
+                <table class="states">
+                  <thead><tr><th scope="col">Status</th><th scope="col">Meaning</th></tr></thead>
+                  <tbody>
+                    <tr><td><code>pending</code></td><td>Created and waiting for the next payout run.</td></tr>
+                    <tr><td><code>in_transit</code></td><td>Sent to the bank; usually arrives in two business days.</td></tr>
+                    <tr><td><code>paid</code></td><td>The bank confirmed the deposit.</td></tr>
+                    <tr><td><code>failed</code></td><td>The bank returned it. Check the account details and retry.</td></tr>
+                  </tbody>
+                </table>
                 <p class="status-line" id="ac-status" role="status" aria-live="polite"></p>
               </article>
             </div>
