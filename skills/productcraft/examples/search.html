@@ -261,8 +261,22 @@
       .sheet { padding: var(--space-5) var(--space-4); }
       .variant.c12, .variant.c7, .variant.c5 { grid-column: 1 / -1; }
       .serp, .zero, .app { grid-template-columns: 1fr; }
-      .facets, .app-side, .docs-nav, .docs-top nav { display: none; }
+      .sheet-header { flex-direction: column; align-items: flex-start; }
+      .variant-stage { padding: var(--space-3); }
+      .facets, .app-side, .docs-nav, .docs-top nav, .shop-top .brand, .help-top .brand, .cmdk-opt .lbl small, .cmdk-foot span:not(.count), .app-kpis { display: none; }
       .docs { grid-template-columns: 1fr; }
+      .serp, .zero { padding: var(--space-4); gap: var(--space-5); }
+      .shop-top, .help-top { padding: var(--space-3) var(--space-4); flex-wrap: wrap; height: auto; }
+      .res-head { flex-wrap: wrap; }
+      .result { grid-template-columns: 72px minmax(0, 1fr); }
+      .result .price { grid-column: 2; text-align: left; }
+      .thumb { width: 72px; height: 54px; }
+      .thumb svg { width: 66px; height: 50px; }
+      .zero-main { grid-template-columns: minmax(0, 1fr); }
+      .docs-top { padding: 0 var(--space-3); gap: var(--space-3); }
+      .shop-top .field, .help-top .field { flex: 1 1 100%; min-width: 0; max-width: none; }
+      .phone { width: 100%; max-width: 360px; }
+      .cmdk-trigger { min-width: 0; }
     }
   </style>
 </head>

@@ -243,11 +243,23 @@
     @media (max-width: 760px) {
       .sheet { padding: var(--space-5) var(--space-4); }
       .variants.cols-2 { grid-template-columns: 1fr; }
-      .lp-nav ul { display: none; }
-      .split, .quote-pair, .stats, .footer-groups { grid-template-columns: 1fr; }
+      .lp-nav ul, .nav-actions .btn-ghost { display: none; }
+      .lp-nav { padding: 0 var(--space-4); }
+      .sheet-header { flex-direction: column; align-items: flex-start; }
+      .variant-stage { padding: var(--space-3); }
+      .split, .quote-pair, .stats, .footer-groups { grid-template-columns: minmax(0, 1fr); }
       .bento > * { grid-column: 1 / -1; grid-row: auto; }
-      .pv-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero { padding: var(--space-5) var(--space-4) 0; }
       .hero-title { font-size: var(--text-2xl); }
+      .hero-lede, .split-lede { font-size: var(--text-md); }
+      .hero-actions, .signup-row, .cta-actions, .proof-foot, .plan-foot, .legal, .footer-brand { flex-wrap: wrap; }
+      .signup-row .btn { width: 100%; }
+      .pv-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .pv-range, .pv-cards { display: none; }
+      .split { padding: var(--space-5) var(--space-4); gap: var(--space-5); }
+      .split-title { font-size: var(--text-xl); }
+      .lp-section { padding: var(--space-4); }
+      .stats > div, .stats > div:first-child { padding-left: 0; border-left: 0; }
     }
   </style>
 </head>

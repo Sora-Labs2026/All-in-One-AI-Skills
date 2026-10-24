@@ -271,7 +271,7 @@
     <div>
       <div class="title-row">
         <h1>Dispatch board</h1>
-        <span class="live">Live · updated <time datetime="2026-10-24T14:20">14:20</time></span>
+        <span class="live"><span>Live · updated <time datetime="2026-10-24T14:20">14:20</time></span></span>
       </div>
       <p class="muted">Saturday, Oct 24. 7 of 70 open deliveries are late; a lane closure on Harbor bridge accounts for 3 of them.</p>
     </div>
@@ -586,7 +586,7 @@
     if (id) map.dataset.route = id; else delete map.dataset.route;
   });
 
-  // Shipments rendered from raw minutes and formatted at render (ENG-07, COP-08)
+  // Shipments rendered from raw minutes and formatted at render (ENG-07)
   const shipments = [
     { id: "#SL-4096", to: "Northline Studio", route: "C", driver: "Mateo Silva", from: 660, until: 780, eta: 930 },
     { id: "#SL-4102", to: "Hana Kim", route: "A", driver: "Owen Clarke", from: 720, until: 840, eta: 910 },
