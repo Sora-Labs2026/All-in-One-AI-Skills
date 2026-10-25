@@ -12,6 +12,7 @@ This module protects the user from the agent. Securing the application being bui
 - Before installing, enabling or updating a third-party skill, plugin, MCP server, hook or agent configuration, including one that arrives inside a cloned repository.
 - When the task touches secrets: `.env` files, keys, tokens, credential stores or CI secrets.
 - When the user asks for a command guard, a pre-tool hook or a safer agent setup.
+- When the user wants the agent sandboxed (devcontainer, container or VM), plans to run it with broad auto-approval or unattended, or the task means building or running code nobody has vetted: `references/isolation.md`.
 
 Do **not** ask permission for ordinary in-project work: editing files, builds, tests, installs from the project's lockfile, and reversible git operations such as commit, branch, stash or rebase. Asking about everything teaches people to approve without reading.
 
@@ -75,7 +76,7 @@ Use the client's question tool if it has one. Do not bundle several risky action
 - Never send a secret to a third-party service: paste sites, online formatters, other AI tools, or a URL query string.
 - If a real secret has been exposed, stop, tell the user and follow LaunchGuard's leak response in `../launchguard/references/safe-operations.md`. Deleting the text does not make it safe; rotation does.
 
-Commands and edge cases: `references/secrets.md`.
+Commands and edge cases: `references/secrets.md`. When a setup needs several values or dashboard steps only the user can do, give them a guided script to run in their own terminal instead of asking for values in the chat: `references/guided-setup.md`.
 
 ## Vetting third-party skills, plugins, MCP servers and hooks
 
@@ -102,7 +103,7 @@ python3 <productcraft>/modules/agent-safety/scripts/guard_command.py --json --cw
 
 The agent may use it to double-check a command it is unsure about. Wiring it in as a Claude Code `PreToolUse` hook is the user's choice: offer it, show the settings change, and add it only after a yes. Setup, decisions, rule IDs, tests and limits are in `references/command-guard.md`.
 
-Limits, stated plainly: the guard only sees the command text. It cannot see inside scripts, package scripts, aliases or programs the command starts, and it reasons about paths without following symlinks. Anyone determined can get around it. For real isolation, use a container, VM, devcontainer or throwaway account with no production credentials.
+Limits, stated plainly: the guard only sees the command text. It cannot see inside scripts, package scripts, aliases or programs the command starts, and it reasons about paths without following symlinks. Anyone determined can get around it. For real isolation, use a container, VM, devcontainer or throwaway account with no production credentials; setup, checks and limits are in `references/isolation.md`.
 
 ## Scripts
 

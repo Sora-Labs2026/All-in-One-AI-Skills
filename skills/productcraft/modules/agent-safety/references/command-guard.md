@@ -90,7 +90,7 @@ An `ASK` only helps if a person sees the prompt. When the payload says the sessi
 | Permissions | `PERM-CATASTROPHIC` | Deny |
 | | `PERM-OUTSIDE`, `PERM-WORLD-WRITABLE`, `PERM-UNVERIFIED` | Ask |
 | Remote code and network | `REMOTE-EXEC`, `NET-REVERSE-SHELL`, `SECRET-EXFIL` | Deny |
-| | `REMOTE-EXEC-FILE`, `DATA-UPLOAD`, `INLINE-DESTRUCTIVE` | Ask |
+| | `REMOTE-EXEC-FILE`, `DATA-UPLOAD`, `INLINE-DESTRUCTIVE`, `AWK-EXEC` | Ask |
 | Processes | `PROC-KILL-ALL`, `PROC-POWER`, `PROC-FORK-BOMB` | Deny |
 | | `PROC-KILL`, `PROC-SERVICE` | Ask |
 | Cloud and release | `CLOUD-DELETE` | Ask; deny for production |
@@ -108,20 +108,20 @@ What each class covers and the safer alternatives: `destructive-commands.md`.
 
 ## How the parsing works, briefly
 
-The guard splits the command into simple commands on `;`, `&&`, `||`, `|` and newlines, and keeps quoting, redirects, heredocs and substitutions. It looks through wrappers (`sudo`, `env`, `xargs`, `timeout`, `nohup`, `npx`) and analyzes the inner command. It recursively checks `bash -c`, `sh -c`, `eval`, `$(...)`, backticks, process substitution, heredocs fed to a shell and the command part of `ssh HOST CMD`. It tracks `cd` within a command line. A heredoc written to a file stays data. Unbalanced quotes or nesting deeper than four levels produce `ASK`.
+The guard splits the command into simple commands on `;`, `&&`, `||`, `|` and newlines, and keeps quoting, redirects, heredocs and substitutions. It looks through wrappers (`sudo`, `env`, `xargs`, `timeout`, `nohup`, `npx`) and analyzes the inner command. It recursively checks `bash -c`, `sh -c`, `eval`, `$(...)`, backticks, process substitution, heredocs fed to a shell and the command part of `ssh HOST CMD`, plus commands written literally inside awk `system()` calls and command pipes, and GNU `parallel` command templates, whose inputs count as values known only at runtime (so `parallel rm -rf ::: ...` is asked about, like `xargs rm -rf`). It tracks `cd` within a command line. A heredoc written to a file stays data. Unbalanced quotes or nesting deeper than four levels produce `ASK`.
 
 ## Limits
 
 - **It sees only the command text.** It cannot see inside scripts, `Makefile` targets, package scripts, shell aliases or functions, or whatever the command starts. `bash cleanup.sh` is allowed even if `cleanup.sh` deletes the home folder.
 - **Computed values.** When a recursive delete target comes from a variable or command output it asks, but other computed names and arguments may pass unchecked.
 - **Paths are lexical.** Symlinks are not followed, so a link inside the project that points elsewhere looks like a project path.
-- **Inline interpreter code** (`python -c`, `node -e`) is checked with heuristics only.
+- **Inline interpreter code** (`python -c`, `node -e`) is checked with heuristics only. An awk program read from a file (`awk -f`) is not checked, and an awk `system()` call whose command is built at runtime is asked about (`AWK-EXEC`).
 - **Other channels are not covered:** MCP tools, network traffic, the content of files written by `Edit` or `Write` (only sensitive locations are checked), and any tool not in the matcher.
 - **POSIX shells only.** PowerShell and `cmd` syntax is not parsed, apart from one download-and-run pattern.
 - **It fails open outside its own code.** If `python3` is missing, the hook times out or the process cannot start, Claude Code treats that as a non-blocking error and the call proceeds. Errors inside the script produce `ASK` (`DENY` with `--ask-as-deny`).
 - **Allow is not approval.** Many harmful commands match no rule.
 
-For real isolation use a devcontainer, container or VM, a separate OS account, environments without production credentials, short-lived narrowly scoped tokens, and the agent's own permission rules and sandboxing where available.
+For real isolation use a devcontainer, container or VM, a separate OS account, environments without production credentials, short-lived narrowly scoped tokens, and the agent's own permission rules and sandboxing where available. How to set it up and check it: `isolation.md`.
 
 ## Troubleshooting
 

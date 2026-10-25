@@ -25,6 +25,7 @@ A common target is feedback on a pull request in about ten minutes. When a pipel
 - Run only what a change can affect: path filters for documentation-only changes, affected-project builds in monorepos (Nx, Turborepo, Bazel, Gradle build cache).
 - Remove repeated work: install once per job, reuse build outputs between jobs as artifacts, avoid rebuilding containers that did not change (layer caching).
 - Move very slow suites to the merge queue or a scheduled run, but keep them required before release.
+- Large property-test counts, mutation testing and long fuzzing runs belong in scheduled jobs; pull requests get the short versions (`advanced-testing.md`, `fuzzing.md`).
 - Measure the pipeline: time per job and the slowest tests, so you speed up what is actually slow.
 
 ## Keep it trustworthy

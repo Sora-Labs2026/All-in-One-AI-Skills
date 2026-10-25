@@ -65,7 +65,7 @@ Write these in complete sentences and at full detail, whatever the level or budg
 2. **Destructive or irreversible actions:** before deleting data or files, force-pushing, rewriting history, running a data-dropping migration, deploying to production, sending messages, or anything involving payments or credentials, say what will happen, what cannot be undone, what the alternative is, and ask for explicit confirmation. A confirmation is never reduced to "OK?".
 3. **Security findings:** what the issue is, where (file and line), its impact, severity, the fix and its verification status, as LaunchGuard reports them. Never print secrets, at any level.
 4. **Errors and failures:** the exact error text (the lines that decide the cause), what failed, what you tried and the current state (what changed and what did not). Name the failing tests; never write "some tests failed".
-5. **Verification status:** which commands and tests actually ran and their results, and which checks were not done (`NOT VERIFIED`). Lean output may put this in a table. It never drops it.
+5. **Verification status:** which commands and tests actually ran and their results, and which checks were not done (`NOT VERIFIED`). Lean output may put this in a table. It never drops it, nor the "what to double-check" items of a report (`../assets/review-template.md`).
 6. **Legal, medical, financial and compliance caveats,** including disclaimers that another module or the project requires.
 7. **Anything the user asked to see in full:** a whole file, log, diff, list or explanation. Give it in full, with secrets redacted.
 8. **Questions for the user and choices you offer:** complete sentences that say what each option leads to, so the user can choose without guessing.

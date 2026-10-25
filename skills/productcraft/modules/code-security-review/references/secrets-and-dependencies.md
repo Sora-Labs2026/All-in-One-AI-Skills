@@ -111,6 +111,8 @@ Pick the smallest version that contains the fix, read its changelog for breaking
 
 ## Supply-chain review
 
+Install-time code, offline lockfile checks (`supply_chain.py lockfiles`), per-dependency risk cards, update review, response to a compromised package and release integrity are in [supply-chain review](supply-chain-review.md).
+
 ### New or unfamiliar dependencies
 
 Check each package a change adds:
@@ -132,7 +134,7 @@ Check each package a change adds:
 
 ### GitHub Actions
 
-Run `code_audit.py workflows --root .`, then read each workflow to confirm or dismiss every candidate.
+Run `code_audit.py workflows --root .` and `supply_chain.py actions --root .`, then read each workflow to confirm or dismiss every candidate. Workflows that react to outsiders or run AI agents are covered in depth in [CI and agent workflows](ci-agent-workflows.md).
 
 | Risk | What to look for | Safer pattern |
 |---|---|---|
@@ -160,8 +162,8 @@ Propose these as changes for the owner to review; do not push CI configuration w
 | Secret scanning | Gitleaks in CI, the host's secret scanning and push protection, a pre-commit hook | Block on any new hit |
 | Dependency advisories | The ecosystem tool above, or osv-scanner | Block on HIGH or CRITICAL in production dependencies after triage |
 | Dependency updates | Dependabot or Renovate, including the `github-actions` ecosystem | Advisory |
-| Static analysis | CodeQL or Semgrep with project rules; a rule for each confirmed finding whose shape is syntactic | Block on rules with proven precision |
-| Workflow security | `code_audit.py workflows --fail-on high`, or a dedicated Actions linter such as zizmor or actionlint if available | Block on HIGH |
+| Static analysis | CodeQL or Semgrep with project rules; a rule for each confirmed finding whose shape is syntactic ([static analysis](static-analysis-rules.md)) | Block on rules with proven precision |
+| Workflow security | `code_audit.py workflows --fail-on high` and `supply_chain.py actions --fail-on high`, or a dedicated Actions linter such as actionlint if available | Block on HIGH |
 | Repository posture | OpenSSF Scorecard | Advisory |
 | Audit regression tests | The tests written for each fixed finding, in the normal test job | Block |
 

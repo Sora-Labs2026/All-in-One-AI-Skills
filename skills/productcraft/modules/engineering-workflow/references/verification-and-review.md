@@ -1,6 +1,6 @@
 # Verification, self-review and code review
 
-Read this before you report work as done, when you review your own diff, when you ask someone else to review it, and when review feedback arrives.
+Read this before you report work as done, when you review your own diff, when you ask someone else to review it, and when review feedback arrives. Reviewing a change someone else wrote is in `reviewing-changes.md`.
 
 ## Find the commands that count
 
@@ -49,7 +49,7 @@ Read `git diff <base>...HEAD`, plus any untracked files you are adding, from top
 - **Callers:** did a signature, return value or raised error change? Are all callers updated?
 - **Data:** are writes ordered safely, inside a transaction where needed? Is the migration reversible? Can a failure halfway lose or corrupt data?
 - **Security touch points:** input validation, authorization on new endpoints, secrets, personal data in logs. Run the matching LaunchGuard baseline controls.
-- **Tests:** would they fail if the code were wrong? Use the mutation check in `test-first.md`.
+- **Tests:** would they fail if the code were wrong? Use the mutation check in `test-first.md`, and for critical code a scoped mutation run (`../../engineering-practices/references/advanced-testing.md`).
 - **Hygiene:** `diff_scope.py` WARNs resolved or explained; no leftover debugging; clear names.
 - **Docs:** README, changelog, configuration examples and API descriptions updated where the project keeps them.
 

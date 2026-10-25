@@ -23,7 +23,7 @@ git ls-files -z | xargs -0 wc -l 2>/dev/null | sort -rn | head -20
 ## Build the safety net first
 
 - **Pin current behavior** of the paths you will move: characterization tests through the public entry points, including odd behavior you intend to keep for now.
-- **Broad output checks** catch what unit tests miss: snapshot or approval tests of rendered output, generated files, API responses on a fixed dataset, or a diff of before and after outputs over many recorded inputs.
+- **Broad output checks** catch what unit tests miss: snapshot or approval tests of rendered output, generated files, API responses on a fixed dataset, or a diff of before and after outputs over many recorded inputs. Differential and property-based ways to do this are in `advanced-testing.md`.
 - **Let the compiler help.** In typed languages, a deliberate signature change produces an exhaustive list of call sites; keep the type checker green at every step.
 - **Test through stable interfaces** so tests survive the restructuring. Prefer real in-process code and local stand-ins (an in-memory implementation, a containerized database) over mocks; mock only what you do not control or what is slow or non-deterministic (third-party APIs, time, randomness). Once equivalent tests exist at the new interface, delete tests that only exercised internals that no longer exist.
 - Record the baseline: full test, lint, type-check and build results before the first change, so you can tell new failures from old ones.

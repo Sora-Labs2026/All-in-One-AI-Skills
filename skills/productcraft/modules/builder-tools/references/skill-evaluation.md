@@ -34,6 +34,13 @@ For each prompt write the expected outcome in observable terms before you run an
 
 Keep fixtures small, synthetic and free of personal data. Keep expected answers where the agent under test cannot read them (outside the folder it works in).
 
+**Start from a baseline.** Run the prompts once without the new instructions and keep the transcripts. The instructions should answer what those runs actually got wrong; a point the bare agent already handles needs no text.
+
+Add to the set, depending on what the skill does:
+- for each rule it must hold even when that is inconvenient, a prompt that makes skipping it tempting: a stated deadline, a user who asks to skip it, or half the work already done another way;
+- for facts it supplies, a prompt that can only be answered correctly by opening the right reference file;
+- a prompt with one needed detail missing, to see whether the agent notices instead of guessing.
+
 ## Checks that discriminate
 
 A check is useful only if a wrong result would fail it.
@@ -79,6 +86,7 @@ Before or alongside task runs, give only `SKILL.md` (and the files it links) to 
 ## Iterating
 
 - **One idea per round.** Change one thing (the description, one rule, one reference split), rerun, compare. Bundled changes hide which part helped or hurt.
+- **Try a one-line wording change on short samples first.** Send the same tempting single-turn prompt several times (five or more) with the old line, the new line and no line at all, each inside the full skill text. Keep the change only if the version without the line shows the problem and the new line fixes it more often than the old one. Judge each sample by reading it, not by keyword matching, which counts quoted examples as hits. If the new line produces a different behavior every time, rewrite it before running full tasks.
 - **Fix the cause, not the case.** Change the instruction behind a whole class of mistakes; do not add a rule that names a test prompt. A skill tuned to its test set fails on the next real request.
 - **Remove as readily as you add.** If deleting a paragraph does not change results, delete it; shorter skills load faster and are followed more closely.
 - **Involve the user** on subjective outputs: show the outputs per case with a place for comments, and treat silence on a case as acceptance.

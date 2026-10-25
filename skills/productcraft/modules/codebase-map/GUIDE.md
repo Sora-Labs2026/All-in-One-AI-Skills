@@ -70,7 +70,7 @@ python3 <productcraft>/modules/codebase-map/scripts/map_codebase.py . --focus sr
 
 - **Done when:** you have named the files you will change, the callers and tests affected, and nothing in the context is there "just in case".
 
-For questions the summary does not answer (all importers of a package, every edge into a directory, every route under `/api`), save the JSON to a temporary file and query it. Recipes are in `references/output-format.md`.
+For questions the summary does not answer (all importers of a package, every edge into a directory, every route under `/api`, the import chain from one file to another, a directory-level diagram for a design doc or pull request), save the JSON to a temporary file and query it. Recipes are in `references/output-format.md`.
 
 ### 4. Use the map for the change
 
@@ -96,7 +96,7 @@ git log --since=6.months --format= --name-only | grep -v '^$' | sort | uniq -c |
 - Imports built at runtime: computed `import()` paths, `importlib`, `__import__`, plugin entry points, dependency-injection containers, reflection and string-based routing.
 - Languages other than Python and JavaScript/TypeScript (including Vue and Svelte files): these get a file inventory, line counts, Go and Rust `main` detection and nothing more.
 - JavaScript parsing uses patterns, not a full parser. Odd syntax or import-like text inside strings can add or hide an edge. Python uses the standard `ast` module and is exact for static imports.
-- Ignore rules: `.gitignore` files in the scanned tree and in parent folders up to the Git root. Global excludes and `.git/info/exclude` are not read. Vendored, build, cache and virtual-environment folders are always skipped.
+- Ignore rules: `.gitignore` files in the scanned tree and in parent folders up to the Git root. Global excludes and `.git/info/exclude` are not read. Vendored, build, cache and virtual-environment folders are always skipped. Leave out anything else with `--exclude`.
 - Routes: only the obvious patterns are detected (route decorators, Django `urls.py`, Express-style routers, Next.js and SvelteKit file routes). Routers mounted under a prefix show the local path only.
 - History, runtime behavior, performance and correctness. Use Git, profilers and tests for those.
 
@@ -113,6 +113,7 @@ git log --since=6.months --format= --name-only | grep -v '^$' | sort | uniq -c |
 | `--max-files N` | Stop after N files and mark the output truncated (default 5000) |
 | `--top N` | Rows per Markdown list and hotspot list (default 10) |
 | `--no-gitignore` | Do not apply `.gitignore` rules (vendor and build folders are still skipped) |
+| `--exclude PATTERN` | Skip paths matching a `.gitignore`-style pattern relative to the root; repeatable, and also applied with `--no-gitignore`. Use it for tracked folders the task does not need, such as test fixtures, vendored copies or generated clients. Imports of excluded files show up as unresolved |
 
 Exit status is 0 on success and 2 for a bad argument, a missing root or a focus path that matches no scanned file. The JSON fields, edge kinds and query recipes are documented in `references/output-format.md`.
 

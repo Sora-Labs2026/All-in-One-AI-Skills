@@ -2,7 +2,9 @@
 
 Reference for the `code-security-review` module. Read only the section for the stack under review. Entries are traps specific to that language or framework; the general classes are in `vulnerability-classes.md` (cited as "class N") and generated-code patterns in `ai-generated-code-bugs.md` (cited as `AIG-nn`). Tools named here are optional: run them only if already installed, treat their output as advisory, and record anything that did not run as `NOT_VERIFIED`.
 
-**Contents:** [JavaScript and TypeScript](#javascript-and-typescript) · [Python](#python) · [Go](#go) · [Java and Spring](#java-and-spring) · [PHP](#php) · [Ruby and Rails](#ruby-and-rails) · [Solidity basics](#solidity-basics)
+**Contents:** [JavaScript and TypeScript](#javascript-and-typescript) · [Python](#python) · [Go](#go) · [Java and Spring](#java-and-spring) · [PHP](#php) · [Ruby and Rails](#ruby-and-rails) · [C# and .NET](#c-and-net) · [Solidity basics](#solidity-basics)
+
+**Separate guides:** [C and C++](c-and-cpp.md), [Rust](rust.md), [smart contracts in depth](smart-contracts.md), [mobile apps and their backends](mobile-apps.md).
 
 ## JavaScript and TypeScript
 
@@ -140,6 +142,18 @@ Reference for the `code-security-review` module. Read only the section for the s
 - **CSRF:** `ActionController::Base` protects by default; `ActionController::API` controllers have no CSRF protection, which is fine for token authentication and wrong if they read cookies (class 8).
 - **Tools:** Brakeman (`brakeman -q`), bundler-audit (`bundle audit check`; refreshing its advisory database needs network access).
 
+## C# and .NET
+- **Deserialization:** `BinaryFormatter` (obsolete, and removed from .NET 9), `SoapFormatter`, `NetDataContractSerializer`, `LosFormatter`, `ObjectStateFormatter`, Json.NET with `TypeNameHandling` other than `None` on untrusted input, and `JavaScriptSerializer` with a type resolver. Use `System.Text.Json` and never let the input choose the type (class 5).
+- **SQL:** Entity Framework `FromSqlRaw` or `ExecuteSqlRaw` with interpolated or concatenated strings, and `SqlCommand` text built from input. Use `FromSql` or `FromSqlInterpolated`, which turn interpolations into parameters, or explicit `SqlParameter`s (class 1.1).
+- **XML:** `XmlDocument` or `XmlTextReader` with a non-null `XmlResolver`, or `XmlReaderSettings.DtdProcessing = DtdProcessing.Parse`. Old .NET Framework versions resolve external entities by default; keep `DtdProcessing.Prohibit` and a null resolver (class 13).
+- **Processes:** `Process.Start` with `UseShellExecute = true`, or `cmd.exe /c` and `powershell -Command` with input in the command line; pass arguments through `ProcessStartInfo.ArgumentList` (class 1.3).
+- **Authorization:** controllers and endpoints without `[Authorize]` when no fallback policy is set, `[AllowAnonymous]` overriding a controller-level policy, and minimal-API endpoints registered outside the group that carries `RequireAuthorization()` (class 2).
+- **Forms and redirects:** MVC controllers handling cookie-authenticated form posts without antiforgery validation (Razor Pages validate by default; MVC needs `[ValidateAntiForgeryToken]` or the global `AutoValidateAntiforgeryTokenAttribute`), `[IgnoreAntiforgeryToken]`, `Redirect(returnUrl)` instead of `LocalRedirect` or a `Url.IsLocalUrl` check, and `Html.Raw` on user content (classes 7, 8 and 12).
+- **Over-posting:** model binding straight into entity classes; bind to request DTOs (class 11).
+- **Randomness and passwords:** `System.Random` for tokens (use `RandomNumberGenerator`); `MD5` or `SHA1` for passwords (use ASP.NET Core Identity's password hasher, or `Rfc2898DeriveBytes.Pbkdf2` with a high iteration count) (class 9).
+- **Comparisons:** culture-sensitive `string.Compare`, `ToLower()` or `ToUpper()` on identifiers (the Turkish dotless i); use `StringComparison.Ordinal` or `OrdinalIgnoreCase`.
+- **Tools:** `dotnet list package --vulnerable --include-transitive`, the built-in analyzers with `<AnalysisLevel>latest-all</AnalysisLevel>`, and CodeQL for C#.
+
 ## Solidity basics
 
 Contracts hold value and cannot be patched in place once deployed, so treat findings as high stakes. Work only against local chains or forks (Foundry Anvil, Hardhat Network); never sign or send mainnet transactions, never handle real private keys or seed phrases, and recommend an independent audit before value-bearing contracts are deployed. OWASP's web categories fit contracts poorly; describe findings by name and impact, and use the OWASP Smart Contract Top 10 when a list is wanted.
@@ -156,3 +170,5 @@ Contracts hold value and cannot be patched in place once deployed, so treat find
 - **Randomness:** `block.timestamp`, `blockhash` and `block.prevrandao` are predictable or influenceable; use a verifiable randomness service.
 - **Denial of service:** unbounded loops over growing arrays; paying many recipients in one transaction (one reverting recipient blocks all), so use pull payments.
 - **Tools:** Foundry `forge test` with fuzz and invariant tests, plus a Solidity static analyzer (for example Mythril) if one is installed. Pin an exact compiler version and build on OpenZeppelin Contracts instead of hand-written tokens and access control.
+
+Scoping a contract review, writing invariants, token integration, upgradeable contracts, Foundry fuzz, invariant and fork tests, and other chains: `smart-contracts.md`.

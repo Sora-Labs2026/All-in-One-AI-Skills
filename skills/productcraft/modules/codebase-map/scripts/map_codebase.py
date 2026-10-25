@@ -43,7 +43,7 @@ try:  # Python 3.11+
 except ImportError:  # pragma: no cover - exercised only on older interpreters
     tomllib = None
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 SCHEMA_VERSION = 1
 DEFAULT_MAX_FILES = 5000
 DEFAULT_TOP = 10
@@ -349,9 +349,22 @@ def _skip_dir(entry) -> bool:
     return os.path.isfile(os.path.join(entry.path, "pyvenv.cfg"))
 
 
-def collect_files(root: str, max_files: int = DEFAULT_MAX_FILES, use_gitignore: bool = True):
+def compile_excludes(patterns) -> list:
+    """Compile --exclude patterns (.gitignore syntax, relative to the scan root)."""
+    rules = []
+    for pat in patterns or ():
+        rule = compile_ignore_pattern(pat)
+        if rule is None or rule.negate:
+            raise ValueError(f"invalid --exclude pattern {pat!r}: use a non-empty, non-negated .gitignore pattern")
+        rules.append(rule)
+    return rules
+
+
+def collect_files(root: str, max_files: int = DEFAULT_MAX_FILES, use_gitignore: bool = True, exclude=()):
     """Deterministic pre-order walk. Returns ([(rel_path, size)], info)."""
-    info = {"skipped_dirs": [], "ignored_paths": 0, "symlinks_skipped": 0, "truncated": False}
+    info = {"skipped_dirs": [], "ignored_paths": 0, "excluded_paths": 0, "symlinks_skipped": 0,
+            "truncated": False}
+    excludes = compile_excludes(exclude)  # checked before .gitignore rules, so a negation cannot re-include
     files = []
     start_rules = _outer_rules(root) if use_gitignore else []
     stack = [("", start_rules)]
@@ -381,11 +394,16 @@ def collect_files(root: str, max_files: int = DEFAULT_MAX_FILES, use_gitignore: 
             if e.is_dir(follow_symlinks=False):
                 if _skip_dir(e):
                     info["skipped_dirs"].append(rel)
+                elif excludes and is_ignored(rel, True, excludes):
+                    info["excluded_paths"] += 1
                 elif use_gitignore and is_ignored(rel, True, rules):
                     info["ignored_paths"] += 1
                 else:
                     subdirs.append(rel)
             elif e.is_file(follow_symlinks=False):
+                if excludes and is_ignored(rel, False, excludes):
+                    info["excluded_paths"] += 1
+                    continue
                 if use_gitignore and is_ignored(rel, False, rules):
                     info["ignored_paths"] += 1
                     continue
@@ -1250,10 +1268,10 @@ def _example_cycle(component, adj):
     return component + [start]
 
 
-def build_map(root: str, max_files: int = DEFAULT_MAX_FILES, use_gitignore: bool = True) -> dict:
+def build_map(root: str, max_files: int = DEFAULT_MAX_FILES, use_gitignore: bool = True, exclude=()) -> dict:
     """Scan `root` and return the full (unfocused) map as a dict."""
     root = os.path.abspath(root)
-    listed, info = collect_files(root, max_files, use_gitignore)
+    listed, info = collect_files(root, max_files, use_gitignore, exclude)
     file_set = {p for p, _ in listed}
     records = {}
     counters = {"not_opened": 0, "binary": 0, "too_large": 0}
@@ -1522,6 +1540,8 @@ def build_map(root: str, max_files: int = DEFAULT_MAX_FILES, use_gitignore: bool
         "max_files": max_files,
         "gitignore": use_gitignore,
         "ignored_paths": info["ignored_paths"],
+        "exclude": list(exclude),
+        "excluded_paths": info["excluded_paths"],
         "skipped_dirs": len(info["skipped_dirs"]),
         "skipped_dir_examples": sorted(info["skipped_dirs"])[:20],
         "symlinks_skipped": info["symlinks_skipped"],
@@ -1657,6 +1677,7 @@ def render_markdown(m: dict, top: int = DEFAULT_TOP) -> str:
     skipped = [
         f"{s['skipped_dirs']} vendor/build/env dirs",
         f"{s['ignored_paths']} gitignored paths" if s["gitignore"] else "gitignore not applied",
+        *([f"{s['excluded_paths']} excluded by --exclude"] if s.get("exclude") else []),
         f"{s['symlinks_skipped']} symlinks",
         f"{s['not_opened']} files not opened (unknown type or credential-like name)",
     ]
@@ -1786,6 +1807,7 @@ def _parser():
                "  python3 map_codebase.py .                       # Markdown summary\n"
                "  python3 map_codebase.py . --json > /tmp/map.json\n"
                "  python3 map_codebase.py . --focus src/billing --depth 1\n"
+               "  python3 map_codebase.py . --exclude tests/fixtures/ --exclude '*.generated.ts'\n"
                "Output is written to stdout only. Heuristic: verify findings in the code.",
         formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("root", nargs="?", default=".", help="repository or directory to map (default: .)")
@@ -1801,6 +1823,9 @@ def _parser():
     p.add_argument("--top", type=int, default=DEFAULT_TOP, metavar="N",
                    help=f"rows per Markdown list and hotspot list (default: {DEFAULT_TOP})")
     p.add_argument("--no-gitignore", action="store_true", help="do not apply .gitignore rules (vendor/build dirs are still skipped)")
+    p.add_argument("--exclude", action="append", default=[], metavar="PATTERN",
+                   help="skip paths matching this .gitignore-style pattern, relative to root; repeatable; "
+                        "applies with --no-gitignore too")
     p.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
     return p
 
@@ -1810,6 +1835,10 @@ def main(argv=None) -> int:
     args = parser.parse_args(argv)
     if args.max_files < 1 or args.top < 1 or args.depth < 0:
         parser.error("--max-files and --top must be >= 1 and --depth >= 0")
+    try:
+        compile_excludes(args.exclude)
+    except ValueError as exc:
+        parser.error(str(exc))
     root = os.path.abspath(args.root)
     if not os.path.isdir(root):
         print(f"error: {args.root} is not a directory", file=sys.stderr)
@@ -1825,11 +1854,11 @@ def main(argv=None) -> int:
             print(f"error: focus path {args.focus} is outside {args.root}", file=sys.stderr)
             return 2
         focus = None if rel == "." else rel
-    full = build_map(root, max_files=args.max_files, use_gitignore=not args.no_gitignore)
+    full = build_map(root, max_files=args.max_files, use_gitignore=not args.no_gitignore, exclude=args.exclude)
     try:
         result = finalize(full, top=args.top, focus=focus, depth=args.depth)
     except ValueError as exc:
-        print(f"error: {exc} (it may be gitignored, in a skipped directory or beyond --max-files)", file=sys.stderr)
+        print(f"error: {exc} (it may be gitignored, excluded, in a skipped directory or beyond --max-files)", file=sys.stderr)
         return 2
     if args.json:
         text = json.dumps(result, indent=2, ensure_ascii=True) + "\n"

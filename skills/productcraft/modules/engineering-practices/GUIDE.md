@@ -2,7 +2,7 @@
 
 > ProductCraft module. Reach it through the router in `../../SKILL.md`; it is not a separate skill.
 
-**Purpose:** Shape *what* production code should look like once a change reaches beyond a single function: contracts other code depends on, schemas holding real data, calls that can fail, latency users feel, telemetry on-call needs, pipelines and releases, dependencies, written decisions, large restructurings, TypeScript types, git history and work handed to the next session. Each topic has one focused reference. Read only the ones the change touches.
+**Purpose:** Shape *what* production code should look like once a change reaches beyond a single function: contracts other code depends on, schemas holding real data, calls that can fail, latency users feel, telemetry on-call needs, pipelines and releases, dependencies, written decisions, large restructurings, TypeScript types, git history, work handed to the next session, tests that go beyond examples, checks against specifications and units, public releases and repository upkeep. Each topic has one focused reference. Read only the ones the change touches.
 
 **How the work is done** (goal and done-when checks, planning, test-first, root-cause debugging, smallest change, verification, self-review, subagents and worktrees, finishing a branch) lives in `../engineering-workflow/GUIDE.md`. This module does not repeat it. Security review lives in `../launchguard/GUIDE.md`, `../code-security-review/GUIDE.md` and `../credential-shield/GUIDE.md`.
 
@@ -10,6 +10,9 @@
 
 - The change adds or alters an API, schema, event, public function or module boundary, a database table or migration, a network call or background job, a CI workflow, a release or feature flag, a dependency, a TypeScript type model, or a refactor spanning many files.
 - The user asks about performance, logging, metrics, tracing, alerts, rollout, rollback, ADRs, documentation, commit or PR quality, or how to pause and resume work.
+- The user asks for a health check or audit of a whole repository, package or service (a security audit goes to `../code-security-review/GUIDE.md`).
+- Example tests are not enough to trust the code (parsers, codecs, money or date arithmetic, data structures, state machines, a rewrite that must keep behavior), the user asks how strong the tests really are, or the code must match a specification, standard or contract.
+- A private repository is about to go public, a first public release or a license choice is coming, or branches, worktrees, issues and pull requests need cleaning up.
 - **Not for** a copy edit, a style tweak or a change inside one function with no callers outside it. Those follow the Quick track of the workflow module.
 
 ## Ground rules
@@ -34,11 +37,17 @@
 | Logs, metrics, traces, alerts, dashboards, runbooks | `references/observability.md` | Structured events with a request or trace ID; no secrets or personal data; alerts are symptom-based with a runbook |
 | CI workflows, build speed, deploys, feature flags, rollout, rollback | `references/ci-and-release.md` | Pipeline green with no weakened gate; rollout and rollback plan written; flags have an owner and removal date |
 | Adding, upgrading, auditing or removing packages | `references/dependencies.md` | Need justified; lockfile committed and diff reviewed; changelog read for upgrades; audit result recorded |
-| READMEs, ADRs, API docs, code comments, changelogs, agent instruction files | `references/docs-and-decisions.md` | Commands in docs were run; ADR written for costly-to-reverse choices; docs updated in the same change |
+| READMEs, ADRs, API docs, code comments, changelogs, agent instruction files, design docs and specs written with the user, setup changes after a session | `references/docs-and-decisions.md` | Commands in docs were run; ADR written for costly-to-reverse choices; docs updated in the same change |
 | Renames, extractions, framework migrations, legacy restructuring across many files | `references/large-refactors.md` | Behavior pinned by tests first; each step green and mergeable; no behavior change mixed into mechanical commits |
+| Parsers, codecs, calculations, data structures, state machines or rewrites whose tests need more than examples; how strong a suite really is | `references/advanced-testing.md` | Strongest property the code supports, generators that build valid input, every failure kept as an example test; mutation runs scoped, survivors in critical code killed or proven equivalent |
+| Parsers, decoders and handlers of untrusted bytes; native, unsafe or FFI code | `references/fuzzing.md` | Deterministic harness that asserts an invariant; sanitizers on native code; findings reproduced, minimized and kept as regression inputs; run time reported |
+| Code that must follow a spec, RFC, contract or documented guarantee; arithmetic with units, money, time or scale factors | `references/spec-and-units.md` | Quoted, numbered requirements with a verdict and evidence each; every quantity's unit and scale known; formulas walked; tests with non-round values |
 | TypeScript types, `tsconfig`, runtime validation, type-level APIs | `references/typescript.md` | `tsc --noEmit` clean; untrusted input parsed by a schema; no new unchecked casts |
 | Commits, branches, pull requests, conflicts, tags, release notes | `references/git-and-pull-requests.md` | Each commit one logical change; PR states what, why, evidence, risk and rollback |
+| Making a repository public, a first public release, choosing a license | `references/open-sourcing.md` | Owner decided scope, license and history route; full-history secret scan ran; `scripts/oss_readiness.py --strict` clean or every WARN accepted; README works from a clean clone |
+| Stale branches and worktrees, issue and pull request backlogs, labels, issue forms, `CODEOWNERS` | `references/repository-hygiene.md` | Evidence for every branch deleted and issue closed; every write shown first and only approved ones executed |
 | Pausing, ending or handing over unfinished work; resuming someone else's | `references/session-handoff.md` | State file lets a fresh agent resume without the old conversation; claims re-verified on resume |
+| A health check or audit of a whole repository, package or service | `references/repo-health-audit.md` | Scope and assumed load stated; project checks run; every finding has a location, a failing case, the smallest fix and an evidence label; no code changed |
 
 Templates: `assets/adr-template.md` for decision records and `assets/handoff-template.md` for session state files.
 
@@ -91,6 +100,19 @@ Use these when the reference is not needed. Open the reference when a bullet rai
 - Pin behavior with tests, change structure in small green steps, and keep mechanical changes in their own commits and PRs.
 - Use automated, syntax-aware tools for wide renames. Migrate callers through a parallel path, then delete the old one.
 
+### Advanced testing
+- State a property that can fail: a round trip, agreement with a simpler model, an invariant, a law or a bound. Build valid inputs in the generator, pin known edge cases as examples, and keep every shrunk failure as a permanent test.
+- Mutation testing shows whether assertions bite: scope it to changed or critical code, then kill each surviving mutant with a test or prove it equivalent.
+- Compare two implementations that should agree (differential), check relations between runs when no exact answer is known (metamorphic), and use published test vectors where a standard has them.
+
+### Fuzzing
+- Fuzz code that parses untrusted bytes and anything native or unsafe: Go's built-in fuzzing, cargo-fuzz, Atheris, libFuzzer or AFL++ with sanitizers.
+- Harnesses are deterministic, catch only documented errors and assert an invariant. Every crash is reproduced, minimized and kept as a regression input.
+
+### Specifications and units
+- Turn the document into numbered, quoted requirements. Give each a verdict with code evidence on every path, and list behavior no document mentions.
+- Give every quantity a unit and a scale (types first, names second), add or compare only like with like, convert once at the boundary, and test with non-round values.
+
 ### TypeScript
 - `strict` on, `tsc --noEmit` in CI (bundlers strip types without checking them).
 - Parse untrusted data with a schema and infer types from it. Prefer `unknown`, narrowing, discriminated unions and `satisfies` over `any`, `as` and `!`.
@@ -99,9 +121,21 @@ Use these when the reference is not needed. Open the reference when a bullet rai
 - Small branches, one logical change per commit, messages that explain why. Review your staged diff before every commit.
 - No force-push, history rewrite, `reset --hard` or branch deletion without permission. Resolve conflicts by intent and rerun the checks.
 
+### Open-sourcing
+- The owner decides scope, license and whether history ships. Scan the full history first, have every real credential rotated, and prefer a fresh repository when anything sensitive was ever committed.
+- LICENSE text, manifest identifiers and README agree; README, SECURITY.md and CONTRIBUTING.md work for an outsider from a clean clone. Run `scripts/oss_readiness.py`; never flip visibility yourself.
+
+### Repository hygiene
+- Delete a branch only with evidence that its work is in the default branch, after recording branch tips; never touch unpushed work, dirty worktrees or long-lived branches.
+- Triage issues and pull requests read-only; propose every close, comment, label or merge with its evidence, and execute only what the user approves.
+
 ### Session handoff
 - Before stopping, write a short state file: goal, status per step, branch and commit, uncommitted files, commands run with results, decisions, open questions, next steps.
 - On resume, trust the repository over the note: check `git status` and rerun the recorded checks before building on them.
+
+### Repository health audit
+- Map first, state the load you assume, run the project's own tests and linters, then read the costly paths (money, permissions, writes, jobs) in full.
+- Rank findings as Blocker, Should fix or Optional. Each needs a failing case, a location and the smallest fix. Change nothing until the user picks.
 
 ## Migration safety helper
 
@@ -115,6 +149,17 @@ python3 <productcraft>/modules/engineering-practices/scripts/migration_check.py 
 
 `<productcraft>` is the folder where the ProductCraft skill is installed. Run it on the migration files the change adds, not the whole history. A reviewed, intended finding (such as the final drop of an expand/contract change) is acknowledged with a comment above the statement, `-- migration-check: allow DROP_COLUMN <reason>`, and is still listed. `--strict` exits 1 while open HIGH or WARN findings remain. A clean result is not proof of safety; timing on a production-sized copy is.
 
+## Open-source readiness helper
+
+`scripts/oss_readiness.py` is a read-only, standard-library check of what outsiders will see once a repository is public. It never edits files, never uses the network and never prints file contents. It reports missing front-door files (README, LICENSE, SECURITY.md, contributing guide, templates, CI), LICENSE text that disagrees with the license in `package.json`, `pyproject.toml`, `Cargo.toml`, `composer.json`, `setup.cfg` or a gemspec, tracked files with secret-like names, private keys and `.npmrc` tokens, sensitive file names that exist only in history, internal hostnames, non-public package registries, dependencies outside the repository, and the commit email domains the history would expose.
+
+```bash
+python3 <productcraft>/modules/engineering-practices/scripts/oss_readiness.py --root .
+python3 <productcraft>/modules/engineering-practices/scripts/oss_readiness.py --root . --json --strict
+```
+
+In a git checkout it inspects tracked files, because those are what gets published. `--strict` exits 1 while a WARN finding remains. It does not scan secret values, dependency licenses or workflow security; the report lists those as not checked.
+
 ## What to report
 
 Add these to the workflow module's report and to `../../assets/review-template.md`:
@@ -124,6 +169,8 @@ Add these to the workflow module's report and to `../../assets/review-template.m
 - Numbers for any performance or pipeline claim: baseline, result, method and run-to-run spread.
 - Migration checker output summary and how each open finding was handled.
 - Commands the user still has to run (migrations, deploys, flag changes), with their rollback.
+- For advanced testing and fuzzing: technique, scope, command and budget; failures with their shrunk inputs and classification; surviving mutants left open; fuzzing run time and executions.
+- For a public release: the `oss_readiness.py` summary, how each WARN was handled, and the decisions left to the owner (license, history route, visibility switch).
 
 ## Working with other ProductCraft modules
 
@@ -133,3 +180,5 @@ Add these to the workflow module's report and to `../../assets/review-template.m
 - `../credential-shield/GUIDE.md`: rate limiting and abuse defense for login and account recovery; do not build a competing throttle here.
 - `../interaction-feedback.md` and `../ui-rules.md`: honest pending and error states in the interface when a backend call is slow or degraded.
 - `../language-choice.md`: a new service or performance-critical component whose language is not fixed yet.
+- `../legal-ready/GUIDE.md`: asset licenses and other legal questions around a public release; the license choice stays with the owner.
+- `../agent-safety/GUIDE.md`: the stop-check before deleting branches or worktrees during cleanup.

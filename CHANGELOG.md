@@ -1,5 +1,25 @@
 # Changelog
 
+## ProductCraft 1.7.0 (2026-10-25)
+
+- Code security review:
+  - New references: entry points and context notes; static analysis (running Semgrep and CodeQL so results mean something, writing and testing rules and models); variant analysis; triage of outside reports and scanner leads; insecure defaults and misuse-prone APIs; supply-chain review (install-time code, dependency risk cards, compromise response, release integrity); CI workflows that run AI agents or react to outsiders; patch validation. Language pitfalls gain a C# and .NET section.
+  - Domain guides, read only for matching code: C and C++ memory safety (bug classes, sanitizer builds, hardened compiler and linker flags and how to see them in a binary), Rust (`unsafe` soundness, FFI, panics, integer behavior, async cancellation), cryptographic implementation (home-made constructions, timing side channels, wiping secrets, randomness), smart contracts (invariants, token integration, upgradeable proxies, Foundry fuzz, invariant and fork tests, other chains), mobile apps and their backends (APK and IPA review, hardcoded keys, Firebase and Supabase rules with emulator tests, deep links) and defensive YARA rule authoring.
+  - New helpers: `supply_chain.py` (GitHub Actions trust flows and agent steps, ten lockfile formats), `sarif_triage.py` (SARIF summary, baseline diff, leads in the findings format) and `firebase_rules.py` (open, test-mode, signed-in-only and unvalidated-write rules), with 58 tests.
+- Engineering practices:
+  - Advanced testing (property-based and model-based tests with shrinking and replay; mutation testing with mutmut, Stryker, cargo-mutants and PIT; differential and metamorphic checks; known-answer vectors), fuzzing parsers and native code (Go's built-in fuzzing, cargo-fuzz, Atheris, libFuzzer and AFL++ with sanitizers), and specification compliance and unit-of-measure checks.
+  - Preparing a repository for public release, repository and issue hygiene, and `oss_readiness.py`, a read-only open-source readiness check with 33 tests.
+  - A whole-repository health audit with proven, ranked findings and no code changes; design docs, specs and proposals written with the user; improving the project's setup after a session; request chains and component re-renders in the performance reference.
+- Engineering workflow: a reference for reviewing someone else's change; long plans can run one fresh helper per step, with a review after each step and one whole-branch review; questions only a third party can answer go into a short questionnaire.
+- Reports on consequential work end with up to three specific things for the user to double-check (an assumption, a fact that could not be confirmed, a check only the user can do), each with how to confirm it. `assets/review-template.md` gains the section, and lean output keeps it.
+- Agent safety: isolating the agent in a devcontainer, container or VM (`references/isolation.md`) and guided setup scripts the user runs, so secret values never pass through the conversation (`references/guided-setup.md`). `guard_command.py` 1.1.0 checks literal commands inside awk `system()` calls and command pipes (new rule `AWK-EXEC` asks about commands built at runtime) and GNU `parallel` templates and command inputs.
+- Codebase map: `map_codebase.py` 1.1.0 adds a repeatable `--exclude PATTERN`; the JSON `stats` gain `exclude` and `excluded_paths` (schema version unchanged). New query recipes: the import chain between two files and a directory-level Mermaid diagram.
+- Documents: animated GIFs and short clips with Pillow and ffmpeg (`references/animated-media.md`), including size budgets, a flash-rate check and accessibility rules.
+- Builder tools: skill descriptions without procedures, instructions written against the failure seen in a baseline run, pressure and missing-detail prompts, cheap wording samples with a no-instruction control, and a check for web fonts that failed to load before screenshots.
+- Data surfaces: choose the chart form from the question it answers.
+- Legal ready: an example offline end-to-end test that fails when a non-essential third party, cookie or storage key appears before consent or after "Reject all".
+- The router reaches every new reference; the suites hold 342 tests in total.
+
 ## ProductCraft 1.6.0 (2026-10-25)
 
 - UI rulebook: 294 rules (9 new), with 165 existing rules made more concrete or corrected. Existing rule IDs are unchanged; four titles were corrected (FBK-11, ICO-03, ICO-08, COP-08).

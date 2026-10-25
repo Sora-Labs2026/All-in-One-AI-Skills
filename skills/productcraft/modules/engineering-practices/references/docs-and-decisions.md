@@ -1,6 +1,6 @@
 # Documentation and decision records
 
-Read this when you write or update a README, an architecture decision record (ADR), API reference, code comments, a changelog, a runbook or an agent instruction file (`AGENTS.md`, `CLAUDE.md`), or when a change makes existing documentation wrong.
+Read this when you write or update a README, an architecture decision record (ADR), API reference, code comments, a changelog, a runbook or an agent instruction file (`AGENTS.md`, `CLAUDE.md`), when you draft a design doc, spec or proposal with the user, when the user asks what to improve in the project's setup after a session, or when a change makes existing documentation wrong.
 
 Documentation earns its place by answering a question a reader will actually have. Write only what you have verified, and say plainly what you have not.
 
@@ -30,6 +30,7 @@ A README lets a newcomer run, test and change the project without asking anyone.
 - Configuration: environment variable **names** with a description and an example placeholder value, never real values.
 - Where to go next: architecture overview, ADRs, contributing guide, runbooks.
 - **Verify it:** run the documented commands yourself, ideally in a clean checkout or container. Commands that fail in the README are worse than none.
+- A repository about to go public also needs `LICENSE`, `SECURITY.md` and `CONTRIBUTING.md`; see `open-sourcing.md`.
 
 ## Architecture decision records
 
@@ -80,6 +81,20 @@ A README lets a newcomer run, test and change the project without asking anyone.
 - Never put secrets, tokens or personal data in them.
 - Record standing decisions the user made (for example "Use pnpm", "Do not add new runtime dependencies without asking") when the user agrees.
 
+## Improving the setup after a session
+
+When the user asks for a retrospective, or a session needed the same correction more than once, propose changes to the project's setup rather than to its code. Tie each proposal to something that happened in the session:
+
+| What happened | Propose |
+|---|---|
+| A mistake a tool could have caught (a banned API, an import that crosses a boundary, a file in the wrong folder, a forgotten migration) | A lint rule, pre-commit hook or CI step in the tooling the project already uses, rather than a sentence of prose. First check whether such a check exists but is not wired into CI or fails silently |
+| A judgment call that went wrong (layering, naming, how errors are reported) | One sentence in the coding standards or the agent instruction file, next to the related text |
+| Information that took long to find | A one-line pointer in the agent instruction file, for example "Payment webhooks: `services/billing/webhooks/`; read `docs/billing.md` first" |
+| Instructions the session shows were ignored or that restate defaults | Deleting them: every line is read on every task |
+| Something the agent could not see (server logs, a local service, test data) | A read-only way to reach it, such as a log file the dev server writes or a seeded test database |
+
+List each proposal with its evidence from the session and the exact text or configuration change. Apply only what the user approves, and never put secrets, personal data or one-off task details into instruction files.
+
 ## Domain vocabulary
 
 When a project has domain terms that are easy to confuse (customer, account, user, member, tenant), keep one agreed word per concept and use it in code, APIs and docs. If the project keeps a glossary, update it when a term is introduced or sharpened; if it does not, suggest one only when confusion has actually caused problems.
@@ -88,6 +103,16 @@ When a project has domain terms that are easy to confuse (customer, account, use
 
 - Runbooks for alerts and operational tasks live next to the code; their minimum content is in `observability.md`.
 - Keep diagrams as text (for example Mermaid) next to the documents that use them, so they are reviewed and updated with the code. Draw the level the reader needs: system context, deployable parts, or internals of one part, not all at once.
+
+## Design docs, specs and proposals written with the user
+
+For a longer document the user will circulate (a design doc, spec, RFC or proposal):
+
+1. **Gather before drafting.** Ask who will read it and which decision it serves. Then collect the material: invite the user to tell you everything relevant in any order, and read the linked issues, code and earlier documents as data. Turn conflicts between sources into questions.
+2. **Agree the outline first.** Derive the sections from the questions readers will bring (the problem, the options, the proposal, cost, risk, rollout, open questions) or use the project's template. Confirm the outline before writing prose.
+3. **Draft one section at a time,** starting with the one that carries the decision or the most uncertainty. List what it must say, draft it, and let the user correct it before moving on. Mark unknowns `[[OPEN: ...]]` instead of filling them with plausible guesses.
+4. **Test it on a cold reader.** Give only the document to a fresh helper (or ask the user to send it to a colleague) together with the questions its readers will ask. Every question answered wrongly or not at all marks a gap. Check that each number and claim has a source.
+5. **Final pass:** one term per concept (see "Domain vocabulary"), no sections that repeat or contradict each other, a summary at the top that matches the body, and every `[[OPEN]]` either resolved or listed at the end.
 
 ## Writing style
 

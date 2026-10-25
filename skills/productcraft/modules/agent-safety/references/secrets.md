@@ -43,7 +43,7 @@ To check that the app sees a variable, add a temporary check that prints only `s
 
 ## When the user provides a secret
 
-- Prefer that the user writes it into `.env` or the secret store themselves.
+- Prefer that the user writes it into `.env` or the secret store themselves. When several values or dashboard steps are involved, write them a guided script to run (`guided-setup.md`).
 - If they paste a value into the chat, use it only for the step they asked for, do not repeat it, and mention that it now exists in the conversation history.
 - Create secret files with restrictive permissions: `umask 077` before creating, or `chmod 600 .env` afterwards.
 - For CI secrets, let the tool prompt for the value (`gh secret set NAME` reads it interactively or from stdin) instead of putting it in a command argument.

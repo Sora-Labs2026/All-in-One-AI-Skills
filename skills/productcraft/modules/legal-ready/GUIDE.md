@@ -37,7 +37,7 @@ Send the owner the questions in [`assets/legal-facts.template.md`](assets/legal-
 - Run the scanner and keep its JSON:
   `python3 <productcraft>/modules/legal-ready/scripts/legal_scan.py --root . --json-out legal/legal-scan.json`
 - Build the data map: for each field collected (forms, APIs, SDKs, logs), its purpose, legal basis or reason, where it is stored, who receives it and how long it is kept. If a LaunchGuard Gate 2 data-flow table exists, extend it instead of starting over.
-- Capture third parties at runtime, because tag managers and server-side tags add vendors the source does not show. In a fresh browser profile, record network requests and stored cookies and local storage on first load before any click, after "Reject all" and after "Accept all". On mobile, use an intercepting proxy on a test device with a test account.
+- Capture third parties at runtime, because tag managers and server-side tags add vendors the source does not show. In a fresh browser profile, record network requests and stored cookies and local storage on first load before any click, after "Reject all" and after "Accept all". On mobile, use an intercepting proxy on a test device with a test account. Keep the first two captures as an automated end-to-end test (`references/data-minimization.md`, item 8).
 - Ask for the facts above.
 
 ### 1. Scope the 20 items

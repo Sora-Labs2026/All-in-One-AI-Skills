@@ -6,6 +6,29 @@ Read only the relevant entries in `../references/pattern-library.md`. Related pa
 
 Right-align numeric values and use tabular numerals, left-align labels, state units/currency/date meaning and align sortable headings. Choose row density from tasks; make keyboard actions discoverable, not hover-only. On narrow screens use labeled rows or intentional horizontal scrolling with sticky identifiers. For changing feeds, stable sorts plus cursor pagination prevent duplicates; preserve active page/filter in URL where appropriate. Prefer meaningful current task/KPI over generic metric mosaics.
 
+## Charts: pick the form from the question
+
+Start from the question the chart answers. A single number that matters on its own is a KPI tile (`CMP-17`), and values people look up or compare exactly belong in a table (`CMP-19`). Every chart then follows `CMP-18`: a title, a one-line summary, labeled axes, exact values on hover and keyboard focus, and a table alternative.
+
+| Question | Form | Change the form when |
+|---|---|---|
+| How did it change over time? | Line chart; one to four series, the key one highlighted | Only a few points: show the numbers. So many series that the lines tangle: small multiples, or a picker with one series highlighted |
+| Which is largest, and how do they rank? | Bar chart sorted by value; horizontal when labels are long | A long tail of categories: the top ten plus "Other", or a sortable table |
+| What share of the whole? | One stacked bar, or a donut with five parts at most, each labeled with its value | More parts, or shares compared across groups: 100% stacked bars |
+| How are values spread? | Histogram; box plots to compare groups | Few values: a dot or strip plot that shows every point |
+| Do two measures move together? | Scatter plot; a fitted line only if you computed the fit | Thousands of overlapping points: transparency, hexagonal bins or a density plot |
+| Where does activity cluster across two dimensions (day by hour)? | Heatmap with a sequential color scale and a legend | Exact comparison needed: small multiples of bars |
+| How close is it to the target? | Progress bar or bullet chart with the target marked, plus the number | Avoid gauge dials, which take space and are hard to read precisely |
+| Where do people drop out of a sequence of steps? | Horizontal bars per step, labeled with step-to-step conversion | Paths that branch: a table of steps with counts and conversion |
+
+Rules that keep charts honest:
+- Bars and areas start at zero, because their length or area is the value. A line chart may zoom into a range if the axis labels make the zoom obvious.
+- No dual y-axes; they suggest a relationship the data may not have. Use two charts that share the x-axis.
+- No 3D, no pie with many slices, no gradients or shadows on data marks.
+- Neutral color for context and one accent for the point (`COL-02`); a sequential palette for magnitude; a diverging palette only around a meaningful midpoint such as zero or the target; never color as the only encoding (`COL-07`).
+- A logarithmic axis only when it is labeled as such and the audience reads one.
+- Large series: aggregate on the server to what the chart can show (about one point per pixel column), and draw thousands of marks on a canvas rather than as SVG elements.
+
 ## Scheduling/calendar
 
 7-column (or configured locale week) grids, time labels, event vertical position and height correspond to start/end, stable collision layout. Support overlap, all-day events, timezone/DST, unavailable periods, clear event tooltips and keyboard-accessible list view. For date selection, preserve cross-month ranges and consistent inclusive/exclusive semantics.

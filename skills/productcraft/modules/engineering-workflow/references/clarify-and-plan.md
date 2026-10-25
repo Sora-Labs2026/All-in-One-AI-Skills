@@ -49,6 +49,30 @@ Ask few questions, numbered, each with your proposed default and its consequence
 
 Don't ask what the code already shows, style questions the codebase has answered, or permission for routine reversible steps.
 
+## When the answer belongs to someone else
+
+Some questions neither the repository nor the user can settle: the load target only the operations team knows, a retention period set by the legal team, a limit in a vendor contract. Do not guess and do not stall. Draft a short questionnaire the user can forward or work through in a meeting.
+
+Ask the user just two things: who will answer it (their role and what they know that the user does not), and which decisions wait on the answers. Then write it in this shape:
+
+```markdown
+# Questions for <role>: <topic>
+
+We need to decide <decision> by <date>. Your answers go into <where they will be used>.
+Rough answers help, and "unknown" is better than a blank.
+
+## <topic>
+1. <a single point; no "and" joining two asks>
+   Why we ask: <only if the purpose is not obvious>
+   Answer:
+
+## Anything missing from this list?
+```
+
+Put the questions that unblock the most work first, and group them by topic once the list is long. Save the file outside the repository unless the user wants it kept there, and give the path. In the plan, mark each step that waits on it `blocked on <person>: <question>`, with the assumption you are working with meanwhile, if any.
+
+**Done when:** every decision the user named is served by at least one question, and none asks what the code or the user already answered. For launch legal facts, use `../../legal-ready/assets/legal-facts.template.md` instead.
+
 ## Comparing approaches (Deep track)
 
 When there are genuinely different ways to build it, describe two or three, grounded in this codebase: what each costs, what risk it carries and what it makes harder later. Recommend one and say why. When only one approach is sensible, say so and explain briefly why the others don't fit. The user decides anything expensive to reverse: data model, public API shape, new infrastructure, a new major dependency. Record the choice and the rejected options in the plan.

@@ -21,7 +21,7 @@ Read this for any bug, failing or flaky test, crash, wrong output, build or CI f
 | Technique | Use when | How |
 |---|---|---|
 | Bisect history | It used to work | `git bisect start`, `git bisect bad HEAD`, `git bisect good <sha>`, then `git bisect run ./repro.sh` (exit 0 = good, 125 = skip this commit, any other code from 1 to 127 = bad). Finish with `git bisect reset`. |
-| Shrink the input | A large input fails | Halve it repeatedly and keep the half that still fails; then remove fields or lines one at a time |
+| Shrink the input | A large input fails | Halve it repeatedly and keep the half that still fails; then remove fields or lines one at a time. Property-based and fuzzing tools shrink failing inputs automatically (`../../engineering-practices/references/advanced-testing.md`) |
 | Log at boundaries | Data flows through several components | Log once what enters and leaves each component (IDs, sizes, types, never secrets or personal data) and find the first boundary where the data is already wrong |
 | Compare working and failing | It works somewhere else | Compare environment variable names, configuration, dependency versions, data, feature flags, OS, architecture, locale and time zone |
 | Change one thing per run | Several suspects | Alter exactly one variable per experiment and write down the outcome |
@@ -71,6 +71,7 @@ Stop editing code when three fix attempts have failed, or when each fix exposes 
 - **Performance regressions:** measure before changing anything, with a profiler or timings on a fixed input; techniques are in `../../engineering-practices/GUIDE.md`.
 - **Production problems:** do not debug against production systems or real user data without permission. Reproduce locally with sanitized data.
 - **Fails only in CI:** compare CI and local versions, environment, caches, OS, locale and time zone, file-system case sensitivity and parallelism. Run the failing step locally in the same container image if the project provides one.
+- **Suspected regression from one specific change:** run the same reproduction at the change's base and head commits in two worktrees before blaming it, and rule out a pre-existing or merely exposed bug (`reviewing-changes.md`, step 8).
 
 ## Debug log template
 

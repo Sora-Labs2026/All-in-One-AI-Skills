@@ -105,6 +105,7 @@ Severity is a starting point. Rate the real finding by exposure, impact and expl
 - **Impact:** when the variable is missing in production the app runs with a publicly known secret: forged sessions and tokens, decryptable data.
 - **Fix:** read required secrets without defaults and stop at startup when they are missing (a schema-validated settings object, for example Zod or Pydantic settings); keep development values in local, untracked `.env` files.
 - **Done when:** a test starts the app without the variable and it fails fast with a clear message.
+- **Method for every setting:** [insecure defaults and misuse-prone APIs](defaults-and-misuse-prone-apis.md).
 
 ### AIG-06 Permissive CORS
 *A05:2021 · CWE-942*

@@ -41,7 +41,7 @@ Use synthetic fixtures, dummy secrets and no network. Make concurrency tests det
 
 - **Put the check where the verified identity meets the data or the dangerous call.** Scoping the query by the session user in the data layer protects every route that uses it; a check in one router does not.
 - **Prefer the framework's own mechanism:** bound parameters and query builders, ORM scopes and policy objects, auto-escaping templates, allowlists for identifiers, safe YAML and XML loaders, `execFile`-style argument arrays instead of shell strings, canonical path resolution followed by a base-directory check, and an outbound URL allowlist checked after DNS resolution and on every redirect.
-- **Fix every variant** found during variant hunting, or list the ones left open in the report.
+- **Fix every variant** found during [variant analysis](variant-analysis.md), or list the ones left open in the report.
 - **Keep the diff small and in the project's style.** No unrelated refactors, renames or formatting. No new dependency unless the fix needs one.
 - **Say when behavior changes.** If the safe version rejects input that used to be accepted, note it for the owner.
 
@@ -70,6 +70,8 @@ Run the steps in order and stop at the first failure.
 
 A finding becomes `FIXED` only when steps 1 to 3 ran and passed and the record lists the regression test and the commands with their results. If a step could not run, keep the finding `OPEN`, describe the applied change as unverified, and mark the missing step `NOT_VERIFIED`.
 
+For a patch someone else wrote (a pull request, an upstream commit, an AI-generated change), or when the step 2 test might not reach the bug, use [patch validation](patch-validation.md): pinned base and patched copies, a reach marker before each assertion, root-cause variants and a revert check.
+
 ## Many call sites
 
 When the same unsafe pattern appears in many places, do not patch them all in one diff. List the call sites with the safe replacement for each, cover them with a parameterized test that fails until each one is converted, convert them in batches small enough to review, and keep the remaining list in the report until it is empty. A Semgrep or CodeQL rule that flags the old pattern in CI stops new copies while the work is under way.
@@ -77,7 +79,7 @@ When the same unsafe pattern appears in many places, do not patch them all in on
 ## Make the lesson stick
 
 - Keep every regression test in the normal test suite.
-- When a confirmed finding has a recognizable shape in the code, write a Semgrep or CodeQL rule for it and propose it as a CI check. Rules match code shape only, so treat them as a floor, not as proof the class is gone.
+- When a confirmed finding has a recognizable shape in the code, write a Semgrep or CodeQL rule for it and propose it as a CI check. Rules match code shape only, so treat them as a floor, not as proof the class is gone. How to write, test and measure one: [static analysis](static-analysis-rules.md).
 - Add the finding's commit or ID to the evidence column of the matching threat in `security/threat-model.md`.
 
 ## Report
