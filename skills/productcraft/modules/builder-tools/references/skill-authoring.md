@@ -64,6 +64,7 @@ An agent sees many skill descriptions at once and picks by matching the request 
 - **Say what it does and when to use it**, in the third person, with the concrete nouns and verbs users type: file types, tools, task names, synonyms ("receipt", "billing PDF", "credit note").
 - **Name the boundaries** when a neighbor skill exists: "Not for quotes or purchase orders; use procurement-docs."
 - **Lead with the distinctive part.** Hosts may truncate long lists of descriptions; the first sentence must carry the decision.
+- **Keep the procedure out of it.** Describe the scope and the triggers, not the steps. An agent that finds a step list in the description may act on that summary and never open the body, skipping the checks only the body holds.
 - Avoid vague value words ("powerful", "best practices", "helps with documents"): they match everything and decide nothing.
 - Simple, one-step requests often do not trigger any skill, because the agent handles them directly. Judge triggering on realistic, multi-step requests (`skill-evaluation.md`).
 - Change the description only against trigger tests: wording that reads better can trigger worse.
@@ -73,6 +74,14 @@ An agent sees many skill descriptions at once and picks by matching the request 
 - **Open with the job and the outcome**: what a finished result looks like and how the agent will know it is done.
 - **Give the workflow as ordered steps**, each with a check ("**Done when:** the PDF has one page per order and the totals match the CSV"). Agents follow sequences well and skip unstated checks.
 - **Explain why** a rule exists when the reason is not obvious. An agent that knows the reason handles cases the rule did not foresee; a bare "ALWAYS" or "NEVER" is followed literally and fails at the edges. Reserve absolute rules for safety and irreversible actions.
+
+- **Write against the failure you observed** in a run without the instruction (the baseline in `skill-evaluation.md`), and choose the kind of instruction that fixes that kind of failure:
+  - The agent knows a step but skips it when hurried: state it as a firm requirement where it applies, say what breaks without it, and answer the specific excuses the baseline transcripts showed.
+  - The result is complete but laid out wrong: show the output itself, as a filled-in example or a skeleton. Agents copy a shape more reliably than they avoid a list of mistakes.
+  - Something is regularly missing: make it a labeled field in the output template, so an empty field is visible.
+  - The right behavior depends on the situation: tie it to something the agent can test ("if the repository has a `migrations/` folder, ..."), not to a general rule with exceptions.
+
+  Qualifiers such as "unless it matters" give the agent a reason to skip a rule. Turn a real exception into its own testable condition, then try the wording (`skill-evaluation.md`, iterating).
 - **Prefer specifics to adjectives**: exact commands, file names, formats, thresholds, and an example of the output.
 - **Write for an agent that has not seen this conversation.** No references to "the issue above", no unstated context, no assumptions about tools that may be missing; say what to do when a tool is absent.
 - **Keep safety rules near the action** they govern, not in a distant section.

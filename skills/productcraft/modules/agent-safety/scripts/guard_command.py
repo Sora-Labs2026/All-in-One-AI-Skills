@@ -27,7 +27,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 from urllib.parse import urlsplit
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 ALLOW, ASK, DENY = "allow", "ask", "deny"
 RANK = {ALLOW: 0, ASK: 1, DENY: 2}
 EXIT_CODES = {ALLOW: 0, ASK: 1, DENY: 2}
@@ -729,6 +729,13 @@ INTERPRETERS = {
     "perl": ("-e", "-E"), "ruby": ("-e",), "php": ("-r",), "lua": ("-e",),
 }
 STDIN_INTERPRETERS = {"python", "python2", "python3", "pypy3", "node", "perl", "ruby", "php", "pwsh", "powershell", "lua"}
+AWKS = {"awk", "gawk", "mawk", "nawk"}
+PARALLEL_SEPARATORS = {":::", "::::", ":::+", "::::+"}
+PARALLEL_VALUE_OPTS = {"-j", "-P", "-S", "-a", "-d", "-n", "-N", "-L", "--jobs", "--sshlogin", "--sshloginfile",
+                       "--arg-file", "--delimiter", "--max-args", "--max-lines", "--colsep", "--joblog", "--results",
+                       "--tmpdir", "--workdir", "--wd", "--halt", "--delay", "--timeout", "--retries", "--block",
+                       "--memfree", "--load", "--tagstring", "--basefile", "--bf", "--env"}
+PARALLEL_PLACEHOLDER = r"\{\d*(?:\.|/|//|/\.)?\}|\{[#%]\}"
 DOWNLOADERS = {"curl", "wget", "fetch", "http", "https", "xh", "aria2c", "lwp-request", "httpie"}
 DB_CLIENTS = {
     "psql", "mysql", "mariadb", "sqlite3", "sqlcmd", "mongosh", "mongo", "redis-cli",
@@ -1010,6 +1017,10 @@ def analyze_command(cmd: Command, ctx: Context, st: State) -> Tuple[List[Finding
         findings.extend(check_env_dump(name, args, nxt_name, nxt))
     if name in INTERPRETERS:
         findings.extend(check_inline_code(name, words, ctx, cwd, st.depth))
+    if name in AWKS:
+        findings.extend(check_awk(arg_words, ctx, cwd, st.depth))
+    if name == "parallel":
+        findings.extend(check_parallel(arg_words, ctx, cwd, st.depth))
     stdin_bodies = [r.body for r in cmd.redirects if r.body and r.op in ("<<", "<<-", "<<<")]
     if (name in SHELLS or name in STDIN_INTERPRETERS) and any(
             r.op == "<<<" and r.target is not None and _fetches(r.target) for r in cmd.redirects):
@@ -2177,6 +2188,105 @@ def inline_code_findings(name: str, code: str) -> List[Finding]:
             out.append(_f(ASK, "SECRET-READ", f"Inline {name} code references key or credential material ({lit})."))
             break
     return out
+
+
+AWK_STRING = r'"((?:[^"\\]|\\.)*)"'
+
+
+def _awk_unescape(text: str) -> str:
+    return re.sub(r"\\(.)", lambda m: {"n": "\n", "t": "\t"}.get(m.group(1), m.group(1)), text)
+
+
+def _call_args(code: str, func: str) -> List[str]:
+    """Argument text of every func(...) call in awk code, respecting strings and nesting."""
+    out = []
+    for m in re.finditer(r"\b" + func + r"\s*\(", code):
+        i, level, in_string = m.end(), 1, False
+        while i < len(code) and level:
+            ch = code[i]
+            if in_string:
+                if ch == "\\":
+                    i += 1
+                elif ch == '"':
+                    in_string = False
+            elif ch == '"':
+                in_string = True
+            elif ch == "(":
+                level += 1
+            elif ch == ")":
+                level -= 1
+            i += 1
+        out.append(code[m.end():i - 1] if level == 0 else code[m.end():])
+    return out
+
+
+def check_awk(arg_words: List[Word], ctx: Context, cwd: Optional[str], depth: int) -> List[Finding]:
+    """awk runs shell commands through system() and command pipes: check those written literally."""
+    texts = [w.text for w in arg_words]
+    i = 0
+    while i < len(texts) and texts[i].startswith("-") and texts[i] != "-":
+        t = texts[i]
+        if t == "--":
+            i += 1
+            break
+        if t in ("-f", "--file") or t.startswith("--file=") or (t.startswith("-f") and len(t) > 2):
+            return []  # the program is in a file, which the guard cannot see
+        i += 2 if t in ("-F", "-v", "--assign", "--field-separator") else 1
+    if i >= len(texts):
+        return []
+    program = texts[i]
+    out: List[Finding] = []
+    for arg in _call_args(program, "system"):
+        literal = re.fullmatch(r"\s*" + AWK_STRING + r"\s*", arg)
+        if literal:
+            out.extend(analyze_text(_awk_unescape(literal.group(1)), ctx, cwd, depth + 1))
+        else:
+            out.append(_f(ASK, "AWK-EXEC", "awk runs a shell command built at runtime, which the guard cannot check.",
+                          "Run the command as a plain shell command, or confirm with the user."))
+    piped = re.findall(r"\|&?\s*" + AWK_STRING, program) + re.findall(AWK_STRING + r"\s*\|&?\s*getline", program)
+    for text in piped:
+        out.extend(analyze_text(_awk_unescape(text), ctx, cwd, depth + 1))
+    return out
+
+
+def check_parallel(arg_words: List[Word], ctx: Context, cwd: Optional[str], depth: int) -> List[Finding]:
+    """GNU parallel runs its command template once per input value: check the template."""
+    texts = [w.text for w in arg_words]
+    cut = next((k for k, t in enumerate(texts) if t in PARALLEL_SEPARATORS), len(texts))
+    marker = PARALLEL_PLACEHOLDER
+    i = 0
+    while i < cut and texts[i].startswith("-"):
+        t = texts[i]
+        if t == "--":
+            i += 1
+            break
+        if t in ("-I", "--replace") and i + 1 < cut:
+            marker = re.escape(texts[i + 1]) + "|" + marker
+            i += 2
+            continue
+        i += 2 if t in PARALLEL_VALUE_OPTS else 1
+    template = texts[i:cut]
+    if not template:  # each input value is a whole command
+        return [f for t in texts[cut + 1:] if t not in PARALLEL_SEPARATORS
+                for f in analyze_text(t, ctx, cwd, depth + 1)]
+    if len(template) == 1 and " " in template[0]:
+        text = template[0]  # one quoted string, which parallel hands to a shell
+        found = re.search(marker, text) is not None
+        text = re.sub(marker, '"$PARALLEL_INPUT"', text)
+    else:
+        parts, found = [], False
+        for t in template:
+            if re.search(marker, t):
+                found = True
+                esc = [p.replace("\\", "\\\\").replace('"', '\\"').replace("$", "\\$").replace("`", "\\`")
+                       for p in re.split(marker, t)]
+                parts.append('"' + "${PARALLEL_INPUT}".join(esc) + '"')
+            else:
+                parts.append(_shell_quote(t))
+        text = " ".join(parts)
+    if not found:
+        text += ' "$PARALLEL_INPUT"'  # inputs are appended as the last arguments
+    return analyze_text(text, ctx, cwd, depth + 1)
 
 
 READ_VERBS = {"plan", "preview", "show", "describe", "get", "list", "ls", "status", "logs", "validate",

@@ -9,7 +9,7 @@ Read this when the Markdown summary does not answer the question and you need to
 | `tool`, `version`, `schema_version` | Producer and format version (`schema_version` changes only when a field is renamed or removed) |
 | `root` | Name of the scanned directory (never an absolute path) |
 | `focus` | `null`, or `{path, depth, files_in_focus, neighbors}` when `--focus` was used |
-| `stats` | Counts for the whole scan: `files`, `lines`, `code_files`, `graph_files`, `edges`, `truncated`, `max_files`, `gitignore`, `ignored_paths`, `skipped_dirs`, `skipped_dir_examples`, `symlinks_skipped`, `not_opened`, `binary`, `too_large`, `parse_errors` |
+| `stats` | Counts for the whole scan: `files`, `lines`, `code_files`, `graph_files`, `edges`, `truncated`, `max_files`, `gitignore`, `ignored_paths`, `exclude` (the `--exclude` patterns as given), `excluded_paths` (files and folders they matched; a folder counts once), `skipped_dirs`, `skipped_dir_examples`, `symlinks_skipped`, `not_opened`, `binary`, `too_large`, `parse_errors` |
 | `languages` | `{language, category, files, lines}` sorted by lines. Categories: `code`, `schema`, `markup`, `style`, `config`, `docs` |
 | `directories` | First-level folders (`(root files)` for the top level) with files, lines and main code language |
 | `entry_points` | See "Entry point kinds" |
@@ -129,5 +129,57 @@ print("cycles added:", sorted(cycles(b) - cycles(a)))
 print("cycles removed:", sorted(cycles(a) - cycles(b)))
 ' /tmp/map-before.json /tmp/map-after.json
 ```
+
+How one file reaches another (the shortest import chain, with the kind of each hop). Useful for "why does the CLI load the database layer?" A `type` or `lazy` hop means the chain does not exist at import time:
+
+```bash
+python3 -c '
+import json, sys
+from collections import deque
+m = json.load(open(sys.argv[1])); start, goal = sys.argv[2], sys.argv[3]
+kinds, nxt = {}, {}
+for e in m["edges"]:
+    kinds[e["source"], e["target"]] = "+".join(e["kinds"])
+    nxt.setdefault(e["source"], []).append(e["target"])
+prev, todo = {start: None}, deque([start])
+while todo and goal not in prev:
+    cur = todo.popleft()
+    for t in sorted(nxt.get(cur, [])):
+        if t not in prev:
+            prev[t] = cur
+            todo.append(t)
+if goal not in prev:
+    sys.exit(f"no import path from {start} to {goal}")
+hops, cur = [], goal
+while prev[cur]:
+    hops.append(f"{prev[cur]} -[{kinds[prev[cur], cur]}]-> {cur}")
+    cur = prev[cur]
+print("\n".join(reversed(hops)))
+' "$MAP" bin/cli.js src/db/pool.ts
+```
+
+A directory-level dependency diagram as Mermaid text, for a design doc or pull request (tests and type-only imports left out; the second argument is how many folder levels to group by):
+
+```bash
+python3 -c '
+import json, sys
+m = json.load(open(sys.argv[1])); depth = int(sys.argv[2])
+group = lambda p: "/".join(p.split("/")[:-1][:depth]) or "(root)"
+tests = {f["path"] for f in m["files"] if f["is_test"]}
+counts = {}
+for e in m["edges"]:
+    a, b = group(e["source"]), group(e["target"])
+    if a != b and e["source"] not in tests and set(e["kinds"]) - {"type"}:
+        counts[a, b] = counts.get((a, b), 0) + 1
+ids = {g: f"n{i}" for i, g in enumerate(sorted({g for pair in counts for g in pair}))}
+print("flowchart LR")
+for g, i in ids.items():
+    print(f"  {i}[\"{g}\"]")
+for (a, b), n in sorted(counts.items()):
+    print(f"  {ids[a]} -->|{n}| {ids[b]}")
+' "$MAP" 2
+```
+
+Edge labels count the file-level imports between two folders. If the diagram is empty or unreadable, change the depth. Draw what the reader needs, not every folder (`../../engineering-practices/references/docs-and-decisions.md`, runbooks and diagrams).
 
 If `jq` is installed, the same queries are one-liners, for example `jq -r '.files[] | select(.path=="src/app.py") | .imported_by[]' "$MAP"`.

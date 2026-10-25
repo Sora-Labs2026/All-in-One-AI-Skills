@@ -10,27 +10,27 @@ Each skill in this repository is a folder of instructions, references, scripts a
 
 | Skill | Version | What it does |
 |---|---|---|
-| [**ProductCraft**](skills/productcraft/README.md) | 1.6.0 | One routed skill to build, harden and ship software: engineering workflow and practices, UI design with a rulebook, pattern library and 165 reference screens, interaction, forms and data views, code security review, pre-launch security and auth-abuse defense, agent safety, legal launch readiness, codebase mapping, office documents, and builder tools for skills, MCP servers and Playwright tests. |
+| [**ProductCraft**](skills/productcraft/README.md) | 1.7.0 | One routed skill to build, harden and ship software: engineering workflow and practices with advanced testing and open-source readiness, UI design with a rulebook, pattern library and 165 reference screens, interaction, forms and data views, code security review with static analysis, supply-chain review and domain guides, pre-launch security and auth-abuse defense, agent safety, legal launch readiness, codebase mapping, office documents and animated GIFs, and builder tools for skills, MCP servers and Playwright tests. |
 
 ## ProductCraft
 
 ProductCraft helps an agent build, harden and ship software that shows the important thing first, behaves honestly, is proven by checks that actually ran, works on every device and is secure and lawful where it matters. It reads only the modules a task needs:
 
-- **Engineering workflow**: Quick, Standard and Deep tracks; done-when checks, planning, test-first, root-cause debugging, small diffs, verification before "done", review and finishing a branch
-- **Engineering practices**: API contracts, safe migrations, resilience, performance, observability, CI/CD and releases, dependencies, docs and ADRs, large refactors, TypeScript, git and PRs, session handoff
+- **Engineering workflow**: Quick, Standard and Deep tracks; done-when checks, planning, test-first, root-cause debugging, small diffs, verification before "done", review of your own and others' changes, and finishing a branch
+- **Engineering practices**: API contracts, safe migrations, resilience, performance, observability, CI/CD and releases, dependencies, docs, design docs and ADRs, large refactors, TypeScript, git and PRs, session handoff, whole-repository health audits, advanced testing (property-based, mutation, fuzzing, differential), spec and unit checks, open-source release readiness and repository hygiene
 - **UI Distiller and product design**: decluttering, information hierarchy, tokens, spacing and density, plus taste detectors against generic "AI-looking" UI and a catalog of visual directions with contrast-checked palettes
 - **Interaction and feedback**: buttons, switches, sliders, drag and drop, modals, toasts and motion, with verified rather than faked success states
 - **Forms and conversion**: signup, OTP, passwords, search, uploads and checkout
-- **Data and product surfaces**: tables, dashboards, calendars, Kanban, chat and command palettes
+- **Data and product surfaces**: tables, dashboards, charts chosen from the question they answer, calendars, Kanban, chat and command palettes
 - **Responsive and accessibility**: touch targets, sheets vs. dialogs, keyboard, screen readers, i18n and RTL
 - **Ethical persuasion**: conversion without fake urgency, fake social proof or hidden fees
-- **Code security review**: a multi-phase audit with threat modeling, vulnerability classes mapped to OWASP and CWE, bugs typical of AI-written code, language pitfalls, secrets and dependencies, with every finding proven or discarded
+- **Code security review**: a multi-phase audit with threat modeling, vulnerability classes mapped to OWASP and CWE, bugs typical of AI-written code, language pitfalls, secrets and dependencies, static-analysis rules and SARIF triage, variant analysis, supply-chain and CI agent-workflow review and patch validation, with every finding proven or discarded, plus domain guides for C and C++, Rust, cryptography, smart contracts, mobile apps and YARA detection rules
 - **Credential Shield**: defense against credential stuffing and password spraying on login, OTP, MFA and reset flows
 - **LaunchGuard**: five-gate pre-launch security review with a PASS / FAIL / NOT_VERIFIED evidence report, plus a 20-control security baseline covering API keys, Git secrets, row-level security, server-side auth, record access, field tampering, session cookies, password hashing, login rate limits, bot protection, query parameterization, input validation, output escaping, file uploads, API responses, security headers, HTTPS and dependency scanning
 - **Legal ready**: 20 launch legal-readiness items, from privacy, terms, refund and cookie policies and real consent to honest prices and claims, children's data, unsubscribe links, asset licenses and data deletion (general guidance, not legal advice)
-- **Agent safety**: a stop-check before destructive commands, secrets handled by name only, vetting of third-party skills, plugins, MCP servers and hooks, and an optional command guard
-- **Codebase map**: a read-only mapper for entry points, routes, imports and hotspots in unfamiliar repositories
-- **Documents**: Word, Excel, PowerPoint and PDF with open-source tools, every output verified by rendering
+- **Agent safety**: a stop-check before destructive commands, secrets handled by name only, guided setup scripts so secret values never pass through the conversation, vetting of third-party skills, plugins, MCP servers and hooks, an optional command guard, and guidance for isolating the agent in a devcontainer, container or VM
+- **Codebase map**: a read-only mapper for entry points, routes, imports and hotspots in unfamiliar repositories, with exclusions, import chains and dependency diagrams
+- **Documents**: Word, Excel, PowerPoint and PDF with open-source tools, every output verified by rendering, plus animated GIFs with size, flash-rate and alt-text checks
 - **Builder tools**: authoring and evaluating Agent Skills, designing and testing MCP servers, Playwright browser tests
 - **UI rules**: a rulebook of screen-level rules with IDs (such as `BTN-02`) covering spacing, typography, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, common screens, motion, front-end engineering and brand identity
 - **Language choice**: for new projects, services or performance-critical components, asks once whether to use Rust and states the trade-offs (faster runtime, slower compiles, more AI tokens, no automatic page-load gain)

@@ -35,7 +35,7 @@ Phases appear in the order they usually happen. Enter phase 4 whenever something
 ### 1. Pin down the goal
 
 - Restate the request as an outcome plus **done-when checks**: observable facts another person could confirm by running or looking at something. "Retry failed uploads" becomes: a 503 from storage is retried up to 3 times with backoff; a 400 is not retried; the upload tests pass; existing callers are unchanged.
-- List the assumptions you are making (data volume, callers, compatibility, failure behavior). Search the code before asking. Ask a few precise questions at most, each with the default you would take and what the answer changes.
+- List the assumptions you are making (data volume, callers, compatibility, failure behavior). Search the code before asking. Ask a few precise questions at most, each with the default you would take and what the answer changes. Questions only a third party can answer go into a short questionnaire for the user to forward (`references/clarify-and-plan.md`).
 - If you see a cheaper path, a conflict with existing behavior or a risk the user may not have considered, say it now, before code exists.
 - **Done when:** the done-when list exists, each open question is answered or turned into a stated assumption, and you know which command proves each check.
 - **Skip on Quick.** Details: `references/clarify-and-plan.md`.
@@ -57,6 +57,7 @@ Phases appear in the order they usually happen. Enter phase 4 whenever something
 - Strong fit: business rules, parsers, calculations, bug fixes, request handlers, state machines. Weaker fit: throwaway prototypes (delete them before building for real), pure layout (verify with screenshots through UI Distiller), configuration and glue (prove it by running it). A weaker fit still ends with an executed check.
 - **Legacy code without tests:** before changing it, pin its current behavior with characterization tests on the paths you will touch, odd behavior included. Change behavior only in a separate, deliberate step.
 - Never turn a suite green by deleting, skipping, loosening or re-snapshotting a test you don't understand. If a test is wrong, explain why and get agreement.
+- Parsers, codecs, money and date arithmetic, data structures and rewrites that must keep behavior usually need more than examples: property-based, mutation, differential or fuzz tests (`../engineering-practices/references/advanced-testing.md` and `fuzzing.md`).
 - **Done when:** each new behavior has a test you saw fail and then pass, the relevant suite is green, and no focused or skipped tests were added. Details: `references/test-first.md`.
 
 ### 4. Debug to the root cause
@@ -96,6 +97,7 @@ Use this loop for any bug, failing test, crash, flaky test or "it worked yesterd
 - **Self-review every Standard and Deep change:** read the whole diff against the base branch as if a colleague wrote it, using the checklist in `references/verification-and-review.md`.
 - **Request an independent review on Deep work** and on risky changes (money, auth, deletion, concurrency, public interfaces): a fresh subagent if the platform has them, or a human, briefed with `assets/review-brief.md`, never your whole session transcript. Reviewers read; they don't edit your checkout. With neither available, do a second self-review pass as a separate step and say in the report that the change had self-review only.
 - **Weigh feedback on its merits:** check each point against the code, ask about unclear items before changing anything related, fix blockers first with a test each, and push back with evidence when a suggestion is wrong for this codebase.
+- **Reviewing someone else's change** (a pull request, a colleague's branch, a helper's diff): pin the base and head commits, triage files by risk, read callers and the history of removed checks, confirm a suspected regression at both commits, and keep the review local unless asked to post it. Details: `references/reviewing-changes.md`.
 - **Done when:** every blocker is fixed and re-verified, and every other finding is fixed, deferred or declined with a reason the user can see.
 
 ### 8. Parallel work, only when it pays
@@ -103,6 +105,7 @@ Use this loop for any bug, failing test, crash, flaky test or "it worked yesterd
 - Use subagents in parallel only when the pieces are independent: different files, no shared state, each with its own check. Read-only investigation parallelizes easily; writers need separate worktrees or strictly separate files.
 - Give each helper a self-contained brief: goal, files it may touch, constraints, done-when checks and what to report back.
 - Treat helper reports as claims. Read each diff and rerun its checks yourself, then run the full suite on the integrated tree.
+- A long sequential plan can also run one fresh helper per step, with a review after each step and one whole-branch review at the end (`references/parallel-work.md`).
 - **Done when:** all results are integrated without overlapping edits, the combined tree passes, and worktrees you created are removed or handed over. Details: `references/parallel-work.md`.
 
 ### 9. Finish the branch
@@ -139,4 +142,5 @@ Keep it short and factual. For Standard and Deep work, fill the "Checks and evid
 - `../launchguard/GUIDE.md` and `../launchguard/references/security-baseline.md`: changes to auth, data access, uploads, secrets, payments or dependencies get the matching scoped controls; launches get the full review.
 - `../ui-distiller/GUIDE.md` and `../ui-rules.md`: visual verification of interface changes, which unit tests cannot replace.
 - `../credential-shield/GUIDE.md`: login and account-recovery abuse.
+- `../code-security-review/GUIDE.md`: its Diff depth is the security pass over a change; run it alongside `references/reviewing-changes.md` when a change touches auth, money, outside input or secrets.
 - `../language-choice.md`: a new project or component whose language isn't fixed yet.

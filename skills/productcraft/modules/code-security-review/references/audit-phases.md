@@ -50,6 +50,8 @@ python3 <productcraft>/modules/code-security-review/scripts/code_audit.py map --
 
 Record for each entry point: file, who can reach it, how identity is established, the identity the code runs as (database role, service account, API key), and the assets it touches. Note the tests that exist; untested surfaces are where scans most often miss things.
 
+For framework route tables, surfaces outside the web routes and access classes, see [entry points and context](entry-points-and-context.md).
+
 ## Phase 3. Hunt by vulnerability class
 
 ### Order of work
@@ -88,6 +90,8 @@ The class guides say what to look for per class and stack: [vulnerability classe
 ### Variant hunting
 
 When a candidate looks real, search the rest of the code for its relatives before moving on: other callers of the same unsafe helper or API, queries built the same way, handlers next to it that skip the same check, and copies of the same block. Give each relative its own location and conditions; keep them under one finding when a single change would close them all.
+
+The full method (defect statement, calibrated search, widening one dimension at a time, hunt log, CI guard) is in [variant analysis](variant-analysis.md).
 
 ## Diff reviews
 
@@ -158,6 +162,8 @@ A candidate is kept only if it survives five questions, answered from the code:
 3. **What stands in the way?** List each guard on that route: validation, types, parameter binding, escaping, middleware, database policies, feature flags, configuration.
 4. **Is there another road?** For each guard, look for a route, method, encoding or job that reaches the same line without passing it.
 5. **What does the attacker actually gain?** Restate the result in terms of an asset from the threat model. If the answer is "nothing they could not already do", drop it.
+
+For claims that arrive from outside the audit, and for checks specific to memory, integer, resource, disclosure, side-channel, cryptography, deserialization and logic bugs, see [triage](triage-and-false-positives.md).
 
 ### Drop a candidate when
 

@@ -119,6 +119,7 @@ To discover names on an unfamiliar page without a display, print its accessibili
 
 - `await page.screenshot({ path: testInfo.outputPath('checkout.png'), fullPage: true })` per state you need to see; `locator.screenshot()` for one component. Run the same test in desktop and mobile projects to get both widths.
 - Look at them. A screenshot nobody opened verifies nothing; UI work in ProductCraft requires looking at real screenshots (`../../ui-distiller/GUIDE.md`).
+- Check the fonts. Playwright waits for `document.fonts.ready` before a screenshot, but a web font that failed to load still renders in the fallback font, with different widths and line breaks. Assert that none failed: `expect(await page.evaluate(() => [...document.fonts].filter((f) => f.status === 'error').map((f) => f.family))).toEqual([])`. Faces declared but never used stay `unloaded`, which is not an error.
 - Visual regression (`await expect(page).toHaveScreenshot()`) compares against stored baselines. Baselines differ by browser, OS and fonts, so generate and compare them in the same environment (usually CI's container), mask dynamic regions (`mask: [page.getByTestId('clock')]`), and review every baseline update as a code change.
 
 ## Console and network errors

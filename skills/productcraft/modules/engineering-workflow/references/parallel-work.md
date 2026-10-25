@@ -62,6 +62,20 @@ If the platform lets you choose models, give mechanical, fully specified tasks t
 5. **Spot-check for repeated mistakes:** helpers given similar briefs often share the same wrong assumption.
 6. **Clean up** the worktrees and branches you created, as described in `finishing-a-branch.md`.
 
+## Long plans, one fresh helper per step
+
+A Deep plan with many dependent steps can be carried out by handing each step to a new helper, one after another. Each helper starts with a clean context, and yours stays free for coordination. It pays only when the platform supports helpers and the plan is long enough to strain a single context; a handful of small steps is cheaper to do yourself.
+
+1. **Strictly in sequence.** One step at a time in the same checkout or worktree; never two implementers at once.
+2. **Note the commit before each step** (`git rev-parse HEAD`) and review the step as the range from that commit. A step may leave several commits, so comparing with the previous commit alone misses work.
+3. **Brief from a file.** Copy the step from the plan, exact values included, into a brief file. Add only what the step cannot know: interfaces created by earlier steps and how you resolved anything ambiguous. Leave out the story of earlier steps.
+4. **Short replies, full reports on disk.** Ask the helper to write its full report (changes, commands and results, doubts) to a file beside the brief, and to keep its reply to a few lines: outcome, commit hashes, test result, open questions. Long replies from every step fill your own context.
+5. **Review each step before the next starts.** First compare `git diff <commit>..HEAD` with the brief, not with the helper's summary: everything asked for, nothing extra. Then review it for soundness with the self-review checklist in `verification-and-review.md`, and rerun the step's check yourself.
+6. **Limit the fix rounds.** Send findings back to the same helper. If two rounds do not produce a clean step, take it back: fix it yourself, split it, or ask the user whether the step itself is wrong, and note which.
+7. **Only you start agents.** A helper that launches its own reviewer duplicates the review you are about to do.
+8. **Progress on disk.** Keep the progress note from `clarify-and-plan.md` (step, start and end commits, status, open findings). After a context reset, rely on it and `git log`, and never redo a step whose commits already exist.
+9. **One review of the whole branch at the end,** by a fresh reviewer over `git diff <plan base>...HEAD`, briefed with `../assets/review-brief.md`. Problems that span steps are invisible in step-by-step reviews.
+
 ## Fresh reviewer
 
 A read-only reviewer with a clean context is one of the most useful helpers: it sees the diff without your assumptions. Brief it with `../assets/review-brief.md` and the diff range. One reviewer per change; the reviewer reports findings and does not edit the code or start other reviewers.

@@ -74,6 +74,8 @@ List the obvious routes, then search for the entry points teams forget:
 - CI workflows triggered by pull requests, issues or comments; package install scripts; migration and seed scripts.
 - Prompts, retrieved documents and tool results flowing into an LLM that can call tools.
 
+To make the list complete, use the framework's own route table and the access classes in [entry points and context](entry-points-and-context.md).
+
 Name each boundary by what changes across it: "anonymous to application", "user A to user B's records", "tenant 1 to tenant 2", "user to admin function", "uploaded bytes to parser memory", "pull request author to CI secrets", "retrieved text to tool calls", "browser to server-only secrets".
 
 ## Step 5. Data flows

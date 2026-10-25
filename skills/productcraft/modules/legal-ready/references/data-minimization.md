@@ -46,4 +46,42 @@ General guidance, not legal advice; have a qualified lawyer review. Security con
   - **Remove** vendors nobody owns or uses. Each removal is a change to the inventory, the registry and the policy.
   - **Mobile:** check each SDK's own privacy declaration, set its data-collection options explicitly at initialisation, and keep the store privacy labels and data-safety answers in line with the inventory.
 - **Verify:** in a fresh profile (GUIDE step 0), every domain contacted after "Accept all" maps to an inventory row, and no non-essential domain is contacted before consent or after "Reject all". The mobile proxy capture of a test session shows the same. Every inventory row has a contract status. The scanner's third-party list holds nothing that is missing from the inventory.
+- **Automate the regression check:** keep the "before consent" and "after Reject all" halves as an end-to-end test, so a new tag or SDK cannot slip in unnoticed. The test lets same-origin requests and the hosts you list as essential through, and records and aborts every other request, so nothing is sent and it runs offline against a local build. A Playwright Test example (`baseURL` points at the local server; adjust the button name and the second page):
+
+  ```ts
+  // e2e/consent.spec.ts: no non-essential third party before consent or after "Reject all"
+  import { test, expect } from '@playwright/test';
+
+  const ESSENTIAL_HOSTS = new Set<string>([]);             // third parties allowed before consent, each in the inventory
+  const ESSENTIAL_COOKIES = new Set<string>(['consent']);  // for example session, CSRF and the consent record
+
+  test.use({ serviceWorkers: 'block' });                  // a service worker could fetch past route()
+
+  test('no non-essential third parties before consent or after rejecting', async ({ page, context, baseURL }) => {
+    const own = new URL(baseURL!).origin;
+    const contacted = new Set<string>();
+    await context.route('**/*', (route) => {
+      const url = new URL(route.request().url());
+      if (url.origin === own || ESSENTIAL_HOSTS.has(url.hostname)) return route.continue();
+      contacted.add(url.hostname);
+      return route.abort();                               // the attempt is the finding; nothing is sent
+    });
+    const extraCookies = async () =>
+      (await context.cookies()).map((c) => c.name).filter((n) => !ESSENTIAL_COOKIES.has(n)).sort();
+
+    await page.goto('/');
+    await page.waitForLoadState('load');
+    expect([...contacted].sort()).toEqual([]);
+    expect(await extraCookies()).toEqual([]);
+    expect(await page.evaluate(() => Object.keys(localStorage))).toEqual([]);
+
+    await page.getByRole('button', { name: 'Reject all' }).click();
+    await page.goto('/pricing');                           // tags often fire on the next page view
+    await page.waitForLoadState('load');
+    expect([...contacted].sort()).toEqual([]);
+    expect(await extraCookies()).toEqual([]);
+  });
+  ```
+
+  It sees only what the browser asks for. Server-side forwarding, the "Accept all" inventory and mobile SDKs still need the runtime capture from GUIDE step 0. WebSocket connections are not covered by `route()`; add `page.routeWebSocket()` (Playwright 1.48 or later) if the product opens them. A passing test is evidence for the pages it visits, not for the whole product.
 - **Common mistakes:** building the inventory from the package manifest only; assuming "anonymous analytics" needs no consent or contract; forgetting server-side forwarding, embeds, fonts and captchas; chat widgets loading on every page before consent; automatic matching features sending hashed emails; store privacy labels that say "no data collected" while SDKs collect it; an inventory written once and never updated.

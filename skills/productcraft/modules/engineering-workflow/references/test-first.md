@@ -31,7 +31,7 @@ Keep the loop fast by running the single test you are working on, then the surro
 
 **Refactor.** With everything green, improve names, remove duplication and simplify, in small steps, rerunning after each. No new behavior during this step.
 
-Pick the next test from the done-when list. Edge cases are separate tests: empty, one, many, boundary values, invalid input, and failure of a dependency.
+Pick the next test from the done-when list. Edge cases are separate tests: empty, one, many, boundary values, invalid input, and failure of a dependency. When the input space is too large for hand-picked cases, add a property test (`../../engineering-practices/references/advanced-testing.md`).
 
 When you explored first and wrote code before tests, either delete the exploration and redo it test-first, or at least prove each new test can fail with the mutation check below.
 
@@ -70,7 +70,7 @@ Avoid big rewrites to make code testable before any safety net exists.
 
 ## Mutation check: prove the test bites
 
-After green, break the code on purpose (flip a comparison, return early, drop a call) and confirm a test fails. Revert, and check with `git diff` that your break is gone. For larger efforts, mutation testing tools automate this: mutmut (Python), Stryker (JavaScript and TypeScript, C#, Scala), PIT (Java), cargo-mutants (Rust). Run them on the module you changed, not the whole repository.
+After green, break the code on purpose (flip a comparison, return early, drop a call) and confirm a test fails. Revert, and check with `git diff` that your break is gone. For larger efforts, mutation testing tools automate this: mutmut (Python), Stryker (JavaScript and TypeScript, C#, Scala), PIT (Java), cargo-mutants (Rust). Run them on the module you changed, not the whole repository; commands, reading the results and triaging surviving mutants are in `../../engineering-practices/references/advanced-testing.md`.
 
 ## Test changes that need a reason
 

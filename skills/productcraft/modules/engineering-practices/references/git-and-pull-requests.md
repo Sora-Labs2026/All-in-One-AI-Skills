@@ -93,6 +93,7 @@ Fixes #482
 - `.gitignore` covers dependencies, build output, environment files, logs, coverage and OS files for the stack.
 - `.gitattributes` normalizes line endings (`* text=auto`) and can mark generated files (`linguist-generated=true`) so reviews collapse them.
 - A pull request template in `.github/pull_request_template.md` (or the platform's equivalent) when the team wants consistent descriptions.
+- Branch and worktree cleanup, issue and pull request triage, labels, issue forms and `CODEOWNERS`: `repository-hygiene.md`. Before a first public release: `open-sourcing.md`.
 
 ## Checks (done when)
 

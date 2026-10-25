@@ -2,7 +2,7 @@
 
 > ProductCraft module. Reach it through the router in `../../SKILL.md`; it is not a separate skill.
 
-**Purpose:** Create, edit, read and convert Word, Excel, PowerPoint and PDF files with open-source libraries and command-line tools, and prove every output by re-opening it and looking at its rendered pages. The user's content, data and formatting are the priority; the file must open, read correctly and look right on the first try.
+**Purpose:** Create, edit, read and convert Word, Excel, PowerPoint and PDF files, and make animated GIFs and short clips, with open-source libraries and command-line tools, and prove every output by re-opening it and looking at the rendered result. The user's content, data and formatting are the priority; the file must open, read correctly and look right on the first try.
 
 It is not a writing guide (the content comes from the user and the task), not a design system for in-app document screens (see `../data-and-product-surfaces.md`) and not an integration guide for online office suites.
 
@@ -11,6 +11,7 @@ It is not a writing guide (the content comes from the user and the task), not a 
 - A task's input or deliverable is a `.docx`, `.xlsx`, `.xlsm`, `.csv` meant for a spreadsheet, `.pptx` or `.pdf` file, or a legacy `.doc`, `.xls` or `.ppt`.
 - The user wants text, tables or data pulled out of such a file, a form filled, files merged or split, a format converted, or a template filled in.
 - An application feature generates or parses office files or PDFs (exports, invoices, reports, imports). Use the references for library behavior; build the feature with the project's normal workflow and tests.
+- The deliverable is an animated GIF or a short looping clip: a demo for a README or release note, a chat emoji or reaction, an animation drawn in code, a trimmed screen recording. Read `references/animated-media.md`.
 - Do **not** activate for Markdown or HTML documentation in the repository, or for charts and dashboards rendered in the app.
 
 ## Ground rules
@@ -35,10 +36,10 @@ for m in ("docx", "openpyxl", "pandas", "pptx", "pypdf", "pdfplumber", "reportla
     except ImportError:
         print(f"{m:11} MISSING")
 EOF
-for c in soffice pandoc pdftoppm pdftotext pdfinfo pdffonts; do printf '%-10s ' "$c"; command -v "$c" || echo MISSING; done
+for c in soffice pandoc pdftoppm pdftotext pdfinfo pdffonts ffmpeg ffprobe; do printf '%-10s ' "$c"; command -v "$c" || echo MISSING; done
 ```
 
-Python package names for installs: `python-docx`, `openpyxl`, `pandas`, `python-pptx`, `pypdf`, `pdfplumber`, `reportlab`, `pillow`. LibreOffice provides `soffice`; poppler-utils provides the `pdf*` tools.
+Python package names for installs: `python-docx`, `openpyxl`, `pandas`, `python-pptx`, `pypdf`, `pdfplumber`, `reportlab`, `pillow`. LibreOffice provides `soffice`; poppler-utils provides the `pdf*` tools; the ffmpeg package provides `ffmpeg` and `ffprobe`.
 
 ## Route by format and task
 
@@ -120,4 +121,5 @@ Report: output paths; what the file contains; which checks ran (re-open, inspect
 - `references/powerpoint-pptx.md`: templates and 16:9, create, extract, template edits, reorder and delete slides, design checks.
 - `references/pdf.md`: inspect, extract, merge and split, encrypt, forms, reportlab generation and fonts, overlays.
 - `references/convert-and-render.md`: LibreOffice headless, pandoc, page rendering, contact sheets, fidelity limits.
+- `references/animated-media.md`: GIF or video, frame rate, palette and loop settings, frames drawn with Pillow, ffmpeg palette conversion, making files smaller, read-back and a flash-rate check, accessibility (flash limits, pausing, reduced motion, alt text), privacy in screen recordings.
 - `scripts/ooxml_inspect.py`: read-only pre-delivery inspection of `.docx`, `.xlsx` and `.pptx`; `--json` and `--fail-on attention` for automation. Tests: `python3 -m unittest discover -s <productcraft>/modules/documents/tests -v`.

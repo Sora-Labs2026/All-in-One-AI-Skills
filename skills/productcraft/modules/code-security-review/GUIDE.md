@@ -20,7 +20,10 @@
 
 - The user asks for a security review, code audit, vulnerability hunt, "is this exploitable?", a security pass over a pull request or branch, or a review of AI-generated code before it handles real users or money.
 - Findings from a scanner, a bug bounty report or a teammate need triage: confirm, merge duplicates, rate and fix.
+- A scanner needs running or its SARIF output needs triage, a project rule (Semgrep, CodeQL) should be written, or a confirmed bug needs its siblings found.
+- CI workflows react to issues, comments or pull requests from outsiders, or run an AI agent; dependencies, their publishers or their install-time code need review; a security patch (yours, a pull request's or an AI-generated one) needs validation before it is called fixed.
 - LaunchGuard needs deeper evidence for gate 4 (critical logic) or gate 5 (attacker perspective).
+- The code needs domain knowledge: C or C++, Rust with `unsafe` or FFI, code that implements or wires cryptography, smart contracts, a mobile app or the backend rules it relies on (Firebase, Supabase), or the user wants detection rules for suspicious files (YARA, detection only). Phase 3 names the matching guide.
 - **Not for** routine feature work (use the scoped baseline check from the router), styling, or a question a short answer covers.
 
 ## Pick the depth first
@@ -55,6 +58,7 @@ A full audit runs every phase in order. Diff and focused reviews run phases 3 to
 ### 1. Inventory
 - Map the stack, services, data stores and third parties, and every entry point: routes, server actions, RPC and GraphQL resolvers, webhooks, queue consumers, cron jobs, CLIs, file importers and parsers, client bundles, CI workflows.
 - Get a reading order: `python3 <productcraft>/modules/code-security-review/scripts/code_audit.py map --root . --json-out security/code-audit-map.json`. `<productcraft>` is the folder where the ProductCraft skill is installed. Hints are a reading order, not findings.
+- Where the framework can list its own routes, use that list. Add CLI, desktop, browser-extension, mobile, library, internal-service and contract entry points, and give each entry an access class read from its guard's code: [entry points and context](references/entry-points-and-context.md).
 - **Done when** every entry point is listed with its file, who can reach it and the identity the code runs as.
 
 ### 2. Threat model
@@ -66,17 +70,22 @@ A full audit runs every phase in order. Diff and focused reviews run phases 3 to
 - Start where an attacker needs the least and gains the most; [audit phases](references/audit-phases.md#order-of-work) gives a simple scoring rule for the order.
 - For each cell: write down the rule the code must keep, follow the input from where it enters to where it is used, and check that every other route to the same outcome applies the same condition from the same trusted identity. A check that exists somewhere is not enough.
 - Use the class guides: [vulnerability classes](references/vulnerability-classes.md), [bugs common in AI-generated code](references/ai-generated-code-bugs.md) and [language and framework pitfalls](references/language-pitfalls.md).
+- For specialist code, add the matching domain guide: [C and C++](references/c-and-cpp.md), [Rust](references/rust.md), [cryptographic implementation](references/crypto-implementation.md), [smart contracts](references/smart-contracts.md), [mobile apps and their backends](references/mobile-apps.md). Firebase projects: run `scripts/firebase_rules.py` on the rules files. Detection rules for suspicious files (detection only, never malware): [YARA rules](references/yara-rules.md).
+- Scanners widen the search, never the verdict: run them and turn their SARIF into leads with [static analysis](references/static-analysis-rules.md) and `sarif_triage.py leads`. Check what the code does when settings are missing, and whether its own APIs invite misuse, with [insecure defaults and misuse-prone APIs](references/defaults-and-misuse-prone-apis.md). Before judging unfamiliar critical code, write [context notes](references/entry-points-and-context.md#5-context-notes-before-judging-unfamiliar-code).
+
 - **Done when** every cell is `PASS` with evidence, holds a candidate, or is `NOT_APPLICABLE` or `NOT_VERIFIED` with a reason.
 
 ### 4. Secrets, dependencies and CI
 - Secrets in the tree and in Git history, dependency advisories with reachability, supply-chain risk and CI workflow permissions: [secrets and dependencies](references/secrets-and-dependencies.md).
 - `code_audit.py history` scans local Git history and `code_audit.py workflows` checks GitHub Actions files, both offline. LaunchGuard's `preflight_scan.py` covers the working tree; do not duplicate it.
+- `supply_chain.py actions` maps which workflows outsiders can trigger and where their text flows: agent prompts and environments, environment files, reusable-workflow and composite-action inputs, agent output reaching a shell. Fixes are in [CI and agent workflows](references/ci-agent-workflows.md). `supply_chain.py lockfiles` lists install-time code, sources outside the registry, mixed registries and credentials in URLs; publisher and provenance checks, compromise response and release integrity are in [supply-chain review](references/supply-chain-review.md).
 - **Done when** each secret source, manifest and workflow has a status.
 
 ### 5. Prove or discard
 - Write each candidate down as who triggers it, what they send, which check should have stopped it and what they end up with, plus the file:line trace. Then argue against it with the questions in [audit phases](references/audit-phases.md#phase-5-prove-or-discard): does the code exist, does untrusted input really get there, what stands in the way, is there another road around it, and what does the attacker actually gain.
 - `CONFIRMED` needs an executed local test or a complete source trace. Anything less is discarded with a reason or kept as a lead with the exact check that would settle it.
 - If sub-agents are available, let a reviewer with a clean context, not the one that raised the candidate, try to knock down each high-impact claim.
+- Claims that arrive from outside the audit (scanner leads, bug bounty reports, another agent's findings) get the screening questions, class-specific checks and batch handling in [triage](references/triage-and-false-positives.md).
 - **Done when** every candidate is `CONFIRMED`, `LIKELY`, `POSSIBLE` or `FALSE_POSITIVE`, with evidence.
 
 ### 6. Rate severity
@@ -84,7 +93,8 @@ A full audit runs every phase in order. Diff and focused reviews run phases 3 to
 
 ### 7. Fix and verify (only with permission)
 - Write a test that fails on the current code, fix the cause where the verified identity meets the data or the dangerous call, then run the verification ladder in [fix and verify](references/fix-and-verify.md).
-- Search for variants of every confirmed root cause before closing it.
+- Search for variants of every confirmed root cause before closing it, with the calibrated, one-step-at-a-time method in [variant analysis](references/variant-analysis.md).
+- For a patch someone else wrote, an AI-generated patch, or a fix whose test may not reach the bug, collect base-versus-patched evidence with [patch validation](references/patch-validation.md).
 
 ### 8. Report
 - Write the findings JSON and the report described in [fix and verify](references/fix-and-verify.md#report), then run `python3 <productcraft>/modules/code-security-review/scripts/code_audit.py findings --file security/code-audit-findings.json` and fix every error it lists before handing over.
@@ -100,18 +110,23 @@ Shared with LaunchGuard, so results move between the two modules without transla
 - **Severity:** `CRITICAL`, `HIGH`, `MEDIUM`, `LOW`, `INFO`.
 - **Audit result:** `FAIL` (a confirmed finding is open or risk-accepted), `NEEDS_REVIEW` (leads or unverified cells remain), `PASS (scoped)` (every in-scope cell passed or does not apply, and nothing is open), `INSUFFICIENT_EVIDENCE` (no coverage recorded). A scoped pass describes the code that was reviewed, not the security of the product.
 
-## Bundled script
+## Bundled scripts
 
-`scripts/code_audit.py` uses the Python 3 standard library only, never touches the network, does not modify the target and never prints matched source text or secret values.
+`scripts/code_audit.py`, `scripts/supply_chain.py` and `scripts/sarif_triage.py` use the Python 3 standard library only, never touch the network, do not modify the target and never print matched source text or secret values.
 
-| Command | Use it for |
+| Command (`code_audit.py` unless another script is named) | Use it for |
 |---|---|
 | `map --root .` | Ranked reading order from entry-point and sink hints; manifests with or without lockfiles; CI files; container base images not pinned by digest |
 | `workflows --root .` | GitHub Actions: privileged triggers that check out contributor code, event data expanded into scripts, actions not pinned to a commit SHA, broad token permissions, self-hosted runners on pull requests, remote scripts piped to a shell |
 | `history --root .` | Secret-shaped values and sensitive file names in every commit reachable from local refs, marked as still present or history-only |
 | `findings --file F` | Checks a findings file against the evidence rules in this guide and prints the audit result |
+| `supply_chain.py actions --root .` | GitHub Actions workflows and composite actions: events outsiders can trigger, AI agent steps and the token, secrets and tools they reach, outsider text in prompts, agent environments and environment files, agent output in scripts, inputs of reusable workflows, always-true conditions, spoofable bot checks, persisted checkout tokens, artifacts and caches crossing trust levels |
+| `supply_chain.py lockfiles --root .` | npm, Yarn, pnpm, uv, Poetry, Pipenv, Cargo, Go, Bundler and Composer lockfiles: install-time code, source-only packages, Git and URL sources, other and mixed registries, plain HTTP, missing integrity hashes, credentials in URLs (never printed) |
+| `sarif_triage.py summary`, `diff`, `leads` | SARIF from Semgrep, CodeQL and other tools: counts with levels resolved as SARIF defines them, new results against a baseline, and `POSSIBLE` leads in the findings format that `findings` validates |
 
-Add `--json-out <path>` to keep results (written with mode 0600). `workflows` and `history` accept `--fail-on high|medium` for use in CI. Results from `map`, `workflows` and `history` are leads. A clean run proves nothing about the code it could not see. Run the tests with `python3 -m unittest discover -s <productcraft>/modules/code-security-review/tests -v`.
+Add `--json-out <path>` to keep results (written with mode 0600). `workflows`, `history` and both `supply_chain.py` commands accept `--fail-on high|medium` for use in CI, and `sarif_triage.py diff` accepts `--fail-on error|warning|note`. Results from `map`, `workflows`, `history`, `supply_chain.py` and imported SARIF are leads. A clean run proves nothing about the code it could not see. Run the tests with `python3 -m unittest discover -s <productcraft>/modules/code-security-review/tests -v`.
+
+`scripts/firebase_rules.py --root .` reads Cloud Firestore, Cloud Storage and Realtime Database rules files offline (found through `firebase.json` or their usual names) and lists leads: rules with no effective condition, rules that only require a signed-in user, test-mode rules that stay open until a date, and creates or updates that never inspect the incoming data. It never contacts Firebase and never prints rule conditions. `--json`, `--json-out` and `--fail-on high|medium|low` work as above. Confirm each lead with the emulator tests in [mobile apps](references/mobile-apps.md#firebase-and-other-direct-to-client-backends).
 
 ## References
 
@@ -119,11 +134,21 @@ Add `--json-out <path>` to keep results (written with mode 0600). `workflows` an
 - [Threat modeling](references/threat-modeling.md): assets, actors, entry points, data flows, threats, coverage matrix.
 - [Secrets and dependencies](references/secrets-and-dependencies.md): secrets in code and history, dependency and supply-chain review, CI security and CI checks.
 - [Fix and verify](references/fix-and-verify.md): fix rules, regression tests, verification ladder, findings JSON, report.
+- [Entry points and context](references/entry-points-and-context.md): framework route tables, non-web and contract entry points, access classes, context notes for unfamiliar code.
+- [Static analysis](references/static-analysis-rules.md): running Semgrep and CodeQL so results mean something, SARIF to leads, narrow suppressions, writing and testing rules and models.
+- [Variant analysis](references/variant-analysis.md): from one confirmed bug to all of its siblings, with a hunt log and a CI guard.
+- [Triage](references/triage-and-false-positives.md): screening outside reports and scanner leads, class-specific checks, bias checks, batches, replies to reporters.
+- [Insecure defaults and misuse-prone APIs](references/defaults-and-misuse-prone-apis.md): what runs when configuration is missing, infrastructure defaults, APIs and configuration formats that invite mistakes.
+- [Supply-chain review](references/supply-chain-review.md): install-time code, lockfile signals, dependency risk cards, update review, compromise response, release integrity.
+- [CI and agent workflows](references/ci-agent-workflows.md): events outsiders control, paths into scripts and agents, what an injected job reaches, safer designs, safe testing.
+- [Patch validation](references/patch-validation.md): base-versus-patched evidence, reach markers, root-cause variants, revert checks, extra checks for patches you did not write.
 - [Vulnerability classes](references/vulnerability-classes.md), [AI-generated code bugs](references/ai-generated-code-bugs.md), [language pitfalls](references/language-pitfalls.md): what to hunt for and how each class is confirmed.
+- Domain guides, read only for matching code: [C and C++](references/c-and-cpp.md) (memory-safety classes, sanitizers, hardened builds and how to check them in a binary), [Rust](references/rust.md) (`unsafe` soundness, FFI, panics, integer behavior, async), [cryptographic implementation](references/crypto-implementation.md) (constructions, timing side channels, wiping secrets, randomness), [smart contracts](references/smart-contracts.md) (invariants, token integration, upgrades, Foundry fuzz and invariant tests, other chains), [mobile apps](references/mobile-apps.md) (APK and IPA review, hardcoded keys, Firebase and other backend rules, deep links) and [YARA rules](references/yara-rules.md) (defensive detection rules and how to test them).
 
 ## Working with other ProductCraft modules
 
 - **LaunchGuard:** for a launch decision, run LaunchGuard and use this module for gates 4 and 5 or wherever LaunchGuard needs code-level proof. Copy confirmed findings into its report with the same IDs; this module never issues GO or NO-GO.
 - **Credential Shield:** when a finding concerns throttling, lockout, enumeration at scale or campaign detection, hand the design to Credential Shield and keep the code defect here.
+- **Agent safety and engineering practices:** vetting a third-party agent extension before it is installed belongs to [Agent safety](../agent-safety/GUIDE.md), and general CI/CD design to [Engineering practices](../engineering-practices/GUIDE.md). This module reviews how those pieces can be abused once they run on untrusted input.
 - **UI modules:** a security fix that changes user-facing behavior (a new error, a re-authentication step) follows `modules/interaction-feedback.md` and `modules/forms-conversion.md`.
 - Never silently rewrite other project instructions, skill installations or CI configuration. Propose CI changes and let the owner apply them.
