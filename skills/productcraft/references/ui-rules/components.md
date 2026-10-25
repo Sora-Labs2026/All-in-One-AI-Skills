@@ -16,8 +16,11 @@ Foundations, tokens, core components, radius, elevation and common component pat
 
 - **Do:** Use three tiers: primitives (blue-500 = #2563EB), semantic tokens (color-action-primary) and component tokens (button-bg-default).
 - **Do:** Name semantic and component tokens by purpose, not appearance (button-primary, not blue-button).
+- **Do:** Pair every fill token with an on-color token (color-action-primary with color-on-action-primary) and remap each pair together.
 - **Do:** Rebrand by changing primitives and support dark mode by remapping the semantic tier per theme, using the same names in code as in design files.
+- **Do:** Test the token set after every change: size tokens increase with their names, spacing values sit on the scale and every text and fill pair still meets contrast; if white text drops below 4.5:1, point the fill at a darker step (600-700) or switch the on-color to near-black.
 - **Avoid:** Hex, spacing or radius values hard-coded inside components.
+- **Avoid:** Assuming a new primitive keeps the old contrast.
 
 ## CMP-03. Build a few core components completely
 
@@ -25,6 +28,7 @@ Foundations, tokens, core components, radius, elevation and common component pat
 
 - **Do:** Start with button, input, card, avatar and navigation.
 - **Do:** Give each explicit variants (primary, secondary, ghost, destructive), sizes (sm, md, lg) and states (default, hover, pressed, focus, disabled, loading).
+- **Do:** Step sizes evenly (for example sm, md and lg at 40, 48 and 56px tall) and extend anything under 44px to a 44px hit area on touch screens.
 - **Do:** Build one configurable Button component (variant, tone, size, leading or trailing icon, icon-only, badge) instead of styling buttons per screen.
 - **Avoid:** Dozens of half-finished components, or components that only have a default state.
 
@@ -32,33 +36,39 @@ Foundations, tokens, core components, radius, elevation and common component pat
 
 **Why:** Short, consistent documentation turns a library into a shared language for design and code.
 
-- **Do:** Give each component one page: when to use it, do and don't examples, properties and accessibility requirements (contrast, focus ring, target size).
+- **Do:** Give each component one page: when to use it, do and don't examples, properties and accessibility requirements (target size, the focus ring's color, width and offset, and the actual contrast ratio of each variant and state rather than a checkmark).
 - **Do:** Record version, status and owner, and keep release notes.
 - **Avoid:** Shipping or changing components without usage guidance or a changelog.
+- **Avoid:** Unchecked accessibility claims, such as "meets 4.5:1" on a fill that reaches only 3.1:1.
 
 ## CMP-05. Pick one radius scale that fits the brand
 
 **Why:** Corner rounding sets the tone, and a consistent scale makes components feel like one system.
 
 - **Do:** Choose one tier and store it as tokens: sharp (0-2px) for formal products, moderate (4-16px) for neutral ones, or pill (height/2) for friendly ones.
-- **Do:** Apply it consistently to buttons, inputs, chips and cards, scaling with component size.
+- **Do:** Apply it consistently and scale it with component size, for example about 4px for chips and badges, 6-8px for buttons and inputs, 8-12px for cards, 12-16px for dialogs and sheets, 999px for pills, and about 2-6px in dense data UI.
+- **Do:** Set corners that touch a viewport edge, such as docked sheets and sidebars, to 0 on that side.
 - **Avoid:** Sharp, rounded and pill buttons mixed on one screen without a reason.
+- **Avoid:** One medium radius (about 12-16px) on every element regardless of its size.
 
 ## CMP-06. Keep nested corners concentric
 
 **Why:** An inner element with the same radius as its container leaves an uneven gap at the corners.
 
 - **Do:** Set inner radius = outer radius - padding (a 24px card with 8px padding gets a 16px inner radius).
-- **Do:** Use a small or zero inner radius when padding is equal to or larger than the outer radius.
+- **Do:** Use a small or zero inner radius when padding is equal to or larger than the outer radius; if the result looks too sharp, raise the outer radius or reduce the padding instead of inflating the inner radius.
+- **Do:** Apply the rule outward for rings: a focus or selection ring offset 2px around an 8px corner needs a 10px radius (outline follows border-radius, but box-shadow and pseudo-element rings need it set).
+- **Do:** Crop media that sits flush with the card edge with overflow: hidden on the card instead of giving the image its own radius.
 - **Avoid:** The same radius on a card and the image inset inside it.
+- **Avoid:** Halving the outer radius as a shortcut, which is concentric only when the padding is half the radius.
 
 ## CMP-07. Keep elevation soft and consistent
 
 **Why:** Dark, tight or overused shadows look heavy and dated; soft, consistent elevation separates layers cleanly.
 
 - **Do:** Use low-opacity, diffuse shadows with blur about twice the offset and no horizontal offset, for example 0 8px 24px rgba(15,23,42,.08), tinted toward the background hue rather than pure black.
-- **Do:** Define a few elevation tokens (sm, md, lg) and reserve the strongest for floating layers such as menus and dialogs.
-- **Do:** Or separate cards with a 1px light border, using one method for every card in a set.
+- **Do:** Define a few elevation tokens (sm, md, lg) and reserve the strongest for floating layers such as menus, popovers, dialogs and drag previews.
+- **Do:** When more than a few resting elements in one view would carry shadows, separate them with a tone step or a 1px light border instead, using one method for every card in a set, so a shadow still means "above the page".
 - **Avoid:** Default heavy black shadows on every card and button, or shadows and strong borders on the same element.
 
 ## CMP-08. Size components to their content
@@ -83,23 +93,30 @@ Foundations, tokens, core components, radius, elevation and common component pat
 
 **Why:** An inset track makes segmented options read as one control.
 
-- **Do:** Wrap the options in a track with about 4-8px inset, and show the selected option as a raised or contrasting pill.
+- **Do:** Wrap the options in a track with about 4-8px inset, and show the selected option as a raised or contrasting pill with at least 3:1 against the track (WCAG 1.4.11) plus a weight or icon change.
+- **Do:** Over imagery, give the track a near-opaque tint and draw the selected pill in a solid contrasting fill.
 - **Do:** Give each option button-like padding and keyboard support.
 - **Avoid:** Segmented options placed directly on the page background with no track.
+- **Avoid:** A translucent selected pill on a translucent track.
 
 ## CMP-11. Keep tooltips short and reachable without hover
 
 **Why:** Brief contextual help explains a control without cluttering the layout, but hover-only help excludes touch and keyboard users.
 
-- **Do:** Show tooltips on hover, keyboard focus and tap, anchored to the trigger, with one or two short sentences or a 1-4 word label.
-- **Do:** Give icon buttons an aria-label matching their tooltip, and give first-run hints an explicit "Got it".
+- **Do:** Show tooltips on hover after about 500-700 ms and at once on keyboard focus; while one is open, show neighbors without the delay for about 300 ms.
+- **Do:** On touch, use a long press or, better, a visible label; for standalone info icons use a toggletip, a button with aria-expanded that opens the text on tap or click and closes on Escape or an outside tap.
+- **Do:** Meet WCAG 1.4.13: Escape dismisses without moving pointer or focus, the tooltip stays open while the pointer moves onto it, and it stays until hover and focus leave or the user dismisses it.
+- **Do:** Keep the text to a 1-4 word label or one or two short sentences, at most about 240-320px wide, anchored to the trigger with an arrow and flipped to stay inside the viewport.
+- **Do:** Link descriptive tooltips with aria-describedby, give icon buttons an aria-label matching their tooltip, and give first-run hints an explicit "Got it".
 - **Avoid:** Essential instructions that exist only in a tooltip, or interactive content inside tooltips.
+- **Avoid:** Tap-to-show tooltips on controls whose tap performs an action, or hiding the tooltip as soon as the pointer leaves the trigger.
 
 ## CMP-12. Use modals for focused tasks and popovers for light context
 
 **Why:** Blocking overlays interrupt; they should be reserved for tasks that need full attention.
 
-- **Do:** Use a modal (scrim, trapped focus, visible close, Escape to dismiss, Cancel plus one primary action) for focused edits.
+- **Do:** Use a modal (scrim, trapped focus, visible close, Escape to dismiss, Cancel plus one primary action) for focused edits, preferably the native dialog element opened with showModal(), which provides the top layer, an inert page and Escape handling.
+- **Do:** In destructive confirmations, put initial focus on the safe action, ignore backdrop clicks and name the object in the title and the button ('Delete "Q3 plan"?', "Delete plan").
 - **Do:** Use a non-blocking popover anchored to its trigger for short contextual content, dismissed by an outside click or Escape.
 - **Do:** Return focus to the trigger when either closes.
 - **Avoid:** Blocking overlays for trivial information, or dialogs with no visible way out.
@@ -119,7 +136,10 @@ Foundations, tokens, core components, radius, elevation and common component pat
 
 - **Do:** Open with a header that identifies the context (avatar, name), then group related items with dividers and leading icons.
 - **Do:** Show shortcut hints right-aligned on desktop, and place Sign out or destructive items last in their own group.
+- **Do:** Follow the menu keyboard model: arrows move, Home and End jump, a typed letter jumps to the next matching item, Right opens a submenu, Left or Escape closes only that submenu, and Escape at the top level closes the menu and returns focus to the trigger.
+- **Do:** Give right-click menus a touch route (a long press of about 500 ms, plus a visible overflow button) that opens the same actions in the same order in a bottom sheet titled with the item's name, and flip menus opened at the pointer to stay inside the viewport.
 - **Avoid:** A long undivided list, or Sign out mixed into everyday items.
+- **Avoid:** Actions reachable only by right-click.
 
 ## CMP-15. Make cards self-contained modules
 
@@ -140,16 +160,23 @@ Foundations, tokens, core components, radius, elevation and common component pat
 
 **Why:** Dashboards are scanned tile by tile; a fixed structure makes every number interpretable at a glance.
 
-- **Do:** Order each tile as a small label, a large value with tabular numerals, then a delta with arrow, sign and comparison period ("+4.9% vs last month"), with an optional icon or sparkline.
-- **Do:** Render tiles from a data array of raw values mapped to one component, formatting with Intl.NumberFormat at render time.
+- **Do:** Order each tile as a small label, a large value with tabular numerals, then a delta with arrow, sign and comparison period ("+4.9% vs last month"), giving every tile its period.
+- **Do:** Add a sparkline only when the trend's shape matters for that metric, and an icon only when it speeds recognition between otherwise similar tiles.
+- **Do:** Mark up each tile as a labeled pair (dl with dt and dd, or the label as its heading), and keep the sign in the delta text because arrow icons are usually aria-hidden.
+- **Do:** Render tiles from a data array of raw values mapped to one component, formatting with Intl.NumberFormat at render time (signDisplay: 'exceptZero' shows no change as a neutral "0%").
+- **Do:** Derive the arrow from the delta's sign and its color from a per-metric higher-is-better flag, since falling churn or cost is good news.
+- **Do:** State changes in rate metrics (conversion, churn) in percentage points ("+1.1 pp vs last month", not "+1.1%"), keeping relative percentages for counts and amounts.
 - **Do:** Add a hover lift only when the tile opens a detail view, and give it a focus style too.
 - **Avoid:** Up or down shown by green and red alone, hover lift on non-interactive tiles, or preformatted strings that cannot be sorted.
+- **Avoid:** An icon in a tinted circle and a sparkline on every tile by default, or a bare number as the tile's heading.
 
 ## CMP-18. Make charts answer one question and reveal exact values
 
 **Why:** A chart is only useful if the reader knows what it shows, over what period, and can read exact values.
 
 - **Do:** Give each chart a title, a one-line summary, a time-range control and labeled axes, and highlight the current or key series while muting the rest.
+- **Do:** Default line charts to straight lines about 2px wide, without area fill unless the area means something (such as a cumulative total), markers on every point or smoothing that draws values between samples.
+- **Do:** Keep lines, markers and other meaningful marks at least 3:1 against the plot background in every theme (WCAG 1.4.11), with separate stroke tokens per theme.
 - **Do:** Show exact values in tooltips on hover and keyboard focus, put the total in the center of donuts, and list values beside legend entries.
 - **Do:** Provide a text or table alternative and wrap charts in a responsive container.
 - **Avoid:** Color-only legends, tiny low-contrast axis labels, glossy or 3D bars that distort comparison, or entrance animations replayed on every refresh.
@@ -160,7 +187,13 @@ Foundations, tokens, core components, radius, elevation and common component pat
 
 - **Do:** Use real table markup with th scope="col", right-aligned numbers with tabular numerals, and status pills with words.
 - **Do:** Add filter tabs with counts above the table, show relative times with the absolute timestamp in a time element, and highlight the selected row with aria-selected beside a detail pane.
+- **Do:** Keep rows to one line: show a missing value as an en dash with visually hidden text ("No due date"), and truncate long text with an ellipsis and the full value on hover and focus, but never truncate numbers.
+- **Do:** Offer density presets (rows about 40, 48 and 56px tall, at least 48px where rows are touch targets), separate rows with a hairline and a hover tint, and keep zebra stripes for very wide tables.
+- **Do:** Pin the header (top: 0) and identifying columns (left: 0) with position: sticky, an opaque background and an edge shadow once scrolled, setting overflow only on the table's own scroll wrapper.
+- **Do:** Put row actions in a visible overflow button, revealing frequent ones on hover and :focus-within for pointer devices, and mark only the active sort column with an arrow and aria-sort.
+- **Do:** Switch layout with a container query on the table's wrapper, and when rows become cards use list markup or restore table roles, since changing display on table elements can drop their semantics.
 - **Avoid:** Column widths that jump when the selection changes, or status shown by a colored dot alone.
+- **Avoid:** Blank cells for missing values, or a pencil-and-trash column on every row.
 
 ## CMP-20. Give list rows a leading visual, two lines and a trailing value
 
@@ -168,6 +201,7 @@ Foundations, tokens, core components, radius, elevation and common component pat
 
 - **Do:** Place an avatar, logo or icon first, primary text above secondary text, and the key value right-aligned at the end.
 - **Do:** Keep signs on money values (-$24.00, +$240.00) with tabular numerals, group long lists under date headers, and keep tappable rows at least 48px tall.
+- **Do:** When a table collapses into rows on a phone, put identity and the right-aligned amount on line one and the status pill and a labeled date ("Due 12 May") on line two, and replace the lost column headers with a sort control.
 - **Avoid:** Red and green as the only difference between debits and credits, or truncated trailing values.
 
 ## CMP-21. Keep product cards comparable
@@ -184,6 +218,7 @@ Foundations, tokens, core components, radius, elevation and common component pat
 
 - **Do:** Provide labeled previous and next buttons, a position indicator ("3 of 8"), keyboard arrows and scroll snapping.
 - **Do:** Pause on hover and focus and offer a pause control if anything autoplays; treat 3D coverflow as optional styling over the same controls.
+- **Do:** Drive drag, buttons and arrow keys through one fractional position that springs to the nearest item on release, and derive each item's scale and opacity from its distance to that position.
 - **Avoid:** Autoplay without a way to stop it, drag as the only way to move, or the only copy of critical information inside a carousel.
 
 ## CMP-23. Give segmented controls and chips real selection semantics
@@ -192,8 +227,10 @@ Foundations, tokens, core components, radius, elevation and common component pat
 
 - **Do:** Use native radios or role="radiogroup" with role="radio" and aria-checked for single choice, and toggle buttons with aria-pressed or checkboxes for multi-select chips.
 - **Do:** Move selection with arrow keys using a roving tabindex, and show the selected state with fill plus a check or weight change.
+- **Do:** Style the selected state from the ARIA attribute itself ([aria-checked="true"], [aria-pressed="true"]) instead of a separate class, so what is drawn cannot drift from what is announced, and keep that plain style until any script-drawn indicator has painted.
 - **Do:** Let horizontal chip rows scroll with the last chip peeking past the edge.
-- **Avoid:** ARIA roles without the matching keyboard behavior, or a faint tint as the only selected cue.
+- **Do:** When a toggle chip carries its own menu, place the menu button beside it as a sibling with its own name and at least a 24px target, never inside it.
+- **Avoid:** A radiogroup role around plain buttons with no radio roles, ARIA roles without the matching keyboard behavior, or a faint tint as the only selected cue.
 
 ## CMP-24. Make swatch pickers named radio groups
 
@@ -264,3 +301,15 @@ Foundations, tokens, core components, radius, elevation and common component pat
 - **Do:** Use label and value rows with tabular numerals and right-aligned amounts, listing subtotal, discount (with a minus sign), fees, tax with its rate and a bold total, plus a reference number.
 - **Do:** Render receipts as real text that can be selected, printed or downloaded.
 - **Avoid:** Marking discounts by red alone, or decoration that covers the figures.
+
+## CMP-33. Give drag and drop a lift, a landing preview and a non-drag path
+
+**Why:** Moving items by drag is predictable only when people can see what they hold, where it will land and whether the drop is allowed, and some people cannot drag at all.
+
+- **Do:** On pickup, lift the item within about 150-200 ms: a grabbing cursor, scale about 1.02-1.05, a stronger shadow and optionally a tilt of 3 degrees or less, dropped under reduced motion.
+- **Do:** Preview the landing spot with a placeholder the size of the item at the drop position (an insertion line in dense lists), a tint for whole-container drops, and outlines of valid slots on snapping grids.
+- **Do:** Enforce limits during the drag: show counts such as "3 / 4" in group headers and refuse a drop into a full group with a reason ("Column is full, 4 of 4").
+- **Do:** Announce pickup, position and drop in a live region, and offer Undo for about 5-10 s after a drop.
+- **Do:** Provide a single-pointer alternative such as a "Move to…" menu or move buttons (WCAG 2.5.7), plus a keyboard mode: Space to lift, arrows to move, Space to drop, Escape to cancel.
+- **Avoid:** Moves that persist silently with no landing preview or undo, or a flat ghost that looks as if nothing was picked up.
+- **Avoid:** Drag as the only way to reorder or move items between groups.

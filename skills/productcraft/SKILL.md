@@ -4,7 +4,7 @@ description: Sora Labs all-in-one skill for building, hardening and shipping sof
 license: MIT
 metadata:
   author: Sora Labs
-  version: "1.5.0"
+  version: "1.6.0"
 ---
 
 # ProductCraft: one skill, purpose-built modules

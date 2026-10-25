@@ -1,6 +1,6 @@
 # ProductCraft pattern library
 
-Each pattern pairs a design principle with an implementation rule and a guardrail. Read only the entries that match the task in front of you; modules list their related pattern IDs. Rules are heuristics, not mandatory design laws: security, access, performance, facts and user consent take precedence over visual effects and engagement tricks.
+Each pattern pairs a design principle with an implementation rule and a guardrail, followed by concrete specifics (default values, keyboard and screen-reader behavior, edge cases). Read only the entries that match the task in front of you; modules list their related pattern IDs. Rules are heuristics, not mandatory design laws: security, access, performance, facts and user consent take precedence over visual effects and engagement tricks.
 
 Machine-readable version: `pattern-index.json`.
 
@@ -9,411 +9,742 @@ Machine-readable version: `pattern-index.json`.
 - **Principle:** Good drag feedback shows pickup, movement mode and a short undo window; board columns and free canvases need different landing rules.
 - **Implementation rule:** Provide visible drag handle/ghost, valid drop zones, keyboard alternative, meaningful post-drop announcement, reversible move where feasible.
 - **Guardrail:** Never rely solely on cursor animation or silent persistence.
+- **Specifics:**
+  - On pointerdown switch the cursor from grab to grabbing and lift the item in about 150-200 ms: scale about 1.03-1.05, deeper shadow, slightly translucent ghost.
+  - Show where it will land: an insertion line between items, an outlined container for whole-column drops, dashed slots in snap mode, alignment guides on free canvases.
+  - After the drop keep Undo available in a toast for about 6-10 s, pause the countdown on hover and focus, and give Undo a target of at least 24 px (ideally 44 px).
+  - Keyboard: Space lifts, arrow keys move, Space drops, Escape cancels; announce the new column and position in a polite live region.
+  - Also offer a single-pointer path such as a Move to menu (WCAG 2.5.7), and drop the scale effect under reduced motion.
 
 ## 02. Five-level visual hierarchy
 - **Category:** `foundation`
 - **Principle:** Hierarchy comes from size, contrast, weight, position and rhythm working together.
 - **Implementation rule:** Promote primary decision and next action; keep labels readable, secondary copy truly secondary, and one dominant focal point.
 - **Guardrail:** Measure contrast and scan order; do not shrink necessary labels.
+- **Specifics:**
+  - Build levels from size, weight and position first: a page heading about 1.5-2x body size, heading weights around 600-800 over 400 body.
+  - Keep secondary and tertiary text at 4.5:1 or better (3:1 only for large text, WCAG 1.4.3); demote with size and position, not paler gray.
+  - Use regular (400) weight or heavier for small captions and metadata; thin weights at small sizes read as faded.
 
 ## 03. Rounded corners and perceived safety
 - **Category:** `foundation`
 - **Principle:** Softer shapes can feel more approachable, but radius should express product character rather than decoration.
 - **Implementation rule:** Use a restrained, coherent radius scale reflecting product character and control boundaries.
 - **Guardrail:** Rounding does not prove safety or trustworthiness; too much rounding harms dense tools.
+- **Specifics:**
+  - Use a short radius ladder: controls about 8-10 px at 40-48 px height, cards one step larger than the controls inside them.
+  - Reserve full pill shapes for chips, switches and search fields.
+  - Step nested radii down by the padding between them (inner = outer - padding).
 
 ## 04. Switches, feedback, anticipation
 - **Category:** `feedback`
 - **Principle:** Toggle feedback and action confirmation shape how certain users feel about the result.
 - **Implementation rule:** Acknowledge every interaction, display correct pending/success/failure state, and keep semantics unambiguous.
 - **Guardrail:** Do not fake server confirmation or omit error recovery.
+- **Specifics:**
+  - Expose switches as role="switch" with aria-checked (or a native checkbox); move the knob in about 150-200 ms ease-out, with the track color changing by mid-travel.
+  - For async actions show a pending state with a verb ("Sending…") between tap and result; never jump straight from tap to success.
+  - Check label contrast on success and error fills (4.5:1); white on mid-green or amber often fails.
+  - Treat ripples (about 250-300 ms from the pointer) as optional polish; never let them delay the action, and remove them under reduced motion.
 
 ## 05. Optimistic actions and fast perceived response
 - **Category:** `feedback`
 - **Principle:** Immediate local response makes actions feel fast while the real work continues in the background.
 - **Implementation rule:** Use optimistic UI only for reversible low-risk actions, then reconcile on success or rollback with clear error on failure.
 - **Guardrail:** Never confirm financial, medical, or destructive actions before server truth.
+- **Specifics:**
+  - Update the icon and count in the same frame as the tap; any pop (about 300 ms, slight overshoot) is skipped under reduced motion.
+  - Coalesce rapid toggles, send only the final state and ignore stale responses.
+  - On failure revert icon and count together to the previous value and show a short error with Retry.
+  - Never pair optimistic UI with a progress bar that runs ahead of the real work.
 
 ## 06. Dark patterns: hidden costs
 - **Category:** `conversion`
 - **Principle:** Surprise fees at checkout are a dark pattern that erodes trust and drives abandonment.
 - **Implementation rule:** Disclose total price, mandatory fees, recurrence and significant terms before commitment; offer honest persuasive framing instead.
 - **Guardrail:** Hidden fees and misleading choices are anti-patterns, not optimization.
+- **Specifics:**
+  - List every mandatory fee as a line item in the same size, weight and color as the products, and include it in the total.
+  - Give the decline option body-size text, at least 4.5:1 contrast and neutral wording; no shaming copy.
+  - Keep buttons still; never move or swap choices under the pointer.
+  - Make cancelling no longer than signing up: same channel and a comparable number of steps.
 
 ## 07. Color focus and action prominence
 - **Category:** `foundation`
 - **Principle:** When every button is colorful, attention is diluted and no action stands out.
 - **Implementation rule:** Use one clear primary action and reserved color for state, emphasis, and identity; check meaningful contrasts.
 - **Guardrail:** Color must not be the only cue or make every button primary.
+- **Specifics:**
+  - Demote secondary actions with outline or text styles while keeping their labels at 4.5:1; grayed labels read as disabled.
+  - Keep one filled button per group; never put a filled destructive button next to a filled primary.
+  - Check label contrast on every fill: bright amber, yellow and light green fills usually need dark labels.
 
 ## 08. Variable rewards, loss aversion, reciprocity
 - **Category:** `conversion`
 - **Principle:** Variable rewards, streaks and reciprocity are powerful behavioral triggers that are easy to misuse.
 - **Implementation rule:** Provide earned progress, authentic motivation, transparent reciprocity, and legitimate reminders when useful.
 - **Guardrail:** Do not weaponize anxiety, gambling-like loops or false social obligation.
+- **Specifics:**
+  - When a streak breaks, offer a repair, freeze or grace day and neutral wording instead of permanent-loss language.
+  - Batch social notifications into digests and give users per-category controls.
+  - Keep progress cues truthful ("Day 3 of 7") and let users dismiss or turn them off.
 
 ## 09. Fake wait duration, ghost typing, anxiety
 - **Category:** `conversion`
 - **Principle:** Artificially long loading and phantom typing manipulate users and break trust.
 - **Implementation rule:** Make timing indicators truthful, stop simulated typing from implying a real person, and report known progress.
 - **Guardrail:** Never create artificial waits or false human presence to manipulate users.
+- **Specifics:**
+  - Show typing indicators only from live typing events by a person and expire them a few seconds after the last event.
+  - Label automated replies as automated ("Assistant is writing") and never hold back an available result to simulate effort.
+  - Stop looping indicator animations under reduced motion; a static label is enough.
 
 ## 10. Hover affordance and press response
 - **Category:** `feedback`
 - **Principle:** Subtle scale, depth, accent and press states make controls feel interactive.
 - **Implementation rule:** Define pointer hover and pressed states with modest transition and focus-visible equivalents.
 - **Guardrail:** Do not depend on hover for touch or crucial information.
+- **Specifics:**
+  - Hover in over about 150-200 ms and out a little faster (about 100-150 ms); show press feedback within about 100 ms.
+  - Keep scale modest: press to about 0.95-0.98, hover at most about 1.03 on wide buttons, release overshoot under 3% and settled within about 400 ms.
+  - Scale an inner layer so the hit area does not move under the pointer.
+  - Give :focus-visible an equivalent cue, and swap scale for color or shadow changes under reduced motion.
 
 ## 11. Modal entry, exit and backdrop
 - **Category:** `feedback`
 - **Principle:** Entrance motion and a subdued backdrop keep a confirmation dialog focused, especially for destructive actions.
 - **Implementation rule:** Use accessible dialog semantics, clear title, backdrop/focus containment, Escape policy, and predictable exit behavior.
 - **Guardrail:** Support reduced motion, no accidental backdrop dismissal for dangerous actions.
+- **Specifics:**
+  - Animate the container only: fade plus scale from about 0.96-0.98 to 1 over about 150-200 ms, exit faster (about 100-150 ms), no staggered inner content.
+  - Dim the page with a scrim of roughly 40-60% black; keep any backdrop blur light, with a plain scrim under prefers-reduced-transparency.
+  - In destructive dialogs, name the object in the title and place initial focus on the least destructive action (Cancel).
+  - Return focus to the trigger on close; under reduced motion use a plain fade or no animation.
 
 ## 12. Design system: color, type, component atoms
 - **Category:** `foundation`
 - **Principle:** A design system defines color roles, a type hierarchy and reusable atomic components.
 - **Implementation rule:** Set design tokens, semantic color roles, type steps, spacing scales and composable components before sweeping changes.
 - **Guardrail:** Prefer existing product tokens to a wholesale replacement.
+- **Specifics:**
+  - Derive type steps from one ratio and check the resulting sizes; cover the subheading range (about 18-24 px) instead of jumping from body to display.
+  - Give input boundaries at least 3:1 against their surface (WCAG 1.4.11); a fill barely different from the card does not mark the field.
 
 ## 13. 60-30-10 color distribution
 - **Category:** `foundation`
 - **Principle:** A dominant base, a supporting surface and a small accent make a balanced composition.
 - **Implementation rule:** Use majority neutral/base, secondary surface and small purposeful accent where appropriate.
 - **Guardrail:** 60/30/10 is guidance, not a quota; accessibility takes priority.
+- **Specifics:**
+  - Give about 60% to a neutral base, about 30% to a same-hue supporting surface and about 10% to the accent; adjust to the content rather than hitting the numbers.
+  - Restrict the accent to the primary action and the current selection; deltas, charts and secondary buttons use their own roles.
+  - Example dark set: base #0F172A, cards #1E293B, accent #F59E0B with #0F172A labels (about 8:1).
 
 ## 14. Transparency and glass style
 - **Category:** `foundation`
 - **Principle:** Transparency, blur and a subtle border create a glass-like surface that is easy to overuse.
 - **Implementation rule:** If transparency fits the brand, set legible contrast, light/dark fallback and performance-safe blur.
 - **Guardrail:** Do not add generic glassmorphism by default or sacrifice readable text.
+- **Specifics:**
+  - Starting point: a white tint around 30-50% opacity, backdrop-filter: blur(16-20px), a 1 px semi-transparent white border and a soft shadow.
+  - Add -webkit-backdrop-filter, an @supports fallback to an opaque surface, and an opaque surface under prefers-reduced-transparency.
+  - Check text contrast over the busiest background behind the panel; raise the tint for small text and avoid stacking glass layers, which are costly to render.
 
 ## 15. Fitts law: targets and thumb reach
 - **Category:** `interaction`
 - **Principle:** Small targets and hard-to-reach positions slow users down, especially one-handed on mobile.
 - **Implementation rule:** Size interactive targets generously; place mobile primary actions in reachable zones and reduce travel.
 - **Guardrail:** Honor touch accessibility and do not create false urgency.
+- **Specifics:**
+  - Apply Fitts's law qualitatively (bigger and closer is faster); do not quote invented click-time or conversion gains.
+  - Make targets at least 24 × 24 CSS px or adequately spaced (WCAG 2.5.8), and about 44 pt / 48 dp for touch per platform guidelines.
+  - With a pointer, open menus at the cursor and use screen edges; on touch, edges are not infinite targets, so put frequent primary actions in the lower, thumb-reachable area.
 
 ## 16. Whitespace: micro, macro, and active
 - **Category:** `foundation`
 - **Principle:** Whitespace works at three levels: micro inside groups, macro between sections and active around the focal point.
 - **Implementation rule:** Use tight internal grouping, meaningful section separation and deliberate focal breathing room.
 - **Guardrail:** Do not leave huge empty hero regions or remove dense useful content.
+- **Specifics:**
+  - Round every gap to the spacing scale (24, not 22).
+  - Pad cards about 16-24 px on phones and 32-40 px on desktop or hero cards; heavy padding on phones starves the text measure.
+  - Separate sections by about 48 px or more, clearly more than the gaps inside groups.
 
 ## 17. Grid ratios, responsive collapse
 - **Category:** `responsive`
 - **Principle:** Layouts should reflow to fewer columns when content stops fitting, not at arbitrary device sizes.
 - **Implementation rule:** Define breakpoints around content failure, not phone brand; reflow navigation, tables and panels thoughtfully.
 - **Guardrail:** Never hide functionality only because width becomes narrow.
+- **Specifics:**
+  - On a 12-column desktop grid, sidebar-to-content splits of 3:9 or 4:8 work well.
+  - Below about 600 px move primary navigation to a bottom bar; a navigation rail suits medium widths.
+  - Let tile grids reflow with the available width (for example 4 → 2 → 1) using grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)) instead of stacking every tile full width early.
 
 ## 18. Hue adjacency, gradients and text
 - **Category:** `foundation`
 - **Principle:** Hue relationships, gradient direction and accent type can add interest but can also hurt legibility.
 - **Implementation rule:** Start with clear solid colors; add restrained gradient only for a justified identity moment or meaningful data treatment.
 - **Guardrail:** Gradients alone do not make a design premium.
+- **Specifics:**
+  - Keep gradient stops within about 60° of hue; for wider spans interpolate in OKLCH (linear-gradient(135deg in oklch, …)) to avoid a gray midpoint.
+  - Use gradient text only on large headlines: declare a solid color first, add the gradient fill inside @supports, and check contrast at the lightest stop.
 
 ## 19. Skeletons and anticipation
 - **Category:** `feedback`
 - **Principle:** Placeholders that preview the coming content make waits feel shorter.
 - **Implementation rule:** Use representative, bounded skeletons when latency merits them; announce loading and replace with truth.
 - **Guardrail:** Avoid fake content and infinite skeletons when the system failed.
+- **Specifics:**
+  - Shape skeletons like the real layout (avatar, text lines, media block) at final dimensions so nothing shifts when content arrives.
+  - Shimmer slowly (about 1-1.5 s per cycle) in the reading direction, mirrored for RTL; use a static placeholder under reduced motion.
+  - Set aria-busy="true" on the loading region and replace the skeleton with an error and Retry as soon as the request fails.
 
 ## 20. Golden ratio and type scale
 - **Category:** `foundation`
 - **Principle:** The golden ratio is a useful proportion idea for layout and type scales, not a law.
 - **Implementation rule:** Choose a consistent modular type/spacing scale, then tune to readable content and actual responsive measurements.
 - **Guardrail:** Do not enforce 1.618 mathematically or claim universal beauty.
+- **Specifics:**
+  - For product UI use a type ratio of about 1.2-1.25 and round spacing to the 4/8 grid.
+  - A 1.618 type scale leaves few usable sizes (16, 26, 42, 68); keep ratios of 1.5 or more for marketing and editorial layouts.
+  - Golden spacing steps (8, 13, 21, 34) fight a 4/8 grid; treat 62/38 splits as a starting proportion only.
 
 ## 21. Tokenized palettes, spacing, motion
 - **Category:** `foundation`
 - **Principle:** Scattered hard-coded styles drift; shared tokens for color, spacing and easing keep a product coherent.
 - **Implementation rule:** Centralize CSS/theme variables for semantic colors, radii, typography, spacing and motion.
 - **Guardrail:** Support user preferences, light/dark if present, and reduced motion.
+- **Specifics:**
+  - Spacing tokens on a 4/8 scale: 4, 8, 12, 16, 24, 32, 48, 64.
+  - Duration tokens around 100 ms (press), 150-200 ms (hover, toggles, menus, dialogs), 300 ms (sheets, large panels) and 400 ms (page-level), with exits shorter than entrances.
+  - Easing tokens: ease-out for entering, ease-in for exiting, ease-in-out for moving on screen.
+  - Check that size tokens rise with their names, and that a prefers-reduced-motion override removes movement while keeping state changes visible.
 
 ## 22. Empty state design
 - **Category:** `feedback`
 - **Principle:** A good empty state explains what is missing and offers the next step.
 - **Implementation rule:** Explain what is empty and offer a task-relevant action or import path; teach only when useful.
 - **Guardrail:** Avoid empty-state decoration without a next step.
+- **Specifics:**
+  - First run: say what will appear here and offer one action to create or import, optionally with a sample preview.
+  - No results: repeat the query and offer to clear it or check spelling.
+  - Filtered out: say how many items the filters hide and offer Reset filters.
+  - Load failure: say what failed and offer Retry; never present an empty list as an error, or an error as an empty list.
 
 ## 23. Skeleton timing and progress indicators
 - **Category:** `feedback`
 - **Principle:** How long an operation takes decides whether to show nothing, a skeleton or determinate progress.
 - **Implementation rule:** Show nothing or lightweight delay for very short loads; use content skeletons or determinate progress when warranted.
 - **Guardrail:** Never display fabricated progress percentages.
+- **Specifics:**
+  - Show nothing for waits under about 300 ms; once an indicator appears, keep it for at least about 400-500 ms to avoid flicker.
+  - Use a skeleton when the layout is known, and an in-button spinner with a verb ("Saving…") for short waits of unknown length.
+  - Beyond a few seconds of measurable work, show a determinate bar with done/total and time left, and check the estimate against actual completion.
+  - Use a native progress element or role="progressbar" with aria-valuenow so assistive technology hears progress.
 
 ## 24. Errors: severity and surface
 - **Category:** `forms`
 - **Principle:** Inline field errors, toasts and blocking dialogs suit different severities.
 - **Implementation rule:** Use field-level correction near inputs, a short nonblocking toast for minor confirmation, and blocking UI for dangerous decisions.
 - **Guardrail:** Preserve error context and actionable recovery, avoid modal spam.
+- **Specifics:**
+  - Field errors: inline next to the field on blur or submit, linked with aria-describedby.
+  - Connection loss: a persistent non-blocking banner that retries automatically with backoff and offers Retry now.
+  - Server failure: a message in the affected region with Try again and Contact support, technical details collapsed.
+  - Permission: a gated view with Sign in or Request access; never a bare error code or "An error occurred. OK".
 
 ## 25. Motion choreography and feedback timings
 - **Category:** `feedback`
 - **Principle:** Fast click feedback, short entrances and purposeful staggering make motion feel responsive.
 - **Implementation rule:** Use brief, interruptible animation; immediate interaction feedback; stagger only when clarifying sequence.
 - **Guardrail:** Timing figures are starting points, not mandatory; respect prefers-reduced-motion.
+- **Specifics:**
+  - Starting values: feedback within about 100 ms, entrances about 150-250 ms, exits about 100-170 ms.
+  - Stagger list items by about 30-50 ms and cap the total so long lists do not crawl.
+  - Keep attention shakes short (about 400 ms or less) and pair them with a text message.
+  - Under prefers-reduced-motion replace movement with fades or instant state changes.
 
 ## 26. Search and zero-result recovery
 - **Category:** `navigation`
 - **Principle:** Helpful prompts, relevant autocomplete and a productive zero-results state make search recoverable.
 - **Implementation rule:** Search by intent, prioritize relevance, expose keyboard navigation and suggestions, and offer spelling/filter recovery.
 - **Guardrail:** Do not pretend popular results are relevant or leak private search history.
+- **Specifics:**
+  - State the scope in the placeholder ("Search orders by number or customer") and keep an accessible name for the field.
+  - On focus show recent searches, each removable and private to the user.
+  - Suggestions follow the ARIA combobox pattern: about 5-8 items, matched text highlighted, category labels when results are mixed.
+  - Zero results: offer a spelling correction, a broader category or filters to remove, and recent items; keep the query in the URL.
 
 ## 27. Date-range selection across months
 - **Category:** `forms`
 - **Principle:** Date pickers need useful presets, cross-month ranges and a mobile-friendly layout.
 - **Implementation rule:** Offer useful presets, true interval selection across months, explicit dates/timezones and mobile-friendly confirmation.
 - **Guardrail:** Test DST, unavailable days, inclusive endpoints, locale formats.
+- **Specifics:**
+  - Resolve presets to explicit, inclusive dates and display them ("Last 7 days" = today and the 6 days before).
+  - On desktop show two months side by side; the first click sets the start, hover previews the end, the second click commits.
+  - Follow the ARIA date picker dialog pattern: arrows move by day and week, Home/End to week bounds, PageUp/PageDown by month (Shift for year).
+  - On phones use a full-screen sheet with vertically scrolling months, a summary of the range and a sticky Confirm.
 
 ## 28. Checkout steps and preserving state
 - **Category:** `forms`
 - **Principle:** Splitting a long checkout into steps with clear boundaries and back navigation reduces errors.
 - **Implementation rule:** Chunk genuinely complex flows, keep progress honest, preserve state when moving back, and minimize fields.
 - **Guardrail:** Do not hide mandatory charges or force needless steps.
+- **Specifics:**
+  - Count completed steps ("Step 2 of 4", aria-current="step") and reach 100% only after submission.
+  - Validate on blur; keep Next enabled and, when a step has errors, move focus to the first invalid field.
+  - Put the step in the URL so Back and refresh work; keep the draft in sessionStorage, never card numbers, security codes or passwords.
 
 ## 29. Notification surfaces and lifecycle
 - **Category:** `feedback`
 - **Principle:** Toasts, banners, modals and badges differ in persistence and severity.
 - **Implementation rule:** Match notification surface to importance, provide undo for reversible operations, allow persistent alerts where necessary.
 - **Guardrail:** Avoid overusing urgent styles or masking critical notices.
+- **Specifics:**
+  - Plain confirmation toasts about 4-6 s; toasts with an action about 6-10 s or until dismissed, paused on hover and focus (WCAG 2.2.1).
+  - Banners stay until the condition ends or the user closes them; badges stay until the item is read.
+  - Show one modal at a time and queue the rest; stack at most about 3 toasts in a consistent order.
 
 ## 30. Card-number input formatting
 - **Category:** `forms`
 - **Principle:** Grouping long card numbers makes them easier to scan and check.
 - **Implementation rule:** Group input visually, validate via trusted payment provider, and handle formatting without changing semantics.
 - **Guardrail:** Never store raw payment card numbers in application storage or logs; use tokenized hosted payment fields.
+- **Specifics:**
+  - Use a text input with inputmode="numeric" and autocomplete="cc-number"; strip spaces and dashes from pasted values.
+  - Group digits as the user types and restore the caret by counting digits before it; most cards group 4-4-4-4, 15-digit numbers starting 34 or 37 group 4-6-5.
+  - Run the Luhn check on blur rather than on every keystroke, and submit digits only.
+  - Size the field for the longest formatted number plus the card-type icon so it never wraps.
 
 ## 31. Ratings and interaction precision
 - **Category:** `interaction`
 - **Principle:** Star inputs need precise interaction, and rating summaries need honest aggregates.
 - **Implementation rule:** Make star input operable with keyboard, expose accessible labels and show genuine aggregate data.
 - **Guardrail:** Do not fabricate ratings, users or sample sizes.
+- **Specifics:**
+  - Build star input as a fieldset with a legend and five radio buttons labelled "1 star" to "5 stars"; arrow keys change the value.
+  - Give each star a target of at least 24 px, ideally 44 px; hover previews the value and leaving restores the committed one.
+  - Compute the average from the real distribution, round it once to one decimal, use that figure everywhere and show the review count beside it.
 
 ## 32. Sliders: hit area, steps, keyboard
 - **Category:** `interaction`
 - **Principle:** A wide track, discrete steps and Home/End support make sliders usable.
 - **Implementation rule:** Use accessible native slider semantics where possible; show current value, sensible bounds, keyboard and touch.
 - **Guardrail:** Avoid slider for precise values when a numeric input would be better.
+- **Specifics:**
+  - Make the full track a hit area at least 44 px tall, let a click on the track move the thumb (WCAG 2.5.7) and use pointer capture while dragging.
+  - Fill the track up to the value, show tick marks when values snap to steps, and show the value above the thumb while dragging.
+  - Keyboard: arrows step, PageUp/PageDown take larger steps, Home/End go to the bounds; set aria-valuetext for readable values ("$40", "3 nights").
+  - For ranges use two thumbs with separate labels such as "Minimum price" and "Maximum price".
 
 ## 33. OTP input paste and autofill
 - **Category:** `forms`
 - **Principle:** Full-code paste across cells, a numeric keypad and instant status make OTP entry fast.
 - **Implementation rule:** Support full-code paste, WebOTP/autocomplete when supported, clear focus behavior and retry/resend with limits.
 - **Guardrail:** Do not disclose which part of an auth challenge was wrong; never log codes.
+- **Specifics:**
+  - Use inputmode="numeric" and autocomplete="one-time-code"; on paste strip non-digits, fill every cell and auto-submit only when exactly the expected number of digits arrives.
+  - Advance focus after each digit and step back on Backspace; give each cell an accessible name ("Digit 1 of 6").
+  - Enable Resend after a visible countdown of about 30 s, and announce when it becomes available rather than every second.
+  - On a wrong code show a text error, clear the cells and focus the first; keep any shake to about 400 ms or less.
 
 ## 34. Pagination for changing datasets
 - **Category:** `navigation`
 - **Principle:** Offset pagination duplicates or skips rows when data changes; long page-link lists and missing URL state hurt navigation.
 - **Implementation rule:** Choose cursor pagination for changing feeds; use short controls, stable sort, shareable URL state and page boundaries.
 - **Guardrail:** Explain offset pagination tradeoffs rather than assuming all data requires cursors.
+- **Specifics:**
+  - Compute the page count as ceil(total / pageSize) and test the last partial page.
+  - Show first, previous, current ±1, next and last with ellipses (plus an optional go-to field); mark the current page with aria-current="page" inside a labelled nav.
+  - For changing data use cursor pagination with the cursor in the URL (for example `?after=<id>`) and a stable sort with a unique tiebreaker.
+  - On Back, restore the scroll position and focus to the row the user opened.
 
 ## 35. Password strength and entropy
 - **Category:** `forms`
 - **Principle:** Long, uncommon passwords are stronger than short complex ones, and strength meters need careful wording.
 - **Implementation rule:** Favor length and breached-password checks; support paste and password managers; communicate strength carefully.
 - **Guardrail:** Do not claim exact crack times from a simplistic meter or require symbols arbitrarily.
+- **Specifics:**
+  - Follow NIST SP 800-63B: no composition rules, a minimum of 8 characters (15 when the password is the only factor), a maximum of at least 64, and a blocklist of breached and common passwords.
+  - Allow paste and password managers; use autocomplete="new-password" on sign-up and "current-password" on sign-in, with a show-password toggle.
+  - Rate strength with a pattern-aware estimator that catches dictionary words, dates and keyboard runs; describe it in words, never as a crack time.
 
 ## 36. Multi-file upload with per-file recovery
 - **Category:** `forms`
 - **Principle:** Uploads can fail near completion; an independent per-file queue keeps one failure from sinking the batch.
 - **Implementation rule:** Provide per-file progress, retry/cancel, supported types and accessible non-drag fallback.
 - **Guardrail:** Enforce server-side size/type limits and scan/quarantine where required.
+- **Specifics:**
+  - Track each file through queued, uploading (percent and time left), failed (bar held at the last confirmed percentage, reason, inline Retry) and done; the other files keep going.
+  - Resume a failed file from the last confirmed byte when the server supports resumable uploads; otherwise retry that file only.
+  - Summarize "N of M uploaded" in a header that names failures, and announce completion and failures in a polite live region.
+  - After upload show a row with thumbnail, type, size and Replace / Remove buttons whose accessible names include the file name.
+  - During dragover show only the item count (names and sizes are known after drop), and keep a visible file-picker button for non-drag use.
 
 ## 37. Destructive action friction proportional to risk
 - **Category:** `safety`
 - **Principle:** Hold-to-delete, restrained red and delayed deletion add friction in proportion to risk.
 - **Implementation rule:** Use an appropriate confirmation or type-to-confirm for truly irreversible changes; make recoverable changes easy.
 - **Guardrail:** No unnecessary friction for harmless actions; never mislead about deletion finality.
+- **Specifics:**
+  - Scale friction with risk: Undo for recoverable actions, a confirmation naming the object for impactful ones, typed confirmation only for irreversible ones.
+  - Schedule account deletion: show the exact purge date, days remaining and one primary Cancel deletion during a grace period (for example 14-30 days).
+  - If you use hold-to-delete, hold for about 1 s with a filling ring, cancel on early release or pointercancel and say nothing was deleted; keep a button-plus-confirm path for keyboard and switch users.
 
 ## 38. Undo, typed confirmation and delayed send
 - **Category:** `safety`
 - **Principle:** Repeated confirmations train users to click through; undo and a grace period protect them better.
 - **Implementation rule:** Prefer undo for reversible changes; confirm truly destructive effects by naming consequences and offering a review window where feasible.
 - **Guardrail:** Backend undo must actually work; never offer a placebo Undo.
+- **Specifics:**
+  - In editors, Ctrl/Cmd+Z undoes one action at a time and Shift+Ctrl/Cmd+Z redoes; a new action clears the redo stack.
+  - A history panel lists actions in order and marks undone ones, so users can step back several at once.
+  - For delayed send, show "Sending…" with a real-time countdown (about 5-30 s, user-adjustable) and an Undo that restores the full draft; the server commits only when the window ends.
 
 ## 39. Tabs with active indicator and keyboard
 - **Category:** `navigation`
 - **Principle:** A moving active indicator plus arrow-key and Home/End support make tabs clear and accessible.
 - **Implementation rule:** Use semantic tabs/tabpanel and roving keyboard focus, keep visual focus distinct from selected state.
 - **Guardrail:** Do not autoplay tabs or rely only on color.
+- **Specifics:**
+  - Move a single active indicator with transform over about 200-250 ms with little or no overshoot; jump it instantly under reduced motion.
+  - Swap panels without a blank frame: crossfade in about 150-200 ms while easing the container to the new height.
+  - Follow the ARIA tabs pattern: arrows move focus, Home/End jump to the ends, Tab enters the panel; use manual activation when panels load slowly, and style focus distinctly from selection.
+  - When tabs overflow, scroll them in one row with edge fades and arrow buttons, never two rows; on phones more than about four tabs work better as a select menu.
 
 ## 40. Form validation on blur and success
 - **Category:** `forms`
 - **Principle:** Errors revealed late frustrate users; feedback on blur and a quiet success state guide them.
 - **Implementation rule:** Validate at useful boundaries (blur/submit), reserve field space to prevent layout jumps and confirm correct entries discreetly.
 - **Guardrail:** Avoid errors on every keystroke while users are still composing.
+- **Specifics:**
+  - Do not validate while a field is first being typed; validate on blur and on submit.
+  - Once a field shows an error, re-validate on every input so the error clears as soon as the value is valid.
+  - Confirm valid entries quietly with a check icon plus a short word, not color alone.
+  - On submit move focus to the first invalid field or an error summary; set aria-invalid and link messages with aria-describedby.
 
 ## 41. Context menus: placement and touch
 - **Category:** `navigation`
 - **Principle:** Context menus must open at the pointer, stay on screen and have a long-press equivalent on touch.
 - **Implementation rule:** Collision-detect positions, manage submenu pointer intent, add keyboard access and mobile long-press alternative.
 - **Guardrail:** Do not trap touch users in desktop-only context menus.
+- **Specifics:**
+  - Measure the menu, open it at the pointer and flip horizontally or vertically to stay in the viewport; scale in over about 150 ms from the corner at the pointer.
+  - Group items by intent with dividers, destructive items last, shortcuts right-aligned.
+  - Use a safe triangle for submenus; Escape closes one level at a time and returns focus; Shift+F10 or the Menu key opens the same menu (ARIA menu pattern).
+  - On touch, a long press of about 500 ms opens the same actions in a bottom sheet titled with the item's name; also offer a visible More button.
 
 ## 42. Dropdowns: click and keyboard interaction
 - **Category:** `interaction`
 - **Principle:** Dropdowns need full-row hit areas, arrow keys, Enter/Escape and fast opening.
 - **Implementation rule:** Provide conventional dropdown/listbox behavior, visible focus, touch-safe items, and prompt open feedback.
 - **Guardrail:** Do not invent unusual interactions that hurt accessibility.
+- **Specifics:**
+  - Trigger about 40-48 px tall (at least 44 px on touch) with a visible caret, a border of at least 3:1 and a hover state.
+  - Open in about 120-150 ms with a fade and slight scale from the trigger edge, close in about 75-100 ms, and flip above when there is no room below.
+  - Mark the current value in the list and add a filter field once the list passes about 10 options.
+  - Keyboard per the ARIA listbox/combobox pattern: Up/Down move, Home/End, type-ahead, Enter selects, Escape closes and returns focus to the trigger.
 
 ## 43. Optimistic UI state synchronization
 - **Category:** `feedback`
 - **Principle:** Optimistic UI updates immediately, then reconciles with the server or reverts on error.
 - **Implementation rule:** For low-risk interactions, update local state immediately and retry or rollback with notice; dedupe calls.
 - **Guardrail:** Irreversible/payment/medical outcomes must wait for authenticated server truth.
+- **Specifics:**
+  - Go optimistic for likes, follows, saves and bookmarks; wait for the server, with an in-button processing state, for payments, transfers and permanent deletion.
+  - On failure restore the exact previous value, mark the control briefly and say in a toast that the change was undone, with Retry.
+  - Show a visible change within about 100 ms of input, and judge whether optimism is safe from your own success-rate telemetry.
+  - Dedupe with a request id or idempotency key and drop responses older than the latest change.
 
 ## 44. Swipe actions on mobile
 - **Category:** `interaction`
 - **Principle:** Swipe should reveal actions rather than commit them, and direction should encode intent.
 - **Implementation rule:** Use swipe to reveal optional actions, require explicit destructive commit and give undo where possible.
 - **Guardrail:** Ensure screen-reader and non-swipe alternatives.
+- **Specifics:**
+  - Use two thresholds: a short pull reveals buttons without firing; a long pull past most of the row commits the outermost action on release, with resistance past the reveal width and a haptic tick at the commit point.
+  - Keep the leading side for reversible actions and the trailing side for destructive ones; commit a full-swipe delete only with an Undo that restores the row in place.
+  - Hint once on first use by partly revealing one row (about 2 s in total), remember that it ran, and skip it under reduced motion.
+  - Mirror every swipe action in a visible menu and expose them as accessibility actions for screen-reader and switch users.
 
 ## 45. Accessible toggle anatomy
 - **Category:** `interaction`
 - **Principle:** A switch needs clear dimensions, a knob, keyboard support, ARIA state and rollback on server error.
 - **Implementation rule:** Use real checked state, Space support, focus ring, proper label and server rollback if update fails.
 - **Guardrail:** Use checkboxes rather than switches for non-immediate apply scenarios.
+- **Specifics:**
+  - Start from platform sizes (about 51 × 31 pt or 52 × 32 dp) with a 2-4 px knob inset, knob travel equal to track width minus track height, and a hit area of at least 44-48 px.
+  - Animate track color, knob position and shadow together in about 150-250 ms ease-out; under reduced motion change state without travel.
+  - Give the off track at least 3:1 against its surface (WCAG 1.4.11), draw the focus ring outside the track, and make Space toggle a role="switch" with aria-checked.
+  - Flip immediately on tap with a small spinner in the knob while saving; on server error animate back and say the change was not saved, with Retry.
 
 ## 46. Toast positioning, stacking and status colors
 - **Category:** `feedback`
 - **Principle:** Toast position, stack limits and status styling decide whether notifications help or overwhelm.
 - **Implementation rule:** Anchor toast consistently, limit concurrent stacking, distinguish status text/icons, announce via live region.
 - **Guardrail:** Do not blanket the screen or rely on color alone.
+- **Specifics:**
+  - Time toasts by severity: info about 4-5 s, warnings about 7-10 s, errors until dismissed; pause the timer and any remaining-time bar on hover and focus.
+  - Show at most about 3 at once, oldest leaving first, from one consistent corner.
+  - Convey status with an icon and title as well as color.
+  - Announce through a live region present before the toast is inserted: role="status" for info, role="alert" for errors; do not move focus to toasts.
 
 ## 47. Settings density, search, dangerous zone
 - **Category:** `navigation`
 - **Principle:** Low-risk preferences can save instantly, identity changes need an explicit save, and settings search scales with size.
 - **Implementation rule:** Persist low-risk toggles quickly, require explicit Save for high-impact fields, provide settings search and isolate danger zone.
 - **Guardrail:** Protect identity/security changes with reauthentication when warranted.
+- **Specifics:**
+  - Mark toggles that save instantly ("Applies immediately") and confirm each save briefly.
+  - For identity and other high-impact fields, show unsaved changes in a sticky bar with Cancel and Save, and warn before leaving with unsaved edits.
+  - Mark settings changed from their defaults, with per-setting reset and an "N modified" count.
+  - Settings search shows each result's path and jumps to and highlights the setting.
+  - Put the danger zone last, visually separated, with each action stating whether it can be undone and who can perform it.
 
 ## 48. Touch targets: no hover-only on mobile
 - **Category:** `responsive`
 - **Principle:** Actions hidden behind hover vanish on touch screens; larger hit areas and visible inline actions keep them reachable.
 - **Implementation rule:** Expose essential actions directly or through visible menus, provide adequate hit area, and avoid hover assumptions.
 - **Guardrail:** Do not shrink tap areas to fit visual composition.
+- **Specifics:**
+  - Give every hover-revealed action a visible home on touch: inline in the card, a visible More button that opens a sheet, or a swipe with a visible alternative.
+  - Scope hover reveals to @media (hover: hover) and (pointer: fine), and also reveal on :focus-within for keyboard users.
+  - Elements hidden with opacity: 0 still take taps and focus; use visibility or display when the action should be unreachable.
+  - Pad icon buttons to at least 44 px under @media (pointer: coarse) without enlarging the icon.
 
 ## 49. Live cursors, presence and follow
 - **Category:** `advanced`
 - **Principle:** Interpolated remote cursors, presence before activity and an optional follow mode make collaboration feel live.
 - **Implementation rule:** Throttled collaboration presence, jitter smoothing, accessible participant labels and opt-in follow mode.
 - **Guardrail:** Limit private presence leakage and avoid user-surveillance implications.
+- **Specifics:**
+  - Throttle cursor updates to about 10-20 per second and interpolate each remote cursor toward its latest position every frame, buffering about 100 ms to hide jitter.
+  - Derive each person's color from a hash of their id (hue at fixed lightness), with label text that passes 4.5:1 on every hue.
+  - Show presence before activity: an avatar stack with "+N", accessible names and an online count; outline objects others are editing with a "Sam is editing" label.
+  - Make follow mode explicit: frame the viewport in the followed person's color with a "Following Sam" label, ending on Escape or any own input.
 
 ## 50. Tooltip delay and edge placement
 - **Category:** `feedback`
 - **Principle:** Delayed tooltips that flip at screen edges and keep wording short stay helpful without getting in the way.
-- **Implementation rule:** Delay nonessential hover tooltips appropriately, position within viewport and show keyboard focus alternatives.
+- **Implementation rule:** Delay nonessential hover tooltips briefly, show them immediately on focus, keep them inside the viewport and make them dismissible, hoverable and persistent (WCAG 1.4.13).
 - **Guardrail:** Critical guidance cannot live only in tooltips.
+- **Specifics:**
+  - Show on hover after about 300-700 ms, immediately on keyboard focus, and without delay when moving to a neighbouring trigger right after one closes.
+  - Keep it to one short sentence, about 240-320 px wide at most, with an arrow at the trigger, flipping to stay in the viewport.
+  - Dismiss on Escape without moving the pointer, stay open while the pointer moves onto the tooltip, and persist until hover or focus leaves.
+  - Use role="tooltip" referenced by aria-describedby, and never put interactive content in a tooltip.
 
 ## 51. Dark-mode surfaces, text tiers and hairlines
 - **Category:** `foundation`
 - **Principle:** Layered near-black surfaces, three text tiers and subtle hairlines make dark mode readable.
 - **Implementation rule:** Use dark-mode elevation and readable text hierarchy, reserve hairlines for helpful separation.
 - **Guardrail:** Do not blindly choose low-contrast gray or assume OLED benefits justify poor readability.
+- **Specifics:**
+  - Use a tinted near-black ramp that lightens with elevation, for example page #0B0D10, card #13161B, menu #1A1E25, dialog #222730.
+  - Set text tiers as white at about 87%, 60% and 38% opacity (roughly 13.8:1, 7:1 and 3.6:1 on that card); keep the 38% tier for disabled text only.
+  - Use a lighter, less saturated accent in dark mode and check its label; light accents usually need near-black text.
+  - Draw separators as 1 px white at about 8% opacity; input and control boundaries still need 3:1 (WCAG 1.4.11).
+  - Dim photos slightly and supply dark versions of illustrations.
 
 ## 52. Nested radius and concentric geometry
 - **Category:** `foundation`
 - **Principle:** Nested elements look right when the inner radius steps down by the parent's padding.
 - **Implementation rule:** Use radius tokens; nested radius should normally step down relative to container padding.
 - **Guardrail:** Treat formulas as visual heuristics rather than absolute laws.
+- **Specifics:**
+  - Use radius tokens such as 4, 8, 12 and 16 px, plus a full value (for example 999 px) for pills.
+  - Inner radius = outer radius - padding, with a small floor; equal radii on nested elements make the inner one bulge.
+  - A focus ring drawn around an element uses its radius plus the gap (8 px radius + 2 px gap = 10 px).
+  - Use 0 radius on edges docked to the viewport, and let a rounded card crop its media with overflow: hidden.
 
 ## 53. Data tables: alignment, density, actions
 - **Category:** `data`
 - **Principle:** Right-aligned tabular numbers, left-aligned text and task-appropriate row height make tables scannable.
 - **Implementation rule:** Align numeric columns right with tabular numerals, label headers, let density reflect workflow, provide visible keyboard actions.
 - **Guardrail:** Do not hide needed actions in hover alone or truncate key values.
+- **Specifics:**
+  - Right-align numbers with font-variant-numeric: tabular-nums, and never truncate them.
+  - Offer density presets around 40, 48 and 56 px rows; separate rows with a hairline plus hover tint, using stripes only for very wide tables.
+  - Keep the header and the identity column sticky when the table scrolls.
+  - Show missing values as a dash with visually hidden "No value" text; truncate long text with the full value available on hover and focus.
+  - Reveal row actions on hover and :focus-within with a visible overflow menu on touch; set aria-sort and the sort arrow only on the active column.
 
 ## 54. Responsive tables into labeled records
 - **Category:** `data`
 - **Principle:** Wide tables become readable on mobile when rows turn into labeled records.
 - **Implementation rule:** Below a content-fit breakpoint, switch to labelled cards/rows or intentional scroll with sticky identifiers.
 - **Guardrail:** Ensure dates, currency units and statuses remain unambiguous.
+- **Specifics:**
+  - Rank rather than squeeze: identity and amount on the first line (amount in a fixed right-aligned slot), status and a labelled date on the second.
+  - Replace column headers with an explicit sort control once rows become records.
+  - Switch layouts with a container query on the table's wrapper instead of a viewport breakpoint.
+  - Changing a table's display can strip its semantics; render a real list for the record view or restore the table roles.
 
 ## 55. Dashboard anti-slop teardown
 - **Category:** `foundation`
 - **Principle:** Generic gradients, equal-weight metric cards and bloated greetings are dashboard noise.
 - **Implementation rule:** Use real KPIs first, one primary focal point, meaningful comparison units, concise copy and direct controls.
 - **Guardrail:** Never invent analytics or remove necessary expert data.
+- **Specifics:**
+  - Lead with one primary metric and its breakdown, then a few secondary ones, instead of a row of equal tiles.
+  - Replace greeting headlines with the key figure and an explicit date range.
+  - Give every delta its comparison period ("+4.2% vs last week") and express changes in rates as percentage points.
+  - Drop decorative gradient headers, colored icon tiles per metric and shadows on every box; keep shadows for floating layers.
 
 ## 56. Chat system layout and anchoring
 - **Category:** `advanced`
 - **Principle:** Sender grouping, timestamps, scroll anchoring and composer behavior define a usable chat.
 - **Implementation rule:** Group consecutive messages, preserve scroll position, show unread divider, manage composer growth and status semantics.
 - **Guardrail:** Avoid fake presence, intrusive typing and chat-history jumps.
+- **Specifics:**
+  - Group consecutive messages from one sender within a few minutes (about 2-5), about 4 px apart inside a group and about 16 px between groups.
+  - Insert a sent message immediately as pending, then mark it sent, or failed with Retry.
+  - Keep scroll anchored when older history loads, and show a "N new messages" pill instead of jumping when the user has scrolled up.
+  - Render typing as a row in the message flow; grow the composer to about 5 lines, then scroll inside it.
+  - Use role="log" on the message list so new messages are announced politely.
 
 ## 57. Calendar grid and event geometry
 - **Category:** `data`
 - **Principle:** A week grid has seven columns, and each event's position and height map to its time and duration.
 - **Implementation rule:** Render time-to-pixel mapping consistently, handle overlapping events, accessible views and current-time indicator.
 - **Guardrail:** Test daylight-saving transitions, locale week starts and timezone math.
+- **Specifics:**
+  - Map time to height consistently (about 60 px per hour) with a one-line minimum for short events, keeping the full time range in the accessible name.
+  - Open scrolled to the current time or the start of the working day; label the now-line with the time and show the time zone.
+  - Split overlapping events into equal columns, collapse beyond two or three into "+N more", and pin all-day events above the grid.
+  - Dragging on an empty slot creates an event snapped to 15 minutes with a live start, end and duration readout; offer a keyboard New event path too.
+  - Color events with a thin category stripe and a light tint (about 10%) behind normal text, not saturated fills with white titles.
 
 ## 58. Login UI fidelity and real error states
 - **Category:** `forms`
 - **Principle:** Ornamental login screens often hide weak error handling; working auth and clear failure states matter more.
 - **Implementation rule:** Prioritize working auth, provider-specific login, useful validation, distinct failure states, and genuine brand styling.
 - **Guardrail:** Never simulate a provider sign-in or mask auth errors as merely design.
+- **Specifics:**
+  - Use a solid surface, a modest logo, a heading that names the product with one line of value, and sign-in providers of equal visual weight.
+  - Design the failure states: a generic credential error that does not reveal which field was wrong, a lockout message with the retry time and a reset link, and an unverified-email state with inline Resend.
+  - Use autocomplete="username" and "current-password", keep paste enabled, and announce errors with focus or a live region.
 
 ## 59. Icons as a coherent system
 - **Category:** `foundation`
 - **Principle:** One icon stroke style, sized to the surrounding text, keeps an interface coherent.
 - **Implementation rule:** Standardize stroke, viewbox, optical scale and semantic icon usage across surfaces.
 - **Guardrail:** No mismatched emoji, mixed icon styles or icon-only unlabeled actions.
+- **Specifics:**
+  - Use one stroke width across the product and size icons from the adjacent text (14 px text → 16 px icon, 16 px text → 20 px).
+  - Color icons with currentColor so they follow text and state; reserve the filled variant for the selected state.
+  - Nudge asymmetric glyphs such as play triangles about 1 px toward their point so they look centered.
+  - Hide decorative icons with aria-hidden="true" and give icon-only buttons an accessible name and a tooltip.
 
 ## 60. Internationalization and RTL expansion
 - **Category:** `responsive`
 - **Principle:** Long translations and right-to-left layouts expose weak layout assumptions.
 - **Implementation rule:** Test longer strings, flexible controls, logical CSS properties and right-to-left flow incl. icons and motion.
 - **Guardrail:** Do not mirror numbers, media play symbols or meaning-specific icons incorrectly.
+- **Specifics:**
+  - Plan for about 30% expansion in sentences and up to double on short labels (Edit → Bearbeiten); test with pseudo-localized strings.
+  - Size controls with min-width and padding instead of fixed widths, and decide wrapping or truncation per element type.
+  - Set dir="rtl" and use logical properties (margin-inline-start, inset-inline-end); mirror back arrows and chevrons, not logos, clocks or play icons.
+  - Format numbers, dates and currencies with Intl.NumberFormat and Intl.DateTimeFormat in the viewer's locale instead of preformatted strings.
 
 ## 61. Success outcomes and next steps
 - **Category:** `feedback`
 - **Principle:** A good success screen says what happened, for whom and when, with a receipt and next steps.
 - **Implementation rule:** Show concrete outcome, relevant next action, reference/receipt, and permanence level.
 - **Guardrail:** Never say paid/confirmed until independently verified.
+- **Specifics:**
+  - Name the object, recipient, amount and timing ("Invoice INV-104 sent to Jordan Lee, €1,250.00, due 30 Nov") and where it was delivered.
+  - Offer one main next step, an optional secondary one and a way back to the list; never a bare "Success!" with OK.
+  - Include a reference number or receipt and say whether the action can still be changed or cancelled.
+  - Move focus to the outcome heading or announce it so screen-reader users hear the result.
 
 ## 62. AI editing version history and source labels
 - **Category:** `advanced`
 - **Principle:** AI edits need clear labels, version history and an explicit accept flow.
 - **Implementation rule:** Keep original content recoverable, mark AI-generated suggestions, show provenance and offer compare/revert.
 - **Guardrail:** Never silently overwrite user work or claim AI output is authoritative.
+- **Specifics:**
+  - Show inline suggestions as muted text after the caret; Tab accepts only while one is visible (otherwise Tab moves focus), and Escape or further typing dismisses.
+  - Announce available suggestions in a polite live region.
+  - Keep every version when regenerating, with compare and revert.
+  - Label AI-generated passages and their sources until the user edits them.
 
 ## 63. Kanban drag previews and column limits
 - **Category:** `advanced`
 - **Principle:** A lifted card, a landing placeholder and work-in-progress cues make Kanban boards predictable.
 - **Implementation rule:** Expose drag preview and landing placeholder, preserve ordering atomically, indicate WIP limits and keyboard move action.
 - **Guardrail:** Avoid hidden columns or unannounced state mutation.
+- **Specifics:**
+  - Lift the card with a slight scale (about 1.03) and a deeper shadow, and hold a placeholder the height of the dragged card where it will land.
+  - Show WIP as "3 / 4" in the column header and change its color at the limit; if the limit is strict, refuse the drop with a stated, announced reason.
+  - Let users collapse columns into narrow labelled strips with card counts instead of scrolling the board sideways.
+  - Offer a Move to action (column and position) for keyboard and single-pointer users, and announce the result.
 
 ## 64. View Transitions API with fallbacks
 - **Category:** `advanced`
 - **Principle:** Shared transition names can connect list and detail views, theme toggles and page navigation.
 - **Implementation rule:** Use View Transitions API only where supported, with stable names, fallback, and reduced-motion guard.
-- **Guardrail:** Never rely on experimental cross-document transitions for basic navigation.
+- **Guardrail:** Treat view transitions as progressive enhancement; navigation and state changes must work without them.
+- **Specifics:**
+  - Feature-detect document.startViewTransition and run the plain DOM update when it is missing or reduced motion is preferred.
+  - Set a unique view-transition-name only on the element being transitioned, not on every list item.
+  - Dialog from a button: name the button, then inside the update callback move the name to the dialog and call showModal().
+  - Theme switch: expand a circular mask on the new snapshot only, leaving the old one static, in under about 500 ms.
+  - Across pages, declare @view-transition { navigation: auto; } on both pages inside @media (prefers-reduced-motion: no-preference); other browsers navigate normally.
 
 ## 65. Mobile forms: labels, errors, numeric codes
 - **Category:** `forms`
 - **Principle:** Placeholder-only labels, jumping submit buttons and numeric-typed codes break mobile forms.
 - **Implementation rule:** Keep persistent labels, reserve validation space, anchor submit consistently and store codes as strings (preserve zeros).
 - **Guardrail:** Use inputmode for keypad, not numerical conversion on codes.
+- **Specifics:**
+  - Keep labels visible: above the field, or floating labels that pass 4.5:1 at rest and stay at least 12 px when floated.
+  - Show errors on blur, clear them as soon as the value is valid, and reserve the message slot so the submit button never jumps.
+  - Style the :autofill state so autofilled fields stay readable and match the other fields.
+  - Keep verification codes as strings in a text input with inputmode="numeric" and autocomplete="one-time-code", never type="number", so leading zeros survive.
 
 ## 66. Mobile sheets versus modal dialogs
 - **Category:** `responsive`
 - **Principle:** Bottom sheets suit contextual mobile tasks; swipe-to-dismiss needs velocity and scroll coordination.
 - **Implementation rule:** Choose sheet for contextual mobile actions, modal for genuinely blocking tasks, manage focus/scroll and explicit close.
 - **Guardrail:** Do not allow accidental destructive dismissal or trap gestures.
+- **Specifics:**
+  - If the page must stay visible, use a sheet; if the task must stop everything else, use a modal dialog.
+  - Give sheets snap points (peek, half, full) and dismiss on a fast downward flick or a drag past about half the height.
+  - Start sheet drags from the handle, or from the content only when it is scrolled to the top.
+  - Guard unsaved input before dismissing, keep a visible Close button, and show one sheet at a time.
+  - On desktop, use a side drawer about 320 px to 40% of the viewport wide instead.
 
 ## 67. Checkout layout and error on blur
 - **Category:** `forms`
 - **Principle:** A visible total, well-timed card validation and a logical field order make checkout trustworthy.
 - **Implementation rule:** Display authoritative total and terms, preserve keyboard order and tokenize payment with provider elements.
 - **Guardrail:** Never let client decide charge amount or store PAN/CVC locally.
+- **Specifics:**
+  - Keep an order summary with the total due visible beside the form (sticky on desktop).
+  - Place express payment options above a divider, then the card form in one column with labels above fields.
+  - Show the card network once the prefix identifies it, and validate card fields on blur rather than while typing.
+  - Label the pay button with the exact amount from the server-confirmed total ("Pay €1,250.00").
 
 ## 68. Voice notes: press feedback, lock, playback
 - **Category:** `advanced`
 - **Principle:** Voice recording needs controls away from the thumb, a lock for long recordings and scrub/speed on playback.
 - **Implementation rule:** Give clear recording status, permission handling, pause/cancel, locked hands-free mode and accessible playback.
 - **Guardrail:** No secret recording, false recording indicators or missing consent.
+- **Specifics:**
+  - Start feedback in the same frame as the press: a timer and a pulse placed beyond the thumb so they stay visible.
+  - While recording, show a live level meter or waveform; drag up to lock for hands-free use with Stop and Send, or drag past a cancel line and release to discard.
+  - Warn after a few seconds of completely flat input that the microphone may not be picking up sound.
+  - Offer tap-to-start, tap-to-stop as an alternative to holding, and announce recording start and stop to screen readers.
+  - Playback: scrub on the waveform, a speed control (1x, 1.5x, 2x), time remaining, and a transcript whose timestamps seek to that point.
 
 ## 69. Command palette: ranking, shortcuts, context
 - **Category:** `navigation`
 - **Principle:** A command palette should rank exact and recent matches and layer context without dimming the app too much.
 - **Implementation rule:** Prioritize exact/recent commands, keyboard shortcuts, clear action category and robust focus restoration.
 - **Guardrail:** Do not reveal privileged actions before server authorization.
+- **Specifics:**
+  - Render cached matches immediately and update them in place as fresh results arrive, with a thin progress line rather than a spinner or blank list.
+  - Show in a footer what Enter does for the highlighted row and which key opens more actions; list each action with its shortcut.
+  - Keep the palette surface opaque (any scrim behind it stays light), build it as an ARIA combobox with a listbox, and restore focus to the previous element on close.

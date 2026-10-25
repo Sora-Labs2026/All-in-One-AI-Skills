@@ -34,16 +34,18 @@ Optional visual treatments. Use only when the brand or the request calls for the
 
 **Why:** A luminous, layered treatment can make one special action, such as an AI "Generate" button, feel distinct.
 
-- **Do:** Build it from consistent layers: a radial gradient fill, a fading 1px highlight stroke, soft inset highlights and tinted drop shadows.
-- **Do:** Verify the label meets 4.5:1 against the lightest part of the gradient.
+- **Do:** Build it from consistent layers: a radial gradient fill, a 1px highlight stroke fading to transparent (a masked pseudo-element), inner highlights on a pseudo-element with mix-blend-mode: plus-lighter, two or three tinted drop shadows and a faint 6px halo ring at about 8% accent.
+- **Do:** Verify the label meets 4.5:1 against the lightest part of the gradient behind it: center the bright core below the label (for example radial-gradient(at 50% 100%, ...)) and use near-black labels on light variants.
+- **Do:** Raise the highlight on hover and scale an inner layer to about 0.97 on press while the hit box stays still.
 - **Avoid:** Using it on more than one action per screen, or heavy blur and blend layers on low-end devices.
 
 ## STY-05. Translucent blur on floating chrome
 
 **Why:** Blurred translucent bars and inputs over imagery add depth while keeping context visible.
 
-- **Do:** Use a translucent fill with backdrop-filter blur, plus a subtle gradient so text stays readable.
-- **Do:** Provide a solid fallback for reduce-transparency settings and browsers without backdrop-filter.
+- **Do:** Use a translucent fill with backdrop-filter blur and a tint strong enough that the faintest text tier reaches 4.5:1 over the worst-case backdrop (about 55% black under white text or 50% white under near-black text when the backdrop can be anything), with secondary text at 80% opacity or more.
+- **Do:** Write -webkit-backdrop-filter beside backdrop-filter, and provide a solid fallback for prefers-reduced-transparency and browsers without backdrop-filter.
+- **Do:** Switch a header that starts transparent over a hero to its translucent or solid fill once content scrolls beneath it, using an IntersectionObserver sentinel at the end of the hero or a scroll-driven animation.
 - **Avoid:** Stacked heavy blurs that cost performance or drop text contrast.
 
 ## STY-06. Additive glows on dark backgrounds
@@ -58,8 +60,8 @@ Optional visual treatments. Use only when the brand or the request calls for the
 
 **Why:** A layered gradient tile with a soft halo and glow gives hero or store artwork depth and polish.
 
-- **Do:** Use a square tile with continuous corners at about 24% of its size, a gradient between neighboring hues and a white glyph.
-- **Do:** Add a faint, larger halo tile and a blurred same-gradient glow beneath it, built with pseudo-elements and filter: blur().
+- **Do:** Use a square tile with continuous corners at about 24% of its size (corner-shape: squircle inside @supports, with border-radius as the fallback), a gradient between neighboring hues and a white glyph.
+- **Do:** Add a faint, larger halo tile whose radius equals the tile radius plus the inset, and a blurred same-gradient glow beneath it, built with pseudo-elements and filter: blur().
 - **Avoid:** Using this treatment for small in-app icons, or many large blur filters on performance-sensitive pages.
 
 ## STY-08. Tint surfaces with colors from the imagery
@@ -97,7 +99,8 @@ Optional visual treatments. Use only when the brand or the request calls for the
 
 **Why:** Particle systems, 3D scenes and simulations are expensive and must never degrade the page or hide content.
 
-- **Do:** Cap particle counts, lazy-load 3D libraries, cap devicePixelRatio around 1.5-2 and pause rendering when off-screen or when the tab is hidden.
+- **Do:** Cap particle counts, lazy-load 3D libraries, cap devicePixelRatio around 1.5-2, pause rendering when off-screen or when the tab is hidden, and stop the animation loop once the motion settles.
+- **Do:** Give SVG filter effects such as gooey blur-and-threshold blobs a tight filter region (x, y, width, height), since the whole region is re-filtered every frame its children move.
 - **Do:** Keep headlines and navigation as real DOM elements, mark the canvas aria-hidden and provide a static fallback for reduced motion, low-power devices and missing WebGL.
 - **Avoid:** Unbounded particle arrays, or navigation that depends on exploring a 3D scene.
 
