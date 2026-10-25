@@ -1,5 +1,13 @@
 # Changelog
 
+## ProductCraft 1.6.0 (2026-10-25)
+
+- UI rulebook: 294 rules (9 new), with 165 existing rules made more concrete or corrected. Existing rule IDs are unchanged; four titles were corrected (FBK-11, ICO-03, ICO-08, COP-08).
+  - Concrete defaults throughout: one timing scale for feedback (about 100 ms, 300-400 ms, 1 s), press feedback within about 100 ms, spring damping guidance, hit-area math, contrast floors for inactive labels, icons, input borders and status text, and paired fill and text tokens.
+  - Corrections include: password checklists cover only length and breached-password checks (NIST SP 800-63B); one-time codes prefer a single real input; dark-mode text tiers are white alpha over the surface; tooltips follow WCAG 1.4.13 and use long press or a toggletip on touch; optimistic updates are allowed for low-risk actions with visible rollback; top-level tabs switch instantly or fade through; numbers never count up from zero; sign-in errors use one generic message.
+  - New rules: LAY-17 translation and right-to-left, NAV-18 keep the user's place in long lists, FBK-21 optimistic updates with rollback, FBK-22 lost connections and retry, FBK-23 time-limited decisions, CMP-33 drag and drop, ICO-12 no emoji as interface icons, SCR-26 inline AI output, MOT-21 flash limits (WCAG 2.3.1).
+- Pattern library: all 69 patterns gain a "Specifics" list with default values, keyboard and screen-reader behavior, reduced-motion handling and edge cases; two patterns get corrected rule or guardrail text.
+
 ## ProductCraft 1.5.0 (2026-10-25)
 
 - New modules, each with a `GUIDE.md`, focused references and tested standard-library scripts:

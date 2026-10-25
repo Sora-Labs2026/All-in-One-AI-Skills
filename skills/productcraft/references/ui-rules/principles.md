@@ -8,8 +8,9 @@ Decision load, memory, conventions and perceived quality. Rule IDs use the `PRN-
 
 - **Do:** Show only the options most users need at each step and move the rest behind "More" or "Advanced".
 - **Do:** Mark a recommended default and give options short distinguishing subtitles.
-- **Do:** Collapse fine-grained ranges into a few non-overlapping buckets (for example 0-1, 2-3, 4-5, 6+).
+- **Do:** Collapse fine-grained ranges into a few buckets that place every possible value in exactly one: 0-1, 2-3, 4-5, 6+ for whole numbers, half-open wording for continuous quantities ("Less than 1 year", "1 to under 3 years", "3 years or more").
 - **Avoid:** Long flat lists of near-identical options, or every setting on the first screen.
+- **Avoid:** Ranges that share endpoints (1-3, 3-5), or integer ranges for values that can fall between them.
 
 ## PRN-02. Put key items first and last
 
@@ -35,6 +36,7 @@ Decision load, memory, conventions and perceived quality. Rule IDs use the `PRN-
 
 - **Do:** Default to solid single-color primary buttons, standard navigation placement and platform conventions.
 - **Do:** Express personality through one or two restrained touches such as an accent color or illustration.
+- **Do:** Before shipping, check for dated defaults (violet-indigo gradients, gradient headline text, glass cards over busy backgrounds, glowing buttons, emoji as icons (ICO-12), near-black pages with one neon accent, the same radius and shadow on every element regardless of size or elevation) and keep one only with a brand reason you can state.
 - **Avoid:** Multi-color gradient buttons or extra floating controls added only for flair.
 
 ## PRN-05. Polish shapes perceived usability

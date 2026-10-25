@@ -7,8 +7,9 @@ Contrast minimums, palette discipline, emphasis and text on images. Rule IDs use
 **Why:** Text that looks fine to the designer can be unreadable for people with low vision or in bright light.
 
 - **Do:** Reach at least 4.5:1 for normal text and 3:1 for large text (24px+, or 18.66px+ bold).
+- **Do:** Treat 14-17px button labels, badges and captions as normal text even when semibold, so a white label needs a fill dark enough for 4.5:1 (white on #007AFF is only 4.0:1; #0070E0 reaches 4.8:1).
 - **Do:** Reach at least 3:1 for UI component boundaries, focus indicators and icons that carry meaning.
-- **Do:** Check every token pair with a contrast tool, including white labels on brand-colored buttons.
+- **Do:** Check every token pair with a contrast tool, including white labels on brand-colored buttons, and recompute any ratio written on a spec instead of trusting it.
 - **Avoid:** Judging contrast by eye, or pale brand text on a light tint of the same hue.
 - **Note:** A bright brand color does not guarantee readable white text; many oranges, greens and cyans fail with white.
 
@@ -20,7 +21,7 @@ Contrast minimums, palette discipline, emphasis and text on images. Rule IDs use
 - **Do:** Work from a compact palette: a light base, a dark base, one accent and at most one supporting tone.
 - **Do:** Keep structural colors (surfaces, text) separate from semantic colors (success, warning, error).
 - **Avoid:** A different pastel or gradient on every card, banner and icon.
-- **Avoid:** Using the accent on decorative elements until it no longer signals interactivity.
+- **Avoid:** Using the accent on headings, icons, bullets, borders or decorative shapes until it no longer signals interactivity.
 
 ## COL-03. Use 60-30-10 as a starting balance
 
@@ -28,6 +29,7 @@ Contrast minimums, palette discipline, emphasis and text on images. Rule IDs use
 
 - **Do:** Aim for about 60% neutral base, 30% secondary surfaces and 10% accent, judged by visual weight.
 - **Do:** Define the three roles as tokens (for example --color-bg, --color-surface, --color-accent).
+- **Do:** Count accent roles as well as area: a screen near 10% can still dilute the accent across buttons, tabs, deltas and chart bars, so give deltas status tokens and chart highlights their own token.
 - **Avoid:** Spreading the accent across large backgrounds.
 - **Note:** A heuristic, not a quota.
 
@@ -45,16 +47,17 @@ Contrast minimums, palette discipline, emphasis and text on images. Rule IDs use
 
 - **Do:** Use slightly toned variants instead of #FF0000, #00FF00, #0000FF and similar pure hues.
 - **Do:** Use near-black (for example #171717) for text and dark surfaces and an off-white for large light backgrounds.
-- **Do:** Store the chosen values as tokens and verify each text pairing still meets contrast minimums.
+- **Do:** Store the chosen values as tokens and verify each text pairing still meets contrast minimums; toning a hue down does not make white labels readable by itself, so pair light tones with near-black text.
 - **Avoid:** Pure #000000 text on pure #FFFFFF across large reading areas.
 
 ## COL-06. Reserve status colors for status
 
 **Why:** If red and green appear decoratively, users misread them as errors or success.
 
-- **Do:** Keep red for errors, green for success and amber for warnings, applied consistently across the product.
+- **Do:** Keep red for errors and destructive actions, green for success and amber for warnings, applied consistently across the product.
 - **Do:** Pair every status color with an icon and explicit wording.
-- **Avoid:** Brand or decorative elements in the error red or success green.
+- **Do:** Split each status color into a text token of at least 4.5:1 for status words and percentages (green #15803D is about 5.0:1 on white) and a brighter token of at least 3:1 for icons, bars and dots (#16A34A, about 3.3:1); mid greens such as #22C55E (about 2.3:1) fail even as icons.
+- **Avoid:** Brand or decorative elements in the error red or success green, or active states such as tab underlines and secondary buttons in the error red.
 
 ## COL-07. Never rely on color alone
 
@@ -68,10 +71,11 @@ Contrast minimums, palette discipline, emphasis and text on images. Rule IDs use
 
 **Why:** Text over photos becomes unreadable wherever the image is bright or busy.
 
-- **Do:** Add a scrim behind overlaid text, such as linear-gradient(to top, rgba(0,0,0,.6), transparent) across the lower third.
-- **Do:** Check contrast against the lightest part of the image behind the text.
+- **Do:** Add a scrim behind overlaid text, such as linear-gradient(to top, rgba(0,0,0,.6), transparent) across the lower third, or in light themes a white fade that is fully opaque under near-black text.
+- **Do:** Check contrast against the lightest part of the image behind the text, sizing the scrim for the brightest image in the set and testing it with the smallest caption.
+- **Do:** Apply the same check to header and navigation links that sit over a hero.
 - **Do:** Put small overlays such as ratings on solid pills.
-- **Avoid:** White text straight on skies, buildings or busy textures, or a text shadow as the only protection for small text.
+- **Avoid:** White text straight on skies, buildings, mid-tone or busy areas, or a text shadow as the only protection for small text.
 
 ## COL-09. Collapse near-duplicate colors into tokens
 
@@ -79,6 +83,7 @@ Contrast minimums, palette discipline, emphasis and text on images. Rule IDs use
 
 - **Do:** Define a small set of named tokens (text-primary, text-secondary, border, surface) and reference only those.
 - **Do:** Search stylesheets for raw hex values and merge near-duplicates into the nearest token.
+- **Do:** When merging grays used for text, round toward the darker value so it keeps 4.5:1 on off-white surfaces too; #767676 is the lightest gray that passes on pure white.
 - **Avoid:** Hard-coded one-off colors inside components.
 
 ## COL-10. Keep focus and pending colors apart from verdict colors
@@ -93,19 +98,25 @@ Contrast minimums, palette discipline, emphasis and text on images. Rule IDs use
 
 **Why:** Light accents such as lime, yellow, orange and cyan often fail with white text, and gradients fail at their lightest stop.
 
-- **Do:** Define an on-accent text token for each accent (near-black on light accents, white on dark ones).
+- **Do:** Define an on-accent text token for each accent from the fill's relative luminance: white reaches 4.5:1 only up to about 0.18 (about as dark as #767676 gray), so lighter fills get near-black text.
+- **Do:** Check the label on every state's fill (default, hover, pressed, busy, progress), since lighter hover and busy shades are where white labels usually fail.
+- **Do:** For white labels on common 50-900 color ramps, expect to need the 700 step for green, emerald, teal, cyan, orange and amber and at least the 600 step for blue, indigo, violet and red (for example #15803D, #C2410C, #2563EB, #DC2626); otherwise keep the bright fill and switch the label to near-black.
 - **Do:** Check labels against the lightest stop of any gradient, and darken the stops or switch text color until it passes.
+- **Do:** For gradient-filled text (background-clip: text), declare a solid color first as a fallback, check the lightest stop against the background (3:1 for large text, 4.5:1 otherwise), and switch to solid text for print and under @media (forced-colors: active).
 - **Do:** When accents are sampled from imagery or brand material, darken or lighten them until text reaches 4.5:1 against the real background.
-- **Avoid:** White text on lime, yellow or orange fills, or a gradient button whose label fades out at one end.
+- **Avoid:** White text on lime, yellow, orange, mint, teal or mid-blue fills, or a gradient button whose label fades out at one end.
 
 ## COL-12. Give translucent surfaces a contrast floor
 
 **Why:** Text on frosted or translucent panels changes contrast with whatever sits behind it.
 
-- **Do:** Pair backdrop-filter blur (about 12-24px) with a semi-opaque tint and a 1px light border, and raise the tint until text passes 4.5:1 against the worst-case background.
-- **Do:** Provide an opaque fallback under @supports not (backdrop-filter: blur(1px)) and @media (prefers-reduced-transparency: reduce).
+- **Do:** Pair backdrop-filter blur (about 12-24px) with a semi-opaque tint and a 1px light border, and raise the tint until the faintest text tier (secondary text, timestamps) passes 4.5:1 against the worst-case background.
+- **Do:** When the backdrop can be anything, use at least about 55% black under white text or about 50% white under near-black text, because blur alone leaves large bright or dark areas intact.
+- **Do:** Set secondary text on glass at about 80% opacity or more, or use a solid token.
+- **Do:** Write -webkit-backdrop-filter beside backdrop-filter, and provide an opaque fallback under @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) and @media (prefers-reduced-transparency: reduce).
 - **Do:** Use regular or medium weights for small text and keep the number of stacked blurred layers low.
 - **Avoid:** Secondary text or placeholders at 30-60% white on glass over photos or video.
+- **Note:** If shapes behind the panel are still recognizable under the text, the blur and tint are too weak.
 
 ## COL-13. Change the fill, not the ink, for errors on colored controls
 

@@ -16,6 +16,7 @@ Native elements, state management, robustness and progressive enhancement. Rule 
 
 - **Do:** Declare the allowed transitions (idle to working to done or failed, and back) and reflect the current state in one data-state attribute that all styling reads.
 - **Do:** Ignore activation unless the state allows it, set aria-busy and disabled or aria-disabled while working, and auto-reset after a short confirmation when the action repeats.
+- **Do:** For optimistic toggles keep the confirmed and the pending value separately: render pending at once, promote it on success, restore the confirmed value with a short error and Retry on failure, and send only the latest state after rapid toggles.
 - **Avoid:** Separate loading, success and error booleans that can all be true, or a second click restarting the request mid-flight.
 
 ## ENG-03. Keep button size stable across label changes
@@ -30,7 +31,8 @@ Native elements, state management, robustness and progressive enhancement. Rule 
 
 **Why:** If the element receiving pointer events moves, hover flickers and clicks miss.
 
-- **Do:** Give the outer link or button a fixed box and apply transforms to an inner span, driving state from a data attribute set on pointerenter and pointerleave.
+- **Do:** Give the outer link or button a fixed box and apply transforms to an inner span, driving state from a data attribute set on pointerenter and pointerleave (or, with a motion library, from hover and tap gestures on the outer element that propagate to the inner span).
+- **Do:** Limit CSS transitions on script-animated elements to colors; a transition-all utility re-eases every frame the script writes and makes the motion lag.
 - **Avoid:** Scaling or translating the element that receives pointer events.
 
 ## ENG-05. Make hidden and covered content inert
@@ -53,7 +55,7 @@ Native elements, state management, robustness and progressive enhancement. Rule 
 
 **Why:** Defining tiles, rows and menus as data keeps markup consistent and values computable.
 
-- **Do:** Map arrays of raw values ({ title, value, change, icon }) to one component with stable keys.
+- **Do:** Map arrays of raw values ({ title, value, change, icon }) to one component keyed by a stable id, never the array index, so per-item state (playing media, expanded text, a half-typed reply) stays with its row when items are inserted or reordered.
 - **Do:** Store numbers and dates raw and format them at render with Intl.NumberFormat and Intl.DateTimeFormat.
 - **Avoid:** Copy-pasted near-identical markup per item, or preformatted strings that cannot be sorted or summed.
 
@@ -95,6 +97,8 @@ Native elements, state management, robustness and progressive enhancement. Rule 
 **Why:** Status-bar colors, orientation locks and leaked listeners cause flashes, jank and memory leaks in apps.
 
 - **Do:** Initialize the shell before the first frame (preload assets, set transparent system bars with icon brightness from the active theme).
+- **Do:** Set both the iOS status-bar brightness flag and the Android icon brightness flag for each theme, checking what each means: in some toolkits one describes the bar background and the other the icons, so the same look needs opposite values.
+- **Do:** Over a full-bleed map or photo under a transparent bar, set icon brightness per screen from the content behind it, or add a 24-48px top gradient scrim.
 - **Do:** Lock orientation only when the layout truly cannot adapt, and dispose controllers, listeners and subscriptions when screens close.
 - **Avoid:** Hard-coded dark status-bar icons in both themes, or listeners left running after a screen is gone.
 

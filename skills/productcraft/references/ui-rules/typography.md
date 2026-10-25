@@ -9,16 +9,20 @@ Typefaces, type scale, weight, size, line length, letter spacing and text color.
 - **Do:** Use the platform system stack (system-ui, -apple-system, Roboto) or one neutral, well-hinted UI sans for body, labels and buttons.
 - **Do:** Reserve any expressive display face for large headlines, if at all.
 - **Do:** Load only the weights in use, subset fonts, use font-display: swap and keep a system fallback stack.
-- **Avoid:** Mixing script, serif and sans faces within one card or heading.
+- **Do:** Check the font license before bundling, keep the license file with self-hosted copies, and self-host for privacy-sensitive products, since third-party font servers receive every visitor's IP address.
+- **Avoid:** Mixing script, serif and sans faces within one card or heading, including a single italic-serif accent word in a sans headline, unless the brand system defines that treatment.
+- **Avoid:** Monospace as a decorative "technical" voice for navigation, labels or marketing figures; reserve it for code, identifiers and keyboard keys, and use tabular-nums when figures must align.
 - **Avoid:** Decorative faces for paragraphs, form labels or button text.
 
 ## TYP-02. Keep a short type scale
 
 **Why:** Many slightly different font sizes read as noise; a few deliberate steps create clear levels.
 
-- **Do:** Define about 5-6 sizes as tokens or utility classes, each with a fixed line height and weight, for example Display 32, Title 24, Heading 18, Body 16, Small 13.
+- **Do:** Define about 5-6 sizes as tokens or utility classes, each with a fixed line height and weight, for example Display 32, Title 24, Heading 18, Body 16, Secondary 14, and Caption 12-13 only for captions, field labels and metadata.
 - **Do:** Start from platform ramps where they apply (iOS body 17pt, Android body 16sp, web body 16px) and step headings with a ratio of about 1.2-1.25.
-- **Avoid:** Ten or more sizes on one page, or 1px nudges used to fix layout problems.
+- **Do:** On iOS, take sizes from the Dynamic Type text styles (for example Large Title 34, Title 1 28, Body 17, Subheadline 15, Footnote 13, Caption 12pt) and apply them with .font(.body) or preferredFont(forTextStyle:), so they follow the user's text-size setting.
+- **Do:** Audit computed sizes on the rendered page at phone and desktop widths: more than about 8 distinct sizes (about 10 in a dense app) signals drift, so merge strays into the nearest step.
+- **Avoid:** Sizes outside the scale, two sizes within 2px doing different jobs, or 1px nudges used to fix layout problems.
 - **Note:** Data-dense apps may need one or two extra steps, but every size still comes from the scale.
 
 ## TYP-03. Match weight to size and avoid thin weights
@@ -44,8 +48,9 @@ Typefaces, type scale, weight, size, line length, letter spacing and text color.
 **Why:** Very long lines make it hard to find the next line; tight leading makes paragraphs dense.
 
 - **Do:** Cap body text at about 45-75 characters per line (for example max-width: 65ch).
-- **Do:** Use a line height of about 1.4-1.6 for body text and tighter (1.1-1.3) for large headings.
-- **Avoid:** Paragraphs that stretch across the full width of wide screens.
+- **Do:** Use a line height of about 1.4-1.6 for paragraphs, about 1.2-1.35 for one- or two-line labels, list titles and card titles, and 1.1-1.3 for large headings.
+- **Do:** Let layouts survive the WCAG 2.2 SC 1.4.12 text-spacing overrides (line height 1.5, paragraph spacing 2em, letter spacing 0.12em, word spacing 0.16em) without clipping or overlap.
+- **Avoid:** Paragraphs that stretch across the full width of wide screens, or fixed heights on text containers.
 
 ## TYP-06. Leave body tracking alone and use capitals sparingly
 
@@ -54,15 +59,17 @@ Typefaces, type scale, weight, size, line length, letter spacing and text color.
 - **Do:** Keep letter-spacing at the font default for body text.
 - **Do:** Use uppercase only for short eyebrows, tags and overlines, set smaller with about +0.05-0.1em tracking, applied with text-transform so screen readers do not spell words out.
 - **Do:** Use slight negative tracking only on very large display headings, if needed.
-- **Avoid:** Widened tracking on paragraphs, or headlines and paragraphs in all caps.
+- **Do:** Add an eyebrow only when it states a fact the heading lacks (a category, step or status); keep it at 12px or larger and 4.5:1, de-emphasized by size, case and tracking rather than a lighter gray.
+- **Avoid:** Widened tracking on paragraphs, headlines and paragraphs in all caps, or an eyebrow above every section that repeats its heading.
 
 ## TYP-07. Make headings darker than body text
 
 **Why:** A near-black, heavier heading above a slightly lighter body creates an instant reading order.
 
 - **Do:** Set titles in the strongest text color token and a heavier weight.
-- **Do:** Set supporting text in a medium gray that still reaches at least 4.5:1 against its background.
+- **Do:** Set supporting text in a medium gray that still reaches at least 4.5:1 on every surface it appears on: the lightest passing gray is about #767676 on white, #737373 on #FAFAFA and #6E6E6E on #F2F2F2.
 - **Avoid:** Titles in the same light gray as body copy, or low-contrast gray for errors and other critical messages.
+- **Avoid:** Relative specs such as "50% lighter", or a secondary gray checked only on white (#6B7280 is 4.8:1 on white but 4.4:1 on #F3F4F6; iOS secondaryLabel is about 3.4:1 on white).
 
 ## TYP-08. Style same-role text identically
 
@@ -94,7 +101,7 @@ Typefaces, type scale, weight, size, line length, letter spacing and text color.
 **Why:** Oversized, condensed, dot-matrix or split-word type adds energy but loses legibility quickly.
 
 - **Do:** Limit display type to short headlines (2-5 words) sized with clamp(), for example clamp(3rem, 10vw, 10rem), with line-height around 0.9-1.
-- **Do:** Use novelty numerals only for one or two large figures (32px or more) and keep a plain label beside them.
+- **Do:** Use novelty numerals only for one or two large figures (32px or more), keep their own dots or strokes at 3:1 or better, and keep a plain label beside them at 4.5:1.
 - **Do:** When a headline is split or partly muted for effect, keep the full text as the accessible name and keep the muted part at 3:1 or better.
 - **Avoid:** Display or dot-matrix faces for body text, small labels, tables or placeholders.
 - **Avoid:** Display type over busy photography without a scrim.

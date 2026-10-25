@@ -9,6 +9,7 @@ Spacing scale, grouping, alignment, hierarchy and grids. Rule IDs use the `LAY-`
 - **Do:** Take every padding, margin and gap from a token scale such as 4, 8, 12, 16, 24, 32, 40, 48.
 - **Do:** Use padding for space inside an element and gap or margin for space between elements, both from the same scale.
 - **Do:** Give repeated elements (cards, rows, chips) identical spacing.
+- **Do:** Apply the scale to padding, margins, gaps and component sizes; 1px borders, 2px focus outlines, line heights and 1-2px optical icon nudges sit outside it.
 - **Avoid:** Off-scale values such as 7, 13 or 22px, or different inner padding on sibling cards.
 - **Note:** A 4px base and an 8px base are both fine; pick one and enforce it.
 
@@ -31,6 +32,7 @@ Spacing scale, grouping, alignment, hierarchy and grids. Rule IDs use the `LAY-`
 - **Do:** When a screen feels busy, try doubling the gaps inside cards and between sections before removing content.
 - **Avoid:** Text or buttons touching card edges, or tight 4px gaps between headings and their content.
 - **Avoid:** Spacing so large that related items stop looking related.
+- **Avoid:** Lopsided sections with text in one half and nothing in the other, or empty bands from stacked section padding and margins.
 
 ## LAY-04. Align to shared edges
 
@@ -39,17 +41,19 @@ Spacing scale, grouping, alignment, hierarchy and grids. Rule IDs use the `LAY-`
 - **Do:** Align icons, text and buttons in a column to one left edge, and align numeric values such as prices to one right edge.
 - **Do:** In card rows, make cards equal height and pin the action to the bottom (flex column with margin-top: auto) so buttons share a baseline.
 - **Do:** Inspect layouts at high zoom or with guides to catch 1-6px offsets.
-- **Avoid:** Centered body paragraphs next to left-aligned headings in the same block.
+- **Do:** Left-align text by default; center only short moments such as a one- or two-line hero, an empty state or a short dialog.
+- **Avoid:** Centered body paragraphs next to left-aligned headings in the same block, or centered paragraphs longer than about three lines.
 
 ## LAY-05. One focal point per screen
 
 **Why:** When every element has the same weight, users do not know where to look first.
 
 - **Do:** Rank content with size, weight and color: one large title, quieter body text and one high-contrast primary action.
-- **Do:** Run a squint test: with the screen blurred, the most important element should still stand out.
+- **Do:** Run a squint test (filter: blur(6px) on the page root, or a screenshot shrunk to about 25%): the primary action should still be the most distinct shape; if several compete, quiet the secondary fills before enlarging the primary.
 - **Do:** Vary emphasis deliberately, for example a featured card larger than regular ones.
 - **Avoid:** Headline, body and button text at similar size and weight.
 - **Avoid:** A loud primary button repeated on every row of a list.
+- **Avoid:** Rows of three or more identical icon-title-blurb cards with no lead item; keep uniform tiles for genuinely comparable items such as products or search results.
 
 ## LAY-06. Remove elements that do not earn their place
 
@@ -59,6 +63,7 @@ Spacing scale, grouping, alignment, hierarchy and grids. Rule IDs use the `LAY-`
 - **Do:** Move secondary details into detail views or disclosures.
 - **Do:** Consolidate scattered secondary actions into one clearly placed control.
 - **Avoid:** Decorative icons, duplicate buttons, "see all" links and filler added just because there is space.
+- **Avoid:** Simplifying by fading the remaining text below 4.5:1 or replacing labeled primary navigation with a single icon button.
 - **Note:** Never remove information people need to decide or act, such as price, limits, errors or legal text.
 
 ## LAY-07. Group with space and tint before borders
@@ -66,9 +71,10 @@ Spacing scale, grouping, alignment, hierarchy and grids. Rule IDs use the `LAY-`
 **Why:** Every line adds visual noise; spacing and subtle background tints group content more quietly.
 
 - **Do:** Separate list rows with consistent spacing instead of a divider under every item.
-- **Do:** Give inputs such as search a light filled background instead of a box inside another bordered band.
+- **Do:** Give inputs such as search a light filled background instead of a box inside another bordered band, and keep the field identifiable with a border or bottom edge at 3:1 or more against its surroundings.
 - **Do:** Set off footers or action bars with a faint background tint.
 - **Avoid:** Stacking borders, bands and outlines on the same element.
+- **Avoid:** A near-white fill (about 1.1:1) as the only cue that an input exists.
 - **Note:** Dense data tables can still benefit from row separators.
 
 ## LAY-08. Lay out on a column grid
@@ -117,10 +123,11 @@ Spacing scale, grouping, alignment, hierarchy and grids. Rule IDs use the `LAY-`
 
 **Why:** One-field steps (email, name, code) look calm and structured when every gap follows a deliberate rhythm.
 
-- **Do:** On a 375pt-wide frame: title about 28px with 8px to its description, text block about 96px from the top, 24px to a 56px-tall full-width input with 16px side margins.
+- **Do:** On a 375pt-wide frame, place a 56pt navigation row with a 44x44 back target directly under the runtime top inset, then a title of about 28px about 8px below it, with 8px to its description.
+- **Do:** Leave 24px to a 56px-tall full-width input with 16px side margins and a visible label above it, or a floating label that stays visible once filled.
 - **Do:** Put a related secondary link 16px below the input, then a large gap before the bottom group.
 - **Do:** Keep consent text 24px above a 56px full-width primary button that sits 16px above the keyboard or safe area.
-- **Avoid:** Using the same gap within and between groups, or letting the button touch the keyboard.
+- **Avoid:** Using the same gap within and between groups, a top offset hard-coded to one status-bar height, or letting the button touch the keyboard.
 - **Note:** Scale the values proportionally for other device sizes; read safe areas at runtime.
 
 ## LAY-14. Bento grids need one leading tile
@@ -138,6 +145,7 @@ Spacing scale, grouping, alignment, hierarchy and grids. Rule IDs use the `LAY-`
 
 - **Do:** Switch patterns at breakpoints or container queries (around 600px and 1024px): phone with one column and bottom navigation, tablet with a side rail and two panes, desktop with a sidebar and multi-column grid.
 - **Do:** Keep components and tokens shared across breakpoints so it still reads as one product.
+- **Do:** Let tile groups reflow by available width, for example repeat(auto-fit, minmax(min(100%, 10rem), 1fr)), so four tiles become two per row before one.
 - **Do:** For split layouts such as sign-in beside an illustration, drop or shrink the visual on mobile so the form comes first.
 - **Avoid:** Proportionally shrinking a desktop split layout onto a phone.
 
@@ -146,6 +154,19 @@ Spacing scale, grouping, alignment, hierarchy and grids. Rule IDs use the `LAY-`
 **Why:** Scaling lengths from a reference frame keeps proportions, but text must still follow the user's accessibility settings.
 
 - **Do:** Use flexible layout primitives (flex, grid, constraints) for structure and scale only spacing and radii if needed.
-- **Do:** Respect the platform text scale (for example MediaQuery textScaler or rem units) and clamp only extreme values.
-- **Avoid:** Shrinking all fonts with screen width, or assuming one phone size fits tablets and split screen.
+- **Do:** If a reference-frame scaler is used, compute its factor from the shorter screen side and clamp it to about 0.85-1.2, so tablets, landscape and split screen gain content rather than oversized chrome.
+- **Do:** Respect the platform text scale (for example MediaQuery textScaler, allowFontScaling or rem units) and clamp only extreme values, for example with maxFontSizeMultiplier on dense UI.
+- **Avoid:** Shrinking all fonts with screen width, applying a layout scale factor to font sizes, or assuming one phone size fits tablets and split screen.
 - **Note:** Pixel-scaling helpers are debated; responsive layout is the better default.
+
+## LAY-17. Build layouts that survive translation and right-to-left
+
+**Why:** Fixed widths, physical left and right properties and one overflow rule for everything break as soon as text grows or direction flips.
+
+- **Do:** Size labeled controls with min-width and padding, and plan for about 30% longer sentences and two to three times longer short labels.
+- **Do:** Use logical properties (margin-inline-start, padding-inline, inset-inline-end, text-align: start) and set lang and dir on the root element.
+- **Do:** Mirror directional icons such as back arrows and chevrons in right-to-left layouts, but not logos, clocks, media playback symbols or numbers.
+- **Do:** Choose overflow by element type: buttons grow or go full width rather than clip, table cells truncate with the full text available, and titles clamp to two lines.
+- **Avoid:** Fixed widths on buttons, tabs or chips that hold translated text.
+- **Avoid:** overflow: hidden as a global default, or margin-left and padding-right in components that must flip.
+- **Note:** Test with a long-word language and a right-to-left language before shipping.

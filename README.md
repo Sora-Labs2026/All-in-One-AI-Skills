@@ -10,7 +10,7 @@ Each skill in this repository is a folder of instructions, references, scripts a
 
 | Skill | Version | What it does |
 |---|---|---|
-| [**ProductCraft**](skills/productcraft/README.md) | 1.5.0 | One routed skill to build, harden and ship software: engineering workflow and practices, UI design with a rulebook, pattern library and 165 reference screens, interaction, forms and data views, code security review, pre-launch security and auth-abuse defense, agent safety, legal launch readiness, codebase mapping, office documents, and builder tools for skills, MCP servers and Playwright tests. |
+| [**ProductCraft**](skills/productcraft/README.md) | 1.6.0 | One routed skill to build, harden and ship software: engineering workflow and practices, UI design with a rulebook, pattern library and 165 reference screens, interaction, forms and data views, code security review, pre-launch security and auth-abuse defense, agent safety, legal launch readiness, codebase mapping, office documents, and builder tools for skills, MCP servers and Playwright tests. |
 
 ## ProductCraft
 
