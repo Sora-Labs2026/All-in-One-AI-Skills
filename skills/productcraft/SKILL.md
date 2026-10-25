@@ -59,7 +59,7 @@ metadata:
 - `references/pattern-index.json`: machine-readable pattern index.
 - `modules/language-choice.md`: when and how to offer Rust, the trade-offs to state, and what to do with either answer.
 - `modules/ui-rules.md` and `references/ui-rules/`: UI rulebook with IDs (for example `BTN-02`), one file per category; `references/ui-rules-index.json` is its machine-readable index.
-- `examples/`: original reference screens (dashboards, auth, settings, navigation, charts, cards, forms, feedback, commerce, pricing, mobile, messaging, onboarding, brand) in self-contained HTML that cites rule IDs; `examples/README.md` is the index. Reference code to adapt, not a theme to copy.
+- `examples/`: 165 original reference screens on 44 pages (16 dashboards; auth, settings, navigation, search, charts, cards, tables, forms, overlays, feedback, commerce, pricing, landing, mobile, messaging, onboarding, brand) in self-contained HTML that cites rule IDs; `examples/README.md` is the index. Reference code to adapt, not a theme to copy.
 - `assets/review-template.md`: implementation evidence summary template.
 
 ## Execution priority when several modules apply
