@@ -62,8 +62,8 @@
     .balance {
       margin-top: var(--space-4); padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
       border-radius: var(--radius-lg); color: #fff;
-      background: radial-gradient(120% 140% at 100% 0%, #7c3aed 0%, rgba(124, 58, 237, 0) 55%), linear-gradient(135deg, #3730a3, #4f46e5);
-      box-shadow: 0 14px 30px -14px rgba(79, 70, 229, 0.7);
+      background: radial-gradient(120% 140% at 100% 0%, rgba(141, 178, 255, 0.25) 0%, rgba(141, 178, 255, 0) 55%), linear-gradient(135deg, #182f96, #2b50e0);
+      box-shadow: 0 14px 30px -14px rgba(43, 80, 224, 0.7);
     }
     .balance-top { display: flex; align-items: center; justify-content: space-between; margin-right: calc(var(--space-2) * -1); }
     .balance-top span { font-size: var(--text-sm); color: rgba(255, 255, 255, 0.86); }
@@ -127,7 +127,7 @@
     .trip-bar span { position: absolute; inset: 0 auto 0 0; width: 62%; border-radius: inherit; background: var(--accent); }
     .trip-legend { display: flex; justify-content: space-between; margin-top: 6px; font-size: var(--text-xs); color: var(--text-3); }
     .driver { display: grid; grid-template-columns: 48px 1fr auto; gap: var(--space-3); align-items: center; margin-top: var(--space-4); padding: var(--space-3); border-radius: var(--radius-md); background: var(--surface-2); }
-    .driver .avatar { width: 48px; height: 48px; font-size: var(--text-sm); background: linear-gradient(135deg, #c7d2fe, #a5b4fc); color: #312e81; }
+    .driver .avatar { width: 48px; height: 48px; font-size: var(--text-sm); background: linear-gradient(135deg, #cfdcff, #b3cbff); color: #182f96; }
     .driver b { display: block; font-size: var(--text-md); }
     .driver .rating { display: flex; align-items: center; gap: 4px; font-size: var(--text-xs); color: var(--text-2); white-space: nowrap; }
     .driver .rating .ico { width: 13px; height: 13px; color: var(--text); }
@@ -399,16 +399,16 @@
                     <path d="M108 0 V 400"/><path d="M0 98 H 340"/><path d="M0 200 H 340"/><path d="M188 0 V 300"/><path d="M0 298 H 240"/><path d="M220 190 L 330 300"/>
                   </g>
                   <path d="M108 70 V 200 H 188 V 280" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M108 70 V 200 H 188 V 280" fill="none" stroke="#4f46e5" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <circle cx="108" cy="70" r="13" fill="#4f46e5" fill-opacity=".18"/>
-                  <circle cx="108" cy="70" r="7" fill="#4f46e5" stroke="#fff" stroke-width="3"/>
+                  <path d="M108 70 V 200 H 188 V 280" fill="none" stroke="#2b50e0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle cx="108" cy="70" r="13" fill="#2b50e0" fill-opacity=".18"/>
+                  <circle cx="108" cy="70" r="7" fill="#2b50e0" stroke="#fff" stroke-width="3"/>
                   <g transform="translate(188 280)">
                     <circle r="16" fill="#15171a"/>
                     <rect x="-5" y="-5" width="10" height="10" rx="2" fill="#fff"/>
                   </g>
                   <g transform="translate(108 150)">
                     <circle r="18" fill="#fff" stroke="#e3e6ea"/>
-                    <path d="M-8 4V0l2-5a2 2 0 0 1 2-1.3h8A2 2 0 0 1 6 -5l2 5v4z" fill="#4f46e5"/>
+                    <path d="M-8 4V0l2-5a2 2 0 0 1 2-1.3h8A2 2 0 0 1 6 -5l2 5v4z" fill="#2b50e0"/>
                   </g>
                 </svg>
                 <div class="top">
@@ -474,7 +474,7 @@
                     <h3 id="rings-title">Activity <span>Goals for today</span></h3>
                     <ul class="rings">
                       <li>
-                        <div class="ring" style="--ring:#4f46e5"><svg viewBox="0 0 76 76" aria-hidden="true"><circle class="track" cx="38" cy="38" r="32" fill="none" stroke-width="8"/><circle class="val" cx="38" cy="38" r="32" fill="none" stroke-width="8" stroke-linecap="round" pathLength="100" stroke-dasharray="70 100"/></svg>
+                        <div class="ring" style="--ring:#2b50e0"><svg viewBox="0 0 76 76" aria-hidden="true"><circle class="track" cx="38" cy="38" r="32" fill="none" stroke-width="8"/><circle class="val" cx="38" cy="38" r="32" fill="none" stroke-width="8" stroke-linecap="round" pathLength="100" stroke-dasharray="70 100"/></svg>
                           <span class="ring-label"><b class="num">420</b><span>kcal</span></span></div>
                         <p><strong>Move</strong>70% of 600</p>
                       </li>

@@ -13,8 +13,8 @@
   <link rel="stylesheet" href="gallery.css">
   <style>
     /* Extra tokens: pressed fill, destructive hover and a scrim behind the open speed dial (BTN-02) */
-    :root { --accent-press: #3730a3; --danger-hover: #991b1b; --scrim: rgba(15, 17, 21, 0.56); }
-    [data-theme="dark"] { --accent-press: #c7d2fe; --danger-hover: #fca5a5; color: var(--text); }
+    :root { --accent-press: #182f96; --danger-hover: #991b1b; --scrim: rgba(15, 17, 21, 0.56); }
+    [data-theme="dark"] { --accent-press: #cfdcff; --danger-hover: #fca5a5; color: var(--text); }
 
     [hidden] { display: none !important; }
     .sheet-header h1 { margin-top: var(--space-2); }
@@ -242,7 +242,7 @@
     .dz-field label { display: block; margin-bottom: 6px; font-size: var(--text-sm); color: var(--text-2); }
     .dz-field label b { color: var(--text); }
     .dz-input { width: 100%; height: 44px; padding: 0 var(--space-3); border: 1px solid #6b7280; border-radius: var(--radius-sm); background: var(--bg); font-size: var(--text-md); }
-    .dz-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.3); }
+    .dz-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(141, 178, 255, 0.3); }
     .dz-hint { display: flex; align-items: center; gap: 6px; min-height: 18px; margin-top: 6px; font-size: var(--text-xs); color: var(--text-3); }
     .dz-hint .i { width: 14px; height: 14px; }
     .dz-hint[data-tone="ok"] { color: var(--text-2); }
@@ -382,7 +382,7 @@
                 </div>
               </div>
               <ul class="fview" id="fview" data-view="grid">
-                <li class="fitem"><span class="thumb" aria-hidden="true"><svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice"><rect width="120" height="90" fill="#e0e7ff"/><circle cx="88" cy="26" r="10" fill="#a5b4fc"/><path d="M0 90L38 46l24 24 18-16 40 36z" fill="#6366f1"/></svg></span><span class="ftext"><span class="fname">spring-hero.png</span><span class="fmeta num">PNG · 4.8 MB</span></span></li>
+                <li class="fitem"><span class="thumb" aria-hidden="true"><svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice"><rect width="120" height="90" fill="#e0e7ff"/><circle cx="88" cy="26" r="10" fill="#b3cbff"/><path d="M0 90L38 46l24 24 18-16 40 36z" fill="#4a6cf0"/></svg></span><span class="ftext"><span class="fname">spring-hero.png</span><span class="fmeta num">PNG · 4.8 MB</span></span></li>
                 <li class="fitem"><span class="thumb" aria-hidden="true"><svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice"><rect width="120" height="90" fill="#f1f3f5"/><rect x="36" y="12" width="48" height="66" rx="4" fill="#ffffff" stroke="#d1d5db"/><path d="M44 28h32M44 37h32M44 46h20" stroke="#9ca3af" stroke-width="3" stroke-linecap="round"/></svg></span><span class="ftext"><span class="fname">media-kit.pdf</span><span class="fmeta num">PDF · 6.2 MB</span></span></li>
                 <li class="fitem"><span class="thumb" aria-hidden="true"><svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice"><rect width="120" height="90" fill="#272b36"/><circle cx="60" cy="45" r="17" fill="#ffffff" fill-opacity="0.16"/><path d="M55 36v18l14-9z" fill="#ffffff"/></svg></span><span class="ftext"><span class="fname">teaser-15s.mp4</span><span class="fmeta num">MP4 · 38.4 MB</span></span></li>
                 <li class="fitem"><span class="thumb" aria-hidden="true"><svg viewBox="0 0 120 90" preserveAspectRatio="xMidYMid slice"><rect width="120" height="90" fill="#f1f3f5"/><rect x="24" y="16" width="72" height="58" rx="4" fill="#ffffff" stroke="#d1d5db"/><path d="M24 30h72M24 44h72M24 58h72M48 16v58M72 16v58" stroke="#d1d5db"/></svg></span><span class="ftext"><span class="fname">utm-links.csv</span><span class="fmeta num">CSV · 24 KB</span></span></li>
@@ -872,9 +872,9 @@
       const count = document.getElementById("tpl-count");
       const fmt = new Intl.NumberFormat("en-US");
       const thumbs = [
-        '<rect width="160" height="56" fill="#eef2ff"/><path d="M20 44V30M36 44V22M52 44V34M68 44V16M84 44V26M100 44V20M116 44V30M132 44V24" stroke="#6366f1" stroke-width="7"/>',
-        '<rect width="160" height="56" fill="#f1f3f5"/><path d="M12 42l22-10 20 6 24-18 22 8 22-14 26 8" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
-        '<rect width="160" height="56" fill="#f1f3f5"/><circle cx="80" cy="28" r="15" fill="none" stroke="#c7d2fe" stroke-width="8"/><path d="M80 13a15 15 0 0 1 13 22.5" fill="none" stroke="#4f46e5" stroke-width="8"/>',
+        '<rect width="160" height="56" fill="#eef2ff"/><path d="M20 44V30M36 44V22M52 44V34M68 44V16M84 44V26M100 44V20M116 44V30M132 44V24" stroke="#4a6cf0" stroke-width="7"/>',
+        '<rect width="160" height="56" fill="#f1f3f5"/><path d="M12 42l22-10 20 6 24-18 22 8 22-14 26 8" fill="none" stroke="#2b50e0" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>',
+        '<rect width="160" height="56" fill="#f1f3f5"/><circle cx="80" cy="28" r="15" fill="none" stroke="#cfdcff" stroke-width="8"/><path d="M80 13a15 15 0 0 1 13 22.5" fill="none" stroke="#2b50e0" stroke-width="8"/>',
       ];
       const pageList = (cur) => {
         if (pages <= 7) return Array.from({ length: pages }, (_, i) => i + 1);
