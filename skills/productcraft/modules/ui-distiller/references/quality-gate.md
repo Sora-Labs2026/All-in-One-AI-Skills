@@ -39,7 +39,7 @@ Ask yourself, in order:
 1. What would a first-time user look at first? Is that the correct thing?
 2. What would an experienced user look for? Can they reach it rapidly?
 3. Can the user complete the main task faster than before?
-4. What remains purely because it looks like a trendy UI template?
+4. What remains purely because it looks like a trendy UI template? (Detectors and replacements: `taste.md`.)
 5. What can be removed without removing meaning, capability, trust or clarity?
 6. Have I accidentally confused minimalism with hiding useful information?
 

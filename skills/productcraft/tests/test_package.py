@@ -1,5 +1,5 @@
 from pathlib import Path
-import importlib.util,unittest,json
+import importlib.util,unittest,json,re
 ROOT=Path(__file__).resolve().parents[1]
 spec=importlib.util.spec_from_file_location('checker',ROOT/'scripts'/'check_package.py')
 mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
@@ -24,7 +24,8 @@ class ProductCraftTest(unittest.TestCase):
   self.assertGreater(len(pages),0)
   index=(ROOT/'examples'/'README.md').read_text()
   self.assertTrue(all(f'`{p.name}`' in index for p in pages))
-  self.assertFalse(any('://' in p.read_text().replace('http://www.w3.org/2000/svg','') for p in pages))
+  external=re.compile(r'''(?:src|href)\s*=\s*["']?(?:https?:)?//|url\(\s*["']?(?:https?:)?//|@import''')
+  self.assertEqual([p.name for p in pages if external.search(p.read_text())],[])
  def test_exactly_one_skill(self):
   self.assertEqual([p.relative_to(ROOT).as_posix() for p in ROOT.rglob('SKILL.md')],['SKILL.md'])
 if __name__=='__main__':unittest.main()

@@ -10,20 +10,28 @@ Each skill in this repository is a folder of instructions, references, scripts a
 
 | Skill | Version | What it does |
 |---|---|---|
-| [**ProductCraft**](skills/productcraft/README.md) | 1.4.0 | Builds and hardens app UIs with one routed skill: design hierarchy, a screen-level UI rulebook, honest interaction feedback, forms and checkout, data views, mobile and accessibility, ethical conversion, auth-abuse defense, a 20-control security baseline and pre-launch security review, backed by a UI/UX pattern library and 165 reference screens. |
+| [**ProductCraft**](skills/productcraft/README.md) | 1.5.0 | One routed skill to build, harden and ship software: engineering workflow and practices, UI design with a rulebook, pattern library and 165 reference screens, interaction, forms and data views, code security review, pre-launch security and auth-abuse defense, agent safety, legal launch readiness, codebase mapping, office documents, and builder tools for skills, MCP servers and Playwright tests. |
 
 ## ProductCraft
 
-ProductCraft helps an agent build interfaces that show the important thing first, respond honestly, work on every device and are secured where it matters. It reads only the modules a task needs:
+ProductCraft helps an agent build, harden and ship software that shows the important thing first, behaves honestly, is proven by checks that actually ran, works on every device and is secure and lawful where it matters. It reads only the modules a task needs:
 
-- **UI Distiller and product design**: decluttering, information hierarchy, tokens, spacing and density
+- **Engineering workflow**: Quick, Standard and Deep tracks; done-when checks, planning, test-first, root-cause debugging, small diffs, verification before "done", review and finishing a branch
+- **Engineering practices**: API contracts, safe migrations, resilience, performance, observability, CI/CD and releases, dependencies, docs and ADRs, large refactors, TypeScript, git and PRs, session handoff
+- **UI Distiller and product design**: decluttering, information hierarchy, tokens, spacing and density, plus taste detectors against generic "AI-looking" UI and a catalog of visual directions with contrast-checked palettes
 - **Interaction and feedback**: buttons, switches, sliders, drag and drop, modals, toasts and motion, with verified rather than faked success states
 - **Forms and conversion**: signup, OTP, passwords, search, uploads and checkout
 - **Data and product surfaces**: tables, dashboards, calendars, Kanban, chat and command palettes
 - **Responsive and accessibility**: touch targets, sheets vs. dialogs, keyboard, screen readers, i18n and RTL
 - **Ethical persuasion**: conversion without fake urgency, fake social proof or hidden fees
+- **Code security review**: a multi-phase audit with threat modeling, vulnerability classes mapped to OWASP and CWE, bugs typical of AI-written code, language pitfalls, secrets and dependencies, with every finding proven or discarded
 - **Credential Shield**: defense against credential stuffing and password spraying on login, OTP, MFA and reset flows
 - **LaunchGuard**: five-gate pre-launch security review with a PASS / FAIL / NOT_VERIFIED evidence report, plus a 20-control security baseline covering API keys, Git secrets, row-level security, server-side auth, record access, field tampering, session cookies, password hashing, login rate limits, bot protection, query parameterization, input validation, output escaping, file uploads, API responses, security headers, HTTPS and dependency scanning
+- **Legal ready**: 20 launch legal-readiness items, from privacy, terms, refund and cookie policies and real consent to honest prices and claims, children's data, unsubscribe links, asset licenses and data deletion (general guidance, not legal advice)
+- **Agent safety**: a stop-check before destructive commands, secrets handled by name only, vetting of third-party skills, plugins, MCP servers and hooks, and an optional command guard
+- **Codebase map**: a read-only mapper for entry points, routes, imports and hotspots in unfamiliar repositories
+- **Documents**: Word, Excel, PowerPoint and PDF with open-source tools, every output verified by rendering
+- **Builder tools**: authoring and evaluating Agent Skills, designing and testing MCP servers, Playwright browser tests
 - **UI rules**: a rulebook of screen-level rules with IDs (such as `BTN-02`) covering spacing, typography, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, common screens, motion, front-end engineering and brand identity
 - **Language choice**: for new projects, services or performance-critical components, asks once whether to use Rust and states the trade-offs (faster runtime, slower compiles, more AI tokens, no automatic page-load gain)
 - **Pattern library**: UI/UX patterns, each with a principle, an implementation rule and a guardrail
@@ -109,8 +117,7 @@ mkdir -p .agents/skills && cp -R /tmp/sora-skills/skills/productcraft .agents/sk
 cd skills/productcraft
 python3 scripts/check_package.py --root .
 python3 -m unittest discover -s tests -v
-python3 -m unittest discover -s modules/credential-shield/tests -v
-python3 -m unittest discover -s modules/launchguard/tests -v
+for t in modules/*/tests; do python3 -m unittest discover -s "$t" -v; done
 cd ../..
 python3 scripts/build_dist.py --check
 ```
@@ -133,6 +140,8 @@ Every Sora Labs skill follows the same rules:
 - Show *pending*, not *done*, until the server or provider has confirmed money, bookings, deletions or permission changes.
 - Never fake scarcity, typing, progress, social proof or fees.
 - Report only checks that actually ran. Scanners are advisory, and a clean scan is not a security pass.
+- Stop before destructive commands, keep secret values out of the session, and vet third-party extensions before installing them.
+- Never invent legal facts; legal guidance is general, not legal advice.
 - Leave production secrets, live data and deployments alone unless explicitly authorized.
 
 ## License

@@ -32,7 +32,7 @@ Use this module together with [product-design.md](product-design.md) (what to sh
 | `MOT` | `motion.md` | Durations, easing, reduced motion, FLIP and morphs, springs, sequencing, scroll effects |
 | `ENG` | `engineering.md` | Native elements, async state machines, inert content, data-driven UI, progressive enhancement, tests |
 | `BRD` | `branding.md` | Logo construction, app icons, palettes, consistent application, tone of voice |
-| `STY` | `style-options.md` | Optional visual treatments, only when the brand or request asks for them |
+| `STY` | `style-options.md` | Optional visual treatments, only when the brand or request asks for them; complete directions with checked palettes are in `modules/ui-distiller/references/style-catalog.md` |
 
 ## Baseline for almost every screen
 

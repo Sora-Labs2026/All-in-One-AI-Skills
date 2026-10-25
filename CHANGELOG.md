@@ -1,5 +1,22 @@
 # Changelog
 
+## ProductCraft 1.5.0 (2026-10-25)
+
+- New modules, each with a `GUIDE.md`, focused references and tested standard-library scripts:
+  - **Engineering workflow**: Quick, Standard and Deep tracks; done-when checks, planning, test-first, root-cause debugging, change discipline, verification, review, parallel work and finishing a branch. `diff_scope.py` self-checks a diff.
+  - **Engineering practices**: API contracts, data and safe migrations, resilience, performance, observability, CI/CD and releases, dependencies, docs and ADRs, large refactors, TypeScript, git and pull requests, session handoff. `migration_check.py` flags risky SQL migrations.
+  - **Code security review**: a multi-phase audit with threat modeling, vulnerability classes mapped to OWASP Top 10 and CWE, bugs typical of AI-written code, language pitfalls, secrets and dependencies, and fix-and-verify. `code_audit.py` ranks files, scans history for secrets without printing them and validates findings.
+  - **Legal ready**: 20 launch legal-readiness items with concrete implementation steps, an owner questionnaire and a report template; general guidance, not legal advice. `legal_scan.py` checks a project for signals.
+  - **Agent safety**: a stop-check before destructive commands, secrets by name only, and vetting of third-party skills, plugins, MCP servers and hooks. `guard_command.py` works as an opt-in pre-tool hook; `scan_skill.py` scans extensions before install.
+  - **Codebase map**: `map_codebase.py` maps entry points, routes, the import graph, symbols and hotspots of an unfamiliar repository.
+  - **Documents**: Word, Excel, PowerPoint and PDF work with open-source tools and render-based verification. `ooxml_inspect.py` checks Office files.
+  - **Builder tools**: authoring and evaluating Agent Skills, designing and testing MCP servers, Playwright browser tests. `lint_skill.py` checks a skill folder.
+  - **Lean output**: opt-in shorter answers that never shorten safety warnings, security findings, errors or legal caveats.
+- UI Distiller gains taste detectors against generic generated-looking UI and a catalog of 14 visual directions with contrast-checked palettes and freely licensed font pairings.
+- Reference screens grow to 44 pages with 165 screens: dashboards v4 to v16 (finance, CRM, learning, property, admin, credit, creator, fitness, smart home, logistics, energy, accounts payable, clinical monitoring), new landing, search, data table and menu/overlay pages, and v7 to v12 of cards, charts, buttons, form controls, sign-in and onboarding. The README galleries show all 16 dashboards in their own section.
+- The example tokens move from a stock indigo to the Sora brand blues, and two purple gradients are replaced; every page still passes the contrast audit.
+- `SKILL.md` routes to all new modules; the package checker requires every guided module, and CI runs every module's tests (231 tests in total).
+
 ## ProductCraft 1.4.0 (2026-10-24)
 
 - Added reference screens in `examples/`: 21 original pages with 92 screens covering dashboards (three versions), sign-in and account access, verification codes and PINs, security settings, navigation, tab bars, charts, cards, calendars, buttons, form controls, feedback, commerce, pricing, mobile apps, messaging and assistants, onboarding and error states, and brand guidelines. Each page is self-contained HTML and CSS with shared `tokens.css`, cites the rule IDs it applies and passes a WCAG AA contrast check. `examples/README.md` indexes every version.

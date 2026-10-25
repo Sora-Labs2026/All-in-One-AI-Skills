@@ -1,16 +1,18 @@
 # ProductCraft
 
-**A Sora Labs Agent Skill** · version 1.4.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
+**A Sora Labs Agent Skill** · version 1.5.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
 
-ProductCraft is one installable skill that teaches a coding agent to build product interfaces that **show the important thing first, respond honestly, work on every device, and are secured where it matters**. It routes each task to only the modules that task needs, so a table change reads the table guidance, an auth change reads the auth-defense module, and a launch reads the five-gate security review.
+ProductCraft is one installable skill that teaches a coding agent to build, harden and ship software that **shows the important thing first, behaves honestly, is proven by checks that actually ran, works on every device, and is secure and lawful where it matters**. It routes each task to only the modules that task needs: a bug fix reads the engineering workflow, a table change reads the table guidance, an auth change reads the auth-defense module, a destructive command triggers the agent-safety stop-check, and a launch reads the security and legal-readiness reviews.
 
-It is a coding skill, not a theme pack or security certification. Its reference screens are code to learn from, not a component kit to paste. The agent changes your real codebase and reports what it actually tested.
+It is a working skill for real codebases, not a theme pack, legal service or security certification. Its reference screens are code to learn from, not a component kit to paste. The agent changes your real codebase and reports what it actually tested.
 
 ## What's inside
 
 | Module | Use it for | Entry file |
 |---|---|---|
-| **UI Distiller** | New screens, redesigns, cleaning up cluttered or "AI-looking" frontends | `modules/ui-distiller/GUIDE.md` |
+| **Engineering workflow** | Any non-trivial code change: Quick/Standard/Deep tracks, done-when checks, planning, test-first, root-cause debugging, small diffs, verification, review, finishing a branch | `modules/engineering-workflow/GUIDE.md` |
+| **Engineering practices** | API contracts, data and safe migrations, resilience, performance, observability, CI/CD and releases, dependencies, docs and ADRs, large refactors, TypeScript, git and PRs, session handoff | `modules/engineering-practices/GUIDE.md` |
+| **UI Distiller** | New screens, redesigns, cleaning up cluttered or "AI-looking" frontends, with taste detectors and a catalog of visual directions with contrast-checked palettes | `modules/ui-distiller/GUIDE.md` |
 | **Product design** | Information hierarchy, tokens, spacing, density, Keep/Promote/Compress/Demote/Remove audits | `modules/product-design.md` |
 | **Interaction & feedback** | Buttons, switches, sliders, drag and drop, modals, toasts, motion, optimistic vs. verified state | `modules/interaction-feedback.md` |
 | **Forms & conversion** | Signup, OTP, passwords, search, uploads, checkout and payment UI | `modules/forms-conversion.md` |
@@ -18,9 +20,16 @@ It is a coding skill, not a theme pack or security certification. Its reference 
 | **Responsive & accessibility** | Mobile layouts, touch targets, sheets vs. dialogs, keyboard, screen readers, i18n and RTL | `modules/responsive-accessibility.md` |
 | **Ethical persuasion** | Funnels, copy and engagement without fake urgency, fake social proof or hidden fees | `modules/ethical-persuasion.md` |
 | **Credential Shield** | Login, OTP/MFA, password reset, credential stuffing and password spraying defense | `modules/credential-shield/GUIDE.md` |
+| **Code security review** | Multi-phase code audit: threat model, vulnerability classes mapped to OWASP and CWE, bugs typical of AI-written code, language pitfalls, secrets and dependencies, proven findings and tested fixes | `modules/code-security-review/GUIDE.md` |
 | **LaunchGuard** | Pre-launch five-gate security review plus a 20-control security baseline: secrets, user data, authorization, payments, release go/no-go | `modules/launchguard/GUIDE.md` |
+| **Legal ready** | 20 launch legal-readiness items: privacy, terms, refund and cookie policies, consent, data minimization, trackers, dark patterns, hidden fees, fake reviews, unsupported claims, accessibility, business details, children's data, unsubscribe, asset licenses, data deletion. General guidance, not legal advice | `modules/legal-ready/GUIDE.md` |
+| **Agent safety** | Stop-check before destructive commands, secrets handled by name only, vetting third-party skills, plugins, MCP servers and hooks; optional command guard | `modules/agent-safety/GUIDE.md` |
+| **Codebase map** | Getting oriented in unfamiliar repositories: entry points, routes, import graph, symbols, hotspots | `modules/codebase-map/GUIDE.md` |
+| **Documents** | Word, Excel, PowerPoint and PDF: create, edit with formatting intact, extract, convert, fill forms, verified by rendering | `modules/documents/GUIDE.md` |
+| **Builder tools** | Authoring and evaluating Agent Skills, designing and testing MCP servers, Playwright browser tests | `modules/builder-tools/GUIDE.md` |
 | **UI rules** | A rulebook of screen-level rules with IDs (spacing, type, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, screens, motion, front-end engineering, brand identity) | `modules/ui-rules.md` |
 | **Language choice** | Offers Rust for new projects, services or performance-critical components, with honest trade-offs, and remembers the answer | `modules/language-choice.md` |
+| **Lean output** | Opt-in shorter answers that never shorten safety warnings, security findings, errors or legal caveats | `modules/lean-output.md` |
 | **Pattern library** | One principle, one implementation rule and one guardrail for each UI/UX pattern | `references/pattern-library.md` |
 | **Reference screens** | 44 original HTML pages with 165 screens: 16 dashboards plus auth, settings, navigation, search, charts, cards, tables, forms, overlays, feedback, commerce, pricing, landing pages, mobile, messaging, onboarding and brand | `examples/README.md` |
 
@@ -32,6 +41,9 @@ The pattern library covers foundations, feedback, forms, interaction, navigation
 
 | The task involves | ProductCraft reads |
 |---|---|
+| Any non-trivial code change in any language | Engineering workflow |
+| A bug, a failing or flaky test, a regression | Engineering workflow's debugging loop |
+| APIs, schemas and migrations, performance, observability, CI/CD, dependencies, large refactors | The matching engineering-practices topic |
 | A new UI, a redesign, or decluttering | UI Distiller + product design + UI rules |
 | Spacing, type, color, dark mode, buttons, form fields, navigation, icons, microcopy | The matching UI rules categories |
 | Controls, motion, toasts, modals | Interaction & feedback |
@@ -39,13 +51,19 @@ The pattern library covers foundations, feedback, forms, interaction, navigation
 | Tables, dashboards, calendars, Kanban, chat, uploads | Data & product surfaces |
 | Mobile layout, translation, RTL | Responsive & accessibility |
 | Funnels, conversion copy, engagement | Ethical persuasion |
+| A security review or audit of code, including AI-written code | Code security review |
 | Login abuse, MFA, password reset | Credential Shield |
 | API routes, data access, queries, uploads, cookies, headers, dependencies | The matching LaunchGuard security-baseline controls |
 | Launch, payments, user data, privileged operations | LaunchGuard |
+| Launch legal readiness: policies, consent, trackers, prices and claims, email, children's data, licenses, data deletion | Legal ready |
+| Destructive commands, secrets on disk, installing third-party skills, plugins, MCP servers or hooks | Agent safety |
+| An unfamiliar or large repository | Codebase map |
+| Word, Excel, PowerPoint or PDF files | Documents |
+| Writing a skill, building an MCP server, Playwright tests | Builder tools |
 | A new project, service or performance-critical component with no language fixed | Language choice (asks once about Rust) |
 | A broad, ambiguous product task | Product design + interaction, then only what is relevant |
 
-The security modules are conditional. A copy or CSS tweak does not trigger a full audit.
+The security and legal modules are conditional. A copy or CSS tweak does not trigger a full audit, and a one-line fix stays on the Quick track.
 
 ## Install
 
@@ -95,13 +113,27 @@ any control it fails.
 
 Use productcraft to prepare this app for launch. Run the LaunchGuard five gates and
 write the report with PASS / FAIL / NOT_VERIFIED evidence.
+
+Use productcraft to find out why the nightly export test fails only in CI, fix the
+root cause and add a regression test.
+
+Use productcraft to run a security review of the payments service and the code our
+assistant generated last week; prove each finding before fixing it.
+
+Use productcraft to get this store legally ready to launch in the EU and the US: cookie
+consent, policies, unsubscribe links and a data deletion option.
+
+Use productcraft to turn this CSV into a formatted Excel report with totals, then a
+one-page PDF summary, and show me the rendered pages.
+
+Use productcraft to build an MCP server for our ticketing API and test it.
 ```
 
 ### Optional persistent project rule
 
 Add this to your project's `CLAUDE.md` or `AGENTS.md` so the agent keeps using ProductCraft on future work:
 
-> For significant frontend creation/redesign, UI interaction changes, complex forms, tables, dashboards, mobile layouts, or workflow UX, invoke the project-local ProductCraft skill and selectively read the matching design and interaction modules. Prioritize essential content, remove unnecessary visual noise, preserve accessible keyboard/touch behavior and real async/error handling. Use ethically transparent conversion techniques only; never fake scarcity, typing, fees, progress, social proof or server confirmations. For changes to auth/OTP/password recovery, consult its bundled Credential Shield module. For release preparation and changes to privileged operations, money, user data or production security, consult its bundled LaunchGuard module and check the matching security-baseline controls, or run the full five-gate review when shipping. Never apply the whole pattern library or run a full security audit on trivial copy/CSS edits. Keep reports honest and do not modify production secrets, cloud policy, live data or deployments without explicit authorization. For a new project, service or performance-critical component whose language is not yet fixed, ask once whether to write it in Rust, stating the trade-offs (faster runtime, slower compiles, more AI tokens, no automatic page-load gain) per its language-choice module.
+> For significant frontend creation/redesign, UI interaction changes, complex forms, tables, dashboards, mobile layouts, or workflow UX, invoke the project-local ProductCraft skill and selectively read the matching design and interaction modules. Prioritize essential content, remove unnecessary visual noise, preserve accessible keyboard/touch behavior and real async/error handling. Use ethically transparent conversion techniques only; never fake scarcity, typing, fees, progress, social proof or server confirmations. For changes to auth/OTP/password recovery, consult its bundled Credential Shield module. For release preparation and changes to privileged operations, money, user data or production security, consult its bundled LaunchGuard module and check the matching security-baseline controls, or run the full five-gate review when shipping. Never apply the whole pattern library or run a full security audit on trivial copy/CSS edits. Keep reports honest and do not modify production secrets, cloud policy, live data or deployments without explicit authorization. For a new project, service or performance-critical component whose language is not yet fixed, ask once whether to write it in Rust, stating the trade-offs (faster runtime, slower compiles, more AI tokens, no automatic page-load gain) per its language-choice module. For any non-trivial code change, follow its engineering-workflow module (done-when checks, test-first where it fits, root-cause debugging, verification before claiming done). Before destructive commands or installing third-party skills, plugins, MCP servers or hooks, follow its agent-safety module. Before launch, also work through its legal-ready module as general guidance, not legal advice.
 
 ## Built-in guardrails
 
@@ -180,9 +212,18 @@ LaunchGuard ships a 20-control baseline in `modules/launchguard/references/secur
 | `scripts/check_package.py` | Checks package integrity: one `SKILL.md`, a valid pattern library and UI rulebook, all modules present, and reference screens that are listed, self-contained and cite only real rule IDs |
 | `modules/launchguard/scripts/preflight_scan.py` | Read-only, redacted heuristic scan for secret-shaped literals, public secret env names, disabled TLS verification, wildcard CORS, debug flags, HTML sinks, sensitive logging, cookies with HttpOnly or Secure disabled, and fast hashes used on passwords |
 | `modules/credential-shield/scripts/simulate_policy.py` | Offline, synthetic demonstration of how distributed credential-stuffing campaigns become visible through combined signals |
+| `modules/engineering-workflow/scripts/diff_scope.py` | Self-check of a diff: out-of-scope files, whitespace churn, debug leftovers, focused or skipped tests, removed assertions, lockfile churn. Never prints changed lines |
+| `modules/engineering-practices/scripts/migration_check.py` | Flags SQL migrations likely to lock tables or lose data (drops, in-place renames, blocking index builds, full-table updates, missing lock timeouts) |
+| `modules/code-security-review/scripts/code_audit.py` | Ranks files to read first, scans local git history for secrets without printing values, checks CI workflow files, validates the findings JSON |
+| `modules/legal-ready/scripts/legal_scan.py` | Scans a project for legal-readiness signals: policy pages, consent mechanism, third-party trackers, images without alt text, pre-ticked consent, unsubscribe links, a data deletion route |
+| `modules/agent-safety/scripts/guard_command.py` | Classifies a shell command as allow, ask or deny with a reason and a safer alternative; usable as an opt-in pre-tool hook |
+| `modules/agent-safety/scripts/scan_skill.py` | Read-only static scan of a third-party skill, plugin, MCP server or hook folder before installation |
+| `modules/codebase-map/scripts/map_codebase.py` | Maps a repository: entry points, routes, Python and JS/TS import graph, top-level symbols and hotspots; never opens credential files |
+| `modules/documents/scripts/ooxml_inspect.py` | Inspects Word, Excel and PowerPoint files for tracked changes, comments, hidden content, leftover placeholders, uncalculated formulas and off-slide shapes |
+| `modules/builder-tools/scripts/lint_skill.py` | Lints an Agent Skill folder: frontmatter limits, broken file references, oversized files without contents lists, stray caches |
 | `assets/review-template.md` | Template for the agent's change report |
 
-Everything uses the Python 3 standard library only. Nothing touches the network.
+Every script uses the Python 3 standard library only, is read-only toward the project it inspects and never touches the network.
 
 Run the scanner against an app:
 
@@ -198,11 +239,10 @@ From inside this folder:
 ```bash
 python3 scripts/check_package.py --root .
 python3 -m unittest discover -s tests -v
-python3 -m unittest discover -s modules/credential-shield/tests -v
-python3 -m unittest discover -s modules/launchguard/tests -v
+for t in modules/*/tests; do python3 -m unittest discover -s "$t" -v; done
 ```
 
-The suites hold 19 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
+The suites hold 231 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
 
 ## Package layout
 
@@ -222,9 +262,18 @@ productcraft/
 │   ├── ethical-persuasion.md
 │   ├── ui-rules.md              # routes to the UI rulebook
 │   ├── language-choice.md       # when and how to offer Rust
-│   ├── ui-distiller/            # guide + design rules, patterns, quality gate
+│   ├── lean-output.md           # opt-in shorter answers
+│   ├── engineering-workflow/    # tracks, planning, test-first, debugging, review; diff self-check
+│   ├── engineering-practices/   # APIs, migrations, resilience, performance, observability, CI/CD; migration check
+│   ├── ui-distiller/            # guide + design rules, patterns, quality gate, taste, style catalog
+│   ├── code-security-review/    # audit phases, threat modeling, vulnerability classes, audit helper
 │   ├── credential-shield/       # guide, references, policy example, simulator, tests
-│   └── launchguard/             # guide, security baseline, references, scanner, tests, report templates
+│   ├── launchguard/             # guide, security baseline, references, scanner, tests, report templates
+│   ├── legal-ready/             # 20 legal-readiness items, owner questionnaire, scanner
+│   ├── agent-safety/            # stop-check, secrets, extension vetting, command guard, scanner
+│   ├── codebase-map/            # repository mapper and how to use it
+│   ├── documents/               # Word, Excel, PowerPoint and PDF guides, OOXML inspector
+│   └── builder-tools/           # Agent Skills, MCP servers, Playwright; skill linter
 ├── examples/                    # reference screens: HTML pages, tokens.css, gallery.css, README index
 ├── references/
 │   ├── ui-rules/                # UI rulebook, one file per category
@@ -240,6 +289,8 @@ productcraft/
 - Pattern rules are heuristics, not mandatory design laws. Security, accessibility, facts and user consent always take precedence.
 - ProductCraft is a build guide. It does not guarantee security, accessibility compliance or a correct implementation in your app.
 - For apps that handle substantial money or sensitive data, arrange a qualified human security review before launch.
+- Legal Ready is general guidance, not legal advice. Have a qualified lawyer review policies and obligations for your business and markets.
+- The agent-safety command guard is a seatbelt, not a sandbox. For real isolation, run agents in a container or VM without production credentials.
 
 ## License
 

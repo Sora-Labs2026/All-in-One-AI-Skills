@@ -1,0 +1,7 @@
+{
+  // path aliases used by src/index.ts
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"], },
+  },
+}

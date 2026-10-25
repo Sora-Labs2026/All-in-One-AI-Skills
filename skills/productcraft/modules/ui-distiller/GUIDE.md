@@ -59,11 +59,11 @@ For each region, control, heading, decorative element, and block of copy, classi
 
 Derive an appropriate direction from brand and task: editorial, product-neutral, utilitarian, technical, playful, premium, or another defensible direction. A dense admin screen should not become an airy portfolio. A creative brand should not automatically become sterile monochrome.
 
-Follow [references/design-rules.md](references/design-rules.md). In particular:
+Follow [references/design-rules.md](references/design-rules.md). When the project has no visual language yet or the user asks for a direction, start from [references/style-catalog.md](references/style-catalog.md), and check the result against [references/taste.md](references/taste.md). In particular:
 
 - Establish restrained type scale, line height, color roles, spacing rhythm, surface/border usage, and interaction states. Prefer existing tokens and fonts unless they materially hurt clarity.
 - Highlight with **contrast and position first**; use accent color sparingly for primary interactions and meaningful status, never to decorate every section.
-- Treat gradients, glass, blobs, glowing shadows, floating badges, emoji icons, unnecessary micro-animations, placeholder charts, and perfectly uniform card grids as suspect, **not automatically forbidden**. Use them only if they communicate brand, meaning, or interaction better than a simpler alternative.
+- Treat gradients, glass, blobs, glowing shadows, floating badges, emoji icons, unnecessary micro-animations, placeholder charts, and perfectly uniform card grids as suspect, **not automatically forbidden**. Use them only if they communicate brand, meaning, or interaction better than a simpler alternative. Detectors and replacements: [references/taste.md](references/taste.md).
 - Keep dividers only where grouping/reading would suffer without them. Not every card needs a border, not every label needs an icon, and not every section needs its own background.
 - Maintain sufficient whitespace, but optimize information density for the task. Remove *empty bloat*, not useful breathing room.
 - Write concise, specific microcopy: verbs for actions; real labels and units for values; one short explanation when users need it. Don't erase persistent form labels or replace them with placeholder-only fields.
@@ -89,6 +89,7 @@ Read [references/quality-gate.md](references/quality-gate.md). Check, where tool
 5. **Integrity test:** Do real data, functional flows, accessibility, and critical content remain intact?
 6. **Responsive test:** Check narrow mobile, medium/tablet, and desktop if possible; also long text, mixed content, overflow, keyboard focus, loading, empty, and error states.
 7. **Engineering test:** Run existing appropriate formatter, lint, typecheck, test, and build commands. Report any failures honestly; do not misrepresent an unrun check.
+8. **Taste test:** Run the self-critique pass in [references/taste.md](references/taste.md) and, where a browser exists, its measurement snippet before and after.
 
 If browser/screenshot tooling exists, compare before and after and refine the biggest remaining hierarchy or spacing flaw. If no browser exists, do not claim to have visually inspected the result.
 
@@ -124,5 +125,6 @@ After making edits, give a concise result, not a verbose self-congratulation:
 - **Changed:** meaningful screen(s)/files and the hierarchy/visual improvements.
 - **Removed or demoted:** noteworthy clutter reduced, with any purposeful retention explained.
 - **Checked:** actual commands and viewports verified, with unresolved issues clearly stated.
+- **Taste:** defaults removed or kept with reasons, and the one distinctive move the screen makes.
 
 Do not call the redesign "perfect", "best", or "production ready" without evidence. The measure is user usefulness, not aesthetic confidence.
