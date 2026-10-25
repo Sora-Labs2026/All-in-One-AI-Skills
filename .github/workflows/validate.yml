@@ -21,11 +21,13 @@ jobs:
       - name: Package tests
         working-directory: skills/productcraft
         run: python3 -m unittest discover -s tests -v
-      - name: Credential Shield tests
+      - name: Module tests
         working-directory: skills/productcraft
-        run: python3 -m unittest discover -s modules/credential-shield/tests -v
-      - name: LaunchGuard tests
-        working-directory: skills/productcraft
-        run: python3 -m unittest discover -s modules/launchguard/tests -v
+        run: |
+          for tests in modules/*/tests; do
+            echo "::group::$tests"
+            python3 -m unittest discover -s "$tests" -v
+            echo "::endgroup::"
+          done
       - name: dist/ bundle is up to date
         run: python3 scripts/build_dist.py --check

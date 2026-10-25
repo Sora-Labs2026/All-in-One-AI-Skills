@@ -1,0 +1,1005 @@
+<!doctype html>
+<!-- ProductCraft example: form controls, continued. Original Sora Labs example, MIT License.
+     Demonstrates: FRM-01, FRM-02, FRM-04, FRM-05, FRM-06, FRM-07, FRM-11, FRM-12, FRM-13, FRM-14, FRM-21, FRM-26,
+     FRM-27, CMP-25, BTN-05, BTN-10, FBK-05, FBK-11, FBK-15, COP-01, COP-13, COP-14, COL-07, DRK-01, DRK-09, ICO-04,
+     ENG-01, ENG-06, ENG-07, MOB-01, TYP-09, SCR-23 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Form controls, continued</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    /* Field tokens: borders reach 3:1 against their surface (COL-01); a separate rating color that is not a status color (COL-06) */
+    :root { --field-border: #8a909c; --ring-soft: rgba(43, 80, 224, 0.22); --star: #d97706; }
+    [data-theme="dark"] { --field-border: #6b7280; --ring-soft: rgba(141, 178, 255, 0.3); --star: #fbbf24; color: var(--text); }
+    [data-accent="teal"] { --ring-soft: rgba(15, 118, 110, 0.22); }
+
+    [hidden] { display: none !important; }
+    .sheet-header h1 { margin-top: var(--space-2); }
+    .variant > .variant-stage { flex: 1 0 auto; }
+    .stage-fill { width: 100%; }
+    .i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .btn .i { width: 18px; height: 18px; }
+    .btn-sm { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+    .card h3 { font-size: var(--text-md); }
+    .card-head { margin-bottom: var(--space-4); }
+    .card-sub { margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    h4 { margin: 0; }
+    fieldset { margin: 0; padding: 0; border: 0; min-width: 0; }
+    legend { padding: 0; }
+
+    /* Shared field anatomy: label above, 44px boxed control, reserved helper slot (FRM-01, FRM-10, FRM-15) */
+    .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .lbl-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); }
+    .flabel, .field > label, .lbl-row label { font-size: var(--text-sm); font-weight: 600; }
+    .opt { font-weight: 400; color: var(--text-3); }
+    .input, .select, .textarea { width: 100%; height: 44px; padding: 0 var(--space-3); border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--surface); font-size: var(--text-md);
+      transition-property: border-color, box-shadow; transition-duration: var(--dur-fast); }
+    .textarea { height: auto; padding: var(--space-2) var(--space-3); resize: vertical; font: inherit; line-height: 1.45; }
+    .input::placeholder, .textarea::placeholder { color: var(--text-3); }
+    /* Focus is the brand color, never a verdict color (COL-10) */
+    .input:focus, .select:focus, .textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring-soft); }
+    .input[aria-invalid="true"] { border-color: var(--danger); }
+    .select-wrap { position: relative; }
+    .select { appearance: none; -webkit-appearance: none; padding-right: 36px; cursor: pointer; }
+    .select-wrap .i { position: absolute; right: var(--space-3); top: 50%; width: 16px; height: 16px; margin-top: -8px; color: var(--text-3); pointer-events: none; }
+    .help { display: flex; align-items: flex-start; gap: 4px; min-height: 18px; font-size: var(--text-xs); line-height: 18px; color: var(--text-3); }
+    .help .i { width: 14px; height: 14px; margin-top: 2px; }
+    .help.err { color: var(--danger); }
+    .row { display: grid; gap: var(--space-3); }
+    .row-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .row-3 { grid-template-columns: 1.3fr 1fr 1fr; }
+
+    /* v7 combobox */
+    .cb { position: relative; display: flex; align-items: center; gap: var(--space-2); height: 44px; padding: 0 var(--space-1) 0 var(--space-3); border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--surface); }
+    .cb:focus-within, .cb[data-open="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring-soft); }
+    .cb > .i { width: 18px; height: 18px; color: var(--text-3); }
+    .cb input { flex: 1; min-width: 0; height: 100%; padding: 0; border: 0; outline: none; background: transparent; font-size: var(--text-md); }
+    .cb-toggle { display: grid; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 6px; background: transparent; color: var(--text-3); cursor: pointer; }
+    .cb-toggle:hover { background: var(--surface-2); color: var(--text); }
+    .cb-toggle .i { width: 16px; height: 16px; transition: transform var(--dur-fast) var(--ease-out); }
+    .cb[data-open="true"] .cb-toggle .i { transform: rotate(180deg); }
+    .cb-pop { position: absolute; z-index: 3; top: calc(100% + 6px); left: -1px; right: -1px; overflow: hidden; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); }
+    .cb-list { max-height: 256px; margin: 0; padding: var(--space-1); overflow-y: auto; list-style: none; }
+    .cb-list ul { margin: 0; padding: 0; list-style: none; }
+    .cb-group { padding: var(--space-2) var(--space-2) var(--space-1); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .cb-opt { display: grid; grid-template-columns: minmax(0, 1fr) auto 16px; align-items: center; gap: var(--space-3); min-height: 48px; padding: var(--space-1) var(--space-2); border-radius: 6px; cursor: pointer; }
+    .cb-opt b { display: block; font-size: var(--text-sm); font-weight: 600; }
+    .cb-opt small { display: block; font-size: var(--text-xs); color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cb-opt .off { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .cb-opt .i { width: 16px; height: 16px; color: var(--accent-ink); visibility: hidden; }
+    .cb-opt[data-current] .i { visibility: visible; }
+    /* The active option gets a tint plus an inset bar, so it never rests on hue alone (COL-07) */
+    .cb-opt[aria-selected="true"] { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+    .cb-opt mark { background: none; color: inherit; font-weight: 700; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 2px; }
+    .cb-empty { padding: var(--space-4) var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
+    .cb-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-top: 1px solid var(--border); background: var(--surface-2); font-size: var(--text-xs); color: var(--text-2); }
+    .cb-foot kbd { font: inherit; font-size: 11px; padding: 0 5px; border-radius: 4px; border: 1px solid var(--border); background: var(--surface); }
+    .regional { display: grid; gap: var(--space-4); }
+    .regional .card-head { margin: 0; }
+
+    /* v8 tag input */
+    .tags { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 48px; padding: 6px var(--space-2); border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--surface); cursor: text; }
+    .tags:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring-soft); }
+    .tags[data-invalid="true"]:not(:focus-within) { border-color: var(--danger); }
+    .tk-list { display: contents; }
+    .tk { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 2px 0 var(--space-1); border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface-2); font-size: var(--text-sm); }
+    .tk-plain { padding-left: var(--space-3); }
+    .tk .avatar { width: 24px; height: 24px; font-size: 10px; }
+    .tk-x { display: grid; place-items: center; width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; color: var(--text-2); cursor: pointer; }
+    .tk-x:hover { background: var(--border); color: var(--text); }
+    .tk-x .i { width: 14px; height: 14px; }
+    /* Invalid token: tint, icon and an inline message, never color alone (COL-07, FRM-11) */
+    .tk.bad { border-color: var(--danger); background: var(--danger-soft); color: var(--danger); padding-left: var(--space-2); }
+    .tk.bad .i:not(.tk-x .i) { width: 16px; height: 16px; }
+    .tk.bad .tk-x { color: var(--danger); }
+    .tk-edit { padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer; text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px; }
+    .tags input { flex: 1; min-width: 150px; height: 32px; padding: 0 var(--space-1); border: 0; outline: none; background: transparent; font-size: var(--text-md); }
+    .tags input::placeholder { color: var(--text-3); }
+    .suggest { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+    .suggest > span { font-size: var(--text-xs); font-weight: 600; color: var(--text-3); margin-right: var(--space-1); }
+    .sg { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 var(--space-3) 0 var(--space-2); border: 1px dashed var(--field-border); border-radius: var(--radius-pill); background: var(--surface); color: var(--text-2); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .sg:hover { border-style: solid; color: var(--text); }
+    .sg .i { width: 16px; height: 16px; }
+    .invite { display: grid; gap: var(--space-4); }
+    .invite .card-head { margin: 0; }
+    .invite-foot { display: flex; align-items: flex-end; gap: var(--space-3); padding-top: var(--space-4); border-top: 1px solid var(--border); }
+    .invite-foot .field { flex: 1; }
+    .send-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+    .send-why { margin-top: calc(-1 * var(--space-2)); min-height: 18px; font-size: var(--text-xs); color: var(--text-3); text-align: right; }
+    .btn[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; }
+
+    /* v9 star rating */
+    .rate { display: grid; grid-template-columns: 196px minmax(0, 1fr); gap: var(--space-5); }
+    .rate-sum { padding-right: var(--space-5); border-right: 1px solid var(--border); }
+    .rs-score { display: flex; align-items: baseline; gap: var(--space-2); }
+    .rs-score .num { font-size: var(--text-2xl); font-weight: 700; line-height: 1.1; }
+    .rs-score small { font-size: var(--text-sm); color: var(--text-2); }
+    .mini-stars { position: relative; display: inline-flex; margin-top: var(--space-1); }
+    .mini-stars svg { width: 18px; height: 18px; }
+    .mini-stars .base { display: flex; color: var(--field-border); }
+    .mini-stars .base svg { fill: none; stroke: currentColor; stroke-width: 1.5; }
+    .mini-stars .fill { position: absolute; inset: 0; display: flex; overflow: hidden; width: calc(var(--r) / 5 * 100%); color: var(--star); white-space: nowrap; }
+    .mini-stars .fill svg { flex: none; fill: currentColor; stroke: currentColor; stroke-width: 1.5; }
+    .rs-count { margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    .dist { width: 100%; margin-top: var(--space-4); border-collapse: collapse; font-size: var(--text-xs); }
+    .dist th { width: 44px; padding: 3px 0; font-weight: 600; color: var(--text-2); text-align: left; white-space: nowrap; }
+    .dist td { padding: 3px 0; }
+    .dist td:last-child { width: 36px; text-align: right; color: var(--text-2); }
+    .bar { display: block; height: 6px; margin: 0 var(--space-2); border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; }
+    .bar span { display: block; height: 100%; background: var(--star); transform-origin: left; transform: scaleX(var(--p)); }
+    .rate-form { display: grid; gap: var(--space-3); align-content: start; }
+    .kicker { font-size: var(--text-xs); color: var(--text-3); }
+    .kicker b { display: block; font-size: var(--text-md); color: var(--text); }
+    .stars-field legend { margin-bottom: var(--space-1); font-size: var(--text-sm); font-weight: 600; }
+    .stars-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+    .stars { display: flex; margin-left: -4px; }
+    .stars label { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-sm); cursor: pointer; color: var(--field-border); }
+    .stars svg { width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; transition: transform var(--dur-fast) var(--ease-out); }
+    .stars label:hover svg { transform: scale(1.1); }
+    .stars input:focus-visible + label { outline: 2px solid var(--focus); outline-offset: -2px; }
+    /* One data attribute on the group says how many stars to fill, for the value or a hover preview (ENG-06) */
+    .stars[data-show="1"] label:nth-of-type(-n+1), .stars[data-show="2"] label:nth-of-type(-n+2), .stars[data-show="3"] label:nth-of-type(-n+3),
+    .stars[data-show="4"] label:nth-of-type(-n+4), .stars[data-show="5"] label:nth-of-type(-n+5) { color: var(--star); }
+    .stars[data-show="1"] label:nth-of-type(-n+1) svg, .stars[data-show="2"] label:nth-of-type(-n+2) svg, .stars[data-show="3"] label:nth-of-type(-n+3) svg,
+    .stars[data-show="4"] label:nth-of-type(-n+4) svg, .stars[data-show="5"] label:nth-of-type(-n+5) svg { fill: currentColor; }
+    .rating-out { font-size: var(--text-sm); color: var(--text-2); }
+    .rating-out b { font-size: var(--text-lg); color: var(--text); }
+    .rating-out[data-preview] { font-style: italic; }
+    .yn { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+    .yn label { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-3); border: 1px solid var(--field-border); border-radius: var(--radius-sm); font-size: var(--text-sm); cursor: pointer; }
+    .yn label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); font-weight: 600; }
+    .yn input { margin: 0; accent-color: var(--accent); }
+    .rate-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+
+    /* v10 file input with preview (dark) */
+    .brand { display: grid; gap: var(--space-5); }
+    .brand .card-head { margin: 0; }
+    .up { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+    .up-prev { position: relative; display: grid; place-items: center; width: 80px; height: 80px; overflow: hidden; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--surface-2); color: var(--text-3); }
+    .up-prev img, .up-prev svg { width: 100%; height: 100%; object-fit: cover; }
+    .up-prev .up-none { font-size: var(--text-xl); font-weight: 700; }
+    .up-meta { margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    .up-acts { display: flex; flex-wrap: wrap; gap: var(--space-2); margin: var(--space-3) 0 var(--space-1); }
+    /* The real file input stays focusable; its label is the visible button (FRM-27, ENG-01) */
+    .file-btn { cursor: pointer; }
+    input[type="file"]:focus-visible + .file-btn { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .undo-note { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .link-btn { min-height: 32px; padding: 0 var(--space-2); border: 0; border-radius: 6px; background: transparent; color: var(--accent-ink); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .link-btn:hover { background: var(--accent-soft); }
+    .drop { position: relative; display: grid; place-items: center; min-height: 148px; border: 1.5px dashed var(--field-border); border-radius: var(--radius-md); background: var(--bg); text-align: center;
+      transition-property: border-color, background-color; transition-duration: var(--dur-fast); }
+    .drop[data-over="true"] { border-color: var(--accent); border-style: solid; background: var(--accent-soft); }
+    .drop[data-error="true"] { border-color: var(--danger); }
+    .drop-empty { display: flex; flex-direction: column; align-items: center; gap: var(--space-2); padding: var(--space-4); }
+    .drop-empty > .i { width: 28px; height: 28px; color: var(--text-3); }
+    .drop-empty p { font-size: var(--text-sm); color: var(--text-2); }
+    .drop-empty small { font-size: var(--text-xs); color: var(--text-3); }
+    .drop img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+    .drop-filled { position: absolute; left: var(--space-3); right: var(--space-3); bottom: var(--space-3); display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--surface); text-align: left; }
+    .drop-filled p { flex: 1; min-width: 0; font-size: var(--text-sm); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* v11 phone and address */
+    .addr { display: grid; gap: var(--space-4); }
+    .addr .card-head { margin: 0; }
+    .ac { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; line-height: 18px; padding: 0 5px; border-radius: 4px; background: var(--surface-2); color: var(--text-2); white-space: nowrap; }
+    .phone-ctl { display: grid; grid-template-columns: 112px minmax(0, 1fr); }
+    .phone-ctl .select { border-radius: var(--radius-sm) 0 0 var(--radius-sm); background-color: var(--surface-2); }
+    .phone-ctl .input { margin-left: -1px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+    .phone-ctl .select:focus, .phone-ctl .input:focus { position: relative; z-index: 1; }
+    .row-3 + .help { margin-top: calc(-1 * var(--space-2)); }
+    .addr-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding-top: var(--space-2); }
+    .addr-foot p { font-size: var(--text-xs); color: var(--text-3); }
+
+    /* v12 multi-step with review (teal accent for Sora Pay) */
+    .wiz { padding: 0; overflow: hidden; }
+    .wiz-top { padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--border); }
+    .wiz-title { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
+    .wiz-title p { font-size: var(--text-sm); color: var(--text-2); }
+    .stepper { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; }
+    .stepper li { position: relative; }
+    .stepper li + li::before { content: ""; position: absolute; top: 15px; right: calc(50% + 22px); left: calc(-50% + 22px); height: 2px; border-radius: 2px; background: var(--border); }
+    .stepper li[data-state="done"]::before, .stepper li[data-state="current"]::before { background: var(--accent); }
+    .step { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; padding: 0; border: 0; background: none; color: var(--text-3); font: inherit; font-size: var(--text-xs); font-weight: 600; text-align: center; }
+    button.step { cursor: pointer; border-radius: var(--radius-sm); }
+    button.step:hover .dot { box-shadow: 0 0 0 4px var(--accent-soft); }
+    .dot { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--field-border); background: var(--surface); color: var(--text-2); font-size: var(--text-sm); }
+    .dot .i { width: 16px; height: 16px; stroke-width: 2.5; }
+    /* Done: filled with a check; current: ring and bold label; upcoming: muted number (FBK-05, COL-07) */
+    [data-state="done"] .step { color: var(--text-2); }
+    [data-state="done"] .dot { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+    [data-state="current"] .step { color: var(--text); }
+    [data-state="current"] .dot { border-color: var(--accent); color: var(--accent-ink); box-shadow: 0 0 0 4px var(--accent-soft); }
+    .wiz-body { padding: var(--space-5); }
+    .panel-h { font-size: var(--text-md); }
+    .panel-h:focus { outline: none; }
+    .panel-sub { margin: 2px 0 var(--space-4); font-size: var(--text-sm); color: var(--text-2); }
+    .panel-fields { display: grid; gap: var(--space-3); }
+    .seg-radios { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+    .seg-radios label { display: flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-3); border: 1px solid var(--field-border); border-radius: var(--radius-sm); font-size: var(--text-sm); cursor: pointer; }
+    .seg-radios label:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); font-weight: 600; }
+    .seg-radios input { accent-color: var(--accent); margin: 0; }
+    .review { margin: 0; padding: 0; list-style: none; border: 1px solid var(--border); border-radius: var(--radius-md); }
+    .review li { display: grid; grid-template-columns: 112px minmax(0, 1fr) auto; gap: var(--space-3); align-items: start; padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4); }
+    .review li + li { border-top: 1px solid var(--border); }
+    .review h4 { margin: 0; padding-top: 6px; font-size: var(--text-sm); color: var(--text-2); font-weight: 600; }
+    .review dl { margin: 0; padding-top: 6px; font-size: var(--text-sm); }
+    .review dd { margin: 0; }
+    .review dd + dd { color: var(--text-2); }
+    .edit-btn { min-height: 32px; padding: 0 var(--space-3); border: 0; border-radius: 6px; background: transparent; color: var(--accent-ink); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .edit-btn:hover { background: var(--accent-soft); }
+    .payout-note { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--surface-2); font-size: var(--text-sm); color: var(--text-2); }
+    .payout-note .i { width: 18px; height: 18px; color: var(--accent-ink); }
+    .payout-note b { color: var(--text); }
+    .confirm { display: flex; align-items: flex-start; gap: var(--space-3); min-height: 44px; margin-top: var(--space-3); padding: var(--space-2) 0; font-size: var(--text-sm); cursor: pointer; }
+    .confirm input { width: 20px; height: 20px; margin: 0; flex: none; accent-color: var(--accent); }
+    .wiz-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-4) var(--space-5); border-top: 1px solid var(--border); background: var(--surface-2); }
+    .wiz-foot .step-count { font-size: var(--text-sm); color: var(--text-2); }
+    .wiz-foot .btns { display: flex; gap: var(--space-2); }
+    .wiz-done { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2); }
+    .wiz-done .i { width: 32px; height: 32px; color: var(--success); }
+  </style>
+</head>
+<body>
+  <!-- Inline icon set: one 24px stroke family (ICO-01) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/></symbol>
+    <symbol id="i-chev-d" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 17l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8z"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 15V4"/><path d="M7 9l5-5 5 5"/><path d="M5 20h14"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+    <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-spin" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" opacity="0.3"/><path d="M20.5 12A8.5 8.5 0 0 0 12 3.5"/></symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="6"/><circle cx="12" cy="12" r="3.5"/></svg>ProductCraft · Example screens</span>
+        <h1>Form controls, continued</h1>
+        <p>A searchable combobox, a tag input, a star rating, an image upload with preview, phone and address fields, and a multi-step form that ends in a review.</p>
+      </div>
+    </header>
+
+    <div class="variants cols-2">
+      <!-- v7: searchable select (ARIA 1.2 combobox with a listbox popup) -->
+      <section class="variant" aria-labelledby="v7-title">
+        <h2 class="variant-label" id="v7-title"><span class="v">v7</span> Searchable select with keyboard support</h2>
+        <div class="variant-stage">
+          <form class="stage-fill card regional" onsubmit="return false">
+            <div class="card-head"><h3>Regional settings</h3><p class="card-sub">Used for reminders and scheduled reports.</p></div>
+            <div class="field">
+              <label for="tz-input" id="tz-label">Time zone</label>
+              <div class="cb" id="tz-cb" data-open="false">
+                <svg class="i" aria-hidden="true"><use href="#i-globe"/></svg>
+                <input id="tz-input" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="tz-list" aria-describedby="tz-help" autocomplete="off" spellcheck="false">
+                <button class="cb-toggle" type="button" id="tz-toggle" tabindex="-1" aria-label="Show all time zones" aria-controls="tz-list" aria-expanded="false"><svg class="i" aria-hidden="true"><use href="#i-chev-d"/></svg></button>
+                <div class="cb-pop" id="tz-pop" hidden>
+                  <ul class="cb-list" role="listbox" id="tz-list" aria-labelledby="tz-label"></ul>
+                  <p class="cb-foot" aria-hidden="true"><span id="tz-count"></span><span><kbd>↑</kbd> <kbd>↓</kbd> move · <kbd>Enter</kbd> choose · <kbd>Esc</kbd> close</span></p>
+                </div>
+              </div>
+              <p class="help" id="tz-help">Type a city, zone or offset, like “Tokyo” or “+9”.</p>
+              <p class="visually-hidden" role="status" id="tz-live"></p>
+            </div>
+            <div class="row row-2">
+              <div class="field"><label for="date-fmt">Date format</label><div class="select-wrap"><select class="select" id="date-fmt"><option>Oct 24, 2026</option><option>24 Oct 2026</option><option>2026-10-24</option></select><svg class="i" aria-hidden="true"><use href="#i-chev-d"/></svg></div></div>
+              <div class="field"><label for="week-start">Week starts on</label><div class="select-wrap"><select class="select" id="week-start"><option>Monday</option><option>Sunday</option><option>Saturday</option></select><svg class="i" aria-hidden="true"><use href="#i-chev-d"/></svg></div></div>
+            </div>
+            <div class="row row-2">
+              <div class="field"><label for="hours-from">Working hours start</label><input class="input num" id="hours-from" type="time" value="09:00"></div>
+              <div class="field"><label for="hours-to">Working hours end</label><input class="input num" id="hours-to" type="time" value="17:30"></div>
+            </div>
+            <div class="row row-2">
+              <div class="field"><label for="currency">Currency</label><div class="select-wrap"><select class="select" id="currency"><option>USD, US dollar</option><option>EUR, euro</option><option>GBP, pound sterling</option><option>JPY, yen</option></select><svg class="i" aria-hidden="true"><use href="#i-chev-d"/></svg></div></div>
+              <div class="field"><label for="numfmt">Number format</label><div class="select-wrap"><select class="select num" id="numfmt"><option>1,234.56</option><option>1.234,56</option><option>1 234,56</option></select><svg class="i" aria-hidden="true"><use href="#i-chev-d"/></svg></div></div>
+            </div>
+          </form>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-07</code> <code>FRM-06</code> <code>CMP-25</code> <code>FRM-01</code> <code>COP-14</code> <code>COL-07</code> <code>MOB-01</code> <code>ENG-07</code></p>
+      </section>
+
+      <!-- v8: tag input with removable tokens -->
+      <section class="variant" aria-labelledby="v8-title">
+        <h2 class="variant-label" id="v8-title"><span class="v">v8</span> Tag input with removable tokens</h2>
+        <div class="variant-stage">
+          <form class="stage-fill card invite" id="invite" novalidate>
+            <div class="card-head"><h3>Invite to Sora Analytics</h3><p class="card-sub">People get an email with a link to join.</p></div>
+            <div class="field">
+              <div class="lbl-row"><label for="tag-input">Email addresses</label><span class="opt num" id="tk-count" aria-live="polite">4 of 10</span></div>
+              <div class="tags" id="tags">
+                <ul class="tk-list" id="tk-list" aria-label="People to invite"></ul>
+                <input id="tag-input" type="text" inputmode="email" autocomplete="off" spellcheck="false" enterkeyhint="done" placeholder="name@example.com" aria-describedby="tag-help tag-err">
+              </div>
+              <p class="help err" id="tag-err" hidden></p>
+              <p class="help" id="tag-help">Press Enter or a comma after each address. Paste a list to add several.</p>
+            </div>
+            <div class="suggest" id="suggest"><span>Suggested</span></div>
+            <div class="invite-foot">
+              <div class="field"><label for="role">Role</label><div class="select-wrap"><select class="select" id="role"><option>Viewer, can open dashboards</option><option>Editor, can change dashboards</option><option>Admin, can manage members</option></select><svg class="i" aria-hidden="true"><use href="#i-chev-d"/></svg></div></div>
+              <div class="send-wrap">
+                <button class="btn btn-primary" type="submit" id="send" aria-describedby="send-why"><svg class="i" aria-hidden="true"><use href="#i-send"/></svg><span id="send-lbl">Send 3 invites</span></button>
+              </div>
+            </div>
+            <p class="send-why" id="send-why" role="status"></p>
+          </form>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-25</code> <code>FRM-11</code> <code>FRM-05</code> <code>BTN-10</code> <code>ICO-04</code> <code>COL-07</code> <code>FRM-26</code> <code>COP-01</code></p>
+      </section>
+
+      <!-- v9: star rating as a radio group with a visible value -->
+      <section class="variant" aria-labelledby="v9-title">
+        <h2 class="variant-label" id="v9-title"><span class="v">v9</span> Star rating as a radio group</h2>
+        <div class="variant-stage">
+          <div class="stage-fill card rate">
+            <div class="rate-sum">
+              <p class="rs-score"><span class="num">4.6</span><small>out of 5</small></p>
+              <span class="mini-stars" style="--r: 4.6" aria-hidden="true">
+                <span class="base"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></span>
+                <span class="fill"><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg><svg><use href="#i-star"/></svg></span>
+              </span>
+              <p class="rs-count"><a href="#reviews"><span class="num">1,204</span> reviews</a></p>
+              <table class="dist">
+                <caption class="visually-hidden">Ratings breakdown</caption>
+                <tbody>
+                  <tr><th scope="row">5 stars</th><td><span class="bar" aria-hidden="true"><span style="--p: 0.731"></span></span></td><td class="num">73%</td></tr>
+                  <tr><th scope="row">4 stars</th><td><span class="bar" aria-hidden="true"><span style="--p: 0.178"></span></span></td><td class="num">18%</td></tr>
+                  <tr><th scope="row">3 stars</th><td><span class="bar" aria-hidden="true"><span style="--p: 0.05"></span></span></td><td class="num">5%</td></tr>
+                  <tr><th scope="row">2 stars</th><td><span class="bar" aria-hidden="true"><span style="--p: 0.022"></span></span></td><td class="num">2%</td></tr>
+                  <tr><th scope="row">1 star</th><td><span class="bar" aria-hidden="true"><span style="--p: 0.02"></span></span></td><td class="num">2%</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <form class="rate-form" id="rate-form" novalidate>
+              <p class="kicker"><b>Trail bottle, 750 ml</b>Delivered Thu, Oct 22 · order #SL-1042</p>
+              <fieldset class="stars-field">
+                <legend>Your rating</legend>
+                <div class="stars-row">
+                  <div class="stars" id="stars" data-show="4">
+                    <input class="visually-hidden" type="radio" name="rating" id="r1" value="1"><label for="r1"><svg aria-hidden="true"><use href="#i-star"/></svg><span class="visually-hidden">1 star, Poor</span></label>
+                    <input class="visually-hidden" type="radio" name="rating" id="r2" value="2"><label for="r2"><svg aria-hidden="true"><use href="#i-star"/></svg><span class="visually-hidden">2 stars, Fair</span></label>
+                    <input class="visually-hidden" type="radio" name="rating" id="r3" value="3"><label for="r3"><svg aria-hidden="true"><use href="#i-star"/></svg><span class="visually-hidden">3 stars, Okay</span></label>
+                    <input class="visually-hidden" type="radio" name="rating" id="r4" value="4" checked><label for="r4"><svg aria-hidden="true"><use href="#i-star"/></svg><span class="visually-hidden">4 stars, Good</span></label>
+                    <input class="visually-hidden" type="radio" name="rating" id="r5" value="5"><label for="r5"><svg aria-hidden="true"><use href="#i-star"/></svg><span class="visually-hidden">5 stars, Excellent</span></label>
+                  </div>
+                  <p class="rating-out" id="rating-out" aria-hidden="true"><b class="num">4</b> out of 5 · Good</p>
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend class="flabel" style="margin-bottom:6px">Would you recommend it?</legend>
+                <div class="yn"><label><input type="radio" name="rec" value="yes" checked>Yes</label><label><input type="radio" name="rec" value="no">No</label></div>
+              </fieldset>
+              <div class="field">
+                <label for="rv-text">What stood out? <span class="opt">(optional)</span></label>
+                <textarea class="textarea" id="rv-text" rows="2" placeholder="e.g. Keeps water cold all day"></textarea>
+              </div>
+              <div class="rate-actions"><span class="help">Posting as Avery S.</span><button class="btn btn-primary" type="submit">Post review</button></div>
+              <p class="visually-hidden" role="status" id="rate-live"></p>
+            </form>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-27</code> <code>FRM-06</code> <code>COP-13</code> <code>COL-07</code> <code>MOB-01</code> <code>ENG-06</code> <code>TYP-09</code> <code>FRM-12</code></p>
+      </section>
+
+      <!-- v10: file input with image preview, replace and remove (dark) -->
+      <section class="variant" aria-labelledby="v10-title">
+        <h2 class="variant-label" id="v10-title"><span class="v">v10</span> Image upload with preview, replace and remove (dark)</h2>
+        <div class="variant-stage dark" data-theme="dark">
+          <form class="stage-fill card brand" onsubmit="return false">
+            <div class="card-head"><h3>Workspace branding</h3><p class="card-sub">Shown on shared dashboards and emailed reports.</p></div>
+
+            <div class="up" id="logo-up">
+              <div class="up-prev" id="logo-prev">
+                <svg viewBox="0 0 80 80" id="logo-art" aria-hidden="true"><rect width="80" height="80" fill="#1e1b4b"/><circle cx="40" cy="40" r="22" fill="none" stroke="#b3cbff" stroke-width="6"/><path d="M40 18a22 22 0 0 1 22 22" fill="none" stroke="#e0e7ff" stroke-width="6" stroke-linecap="round"/><circle cx="40" cy="40" r="6" fill="#e0e7ff"/></svg>
+                <img id="logo-img" alt="" hidden>
+                <span class="up-none" id="logo-none" aria-hidden="true" hidden>S</span>
+              </div>
+              <div>
+                <p class="flabel">Logo</p>
+                <p class="up-meta num" id="logo-meta">sora-mark.png · 184 KB · 512 × 512 px</p>
+                <div class="up-acts">
+                  <input class="visually-hidden" type="file" id="logo-file" accept="image/png,image/jpeg,image/svg+xml" aria-describedby="logo-help">
+                  <label class="btn btn-secondary btn-sm file-btn" for="logo-file"><svg class="i" aria-hidden="true"><use href="#i-upload"/></svg><span id="logo-file-lbl">Replace</span><span class="visually-hidden"> logo</span></label>
+                  <button class="btn btn-ghost btn-sm" type="button" id="logo-remove"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>Remove<span class="visually-hidden"> logo</span></button>
+                  <span class="undo-note" id="logo-undo" role="status" hidden>Logo removed <button class="link-btn" type="button" id="logo-undo-btn">Undo</button></span>
+                </div>
+                <p class="help" id="logo-help">Square PNG, JPG or SVG, up to 2 MB.</p>
+              </div>
+            </div>
+
+            <div class="field">
+              <p class="flabel" id="cover-label">Cover image</p>
+              <div class="drop" id="cover-drop" data-error="true">
+                <img id="cover-img" alt="" hidden>
+                <div class="drop-empty" id="cover-empty">
+                  <svg class="i" aria-hidden="true"><use href="#i-image"/></svg>
+                  <p>Drag an image here, or</p>
+                  <input class="visually-hidden" type="file" id="cover-file" accept="image/png,image/jpeg" aria-describedby="cover-limits cover-err">
+                  <label class="btn btn-secondary btn-sm file-btn" for="cover-file"><svg class="i" aria-hidden="true"><use href="#i-upload"/></svg>Choose cover image</label>
+                  <small id="cover-limits" class="num">PNG or JPG, up to 5 MB, at least 1600 × 500 px</small>
+                </div>
+                <div class="drop-filled" id="cover-filled" hidden>
+                  <p class="num" id="cover-meta"></p>
+                  <label class="btn btn-secondary btn-sm file-btn" for="cover-file">Replace</label>
+                  <button class="btn btn-ghost btn-sm" type="button" id="cover-remove">Remove</button>
+                </div>
+              </div>
+              <p class="help err" id="cover-err"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg><span>team-offsite.heic isn't supported. Export it as PNG or JPG and try again.</span></p>
+            </div>
+          </form>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-21</code> <code>FRM-27</code> <code>FRM-11</code> <code>FBK-15</code> <code>ENG-01</code> <code>DRK-01</code> <code>DRK-09</code> <code>COL-07</code></p>
+      </section>
+
+      <!-- v11: phone and address with a country select and autocomplete tokens -->
+      <section class="variant" aria-labelledby="v11-title">
+        <h2 class="variant-label" id="v11-title"><span class="v">v11</span> Phone and address with country select (autocomplete tokens shown)</h2>
+        <div class="variant-stage">
+          <form class="stage-fill card addr" id="addr" onsubmit="return false">
+            <div class="card-head"><h3>Shipping address</h3><p class="card-sub">Where should we send order #SL-1042? Labels and formats follow the country.</p></div>
+            <div class="field">
+              <div class="lbl-row"><label for="a-country">Country or region</label><code class="ac" aria-hidden="true">country</code></div>
+              <div class="select-wrap"><select class="select" id="a-country" autocomplete="country">
+                <option value="US" selected>United States</option><option value="CA">Canada</option><option value="GB">United Kingdom</option><option value="DE">Germany</option><option value="JP">Japan</option><option value="AU">Australia</option>
+              </select><svg class="i" aria-hidden="true"><use href="#i-chev-d"/></svg></div>
+            </div>
+            <div class="field">
+              <div class="lbl-row"><label for="a-name">Full name</label><code class="ac" aria-hidden="true">name</code></div>
+              <input class="input" id="a-name" autocomplete="name" value="Avery Stone">
+            </div>
+            <div class="field" role="group" aria-labelledby="a-phone-lbl">
+              <div class="lbl-row"><span class="flabel" id="a-phone-lbl">Phone</span><span><code class="ac" aria-hidden="true">tel-country-code</code> <code class="ac" aria-hidden="true">tel-national</code></span></div>
+              <div class="phone-ctl">
+                <div class="select-wrap"><select class="select num" id="a-code" autocomplete="tel-country-code" aria-label="Country code">
+                  <option value="+1" data-c="US" selected>US +1</option><option value="+1" data-c="CA">CA +1</option><option value="+44" data-c="GB">GB +44</option><option value="+49" data-c="DE">DE +49</option><option value="+81" data-c="JP">JP +81</option><option value="+61" data-c="AU">AU +61</option>
+                </select><svg class="i" aria-hidden="true"><use href="#i-chev-d"/></svg></div>
+                <input class="input num" id="a-phone" type="tel" inputmode="tel" autocomplete="tel-national" value="555-0142" aria-labelledby="a-phone-lbl" aria-describedby="a-phone-help">
+              </div>
+              <p class="help" id="a-phone-help">Only for delivery updates.</p>
+            </div>
+            <div class="field">
+              <div class="lbl-row"><label for="a-line1">Street address</label><code class="ac" aria-hidden="true">address-line1</code></div>
+              <input class="input" id="a-line1" autocomplete="address-line1" value="1042 Harbor Lane">
+            </div>
+            <div class="field">
+              <div class="lbl-row"><label for="a-line2">Apartment, suite or floor <span class="opt">(optional)</span></label><code class="ac" aria-hidden="true">address-line2</code></div>
+              <input class="input" id="a-line2" autocomplete="address-line2" placeholder="e.g. Suite 300">
+            </div>
+            <div class="row row-3">
+              <div class="field">
+                <div class="lbl-row"><label for="a-city" id="a-city-lbl">City</label><code class="ac" aria-hidden="true">address-level2</code></div>
+                <input class="input" id="a-city" autocomplete="address-level2" value="Portland">
+              </div>
+              <div class="field">
+                <div class="lbl-row"><label for="a-region" id="a-region-lbl">State</label><code class="ac" aria-hidden="true">address-level1</code></div>
+                <input class="input" id="a-region" autocomplete="address-level1" value="Oregon">
+              </div>
+              <div class="field">
+                <div class="lbl-row"><label for="a-postal" id="a-postal-lbl">ZIP code</label><code class="ac" aria-hidden="true">postal-code</code></div>
+                <input class="input num" id="a-postal" autocomplete="postal-code" inputmode="numeric" value="97205" aria-describedby="a-postal-help">
+              </div>
+            </div>
+            <p class="help" id="a-postal-help">ZIP code: 5 digits, like 97205.</p>
+            <div class="addr-foot"><p>Saved to your Sora Shop address book.</p><button class="btn btn-primary" type="submit">Use this address</button></div>
+          </form>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-04</code> <code>FRM-05</code> <code>FRM-13</code> <code>FRM-02</code> <code>FRM-12</code> <code>BTN-05</code> <code>FRM-06</code> <code>FRM-01</code></p>
+      </section>
+
+      <!-- v12: multi-step form with a stepper and a review step (Sora Pay, teal accent) -->
+      <section class="variant" aria-labelledby="v12-title">
+        <h2 class="variant-label" id="v12-title"><span class="v">v12</span> Multi-step form with a stepper and review</h2>
+        <div class="variant-stage" data-accent="teal">
+          <form class="stage-fill card wiz" id="wiz" novalidate>
+            <div class="wiz-top">
+              <div class="wiz-title"><h3>Set up payouts</h3><p>Sora Pay</p></div>
+              <ol class="stepper" id="stepper" aria-label="Payout setup progress">
+                <li data-state="done"><button class="step" type="button" data-go="0"><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span>Business<span class="visually-hidden">, completed</span></button></li>
+                <li data-state="done"><button class="step" type="button" data-go="1"><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span>Owner<span class="visually-hidden">, completed</span></button></li>
+                <li data-state="done"><button class="step" type="button" data-go="2"><span class="dot"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span>Bank account<span class="visually-hidden">, completed</span></button></li>
+                <li data-state="current"><span class="step" aria-current="step"><span class="dot">4</span>Review<span class="visually-hidden">, current step</span></span></li>
+              </ol>
+            </div>
+
+            <div class="wiz-body">
+              <section class="panel" data-step="0" aria-labelledby="p0-h" hidden>
+                <h4 class="panel-h" id="p0-h" tabindex="-1">Business details</h4>
+                <p class="panel-sub">As it appears on your tax documents.</p>
+                <div class="panel-fields">
+                  <div class="field"><label for="w-legal">Legal business name</label><input class="input" id="w-legal" autocomplete="organization" required value="Sora Shop LLC" aria-describedby="w-legal-h"><p class="help" id="w-legal-h"></p></div>
+                  <div class="row row-2">
+                    <div class="field"><label for="w-type">Business type</label><div class="select-wrap"><select class="select" id="w-type"><option>Limited liability company</option><option>Sole proprietor</option><option>Corporation</option><option>Nonprofit</option></select><svg class="i" aria-hidden="true"><use href="#i-chev-d"/></svg></div></div>
+                    <div class="field"><label for="w-industry">Industry</label><div class="select-wrap"><select class="select" id="w-industry"><option>Retail</option><option>Software</option><option>Food and drink</option><option>Services</option></select><svg class="i" aria-hidden="true"><use href="#i-chev-d"/></svg></div></div>
+                  </div>
+                </div>
+              </section>
+              <section class="panel" data-step="1" aria-labelledby="p1-h" hidden>
+                <h4 class="panel-h" id="p1-h" tabindex="-1">Account owner</h4>
+                <p class="panel-sub">The person responsible for this account.</p>
+                <div class="panel-fields">
+                  <div class="field"><label for="w-owner">Full name</label><input class="input" id="w-owner" autocomplete="name" required value="Priya Nair" aria-describedby="w-owner-h"><p class="help" id="w-owner-h"></p></div>
+                  <div class="row row-2">
+                    <div class="field"><label for="w-email">Email</label><input class="input" id="w-email" type="email" autocomplete="email" required value="priya.nair@example.com" aria-describedby="w-email-h"><p class="help" id="w-email-h"></p></div>
+                    <div class="field"><label for="w-phone">Phone</label><input class="input num" id="w-phone" type="tel" autocomplete="tel" required value="+1 555-0148" aria-describedby="w-phone-h"><p class="help" id="w-phone-h"></p></div>
+                  </div>
+                </div>
+              </section>
+              <section class="panel" data-step="2" aria-labelledby="p2-h" hidden>
+                <h4 class="panel-h" id="p2-h" tabindex="-1">Bank account</h4>
+                <p class="panel-sub">Payouts arrive in this account in 1 to 2 business days.</p>
+                <div class="panel-fields">
+                  <div class="field"><label for="w-acct">Checking account number</label><input class="input num" id="w-acct" inputmode="numeric" autocomplete="off" required value="000123454821" aria-describedby="w-acct-h"><p class="help" id="w-acct-h"></p></div>
+                  <fieldset>
+                    <legend class="flabel" style="margin-bottom:6px">Payout schedule</legend>
+                    <div class="seg-radios">
+                      <label><input type="radio" name="sched" value="Daily payouts, every business day">Daily</label>
+                      <label><input type="radio" name="sched" value="Weekly payouts, every Monday" checked>Weekly</label>
+                      <label><input type="radio" name="sched" value="Monthly payouts, on the 1st">Monthly</label>
+                    </div>
+                  </fieldset>
+                </div>
+              </section>
+              <section class="panel" data-step="3" aria-labelledby="p3-h">
+                <h4 class="panel-h" id="p3-h" tabindex="-1">Review and submit</h4>
+                <p class="panel-sub">Check the details. You can still edit any step.</p>
+                <ul class="review" id="review"></ul>
+                <p class="payout-note"><svg class="i" aria-hidden="true"><use href="#i-calendar"/></svg><span>First payout after verification: <b id="first-payout">Mon, Nov 2</b></span></p>
+                <label class="confirm"><input type="checkbox" id="w-confirm" aria-describedby="w-confirm-h">I confirm these details are correct and I'm authorized to add this account.</label>
+                <p class="help" id="w-confirm-h"></p>
+              </section>
+              <div class="wiz-done" id="wiz-done" role="status" hidden>
+                <svg class="i" aria-hidden="true"><use href="#i-check-circle"/></svg>
+                <h4 class="panel-h" id="done-h" tabindex="-1">Application submitted</h4>
+                <p class="card-sub">We'll email priya.nair@example.com within 2 business days.</p>
+              </div>
+            </div>
+
+            <div class="wiz-foot" id="wiz-foot">
+              <p class="step-count" id="step-count">Step 4 of 4</p>
+              <div class="btns">
+                <button class="btn btn-secondary" type="button" id="w-back"><svg class="i" aria-hidden="true"><use href="#i-chev-l"/></svg>Back</button>
+                <button class="btn btn-primary" type="submit" id="w-next" data-state="idle"><span id="w-next-lbl">Submit for review</span></button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-14</code> <code>FBK-05</code> <code>FBK-11</code> <code>FRM-11</code> <code>COP-01</code> <code>SCR-23</code> <code>BTN-05</code> <code>COL-07</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // FRM-07: an ARIA 1.2 combobox that filters as you type, keeps the current value visible and supports the keyboard.
+    (() => {
+      const zones = [
+        ["Los Angeles", "America/Los_Angeles", "United States"], ["Denver", "America/Denver", "United States"], ["Chicago", "America/Chicago", "United States"],
+        ["New York", "America/New_York", "United States"], ["Honolulu", "Pacific/Honolulu", "United States"], ["Mexico City", "America/Mexico_City", "Mexico"],
+        ["São Paulo", "America/Sao_Paulo", "Brazil"], ["Reykjavík", "Atlantic/Reykjavik", "Iceland"], ["London", "Europe/London", "United Kingdom"],
+        ["Lisbon", "Europe/Lisbon", "Portugal"], ["Paris", "Europe/Paris", "France"], ["Madrid", "Europe/Madrid", "Spain"], ["Berlin", "Europe/Berlin", "Germany"],
+        ["Athens", "Europe/Athens", "Greece"], ["Nairobi", "Africa/Nairobi", "Kenya"], ["Dubai", "Asia/Dubai", "United Arab Emirates"], ["Kolkata", "Asia/Kolkata", "India"],
+        ["Singapore", "Asia/Singapore", "Singapore"], ["Seoul", "Asia/Seoul", "South Korea"], ["Tokyo", "Asia/Tokyo", "Japan"], ["Sydney", "Australia/Sydney", "Australia"],
+        ["Auckland", "Pacific/Auckland", "New Zealand"],
+      ].map(([city, tz, region], i) => {
+        // Names and offsets come from Intl at render time, so daylight saving is always right (ENG-07).
+        const part = (style) => new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: style }).formatToParts(new Date()).find((p) => p.type === "timeZoneName").value;
+        const offset = part("shortOffset").replace("GMT", "UTC").replace(/^UTC$/, "UTC+0");
+        return { id: "tz-o-" + i, city, tz, region, name: part("long"), offset };
+      });
+      const fold = (s) => [...s].map((c) => c.normalize("NFD").replace(/[̀-ͯ]/g, "")).join("").toLowerCase(); // keeps one char per char
+      const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+      const mark = (text, q) => {
+        const at = q ? fold(text).indexOf(q) : -1;
+        return at < 0 ? esc(text) : esc(text.slice(0, at)) + "<mark>" + esc(text.slice(at, at + q.length)) + "</mark>" + esc(text.slice(at + q.length));
+      };
+
+      const cb = document.getElementById("tz-cb");
+      const input = document.getElementById("tz-input");
+      const toggle = document.getElementById("tz-toggle");
+      const pop = document.getElementById("tz-pop");
+      const list = document.getElementById("tz-list");
+      const count = document.getElementById("tz-count");
+      const live = document.getElementById("tz-live");
+      const here = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const detected = zones.find((z) => z.tz === here) || zones[0];
+      let current = detected, shown = [], active = -1, announce;
+      const labelOf = (z) => `${z.city} (${z.offset})`;
+
+      function search(q) {
+        if (!q) return zones;
+        const scored = [];
+        zones.forEach((z) => {
+          const fields = [z.city, z.name, z.region, z.offset];
+          const hit = fields.findIndex((f) => fold(f).includes(q));
+          if (hit < 0) return;
+          const starts = fold(z.city).startsWith(q) ? 0 : fields.some((f) => fold(f).split(/[\s(]+/).some((w) => w.startsWith(q))) ? 1 : 2;
+          scored.push({ z, starts });
+        });
+        return scored.sort((a, b) => a.starts - b.starts).map((s) => s.z); // stable sort keeps list order within a rank
+      }
+      const option = (z, q) => `<li class="cb-opt" role="option" id="${z.id}" aria-selected="false"${z === current ? " data-current" : ""}>
+          <span><b>${mark(z.city, q)}${z === current ? '<span class="visually-hidden">, current</span>' : ""}</b><small>${mark(z.name, q)} · ${mark(z.region, q)}</small></span>
+          <span class="off num">${mark(z.offset, q)}</span><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></li>`;
+
+      function render(q) {
+        shown = search(q);
+        if (!q) {
+          // Empty query: the detected zone first, then everything (FRM-07)
+          const rest = zones.filter((z) => z !== detected);
+          shown = [detected, ...rest];
+          list.innerHTML = `<li role="presentation"><ul role="group" aria-labelledby="tz-g1"><li role="presentation" class="cb-group" id="tz-g1">Detected from this device</li>${option(detected, "")}</ul></li>`
+            + `<li role="presentation"><ul role="group" aria-labelledby="tz-g2"><li role="presentation" class="cb-group" id="tz-g2">All time zones</li>${rest.map((z) => option(z, "")).join("")}</ul></li>`;
+        } else {
+          list.innerHTML = shown.length ? shown.map((z) => option(z, q)).join("") : `<li class="cb-empty" role="presentation">No time zones match “${esc(input.value)}”. Try a city or an offset like +2.</li>`;
+        }
+        const n = shown.length;
+        count.textContent = q ? `${n} ${n === 1 ? "match" : "matches"}` : `${n} time zones`;
+        clearTimeout(announce);
+        announce = setTimeout(() => (live.textContent = q ? count.textContent : ""), 500); // announce once typing pauses
+        setActive(q && n ? 0 : -1);
+      }
+      function setActive(i) {
+        active = i;
+        list.querySelectorAll('[role="option"]').forEach((o, j) => o.setAttribute("aria-selected", String(j === i)));
+        const el = i >= 0 ? document.getElementById(shown[i].id) : null;
+        if (el) { input.setAttribute("aria-activedescendant", el.id); el.scrollIntoView({ block: "nearest" }); }
+        else input.removeAttribute("aria-activedescendant");
+      }
+      function open() {
+        if (!pop.hidden) return;
+        pop.hidden = false;
+        cb.dataset.open = "true";
+        input.setAttribute("aria-expanded", "true");
+        toggle.setAttribute("aria-expanded", "true");
+      }
+      function close(restore = true) {
+        pop.hidden = true;
+        cb.dataset.open = "false";
+        input.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-expanded", "false");
+        input.removeAttribute("aria-activedescendant");
+        if (restore) input.value = labelOf(current); // the chosen value stays visible (CMP-25)
+      }
+      function choose(i) {
+        if (i < 0 || !shown[i]) return;
+        current = shown[i];
+        close();
+        live.textContent = `${current.city} selected, ${current.name}`;
+        // Example only: replace with a request to your API that saves the workspace time zone.
+      }
+
+      input.addEventListener("input", () => { open(); render(fold(input.value.trim())); });
+      input.addEventListener("focus", () => input.select());
+      input.addEventListener("keydown", (e) => {
+        const n = shown.length;
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          if (pop.hidden) { open(); render(""); if (e.altKey) return; return setActive(Math.max(0, shown.indexOf(current))); }
+          setActive(n ? (active + 1) % n : -1);
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          if (pop.hidden) { open(); render(""); return setActive(Math.max(0, shown.indexOf(current))); }
+          setActive(n ? (active - 1 + n) % n : -1);
+        } else if (e.key === "Enter") {
+          if (!pop.hidden && active >= 0) { e.preventDefault(); choose(active); }
+        } else if (e.key === "Escape") {
+          if (!pop.hidden) { e.preventDefault(); close(); }
+        } else if (e.key === "Tab" && !pop.hidden) {
+          close();
+        }
+      });
+      toggle.addEventListener("click", () => {
+        if (pop.hidden) { open(); render(""); setActive(Math.max(0, shown.indexOf(current))); input.focus(); } else close();
+      });
+      list.addEventListener("pointerdown", (e) => e.preventDefault()); // keep focus in the input
+      list.addEventListener("click", (e) => { const o = e.target.closest('[role="option"]'); if (o) choose(shown.findIndex((z) => z.id === o.id)); });
+      list.addEventListener("pointermove", (e) => { const o = e.target.closest('[role="option"]'); if (o) { const i = shown.findIndex((z) => z.id === o.id); if (i !== active) setActive(i); } });
+      document.addEventListener("pointerdown", (e) => { if (!cb.contains(e.target) && !pop.hidden) close(); });
+
+      // The sheet opens mid-search so the filtered, highlighted list is visible.
+      input.value = "pa";
+      open();
+      render("pa");
+    })();
+
+    // CMP-25, FRM-11: tokens are rendered from data, each with a named remove button; invalid ones explain the fix.
+    (() => {
+      const directory = { "priya.nair@example.com": "Priya Nair", "owen.clarke@example.com": "Owen Clarke", "zara.ahmed@example.com": "Zara Ahmed", "leo.brandt@example.com": "Leo Brandt" };
+      const MAX = 10;
+      const valid = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+      const initials = (n) => n.split(" ").map((w) => w[0]).join("");
+      let tokens = ["priya.nair@example.com", "jordan.reyes@example.com", "hana.kim@example.com", "sam.okafor@example"];
+
+      const field = document.getElementById("tags");
+      const listEl = document.getElementById("tk-list");
+      const input = document.getElementById("tag-input");
+      const err = document.getElementById("tag-err");
+      const countEl = document.getElementById("tk-count");
+      const suggest = document.getElementById("suggest");
+      const send = document.getElementById("send");
+      const sendLbl = document.getElementById("send-lbl");
+      const why = document.getElementById("send-why");
+      const x = '<svg class="i" aria-hidden="true"><use href="#i-x"/></svg>';
+
+      function token(v) {
+        const name = directory[v];
+        if (!valid(v)) return `<li class="tk bad"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg><button class="tk-edit" type="button" data-edit="${v}" aria-label="Edit ${v}, invalid address">${v}</button><button class="tk-x" type="button" data-remove="${v}" aria-label="Remove ${v}">${x}</button></li>`;
+        if (name) return `<li class="tk"><span class="avatar" aria-hidden="true">${initials(name)}</span><span title="${v}">${name}</span><button class="tk-x" type="button" data-remove="${v}" aria-label="Remove ${name}">${x}</button></li>`;
+        return `<li class="tk tk-plain"><span>${v}</span><button class="tk-x" type="button" data-remove="${v}" aria-label="Remove ${v}">${x}</button></li>`;
+      }
+      function render(note) {
+        listEl.innerHTML = tokens.map(token).join("");
+        const bad = tokens.filter((t) => !valid(t));
+        const good = tokens.length - bad.length;
+        field.dataset.invalid = String(bad.length > 0);
+        input.setAttribute("aria-invalid", String(bad.length > 0));
+        countEl.textContent = `${tokens.length} of ${MAX}`;
+        const msg = note || (bad.length ? `“${bad[0]}” is missing a domain ending, like .com. Select it to edit, or remove it.` : "");
+        err.hidden = !msg;
+        err.innerHTML = msg ? `<svg class="i" aria-hidden="true"><use href="#i-alert"/></svg><span>${msg}</span>` : "";
+        sendLbl.textContent = good ? `Send ${good} invite${good === 1 ? "" : "s"}` : "Send invites";
+        // Unavailable, but focusable and explained (BTN-10)
+        const blocked = bad.length > 0 || good === 0;
+        send.setAttribute("aria-disabled", String(blocked));
+        why.textContent = bad.length ? `Fix or remove ${bad.length} address${bad.length > 1 ? "es" : ""} to send.` : good ? "" : "Add at least one address.";
+        suggest.querySelectorAll("[data-add]").forEach((b) => (b.hidden = tokens.includes(b.dataset.add)));
+      }
+      function add(raw) {
+        const parts = raw.split(/[\s,;]+/).map((s) => s.trim().toLowerCase()).filter(Boolean);
+        let note = "";
+        for (const p of parts) {
+          if (tokens.includes(p)) { note = `${p} is already on the list.`; continue; }
+          if (tokens.length >= MAX) { note = `You can invite up to ${MAX} people at a time.`; break; }
+          tokens.push(p);
+        }
+        render(note);
+      }
+
+      Object.entries(directory).filter(([e]) => e !== "priya.nair@example.com").forEach(([email, name]) => {
+        suggest.insertAdjacentHTML("beforeend", `<button class="sg" type="button" data-add="${email}"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>${name}</button>`);
+      });
+      suggest.addEventListener("click", (e) => { const b = e.target.closest("[data-add]"); if (b) { add(b.dataset.add); input.focus(); } });
+
+      input.addEventListener("keydown", (e) => {
+        if ((e.key === "Enter" || e.key === "," || e.key === ";" || (e.key === "Tab" && input.value.trim())) && input.value.trim()) {
+          e.preventDefault(); add(input.value); input.value = "";
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+        } else if (e.key === "Backspace" && !input.value && tokens.length) {
+          // Backspace in an empty field brings the last address back for editing.
+          e.preventDefault(); input.value = tokens.pop(); render();
+        }
+      });
+      input.addEventListener("paste", (e) => {
+        const text = e.clipboardData.getData("text");
+        if (/[\s,;]/.test(text.trim())) { e.preventDefault(); add(text); }
+      });
+      input.addEventListener("blur", () => { if (input.value.trim()) { add(input.value); input.value = ""; } });
+      field.addEventListener("click", (e) => {
+        const rm = e.target.closest("[data-remove]");
+        const ed = e.target.closest("[data-edit]");
+        if (rm) { tokens = tokens.filter((t) => t !== rm.dataset.remove); render(); input.focus(); }
+        else if (ed) { tokens = tokens.filter((t) => t !== ed.dataset.edit); render(); input.value = ed.dataset.edit; input.focus(); }
+        else if (e.target === field) input.focus();
+      });
+      document.getElementById("invite").addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (send.getAttribute("aria-disabled") === "true") { input.focus(); return; }
+        // Example only: replace with a request to your API that sends the invitations.
+        why.textContent = `Example only: ${tokens.length} invitations would be sent.`;
+      });
+      render();
+    })();
+
+    // FRM-27: native radios carry the rating; the visible value and hover preview are written from one attribute.
+    (() => {
+      const words = ["Not rated yet", "Poor", "Fair", "Okay", "Good", "Excellent"];
+      const stars = document.getElementById("stars");
+      const out = document.getElementById("rating-out");
+      const live = document.getElementById("rate-live");
+      const value = () => Number((stars.querySelector("input:checked") || {}).value || 0);
+      function show(n, preview) {
+        stars.dataset.show = n;
+        out.innerHTML = n ? `<b class="num">${n}</b> out of 5 · ${words[n]}` : words[0];
+        out.toggleAttribute("data-preview", Boolean(preview));
+      }
+      stars.addEventListener("change", () => show(value()));
+      stars.addEventListener("pointerover", (e) => { const l = e.target.closest("label"); if (l) show(Number(document.getElementById(l.htmlFor).value), true); });
+      stars.addEventListener("pointerleave", () => show(value()));
+      document.getElementById("rate-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        // Example only: replace with a request to your API that posts the review.
+        live.textContent = value() ? `Example only: a ${value()}-star review would be posted.` : "Choose a rating first.";
+      });
+    })();
+
+    // FRM-21, FBK-15: real file inputs with a preview, limits checked before upload, and remove with undo.
+    (() => {
+      const kb = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
+      const size = (b) => (b < 1048576 ? kb.format(b / 1024) + " KB" : kb.format(b / 1048576) + " MB");
+      const readImage = (file) => new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => resolve({ url, w: img.naturalWidth, h: img.naturalHeight });
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("unreadable")); };
+        img.src = url;
+      });
+      const typeName = (f) => (f.name.split(".").pop() || "").toUpperCase();
+
+      // Logo
+      const logoFile = document.getElementById("logo-file");
+      const art = document.getElementById("logo-art"), img = document.getElementById("logo-img"), none = document.getElementById("logo-none");
+      const meta = document.getElementById("logo-meta"), help = document.getElementById("logo-help");
+      const remove = document.getElementById("logo-remove"), undo = document.getElementById("logo-undo"), lbl = document.getElementById("logo-file-lbl");
+      let saved = null;
+      const logoState = () => ({ art: !art.hidden, src: img.getAttribute("src"), meta: meta.textContent });
+      function showLogo(s) {
+        art.hidden = !s || !s.art;
+        img.hidden = !s || s.art;
+        if (s && !s.art) img.src = s.src;
+        none.hidden = Boolean(s);
+        meta.textContent = s ? s.meta : "No logo yet. Sora shows your initial instead.";
+        remove.hidden = !s;
+        lbl.textContent = s ? "Replace" : "Upload";
+      }
+      logoFile.addEventListener("change", async () => {
+        const f = logoFile.files[0];
+        if (!f) return;
+        help.classList.remove("err");
+        if (!["image/png", "image/jpeg", "image/svg+xml"].includes(f.type)) { help.classList.add("err"); help.textContent = `${f.name} isn't a PNG, JPG or SVG.`; return; }
+        if (f.size > 2 * 1048576) { help.classList.add("err"); help.textContent = `${f.name} is ${size(f.size)}. Choose one under 2 MB.`; return; }
+        try {
+          const { url, w, h } = await readImage(f);
+          showLogo({ art: false, src: url, meta: `${f.name} · ${size(f.size)} · ${w} × ${h} px` });
+          help.textContent = w !== h ? "Not square, so it will be cropped to the center." : "Square PNG, JPG or SVG, up to 2 MB.";
+          undo.hidden = true;
+          // Example only: replace with a request to your API that uploads the logo.
+        } catch { help.classList.add("err"); help.textContent = `${f.name} couldn't be read. Try exporting it again.`; }
+      });
+      remove.addEventListener("click", () => { saved = logoState(); showLogo(null); undo.hidden = false; document.getElementById("logo-undo-btn").focus(); });
+      document.getElementById("logo-undo-btn").addEventListener("click", () => { showLogo(saved); undo.hidden = true; remove.focus(); });
+
+      // Cover: drop zone plus the same file input
+      const drop = document.getElementById("cover-drop"), coverFile = document.getElementById("cover-file");
+      const cImg = document.getElementById("cover-img"), empty = document.getElementById("cover-empty"), filled = document.getElementById("cover-filled");
+      const cMeta = document.getElementById("cover-meta"), cErr = document.getElementById("cover-err");
+      const fail = (msg) => { drop.dataset.error = "true"; cErr.hidden = false; cErr.querySelector("span").textContent = msg; };
+      async function takeCover(f) {
+        if (!f) return;
+        if (!["image/png", "image/jpeg"].includes(f.type)) return fail(`${f.name} isn't supported. Export it as PNG or JPG and try again.`);
+        if (f.size > 5 * 1048576) return fail(`${f.name} is ${size(f.size)}. Choose an image under 5 MB.`);
+        try {
+          const { url, w, h } = await readImage(f);
+          if (w < 1600 || h < 500) { URL.revokeObjectURL(url); return fail(`${f.name} is ${w} × ${h} px. Use one at least 1600 × 500 px.`); }
+          drop.dataset.error = "false"; cErr.hidden = true;
+          cImg.src = url; cImg.hidden = false; empty.hidden = true; filled.hidden = false;
+          cMeta.textContent = `${f.name} · ${size(f.size)} · ${w} × ${h} px`;
+          // Example only: replace with a request to your API that uploads the cover.
+        } catch { fail(`${f.name} couldn't be read. Try exporting it again.`); }
+      }
+      coverFile.addEventListener("change", () => takeCover(coverFile.files[0]));
+      ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.dataset.over = "true"; }));
+      ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, () => (drop.dataset.over = "false")));
+      drop.addEventListener("drop", (e) => { e.preventDefault(); takeCover(e.dataTransfer.files[0]); });
+      document.getElementById("cover-remove").addEventListener("click", () => {
+        cImg.hidden = true; cImg.removeAttribute("src"); empty.hidden = false; filled.hidden = true; coverFile.value = ""; coverFile.focus();
+      });
+    })();
+
+    // FRM-13, FRM-05: labels, hints and the phone code follow the country; autocomplete tokens stay fixed.
+    (() => {
+      const formats = {
+        US: { region: "State", postal: "ZIP code", city: "City", hint: "ZIP code: 5 digits, like 97205.", mode: "numeric" },
+        CA: { region: "Province", postal: "Postal code", city: "City", hint: "Postal code: letter, number, letter, then number, letter, number.", mode: "text" },
+        GB: { region: "County (optional)", postal: "Postcode", city: "Town or city", hint: "Postcode: letters and numbers, with or without the space.", mode: "text" },
+        DE: { region: "State (optional)", postal: "Postal code", city: "City", hint: "Postal code: 5 digits.", mode: "numeric" },
+        JP: { region: "Prefecture", postal: "Postal code", city: "City or ward", hint: "Postal code: 7 digits, with or without the hyphen.", mode: "numeric" },
+        AU: { region: "State or territory", postal: "Postcode", city: "Suburb", hint: "Postcode: 4 digits.", mode: "numeric" },
+      };
+      const country = document.getElementById("a-country"), code = document.getElementById("a-code");
+      let codeTouched = false;
+      code.addEventListener("change", () => (codeTouched = true));
+      country.addEventListener("change", () => {
+        const f = formats[country.value];
+        document.getElementById("a-region-lbl").textContent = f.region;
+        document.getElementById("a-postal-lbl").textContent = f.postal;
+        document.getElementById("a-city-lbl").textContent = f.city;
+        document.getElementById("a-postal-help").textContent = f.hint;
+        document.getElementById("a-postal").inputMode = f.mode;
+        // Follow the country unless the person picked a code themselves.
+        if (!codeTouched) code.selectedIndex = [...code.options].findIndex((o) => o.dataset.c === country.value);
+      });
+    })();
+
+    // FRM-14, FBK-05: one step index drives the stepper, panels and footer; data persists and review is built from it.
+    (() => {
+      const form = document.getElementById("wiz");
+      const panels = [...form.querySelectorAll(".panel")];
+      const names = ["Business", "Owner", "Bank account", "Review"];
+      const stepper = document.getElementById("stepper");
+      const back = document.getElementById("w-back"), next = document.getElementById("w-next"), nextLbl = document.getElementById("w-next-lbl");
+      const count = document.getElementById("step-count");
+      const val = (id) => document.getElementById(id).value.trim();
+      let step = 3, fromReview = false;
+
+      function renderStepper() {
+        stepper.innerHTML = names.map((n, i) => {
+          const state = i < step ? "done" : i === step ? "current" : "todo";
+          const dot = state === "done" ? '<svg class="i" aria-hidden="true"><use href="#i-check"/></svg>' : i + 1;
+          const word = { done: "completed", current: "current step", todo: "not started" }[state];
+          const inner = `<span class="dot">${dot}</span>${n}<span class="visually-hidden">, ${word}</span>`;
+          // Completed steps are buttons so people can go back (FBK-05)
+          return `<li data-state="${state}">${state === "done" ? `<button class="step" type="button" data-go="${i}">${inner}</button>` : `<span class="step"${state === "current" ? ' aria-current="step"' : ""}>${inner}</span>`}</li>`;
+        }).join("");
+      }
+      function renderReview() {
+        const acct = val("w-acct").slice(-4);
+        const sched = form.querySelector('input[name="sched"]:checked').value;
+        const rows = [
+          ["Business", [val("w-legal"), `${val("w-type")} · ${val("w-industry")}`], 0],
+          ["Owner", [val("w-owner"), `${val("w-email")} · ${val("w-phone")}`], 1],
+          ["Bank account", [`Checking •••• ${acct}`, "Sora Shop LLC"], 2],
+          ["Schedule", [sched.split(", ")[0], sched.split(", ")[1].replace(/^./, (c) => c.toUpperCase())], 2],
+        ];
+        document.getElementById("review").innerHTML = rows.map(([h, lines, i]) => `<li><h4>${h}</h4><dl><dt class="visually-hidden">${h}</dt>${lines.map((l) => `<dd class="${/\d/.test(l) ? "num" : ""}">${l}</dd>`).join("")}</dl><button class="edit-btn" type="button" data-go="${i}">Edit<span class="visually-hidden"> ${h.toLowerCase()}</span></button></li>`).join("");
+      }
+      function go(i, focus = true) {
+        step = i;
+        panels.forEach((p, j) => (p.hidden = j !== i));
+        renderStepper();
+        if (i === 3) renderReview();
+        count.textContent = `Step ${i + 1} of ${names.length}`;
+        back.hidden = i === 0;
+        nextLbl.textContent = i === 3 ? "Submit for review" : fromReview ? "Save and review" : `Next: ${names[i + 1]}`;
+        if (focus) panels[i].querySelector(".panel-h").focus(); // move focus to the new step's heading
+      }
+      function validate(panel) {
+        let first = null;
+        panel.querySelectorAll("[required]").forEach((el) => {
+          const ok = el.type === "checkbox" ? el.checked : el.value.trim() && el.checkValidity();
+          const h = document.getElementById(el.getAttribute("aria-describedby"));
+          el.setAttribute("aria-invalid", String(!ok));
+          if (h) { h.classList.toggle("err", !ok); h.textContent = ok ? "" : el.type === "checkbox" ? "Confirm the details to submit." : `Enter a valid ${el.labels[0].textContent.toLowerCase()}.`; }
+          if (!ok && !first) first = el;
+        });
+        if (first) first.focus();
+        return !first;
+      }
+      form.addEventListener("click", (e) => {
+        const b = e.target.closest("[data-go]");
+        if (!b) return;
+        fromReview = step === 3;
+        go(Number(b.dataset.go));
+      });
+      back.addEventListener("click", () => { fromReview = false; go(step - 1); });
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        if (next.dataset.state !== "idle" || !validate(panels[step])) return;
+        if (step < 3) { const to = fromReview ? 3 : step + 1; fromReview = false; return go(to); }
+        next.dataset.state = "working";
+        next.setAttribute("aria-busy", "true");
+        nextLbl.textContent = "Submitting…";
+        // Example only: replace with a request to your API; show success only after it confirms (FBK-11).
+        await new Promise((r) => setTimeout(r, 900));
+        panels.forEach((p) => (p.hidden = true));
+        document.getElementById("wiz-foot").hidden = true;
+        document.getElementById("wiz-done").hidden = false;
+        document.getElementById("done-h").focus();
+      });
+      document.getElementById("w-confirm").setAttribute("required", "");
+      go(3, false);
+    })();
+  </script>
+</body>
+</html>

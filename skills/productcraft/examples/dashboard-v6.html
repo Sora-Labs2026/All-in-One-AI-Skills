@@ -1,0 +1,553 @@
+<!doctype html>
+<!-- ProductCraft example: dashboard-v6 (learning home, warm accent, sidebar plus week panel). Original Sora Labs example, MIT License.
+     Demonstrates: SCR-01, LAY-05, LAY-01, LAY-02, TYP-02, TYP-07, TYP-09, COL-01, COL-02, COL-07, COL-14, CMP-15,
+     CMP-18, CMP-26, NAV-03, NAV-08, BTN-01, BTN-08, FBK-06, FRM-01, FRM-22, COP-01, COP-10, ICO-03, ENG-07 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Learning home dashboard</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* Page tokens: warm neutrals and a terracotta accent, all routed through the shared names (CMP-26).
+       Measured (COL-01): white on #b4532a 4.99:1; #9a4321 on #fbeee6 5.78:1; #b4532a on #faf7f2 4.67:1;
+       #574e45 on #faf7f2 7.61:1; #6b6158 on #ffffff 6.04:1 and on #f4efe7 5.28:1; #574e45 on every course tint 6.2:1 or more. */
+    :root {
+      --bg: #faf7f2;
+      --surface: #ffffff;
+      --surface-2: #f4efe7;
+      --border: #e9e2d8;
+      --text: #1f1b16;
+      --text-2: #574e45;
+      --text-3: #6b6158;
+      --accent: #b4532a;
+      --accent-hover: #9a4321;
+      --accent-soft: #fbeee6;
+      --accent-ink: #9a4321;
+      --on-accent: #ffffff;
+      --focus: #b4532a;
+      --neutral-ink: #3d342c;
+      --neutral-soft: #f4efe7;
+      --shadow-sm: 0 1px 2px rgba(60, 40, 20, 0.05), 0 1px 3px rgba(60, 40, 20, 0.06);
+      /* One soft tint per course, reused everywhere that course appears (COL-14) */
+      --c-sql: #f3e3cf;
+      --c-ux: #dfe8d8;
+      --c-write: #f2dcd5;
+    }
+
+    .app { display: grid; grid-template-columns: 240px minmax(0, 1fr) 360px; min-height: 100vh; }
+
+    /* Sidebar: logo, main items, a labeled course group, then help and the account (NAV-08).
+       Active item: raised white pill, accent icon and heavier label (NAV-03). */
+    .side { padding: var(--space-5) var(--space-4); }
+    .side-inner { position: sticky; top: var(--space-5); display: flex; flex-direction: column; gap: var(--space-5); min-height: calc(100vh - 2 * var(--space-5)); }
+    .brand { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-2); color: var(--text); font-weight: 700; }
+    .brand:hover { text-decoration: none; }
+    .brand svg { width: 32px; height: 32px; }
+    .nav-label { padding: 0 var(--space-3); margin-bottom: var(--space-1); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .nav { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+    .nav a {
+      display: flex; align-items: center; gap: var(--space-3); min-height: 40px; padding: 0 var(--space-3);
+      border-radius: var(--radius-sm); color: var(--text-2); font-size: var(--text-md); font-weight: 500;
+    }
+    .nav a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    .nav a svg { width: 20px; height: 20px; flex: none; }
+    .nav a[aria-current="page"] { background: var(--surface); color: var(--text); font-weight: 600; box-shadow: var(--shadow-sm); }
+    .nav a[aria-current="page"] svg { color: var(--accent); }
+    .nav .badge { margin-left: auto; min-width: 22px; padding: 0 6px; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--neutral-ink); font-size: var(--text-xs); font-weight: 600; line-height: 20px; text-align: center; }
+    .nav .swatch { width: 20px; height: 20px; flex: none; border-radius: 6px; }
+    .nav .course-link { font-size: var(--text-sm); }
+    .side-foot { margin-top: auto; display: grid; gap: var(--space-3); }
+    .menu-btn { display: none; }
+    .me { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3); border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--border); }
+    .me .avatar { width: 36px; height: 36px; background: var(--accent-soft); color: var(--accent-ink); }
+    .me strong { display: block; font-size: var(--text-sm); }
+    .me small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+
+    /* Main column */
+    .main { padding: var(--space-6) var(--space-6) var(--space-8); min-width: 0; }
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-5); }
+    .page-head .date { font-size: var(--text-sm); font-weight: 600; color: var(--text-3); }
+    .page-head h1 { margin-top: var(--space-1); }
+    .search { display: flex; flex-direction: column; gap: var(--space-1); }
+    .search label { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .search-box { position: relative; }
+    .search-box svg { position: absolute; left: var(--space-3); top: 50%; width: 16px; height: 16px; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+    .search input {
+      width: 264px; min-height: 40px; padding: 0 var(--space-3) 0 36px; border: 1px solid #c9bfb3; border-radius: var(--radius-sm);
+      background: var(--surface); font-size: var(--text-sm);
+    }
+    .search input::placeholder { color: var(--text-3); }
+    .search input:focus-visible { outline: 2px solid var(--focus); outline-offset: 0; border-color: var(--focus); }
+
+    .card { box-shadow: var(--shadow-sm); }
+    .section { margin-top: var(--space-7); }
+    .section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-4); }
+    .section-head .subtle { margin-top: 2px; }
+    .link { font-size: var(--text-sm); font-weight: 600; white-space: nowrap; }
+
+    /* Up next: the answer to "What should I study next?", with the reason and one primary action (SCR-01, LAY-05, BTN-01) */
+    .next { display: grid; grid-template-columns: minmax(0, 1fr) 232px; gap: var(--space-6); padding: var(--space-6); }
+    .eyebrow { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--accent-ink); }
+    .eyebrow svg { width: 16px; height: 16px; }
+    .next h2 { margin-top: var(--space-2); font-size: var(--text-xl); line-height: 1.25; letter-spacing: -0.01em; }
+    .next .course { margin-top: var(--space-1); color: var(--text-2); }
+    .next-meta { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin-top: var(--space-4); list-style: none; padding: 0; font-size: var(--text-sm); color: var(--text-2); }
+    .next-meta li { display: inline-flex; align-items: center; gap: var(--space-2); }
+    .next-meta svg { width: 16px; height: 16px; color: var(--text-3); }
+    .why { margin-top: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); background: var(--surface-2); font-size: var(--text-sm); color: var(--text-2); max-width: 60ch; }
+    .why strong { color: var(--text); font-weight: 600; }
+    .next-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-5); }
+    .cover { position: relative; border-radius: var(--radius-md); overflow: hidden; }
+    .cover svg { display: block; width: 100%; height: 100%; }
+    .next .cover { align-self: stretch; min-height: 200px; }
+    .module { position: absolute; left: var(--space-3); right: var(--space-3); bottom: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: rgba(255, 255, 255, 0.92); font-size: var(--text-xs); color: var(--text-2); }
+    .module strong { display: block; color: var(--text); font-size: var(--text-xs); }
+    .lessons { display: flex; gap: 3px; margin-top: var(--space-2); }
+    .lessons i { flex: 1; height: 4px; border-radius: 2px; background: var(--border); }
+    .lessons i.done { background: var(--accent); }
+    .lessons i.now { background: repeating-linear-gradient(90deg, var(--accent) 0 3px, transparent 3px 5px); }
+
+    /* Course cards: same anatomy for each, progress with a value (CMP-15, FBK-06) */
+    .courses { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); }
+    .course-card { display: flex; flex-direction: column; padding: 0; overflow: hidden; }
+    .course-card .cover { height: 112px; border-radius: 0; }
+    .course-body { display: flex; flex-direction: column; flex: 1; padding: var(--space-4) var(--space-5) var(--space-5); }
+    .course-body h3 { font-size: var(--text-md); }
+    .course-body .where { margin-top: 2px; font-size: var(--text-sm); color: var(--text-3); }
+    .progress { margin-top: var(--space-4); }
+    .progress-top { display: flex; justify-content: space-between; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-2); }
+    .progress-top strong { color: var(--text); }
+    .track { height: 6px; margin-top: var(--space-2); border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; }
+    .track span { display: block; width: calc(var(--v) * 1%); height: 100%; border-radius: inherit; background: var(--accent); }
+    .course-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-top: var(--space-4); padding-top: var(--space-3); border-top: 1px solid var(--border); font-size: var(--text-xs); color: var(--text-3); }
+    .course-foot a { font-size: var(--text-sm); font-weight: 600; }
+
+    /* Skills: five-level segmented meters with the level in words (FBK-06, COL-07) */
+    .skills { padding: var(--space-2) var(--space-5); }
+    .skill { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr) 132px; align-items: center; gap: var(--space-5); min-height: 64px; border-top: 1px solid var(--border); }
+    .skill:first-child { border-top: 0; }
+    .skill-name strong { display: block; font-size: var(--text-sm); font-weight: 600; }
+    .skill-name small { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-3); }
+    .skill-name small i { width: 10px; height: 10px; border-radius: 3px; }
+    .levels { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-1); }
+    .levels span { position: relative; height: 10px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+    .levels span::after { content: ""; position: absolute; inset: 0; width: calc(var(--f, 0) * 1%); background: var(--accent); }
+    .skill-level { text-align: right; font-size: var(--text-sm); font-weight: 600; }
+    .skill-level small { display: block; font-size: var(--text-xs); font-weight: 500; color: var(--text-3); }
+    .skill-level .up { color: var(--success); font-weight: 600; }
+
+    /* Week panel: a calm summary of rhythm, time and dates (COP-10) */
+    .week { background: var(--surface); border-left: 1px solid var(--border); padding: var(--space-6) var(--space-5) var(--space-7); display: flex; flex-direction: column; gap: var(--space-6); min-width: 0; }
+    .week h2 { font-size: var(--text-lg); }
+    .block-title { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+    .block-title h3 { font-size: var(--text-md); }
+    .block + .block { padding-top: var(--space-6); border-top: 1px solid var(--border); }
+
+    /* Study rhythm: count of days, no flames, no loss language (P08 guardrail; FBK-06) */
+    .rhythm-figure { display: flex; align-items: baseline; gap: var(--space-2); margin-top: var(--space-3); }
+    .rhythm-figure strong { font-size: var(--text-2xl); font-weight: 700; line-height: 1.1; }
+    .rhythm-figure span { font-size: var(--text-sm); color: var(--text-2); }
+    .days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-2); list-style: none; margin: var(--space-4) 0 0; padding: 0; }
+    .days li { display: grid; justify-items: center; gap: var(--space-1); font-size: var(--text-xs); color: var(--text-3); }
+    .days .mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; border: 1.5px dashed #b9ae9f; color: var(--text-3); }
+    .days .mark svg { width: 16px; height: 16px; }
+    .days .studied .mark { border: 0; background: var(--accent-soft); color: var(--accent-ink); }
+    .days .today .mark { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
+    .days .today { color: var(--text); font-weight: 700; }
+    .rhythm-note { margin-top: var(--space-4); font-size: var(--text-sm); color: var(--text-2); }
+    .switch-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); background: var(--surface-2); cursor: pointer; }
+    .switch-row strong { display: block; font-size: var(--text-sm); font-weight: 600; }
+    .switch-row small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    /* Off state: #8c8177 border measures 3.8:1 on white, knob #6b6158 5.3:1 on its track (COL-01) */
+    .switch {
+      position: relative; flex: none; width: 44px; height: 26px; padding: 0; cursor: pointer;
+      border: 1px solid #8c8177; border-radius: var(--radius-pill); background: var(--surface);
+      transition: background-color var(--dur-fast), border-color var(--dur-fast);
+    }
+    .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: var(--text-3); transition: transform var(--dur-fast) var(--ease-out); }
+    .switch[aria-checked="true"] { background: var(--accent); border-color: var(--accent); }
+    .switch[aria-checked="true"]::after { transform: translateX(18px); background: var(--on-accent); }
+
+    /* Weekly minutes vs goal: values printed on the bars, goal as a dashed line, met weeks get a check (CMP-18, COL-07) */
+    .goal-summary { margin-top: var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
+    .goal-summary strong { color: var(--text); }
+    .goal-track { height: 8px; margin-top: var(--space-2); border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; }
+    .goal-track span { display: block; width: calc(var(--v) * 1%); height: 100%; background: var(--accent); border-radius: inherit; }
+    .bars { position: relative; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); align-items: end; gap: var(--space-2); height: 148px; margin-top: var(--space-6); border-bottom: 1px solid var(--border); }
+    .bars .goal-line { position: absolute; left: 0; right: 0; bottom: calc(var(--p) * 1%); border-top: 1.5px dashed var(--text-3); pointer-events: none; }
+    .bar { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+    .bar .v { font-size: 11px; font-weight: 700; color: var(--text); line-height: 16px; }
+    .bar .col .v { display: block; padding-top: var(--space-1); color: var(--on-accent); text-align: center; }
+    .bar .met { width: 14px; height: 14px; color: var(--success); }
+    .bar .col { width: 100%; max-width: 28px; height: calc(var(--h) * 1%); border-radius: 4px 4px 0 0; background: var(--accent); }
+    .bar.is-current .col { background: repeating-linear-gradient(-45deg, var(--accent) 0 3px, #d98a66 3px 6px); }
+    .bar.is-current .v { color: var(--text); }
+    .bar-x { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: var(--space-2); margin-top: var(--space-2); font-size: 11px; color: var(--text-3); text-align: center; white-space: nowrap; }
+    .bar-x span { display: flex; justify-content: center; }
+    .bar-x span:last-child { color: var(--text); font-weight: 600; }
+    .chart-key { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); margin-top: var(--space-3); font-size: var(--text-xs); color: var(--text-3); }
+    .chart-key span { display: inline-flex; align-items: center; gap: var(--space-1); }
+    .chart-key svg { width: 14px; height: 14px; color: var(--success); }
+    .chart-key i { width: 16px; height: 0; border-top: 1.5px dashed var(--text-3); }
+
+    /* Deadlines: days left as the leading figure with its unit, then title, date and course (TYP-09) */
+    .deadlines { list-style: none; margin: var(--space-3) 0 0; padding: 0; }
+    .deadline { display: grid; grid-template-columns: 52px minmax(0, 1fr); align-items: center; gap: var(--space-3); min-height: 68px; border-top: 1px solid var(--border); }
+    .deadline:first-child { border-top: 0; }
+    .left { display: grid; justify-items: center; width: 52px; padding: var(--space-1) 0; border-radius: var(--radius-sm); background: var(--surface-2); line-height: 1.1; }
+    .left strong { font-size: var(--text-lg); font-weight: 700; }
+    .left small { font-size: 11px; font-weight: 600; color: var(--text-2); }
+    .is-soon .left { background: var(--accent-soft); }
+    .is-soon .left strong, .is-soon .left small { color: var(--accent-ink); }
+    .deadline-body strong { display: block; font-size: var(--text-sm); font-weight: 600; }
+    .deadline-body small { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-3); }
+    .deadline-body small i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+    .kind { font-weight: 600; color: var(--text-2); }
+    .deadline-body .due { display: block; margin-top: 2px; font-size: var(--text-xs); color: var(--text-2); }
+    .deadline { padding: var(--space-3) 0; }
+
+    @media (max-width: 1280px) {
+      .app { grid-template-columns: 220px minmax(0, 1fr); }
+      .week { grid-column: 2; border-left: 0; border-top: 1px solid var(--border); }
+    }
+    @media (max-width: 900px) {
+      .app { grid-template-columns: minmax(0, 1fr); }
+      .side { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); }
+      .side-inner { position: static; min-height: 0; flex-direction: row; align-items: center; justify-content: space-between; }
+      .side-inner { flex-wrap: wrap; gap: var(--space-2); }
+      .side nav, .side-foot { display: none; }
+      .menu-btn { display: inline-grid; }
+      .side.is-open nav { display: block; flex: 1 1 100%; padding-bottom: var(--space-2); }
+      .week { grid-column: 1; }
+      .courses { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .main { padding: var(--space-5) var(--space-4) var(--space-6); }
+      .page-head { flex-direction: column; align-items: stretch; }
+      .search input { width: 100%; }
+      .next { grid-template-columns: minmax(0, 1fr); padding: var(--space-5); }
+      .next .cover { min-height: 140px; order: -1; }
+      .next-actions .btn { flex: 1; }
+      .skill { grid-template-columns: minmax(0, 1fr) 112px; gap: var(--space-3); padding: var(--space-3) 0; }
+      .skill .levels { grid-column: 1 / -1; grid-row: 2; }
+      .week { padding: var(--space-5) var(--space-4); }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="side-inner">
+      <a class="brand" href="#">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#b4532a"/><path d="M9.5 19.5a6.5 6.5 0 0 1 13 0M7.5 23.5h17" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/></svg>
+        Sora Learn
+      </a>
+      <button class="icon-btn menu-btn" type="button" id="menu" aria-expanded="false" aria-controls="side-main side-courses" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <nav aria-label="Main" class="side-nav" id="side-main">
+        <ul class="nav">
+          <li><a href="#" aria-current="page">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10.5 12 4l8.5 6.5V20h-5.5v-5.5h-6V20H3.5z"/></svg>Home</a></li>
+          <li><a href="#">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z"/></svg>My courses</a></li>
+          <li><a href="#">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h6a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h6"/></svg>Paths</a></li>
+          <li><a href="#" aria-label="Assignments, 4 due">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 11l2 2 4-4M9 17h6"/></svg>Assignments<span class="badge num" aria-hidden="true">4</span></a></li>
+          <li><a href="#">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h10l4 4v12H5z"/><path d="M14 4v5h5M8.5 13h7M8.5 16.5h5"/></svg>Notes</a></li>
+          <li><a href="#">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9.5" r="5.5"/><path d="m9 14.5-1.5 6 4.5-2 4.5 2-1.5-6"/></svg>Certificates</a></li>
+        </ul>
+      </nav>
+      <nav aria-labelledby="courses-label" class="side-nav" id="side-courses">
+        <p class="nav-label" id="courses-label">In progress</p>
+        <ul class="nav">
+          <li><a href="#" class="course-link"><span class="swatch" style="background: var(--c-sql)" aria-hidden="true"></span>Data Analysis with SQL</a></li>
+          <li><a href="#" class="course-link"><span class="swatch" style="background: var(--c-ux)" aria-hidden="true"></span>UX Foundations</a></li>
+          <li><a href="#" class="course-link"><span class="swatch" style="background: var(--c-write)" aria-hidden="true"></span>Writing for Product</a></li>
+        </ul>
+      </nav>
+      <div class="side-foot">
+        <ul class="nav">
+          <li><a href="#">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.4v.3M12 16.5h.01"/></svg>Help</a></li>
+          <li><a href="#">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Settings</a></li>
+        </ul>
+        <a class="me" href="#" aria-label="Account: Nina Park">
+          <span class="avatar" aria-hidden="true">NP</span>
+          <span><strong>Nina Park</strong><small>nina.park@example.com</small></span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="page-head">
+      <div>
+        <p class="date">Saturday, October 24</p>
+        <h1>Your learning</h1>
+      </div>
+      <div class="search">
+        <label for="q">Search courses and notes</label>
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/></svg>
+          <input id="q" type="search" placeholder="For example: window functions" autocomplete="off">
+        </div>
+      </div>
+    </header>
+
+    <!-- Up next: recommendation, reason and one primary action (SCR-01, LAY-05, BTN-01, COP-01) -->
+    <section class="card next" aria-labelledby="next-title">
+      <div>
+        <p class="eyebrow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          Up next for you
+        </p>
+        <h2 id="next-title">Joining three or more tables</h2>
+        <p class="course">Lesson 4.3 · Data Analysis with SQL, Module 4</p>
+        <ul class="next-meta">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg><span class="num">18 min</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5"/><path d="M10.5 9.5v5l4-2.5z"/></svg>Video and 6 practice queries</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16M7 16.5v-5M12 16.5V7M17 16.5v-8"/></svg>Builds SQL joins</li>
+        </ul>
+        <p class="why"><strong>Why this lesson:</strong> your Quarterly sales report is due Tuesday and needs joins across orders, customers and regions. You finished lesson 4.2 on Thursday.</p>
+        <div class="next-actions">
+          <button class="btn btn-primary" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>
+            Start lesson 4.3
+          </button>
+          <a class="btn btn-ghost" href="#">See other options</a>
+        </div>
+      </div>
+      <div class="cover" style="background: var(--c-sql)">
+        <svg viewBox="0 0 232 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <rect x="28" y="40" width="96" height="70" rx="10" fill="#ffffff" fill-opacity="0.75"/>
+          <rect x="28" y="40" width="96" height="18" rx="9" fill="#d9a77c"/>
+          <path d="M40 74h70M40 90h52" stroke="#b98a62" stroke-width="5" stroke-linecap="round"/>
+          <rect x="112" y="98" width="96" height="70" rx="10" fill="#ffffff" fill-opacity="0.75"/>
+          <rect x="112" y="98" width="96" height="18" rx="9" fill="#b4532a"/>
+          <path d="M124 132h70M124 148h40" stroke="#c99b74" stroke-width="5" stroke-linecap="round"/>
+          <path d="M124 75c40 0 30 33 40 23" fill="none" stroke="#9a4321" stroke-width="2.5" stroke-dasharray="4 5" stroke-linecap="round"/>
+          <circle cx="180" cy="52" r="20" fill="#e7c3a0"/>
+        </svg>
+        <div class="module">
+          <strong>Module 4: 2 of 5 lessons done</strong>
+          <div class="lessons" aria-hidden="true"><i class="done"></i><i class="done"></i><i class="now"></i><i></i><i></i></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="continue-title">
+      <div class="section-head">
+        <div>
+          <h2 id="continue-title">Continue learning</h2>
+          <p class="subtle">Your three courses in progress, most recent first</p>
+        </div>
+        <a class="link" href="#">All courses</a>
+      </div>
+      <div class="courses" id="courses"></div>
+    </section>
+
+    <section class="section" aria-labelledby="skills-title">
+      <div class="section-head">
+        <div>
+          <h2 id="skills-title">Skill progress</h2>
+          <p class="subtle">Levels 1 to 5, from quizzes and practice. A level fills as you pass its checks.</p>
+        </div>
+        <a class="link" href="#">Skill map</a>
+      </div>
+      <div class="card skills" id="skills"></div>
+    </section>
+  </main>
+
+  <aside class="week" aria-labelledby="week-title">
+    <h2 id="week-title">This week</h2>
+
+    <section class="block" aria-labelledby="rhythm-title">
+      <div class="block-title">
+        <h3 id="rhythm-title">Study rhythm</h3>
+        <span class="subtle">Last 7 days</span>
+      </div>
+      <p class="rhythm-figure"><strong class="num">4</strong><span>days in a row</span></p>
+      <ol class="days" id="days" aria-label="Days studied, Sunday Oct 18 to Saturday Oct 24"></ol>
+      <p class="rhythm-note">You studied on 5 of the last 7 days. Rest days are part of the plan: missing one never resets your weekly goal.</p>
+      <!-- Opt-in reminder written as a full switch row that applies at once (FRM-22) -->
+      <label class="switch-row" for="remind">
+        <span><strong>Evening reminder</strong><small>7:30 PM, only on days you have not studied</small></span>
+        <button class="switch" id="remind" type="button" role="switch" aria-checked="false"></button>
+      </label>
+    </section>
+
+    <section class="block" aria-labelledby="minutes-title">
+      <div class="block-title">
+        <h3 id="minutes-title">Study minutes</h3>
+        <span class="subtle">Goal 150 min a week</span>
+      </div>
+      <p class="goal-summary" id="goal-summary"></p>
+      <div class="goal-track" role="progressbar" id="goal-track" aria-label="Weekly goal" aria-valuemin="0" aria-valuemax="150"><span></span></div>
+      <div class="bars" id="bars" aria-hidden="true"></div>
+      <div class="bar-x" id="bar-x" aria-hidden="true"></div>
+      <p class="chart-key">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Goal met</span>
+        <span><i aria-hidden="true"></i>Goal, 150 min</span>
+        <span>Weeks start Monday</span>
+      </p>
+      <table class="visually-hidden" id="minutes-table">
+        <caption>Study minutes per week, last 8 weeks</caption>
+        <thead><tr><th scope="col">Week of</th><th scope="col">Minutes</th><th scope="col">Goal met</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section class="block" aria-labelledby="due-title">
+      <div class="block-title">
+        <h3 id="due-title">Upcoming deadlines</h3>
+        <a class="link" href="#">Calendar</a>
+      </div>
+      <ul class="deadlines" id="deadlines"></ul>
+    </section>
+  </aside>
+</div>
+
+<script>
+  // Raw data, formatted at render time (ENG-07). Today is fixed for the example; use the real date in your app.
+  const today = Date.UTC(2026, 9, 24);
+  const day = 86400000;
+  const fmt = (opts) => new Intl.DateTimeFormat("en-US", { timeZone: "UTC", ...opts });
+  const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>';
+  const courseTint = { sql: "var(--c-sql)", ux: "var(--c-ux)", write: "var(--c-write)" };
+
+  // Course cards: one component, three records (CMP-15, FBK-06)
+  const art = {
+    sql: '<rect x="24" y="22" width="72" height="50" rx="8" fill="#fff" fill-opacity=".75"/><rect x="24" y="22" width="72" height="13" rx="6.5" fill="#d9a77c"/><rect x="128" y="44" width="72" height="50" rx="8" fill="#fff" fill-opacity=".75"/><rect x="128" y="44" width="72" height="13" rx="6.5" fill="#b4532a"/><path d="M96 50c20 0 14 16 32 16" fill="none" stroke="#9a4321" stroke-width="2" stroke-dasharray="3 4"/><circle cx="236" cy="30" r="16" fill="#e7c3a0"/>',
+    ux: '<circle cx="80" cy="58" r="34" fill="#fff" fill-opacity=".7"/><circle cx="124" cy="58" r="34" fill="#a9bf9b" fill-opacity=".6"/><rect x="176" y="30" width="64" height="56" rx="10" fill="#fff" fill-opacity=".75"/><path d="M188 48h40M188 60h28M188 72h34" stroke="#7f9873" stroke-width="4" stroke-linecap="round"/>',
+    write: '<rect x="30" y="20" width="120" height="74" rx="10" fill="#fff" fill-opacity=".75"/><path d="M46 40h80M46 54h88M46 68h56" stroke="#c98f7f" stroke-width="5" stroke-linecap="round"/><path d="M176 86 214 30l14 10-38 56-18 6z" fill="#e3b3a5"/><path d="M176 86l-4 14 18-6" fill="#b4532a"/>',
+  };
+  const courses = [
+    { key: "sql", title: "Data Analysis with SQL", lesson: "Lesson 4.3 of 6 modules", done: 14, total: 26, left: 250, last: "Studied Thursday" },
+    { key: "ux", title: "UX Foundations", lesson: "Lesson 2.4 · Visual hierarchy", done: 9, total: 20, left: 330, last: "Studied yesterday" },
+    { key: "write", title: "Writing for Product", lesson: "Lesson 5.2 · Error messages", done: 11, total: 14, left: 65, last: "Studied Oct 18" },
+  ];
+  const hm = (m) => (m >= 60 ? `${Math.floor(m / 60)} h ${m % 60 ? (m % 60) + " min" : ""}` : `${m} min`).trim();
+  document.getElementById("courses").replaceChildren(...courses.map((c) => {
+    const card = el("article", "card course-card");
+    const cover = el("div", "cover"); cover.style.background = courseTint[c.key];
+    cover.innerHTML = `<svg viewBox="0 0 264 112" preserveAspectRatio="xMidYMid slice" aria-hidden="true">${art[c.key]}</svg>`;
+    const body = el("div", "course-body");
+    const pct = Math.round((c.done / c.total) * 100);
+    const progress = el("div", "progress");
+    const top = el("div", "progress-top"); top.append(el("span", "num", `${c.done} of ${c.total} lessons`), el("strong", "num", pct + "%"));
+    const track = el("div", "track"); track.setAttribute("role", "progressbar"); track.setAttribute("aria-label", c.title + " progress");
+    track.setAttribute("aria-valuenow", String(pct)); track.setAttribute("aria-valuemin", "0"); track.setAttribute("aria-valuemax", "100");
+    const fill = el("span"); fill.style.setProperty("--v", pct); track.append(fill);
+    progress.append(top, track);
+    const foot = el("div", "course-foot"); foot.append(el("span", "num", `About ${hm(c.left)} left · ${c.last}`));
+    const go = el("a", null, "Continue"); go.href = "#"; go.setAttribute("aria-label", "Continue " + c.title); foot.append(go);
+    body.append(el("h3", null, c.title), el("p", "where", c.lesson), progress, foot);
+    card.append(cover, body); return card;
+  }));
+
+  // Skills: whole levels filled, the current level filled by its progress (FBK-06)
+  const words = ["", "Starting", "Building", "Practicing", "Confident", "Expert"];
+  const skills = [
+    { name: "SQL joins", from: "sql", level: 3, progress: 60, gained: 1 },
+    { name: "UX writing", from: "write", level: 3, progress: 20 },
+    { name: "Usability testing", from: "ux", level: 2, progress: 75 },
+    { name: "Data visualization", from: "sql", level: 2, progress: 40 },
+    { name: "Research synthesis", from: "ux", level: 1, progress: 50 },
+  ];
+  const courseName = { sql: "Data Analysis with SQL", ux: "UX Foundations", write: "Writing for Product" };
+  document.getElementById("skills").replaceChildren(...skills.map((s) => {
+    const row = el("div", "skill");
+    const name = el("div", "skill-name"); const from = el("small"); const dot = el("i"); dot.style.background = courseTint[s.from]; dot.setAttribute("aria-hidden", "true");
+    from.append(dot, courseName[s.from]); name.append(el("strong", null, s.name), from);
+    const levels = el("div", "levels"); levels.setAttribute("role", "meter"); levels.setAttribute("aria-label", s.name + " level");
+    levels.setAttribute("aria-valuemin", "1"); levels.setAttribute("aria-valuemax", "5"); levels.setAttribute("aria-valuenow", String(s.level));
+    levels.setAttribute("aria-valuetext", `Level ${s.level} of 5, ${s.progress}% toward level ${s.level + 1}`);
+    for (let i = 1; i <= 5; i++) { const seg = el("span"); seg.style.setProperty("--f", i < s.level + 1 ? 100 : i === s.level + 1 ? s.progress : 0); levels.append(seg); }
+    const lvl = el("div", "skill-level"); lvl.append(`Level ${s.level} · ${words[s.level]}`);
+    const sub = el("small", s.gained ? "up" : null, s.gained ? `+${s.gained} level this month` : `${s.progress}% to level ${s.level + 1}`);
+    lvl.append(sub);
+    row.append(name, levels, lvl); return row;
+  }));
+
+  // Study rhythm for the last 7 days, today last (FBK-06). No flames, no loss language.
+  const studied = [true, false, false, true, true, true, true];
+  document.getElementById("days").replaceChildren(...studied.map((done, i) => {
+    const date = today - (6 - i) * day;
+    const li = el("li", (done ? "studied" : "") + (i === 6 ? " today" : ""));
+    const mark = el("span", "mark"); if (done) mark.innerHTML = check;
+    li.append(mark, i === 6 ? "Today" : fmt({ weekday: "narrow" }).format(date));
+    li.setAttribute("aria-label", `${fmt({ weekday: "long", month: "short", day: "numeric" }).format(date)}: ${done ? "studied" : "rest day"}`);
+    return li;
+  }));
+
+  // Weekly minutes against the goal, with the gap stated as a plain consequence (CMP-18, COP-10)
+  const goal = 150;
+  const weeks = [["Aug 31", 95], ["Sep 7", 160], ["Sep 14", 172], ["Sep 21", 140], ["Sep 28", 155], ["Oct 5", 180], ["Oct 12", 150], ["Oct 19", 128]];
+  const max = 200;
+  const thisWeek = weeks.at(-1)[1];
+  document.getElementById("goal-summary").innerHTML =
+    `<strong class="num">${thisWeek} of ${goal} min</strong> so far. ${goal - thisWeek} more minutes by Sunday reaches your goal, about one lesson.`;
+  const gt = document.getElementById("goal-track"); gt.setAttribute("aria-valuenow", String(thisWeek));
+  gt.firstElementChild.style.setProperty("--v", Math.min(100, (thisWeek / goal) * 100));
+  const bars = document.getElementById("bars");
+  const gl = el("span", "goal-line"); gl.style.setProperty("--p", (goal / max) * 100); bars.append(gl);
+  weeks.forEach(([w, m], i) => {
+    const current = i === weeks.length - 1;
+    const b = el("div", "bar" + (current ? " is-current" : ""));
+    if (m >= goal && !current) { const ok = el("span", "met"); ok.innerHTML = check; b.append(ok); }
+    const col = el("span", "col"); col.style.setProperty("--h", (m / max) * 100);
+    const v = el("span", "v num", String(m));
+    if (current) b.append(v); else col.append(v);
+    b.append(col);
+    bars.append(b);
+  });
+  document.getElementById("bar-x").replaceChildren(...weeks.map(([w], i) => el("span", null, i === weeks.length - 1 ? "Now" : i % 2 ? "" : w)));
+  document.querySelector("#minutes-table tbody").replaceChildren(...weeks.map(([w, m], i) => {
+    const tr = el("tr"); const th = el("th", null, w); th.scope = "row";
+    tr.append(th, el("td", null, m + " min" + (i === weeks.length - 1 ? " so far" : "")), el("td", null, i === weeks.length - 1 ? "In progress" : m >= goal ? "Yes" : "No")); return tr;
+  }));
+
+  // Deadlines: days left computed from the due date, nearest first (ENG-07)
+  const deadlines = [
+    { kind: "Assignment", title: "Quarterly sales report", course: "sql", due: Date.UTC(2026, 9, 27) },
+    { kind: "Quiz", title: "Color and contrast", course: "ux", due: Date.UTC(2026, 9, 29) },
+    { kind: "Peer review", title: "Review 2 submissions", course: "write", due: Date.UTC(2026, 10, 1) },
+    { kind: "Project", title: "Usability test plan", course: "ux", due: Date.UTC(2026, 10, 6) },
+  ].sort((a, b) => a.due - b.due);
+  document.getElementById("deadlines").replaceChildren(...deadlines.map((d) => {
+    const left = Math.round((d.due - today) / day);
+    const li = el("li", "deadline" + (left <= 3 ? " is-soon" : ""));
+    const tile = el("div", "left"); tile.append(el("strong", "num", String(left)), el("small", null, left === 1 ? "day" : "days"));
+    const body = el("div", "deadline-body");
+    const title = el("strong"); title.append(el("span", "kind", d.kind + ": "), d.title);
+    const meta = el("small"); const dot = el("i"); dot.style.background = courseTint[d.course]; dot.setAttribute("aria-hidden", "true");
+    meta.append(dot, courseName[d.course]);
+    body.append(title, el("span", "due", "Due " + fmt({ weekday: "short", month: "short", day: "numeric" }).format(d.due)), meta);
+    li.setAttribute("aria-label", `${d.kind}: ${d.title}, due ${fmt({ weekday: "long", month: "long", day: "numeric" }).format(d.due)}, ${left} days left`);
+    li.append(tile, body); return li;
+  }));
+
+  // Phone widths: the sidebar becomes a disclosure behind a named menu button (NAV-08).
+  const menu = document.getElementById("menu");
+  menu.addEventListener("click", () => {
+    const open = menu.getAttribute("aria-expanded") !== "true";
+    menu.setAttribute("aria-expanded", String(open));
+    menu.setAttribute("aria-label", open ? "Close menu" : "Open menu");
+    menu.closest(".side").classList.toggle("is-open", open);
+  });
+
+  // Reminder switch: role="switch" + aria-checked, applies at once (FRM-22).
+  // Example only: replace with a request to your API to save the reminder preference.
+  const remind = document.getElementById("remind");
+  remind.addEventListener("click", () => remind.setAttribute("aria-checked", String(remind.getAttribute("aria-checked") !== "true")));
+</script>
+</body>
+</html>

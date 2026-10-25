@@ -1,0 +1,554 @@
+<!doctype html>
+<!-- ProductCraft example: dashboard-v16 (clinic patient monitoring, "Sora Care", calm clinical theme). Original Sora Labs example, MIT License.
+     Fictional patients and reference ranges for interface demonstration only; not medical advice.
+     Demonstrates: SCR-01, SCR-02, LAY-01, LAY-02, LAY-03, LAY-05, LAY-07, LAY-08, TYP-07, TYP-09, COL-01, COL-02,
+     COL-06, COL-07, CMP-10, CMP-11, CMP-15, CMP-16, CMP-18, CMP-20, CMP-23, CMP-26, CMP-31, FBK-18, NAV-03, BTN-01,
+     COP-10, ICO-03, STY-11, ENG-07 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Patient monitoring dashboard</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* Calm clinical theme: warm neutral base, one dusty navy accent, status colors only for readings (STY-11, COL-02, CMP-26).
+       White on #3d5a80 is 7.1:1; ink #31496a on soft #edf1f6 is 8.1:1; text-3 on the warm base is 4.9:1 (COL-01) */
+    :root {
+      --bg: #f6f5f1;
+      --surface-2: #f3f1ec;
+      --border: #e7e4dc;
+      --accent: #3d5a80;
+      --accent-hover: #31496a;
+      --accent-soft: #edf1f6;
+      --accent-ink: #31496a;
+      --focus: #3d5a80;
+      --band: #e6edf5;
+    }
+    body { line-height: 1.55; }
+    .card { border-radius: var(--radius-lg); box-shadow: none; }
+
+    /* Top bar */
+    .topbar { display: flex; align-items: center; gap: var(--space-5); height: 64px; padding: 0 var(--space-6); background: var(--surface); border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--text); font-weight: 700; }
+    .brand:hover { text-decoration: none; }
+    .brand svg { width: 30px; height: 30px; }
+    .brand .tile { fill: var(--accent); }
+    .brand .sun { fill: none; stroke: var(--on-accent); stroke-width: 2.5; stroke-linecap: round; }
+    .unit-btn { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .unit-btn:hover { background: var(--surface-2); }
+    .unit-btn svg { width: 16px; height: 16px; color: var(--text-3); }
+    .nav { display: flex; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+    .nav a { display: flex; align-items: center; min-height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-pill); color: var(--text-2); font-size: var(--text-sm); font-weight: 600; }
+    .nav a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    .nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent-ink); }
+    .top-right { display: flex; align-items: center; gap: var(--space-4); margin-left: auto; }
+    .shift { font-size: var(--text-sm); color: var(--text-2); text-align: right; line-height: 1.3; }
+    .shift strong { display: block; color: var(--text); }
+    .me { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+
+    /* Page: patient list on the left, the selected patient and tasks on the right (LAY-08) */
+    .page { display: grid; grid-template-columns: 380px minmax(0, 1fr); gap: var(--space-5) var(--space-5); padding: var(--space-6) var(--space-6) var(--space-5); }
+    .page-head { grid-column: 1 / -1; display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+    .page-head h1 { margin-bottom: var(--space-1); }
+    .summary { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+    .sync { font-size: var(--text-sm); color: var(--text-2); }
+    .col { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-5); align-content: start; min-width: 0; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
+    .card-head p { font-size: var(--text-sm); color: var(--text-2); }
+
+    /* Urgency pills: word + icon + color (SCR-02, COL-07) */
+    .urg { display: inline-flex; align-items: center; gap: var(--space-1); padding: 2px var(--space-2) 2px 6px; border-radius: var(--radius-pill); font-size: var(--text-xs); font-weight: 700; line-height: 20px; white-space: nowrap; }
+    .urg svg { width: 14px; height: 14px; }
+    .urg-now { background: var(--danger-soft); color: var(--danger); }
+    .urg-soon { background: var(--warning-soft); color: var(--warning); }
+    .urg-stable { background: var(--surface-2); color: var(--neutral-ink); }
+
+    /* Patient list sorted by urgency; each flag = icon + words + value + normal range (FBK-18, COP-10) */
+    .patients-card { padding: var(--space-5) var(--space-3) var(--space-3); }
+    .patients-card .card-head { padding: 0 var(--space-2); }
+    .patients { display: grid; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+    .patient { display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4); border-radius: var(--radius-md); color: inherit; }
+    .patient:hover { background: var(--surface-2); text-decoration: none; }
+    /* Selected patient: tint, edge bar and a stronger name (CMP-16) */
+    .patient[aria-current="true"] { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+    .patient:focus-visible { outline-offset: -2px; border-radius: var(--radius-md); }
+    .p-top { display: flex; align-items: center; gap: var(--space-3); }
+    .p-who { min-width: 0; flex: 1; }
+    .p-name { display: block; font-weight: 600; font-size: var(--text-md); line-height: 1.3; }
+    .p-meta { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .flags { display: grid; gap: var(--space-1); margin: 0 0 0 44px; padding: 0; list-style: none; }
+    .flag { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: var(--space-2); align-items: start; font-size: var(--text-sm); }
+    .flag-icon { display: grid; place-items: center; width: 18px; height: 18px; margin-top: 2px; border-radius: 50%; }
+    .flag-icon svg { width: 12px; height: 12px; }
+    .flag.is-out .flag-icon { background: var(--danger-soft); color: var(--danger); }
+    .flag.is-late .flag-icon { background: var(--warning-soft); color: var(--warning); }
+    .flag.is-ok .flag-icon { background: var(--success-soft); color: var(--success); }
+    .flag b { font-weight: 600; }
+    .flag .range { display: block; color: var(--text-3); font-size: var(--text-xs); }
+    .p-time { margin-left: 44px; font-size: var(--text-xs); color: var(--text-3); }
+
+    /* Telehealth queue */
+    .queue { display: grid; margin: 0; padding: 0; list-style: none; }
+    .q-item { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: var(--space-3); align-items: start; padding: var(--space-3) 0; }
+    .q-item + .q-item { border-top: 1px solid var(--border); }
+    .q-name { font-size: var(--text-sm); font-weight: 600; }
+    .q-reason { font-size: var(--text-xs); color: var(--text-3); }
+    .q-wait { display: grid; justify-items: end; gap: var(--space-1); text-align: right; }
+    .wait { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-sm); font-weight: 700; }
+    .wait svg { width: 14px; height: 14px; color: var(--text-2); }
+    .wait small { font-size: var(--text-xs); font-weight: 500; color: var(--text-3); }
+    .q-item .btn { min-height: 32px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+
+    /* Selected patient */
+    .detail { display: grid; gap: var(--space-5); padding: var(--space-6); }
+    .d-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+    .d-who { display: flex; align-items: center; gap: var(--space-4); }
+    .d-who .avatar { width: 56px; height: 56px; font-size: var(--text-md); background: var(--accent-soft); color: var(--accent-ink); }
+    .d-who h2 { font-size: var(--text-xl); line-height: 1.25; display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+    .d-meta { font-size: var(--text-sm); color: var(--text-2); }
+    .d-actions { display: flex; gap: var(--space-2); }
+    .note { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--danger-soft); font-size: var(--text-sm); }
+    .note svg { width: 20px; height: 20px; color: var(--danger); }
+
+    /* Current vitals: value with unit, status word with icon, normal range and a small range gauge (TYP-09, COL-07) */
+    .vitals { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+    .vital { display: grid; gap: var(--space-1); align-content: start; padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface-2); }
+    .vital.is-out { background: var(--danger-soft); }
+    .v-label { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .v-value { font-size: var(--text-xl); font-weight: 700; line-height: 1.25; white-space: nowrap; }
+    .v-value .u { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); margin-left: 2px; }
+    .v-status { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-sm); font-weight: 700; }
+    .v-status svg { width: 16px; height: 16px; }
+    .is-out .v-status { color: var(--danger); }
+    .is-in .v-status { color: var(--success); }
+    .v-range { font-size: var(--text-xs); color: var(--text-2); }
+    .gauge { position: relative; height: 8px; margin-top: var(--space-2); border-radius: 4px; background: rgba(21, 23, 26, 0.08); }
+    .gauge .ok { position: absolute; top: 0; bottom: 0; border-radius: 4px; background: #b7c8dc; }
+    .gauge .mark { position: absolute; top: -4px; width: 4px; height: 16px; margin-left: -2px; border-radius: 2px; background: var(--text); box-shadow: 0 0 0 2px var(--surface); }
+    .is-out .gauge .mark { background: var(--danger); }
+
+    /* Vitals trend (CMP-18): one series, normal band, out-of-range points marked by position, ring and tooltip word */
+    .trend-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-3); }
+    .trend-head p { font-size: var(--text-sm); color: var(--text-2); }
+    .trend-head .segmented { max-width: 100%; overflow-x: auto; }
+    .trend-head .segmented button { white-space: nowrap; }
+    .chart { position: relative; height: 240px; border-radius: var(--radius-sm); }
+    .chart svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    .chart text { font-size: 11px; fill: var(--text-2); }
+    .chart .grid { stroke: #ece9e2; }
+    .chart .axis { stroke: #d6d2c8; }
+    .chart .band { fill: var(--band); }
+    .chart .band-label { fill: var(--accent-ink); font-weight: 600; }
+    .chart .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .chart .pt { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+    .chart .pt.out { fill: var(--danger); }
+    .chart .last-label { fill: var(--text); font-weight: 700; font-size: 12px; }
+    .chart .cursor { stroke: var(--text-3); }
+    .tip { position: absolute; top: 0; z-index: 1; min-width: 150px; padding: var(--space-2) var(--space-3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); font-size: var(--text-xs); pointer-events: none; }
+    .tip[hidden] { display: none; }
+    .tip b { display: block; font-size: var(--text-sm); }
+    .chart-key { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin-top: var(--space-3); font-size: var(--text-xs); color: var(--text-2); }
+    .chart-key span { display: inline-flex; align-items: center; gap: var(--space-2); }
+    .chart-key svg { width: 18px; height: 12px; }
+
+    /* Care tasks checklist with a live count (CMP-31) */
+    .tasks-card .card-head { align-items: center; }
+    .count { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .progress { height: 6px; margin: 0 0 var(--space-3); border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; }
+    .progress span { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: transform var(--dur-med) var(--ease-out); transform-origin: left; }
+    .tasks { display: grid; margin: 0; padding: 0; list-style: none; }
+    .task { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; min-height: 56px; }
+    .task + .task { border-top: 1px solid var(--border); }
+    .task input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+    .task label { cursor: pointer; font-size: var(--text-sm); font-weight: 600; }
+    .task label small { display: block; font-size: var(--text-xs); font-weight: 500; color: var(--text-3); }
+    .task:has(input:checked) label { color: var(--text-3); text-decoration: line-through; font-weight: 500; }
+    .due { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); white-space: nowrap; }
+    .due.is-late { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--warning); }
+    .due svg { width: 14px; height: 14px; }
+
+    .disclaimer { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--text-3); text-align: center; }
+
+    @media (max-width: 1240px) {
+      .vitals { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .tasks { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 980px) {
+      .page { grid-template-columns: minmax(0, 1fr); padding: var(--space-4); }
+      .nav, .shift { display: none; }
+      .topbar { padding: 0 var(--space-4); gap: var(--space-3); }
+      .detail { padding: var(--space-4); }
+    }
+    @media (max-width: 560px) {
+      .vitals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .me span:last-child, .unit-btn .lbl { display: none; }
+      .d-actions { width: 100%; flex-direction: column-reverse; }
+      .d-actions .btn { width: 100%; }
+      .trend-head .segmented { width: 100%; }
+      .trend-head .segmented button { flex: 1; padding: 0 var(--space-2); }
+    }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#" aria-label="Sora Care home">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect class="tile" width="32" height="32" rx="8"/><path class="sun" d="M9.5 19.5a6.5 6.5 0 0 1 13 0"/><path class="sun" d="M7.5 23.5h17"/></svg>
+    Sora Care
+  </a>
+  <button class="unit-btn" type="button" aria-haspopup="listbox"><span class="lbl">Observation unit,</span> Ward 4
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+  <nav aria-label="Main">
+    <ul class="nav">
+      <li><a href="#" aria-current="page">My patients</a></li>
+      <li><a href="#">Ward</a></li>
+      <li><a href="#">Telehealth</a></li>
+      <li><a href="#">Handover</a></li>
+    </ul>
+  </nav>
+  <div class="top-right">
+    <p class="shift"><strong>Day shift, 07:00 to 19:00</strong>Saturday, Oct 24</p>
+    <span class="me"><span class="avatar" aria-hidden="true">HK</span><span>Hana Kim, RN</span></span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div>
+      <h1>My patients</h1>
+      <p class="summary" aria-label="Summary">
+        <span class="urg urg-now"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4M12 17h.01"/></svg>1 needs review now</span>
+        <span class="urg urg-soon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>3 to check within the hour</span>
+        <span class="urg urg-stable"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>2 stable</span>
+      </p>
+    </div>
+    <p class="sync">Readings synced <time datetime="2026-10-24T14:20">14:20</time></p>
+  </div>
+
+  <div class="col">
+    <!-- Patients sorted by urgency (FBK-18). Example only: replace with your monitoring feed. -->
+    <section class="card patients-card" aria-labelledby="patients-title">
+      <div class="card-head">
+        <div>
+          <h2 id="patients-title">Patients</h2>
+          <p>Most urgent first</p>
+        </div>
+      </div>
+      <ul class="patients" id="patients"></ul>
+    </section>
+
+    <section class="card" aria-labelledby="queue-title">
+      <div class="card-head">
+        <div>
+          <h2 id="queue-title">Telehealth queue</h2>
+          <p>2 waiting · longest wait 18 min</p>
+        </div>
+      </div>
+      <ul class="queue" id="queue"></ul>
+    </section>
+  </div>
+
+  <div class="col">
+    <!-- Selected patient: one primary action (BTN-01), current vitals with ranges, then the trend (SCR-01) -->
+    <section class="card detail" aria-labelledby="pt-name">
+      <div class="d-head">
+        <div class="d-who">
+          <span class="avatar" aria-hidden="true">MS</span>
+          <div>
+            <h2 id="pt-name">Mateo Silva <span class="urg urg-now"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4M12 17h.01"/></svg>Review now</span></h2>
+            <p class="d-meta">67 · Bed 4 · Admitted Thu, Oct 22 · Day 2 of observation after hip surgery</p>
+          </div>
+        </div>
+        <div class="d-actions">
+          <button class="btn btn-secondary" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Record vitals
+          </button>
+          <button class="btn btn-primary" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 6.5h15v10h-9l-4 3.5v-3.5h-2z"/></svg>
+            Request doctor review
+          </button>
+        </div>
+      </div>
+
+      <p class="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4M12 17h.01"/></svg>
+        <span><strong>3 readings outside the normal range at 14:05.</strong> Heart rate and breathing rate have risen since 09:00 while oxygen saturation fell.</span>
+      </p>
+
+      <ul class="vitals" id="vitals" aria-label="Latest readings at 14:05"></ul>
+
+      <section aria-labelledby="trend-title">
+        <div class="trend-head">
+          <div>
+            <h3 id="trend-title">Last 12 hours</h3>
+            <p id="trend-summary"></p>
+          </div>
+          <div class="segmented" role="radiogroup" aria-label="Reading to chart" id="metric" data-roving>
+            <button type="button" role="radio" aria-checked="true" tabindex="0" data-metric="hr">Heart rate</button>
+            <button type="button" role="radio" aria-checked="false" tabindex="-1" data-metric="spo2">SpO₂</button>
+            <button type="button" role="radio" aria-checked="false" tabindex="-1" data-metric="rr">Breathing</button>
+            <button type="button" role="radio" aria-checked="false" tabindex="-1" data-metric="temp">Temperature</button>
+          </div>
+        </div>
+        <div class="chart" id="chart" tabindex="0" role="group" aria-roledescription="chart" aria-label="Trend chart. Use left and right arrow keys to read each reading." aria-describedby="trend-summary">
+          <svg id="chart-svg" aria-hidden="true"></svg>
+          <div class="tip" id="tip" hidden></div>
+        </div>
+        <p class="chart-key" aria-hidden="true">
+          <span><svg viewBox="0 0 18 12"><rect x="1" y="1" width="16" height="10" rx="2" fill="#e6edf5"/></svg>Normal range</span>
+          <span><svg viewBox="0 0 18 12"><circle cx="9" cy="6" r="4" fill="#3d5a80"/></svg>Reading in range</span>
+          <span><svg viewBox="0 0 18 12"><circle cx="9" cy="6" r="4.5" fill="#b91c1c"/></svg>Reading outside range</span>
+        </p>
+        <p class="visually-hidden" id="chart-live" aria-live="polite"></p>
+        <div class="visually-hidden"><table id="chart-table"><caption id="chart-caption"></caption><thead><tr><th scope="col">Time</th><th scope="col">Reading</th><th scope="col">Status</th></tr></thead><tbody></tbody></table></div>
+      </section>
+    </section>
+
+    <section class="card tasks-card" aria-labelledby="tasks-title">
+      <div class="card-head">
+        <div>
+          <h2 id="tasks-title">Care tasks this shift</h2>
+          <p>Across your 6 patients, by due time</p>
+        </div>
+        <p class="count" id="task-count" aria-live="polite">2 of 7 done</p>
+      </div>
+      <div class="progress" aria-hidden="true"><span id="task-bar"></span></div>
+      <ul class="tasks" id="tasks"></ul>
+    </section>
+  </div>
+
+  <p class="disclaimer">Fictional patients and reference ranges for interface demonstration only. Not medical advice.</p>
+</main>
+
+<script>
+  // Single-choice groups: click or arrow keys move selection with a roving tabindex (CMP-23).
+  document.querySelectorAll("[data-roving]").forEach((group) => {
+    const items = [...group.querySelectorAll('[role="radio"]')];
+    const select = (item) => {
+      items.forEach((el) => { el.setAttribute("aria-checked", String(el === item)); el.tabIndex = el === item ? 0 : -1; });
+      group.dispatchEvent(new CustomEvent("select", { detail: item }));
+    };
+    items.forEach((item, i) => {
+      item.addEventListener("click", () => select(item));
+      item.addEventListener("keydown", (e) => {
+        const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+        if (!step) return;
+        e.preventDefault();
+        const next = items[(i + step + items.length) % items.length];
+        next.focus();
+        select(next);
+      });
+    });
+  });
+
+  const icon = {
+    up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
+    down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+    alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4M12 17h.01"/></svg>'
+  };
+  const urgency = {
+    now: ["urg-now", icon.alert, "Review now"],
+    soon: (t) => ["urg-soon", icon.clock, `Check by ${t}`],
+    stable: ["urg-stable", icon.check, "Stable"]
+  };
+
+  // Patients from data, already ordered by urgency (ENG-07). Fictional people and readings.
+  const patients = [
+    { ini: "MS", name: "Mateo Silva", age: 67, bed: 4, urg: urgency.now, last: "14:05", every: "every 30 min", selected: true,
+      flags: [["out", "down", "SpO₂", "low", "89%", "Normal 95–100%"], ["out", "up", "Heart rate", "high", "118 bpm", "Normal 60–100 bpm"], ["out", "up", "Breathing", "high", "24 /min", "Normal 12–20 /min"]] },
+    { ini: "JR", name: "Jordan Reyes", age: 61, bed: 3, urg: ["urg-soon", icon.clock, "Check now"], last: "11:55", every: "every 2 h",
+      flags: [["late", "clock", "Vitals", "overdue", "by 25 min", "Next set was due at 13:55"]] },
+    { ini: "ZA", name: "Zara Ahmed", age: 54, bed: 2, urg: urgency.soon("14:50"), last: "13:50", every: "every hour",
+      flags: [["out", "up", "Temperature", "high", "38.4 °C", "Normal 36.1–37.2 °C"]] },
+    { ini: "LB", name: "Leo Brandt", age: 72, bed: 7, urg: urgency.soon("15:30"), last: "13:30", every: "every 2 h",
+      flags: [["out", "up", "Blood pressure", "high", "152/94 mmHg", "Normal under 140/90"]] },
+    { ini: "SO", name: "Sam Okafor", age: 45, bed: 1, urg: urgency.stable, last: "13:40", every: "every 4 h",
+      flags: [["ok", "check", "All 5 readings", "in range", "", ""]] },
+    { ini: "PN", name: "Priya Nair", age: 38, bed: 5, urg: urgency.stable, last: "13:15", every: "every 4 h",
+      flags: [["ok", "check", "All 5 readings", "in range", "", ""]], extra: "discharge 16:00" }
+  ];
+  document.getElementById("patients").replaceChildren(...patients.map((p) => {
+    const li = document.createElement("li");
+    const flagText = (f) => `${f[2]} <b>${f[3]}</b>${f[4] ? ` <b class="num">${f[4]}</b>` : ""}${f[5] ? `<span class="range num">${f[5]}</span>` : ""}`;
+    li.innerHTML = `
+      <a class="patient" href="#" ${p.selected ? 'aria-current="true"' : ""}>
+        <span class="p-top">
+          <span class="avatar" aria-hidden="true">${p.ini}</span>
+          <span class="p-who"><span class="p-name">${p.name}</span><span class="p-meta num">${p.age} · Bed ${p.bed}</span></span>
+          <span class="urg ${p.urg[0]}">${p.urg[1]}${p.urg[2]}</span>
+        </span>
+        <ul class="flags">${p.flags.map((f) => `<li class="flag is-${f[0]}"><span class="flag-icon">${icon[f[1]]}</span><span>${flagText(f)}</span></li>`).join("")}</ul>
+        <span class="p-time num">Last reading ${p.last} · ${p.every}${p.extra ? ` · ${p.extra}` : ""}</span>
+      </a>`;
+    return li;
+  }));
+
+  // Telehealth queue: wait time computed from check-in against the current time (ENG-07)
+  const NOW = 14 * 60 + 20;
+  const queue = [
+    { ini: "AS", name: "Avery Stone", reason: "Follow-up after discharge", checkedIn: 14 * 60 + 2 },
+    { ini: "NP", name: "Nina Park", reason: "Wound photo review", checkedIn: 14 * 60 + 11 },
+    { ini: "OC", name: "Owen Clarke", reason: "Results discussion", booked: 14 * 60 + 30 }
+  ];
+  const hhmm = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+  document.getElementById("queue").replaceChildren(...queue.map((q, i) => {
+    const li = document.createElement("li");
+    li.className = "q-item";
+    const waiting = q.checkedIn !== undefined;
+    li.innerHTML = `
+      <span class="avatar" aria-hidden="true">${q.ini}</span>
+      <div><div class="q-name">${q.name}</div><div class="q-reason">${q.reason}</div></div>
+      <div class="q-wait">
+        ${waiting ? `<span class="wait num">${icon.clock}Waiting ${NOW - q.checkedIn} min</span><small class="q-reason num">Checked in ${hhmm(q.checkedIn)}</small>` : `<span class="wait num">Booked ${hhmm(q.booked)}</span><small class="q-reason num">Starts in ${q.booked - NOW} min</small>`}
+        ${i === 0 ? `<button class="btn btn-secondary" type="button">Start visit<span class="visually-hidden"> with ${q.name}</span></button>` : ""}
+      </div>`;
+    return li;
+  }));
+
+  // Current vitals for the selected patient
+  const vitals = [
+    { label: "Heart rate", value: "118", unit: "bpm", status: "High", dir: "up", range: "Normal 60–100", scale: [40, 140], ok: [60, 100], v: 118 },
+    { label: "SpO₂", value: "89", unit: "%", status: "Low", dir: "down", range: "Normal 95–100", scale: [85, 100], ok: [95, 100], v: 89 },
+    { label: "Breathing", value: "24", unit: "/min", status: "High", dir: "up", range: "Normal 12–20", scale: [8, 30], ok: [12, 20], v: 24 },
+    { label: "Temperature", value: "37.0", unit: "°C", status: "In range", range: "Normal 36.1–37.2", scale: [35, 40], ok: [36.1, 37.2], v: 37.0 },
+    { label: "Blood pressure", value: "124/78", unit: "mmHg", status: "In range", range: "Normal under 140/90", scale: [80, 180], ok: [90, 140], v: 124 }
+  ];
+  const pctOf = (v, [a, b]) => Math.max(0, Math.min(100, ((v - a) / (b - a)) * 100));
+  document.getElementById("vitals").replaceChildren(...vitals.map((v) => {
+    const li = document.createElement("li");
+    const out = v.status !== "In range";
+    li.className = `vital ${out ? "is-out" : "is-in"}`;
+    li.innerHTML = `
+      <span class="v-label">${v.label}</span>
+      <span class="v-value num">${v.value}<span class="u">${v.unit}</span></span>
+      <span class="v-status">${out ? icon[v.dir] : icon.check}${v.status}</span>
+      <span class="v-range num">${v.range}</span>
+      <span class="gauge" aria-hidden="true"><span class="ok" style="left:${pctOf(v.ok[0], v.scale)}%;width:${pctOf(v.ok[1], v.scale) - pctOf(v.ok[0], v.scale)}%"></span><span class="mark" style="left:${pctOf(v.v, v.scale)}%"></span></span>`;
+    return li;
+  }));
+
+  // Trend chart: times in minutes, one series per reading type, band = normal range (CMP-18)
+  const times = [120, 240, 360, 480, 540, 600, 660, 720, 780, 845];
+  const metrics = {
+    hr: { name: "Heart rate", unit: "bpm", values: [82, 84, 86, 88, 92, 97, 104, 109, 114, 118], ok: [60, 100], domain: [40, 140], ticks: [40, 60, 80, 100, 120, 140], fmt: (v) => `${v}`,
+      summary: "Rising since 09:00, from 92 to 118 bpm. Above the normal range since 11:00." },
+    spo2: { name: "SpO₂", unit: "%", values: [97, 97, 96, 96, 95, 94, 93, 92, 90, 89], ok: [95, 100], domain: [85, 100], ticks: [85, 90, 95, 100], fmt: (v) => `${v}`,
+      summary: "Falling since 08:00, from 96% to 89%. Below the normal range since 10:00." },
+    rr: { name: "Breathing rate", unit: "/min", values: [16, 16, 17, 17, 18, 19, 21, 22, 23, 24], ok: [12, 20], domain: [8, 30], ticks: [10, 15, 20, 25, 30], fmt: (v) => `${v}`,
+      summary: "Above the normal range since 11:00; now 24 breaths per minute." },
+    temp: { name: "Temperature", unit: "°C", values: [36.8, 36.7, 36.8, 36.9, 37.0, 37.0, 37.1, 37.0, 37.1, 37.0], ok: [36.1, 37.2], domain: [35.5, 39], ticks: [36, 37, 38, 39], fmt: (v) => v.toFixed(1),
+      summary: "Steady and inside the normal range all day; 37.0 °C at 14:05." }
+  };
+  const NS = "http://www.w3.org/2000/svg";
+  const chart = document.getElementById("chart"), svg = document.getElementById("chart-svg"), tip = document.getElementById("tip");
+  const pad = { l: 40, r: 88, t: 10, b: 26 };
+  const T0 = 120, T1 = 860;
+  let metric = "hr", cursor = null;
+  const statusOf = (m, v) => (v > m.ok[1] ? "High" : v < m.ok[0] ? "Low" : "In range");
+  const withUnit = (m, v) => `${m.fmt(v)}${m.unit === "%" ? "%" : ` ${m.unit}`}`;
+  function node(tag, attrs, parent, text) {
+    const n = document.createElementNS(NS, tag);
+    Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v));
+    if (text !== undefined) n.textContent = text;
+    parent.append(n);
+    return n;
+  }
+  function geo() {
+    const m = metrics[metric], W = chart.clientWidth, H = chart.clientHeight;
+    const x = (t) => pad.l + ((t - T0) / (T1 - T0)) * (W - pad.l - pad.r);
+    const y = (v) => pad.t + (1 - (v - m.domain[0]) / (m.domain[1] - m.domain[0])) * (H - pad.t - pad.b);
+    return { m, W, H, x, y };
+  }
+  function render() {
+    const { m, W, H, x, y } = geo();
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.replaceChildren();
+    node("rect", { class: "band", x: pad.l, y: y(m.ok[1]), width: W - pad.l - pad.r, height: y(m.ok[0]) - y(m.ok[1]) }, svg);
+    m.ticks.forEach((t) => {
+      node("line", { class: "grid", x1: pad.l, x2: W - pad.r, y1: y(t), y2: y(t) }, svg);
+      node("text", { x: pad.l - 8, y: y(t) + 4, "text-anchor": "end" }, svg, m.fmt(t));
+    });
+    node("text", { class: "band-label", x: pad.l + 8, y: y(m.ok[1]) + 15 }, svg, `Normal ${m.fmt(m.ok[0])}–${withUnit(m, m.ok[1])}`);
+    node("line", { class: "axis", x1: pad.l, x2: W - pad.r, y1: H - pad.b, y2: H - pad.b }, svg);
+    (W < 560 ? [120, 360, 600, 840] : [120, 240, 360, 480, 600, 720, 840]).forEach((t) => node("text", { x: x(t), y: H - 6, "text-anchor": "middle" }, svg, `${String(t / 60).padStart(2, "0")}:00`));
+    node("polyline", { class: "line", points: times.map((t, i) => `${x(t)},${y(m.values[i])}`).join(" ") }, svg);
+    if (cursor !== null) node("line", { class: "cursor", x1: x(times[cursor]), x2: x(times[cursor]), y1: pad.t, y2: H - pad.b }, svg);
+    times.forEach((t, i) => {
+      const out = statusOf(m, m.values[i]) !== "In range";
+      node("circle", { class: `pt${out ? " out" : ""}`, cx: x(t), cy: y(m.values[i]), r: i === cursor ? 6 : out ? 5 : 4 }, svg);
+    });
+    const last = m.values.length - 1, st = statusOf(m, m.values[last]);
+    node("text", { class: "last-label", x: x(times[last]) + 12, y: y(m.values[last]) - 2 }, svg, withUnit(m, m.values[last]));
+    node("text", { x: x(times[last]) + 12, y: y(m.values[last]) + 13 }, svg, st === "In range" ? "In range" : `${st} · 14:05`);
+    document.getElementById("trend-summary").textContent = m.summary;
+    document.getElementById("chart-caption").textContent = `${m.name}, last 12 hours (${m.unit}); normal ${m.fmt(m.ok[0])} to ${m.fmt(m.ok[1])}`;
+    document.querySelector("#chart-table tbody").replaceChildren(...times.map((t, i) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<th scope="row">${hhmm(t)}</th><td>${withUnit(m, m.values[i])}</td><td>${statusOf(m, m.values[i])}</td>`;
+      return tr;
+    }));
+  }
+  function show(i) {
+    cursor = i;
+    render();
+    const { m, W, x } = geo();
+    const st = statusOf(m, m.values[i]);
+    tip.innerHTML = `<span class="num">${hhmm(times[i])}</span><b class="num">${withUnit(m, m.values[i])} · ${st}</b><span class="num">Normal ${m.fmt(m.ok[0])}–${m.fmt(m.ok[1])}</span>`;
+    tip.hidden = false;
+    const px = x(times[i]);
+    tip.style.left = `${px + 170 > W ? px - 170 : px + 12}px`;
+    document.getElementById("chart-live").textContent = `${hhmm(times[i])}, ${m.name} ${withUnit(m, m.values[i])}, ${st}`;
+  }
+  function hide() { cursor = null; tip.hidden = true; render(); }
+  chart.addEventListener("pointermove", (e) => {
+    const { x } = geo();
+    const r = chart.getBoundingClientRect();
+    let best = 0;
+    times.forEach((t, i) => { if (Math.abs(x(t) - (e.clientX - r.left)) < Math.abs(x(times[best]) - (e.clientX - r.left))) best = i; });
+    show(best);
+  });
+  chart.addEventListener("pointerleave", hide);
+  chart.addEventListener("blur", hide);
+  chart.addEventListener("focus", () => show(cursor ?? times.length - 1));
+  chart.addEventListener("keydown", (e) => {
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[e.key];
+    if (!step) return;
+    e.preventDefault();
+    show(Math.max(0, Math.min(times.length - 1, (cursor ?? times.length - 1) + step)));
+  });
+  document.getElementById("metric").addEventListener("select", (e) => { metric = e.detail.dataset.metric; cursor = null; tip.hidden = true; render(); });
+  new ResizeObserver(render).observe(chart);
+
+  // Care tasks: real checkboxes, line-through when done, live "x of y done" (CMP-31)
+  const tasks = [
+    { t: "Morning vitals round", who: "All beds", due: "Done 08:10", done: true },
+    { t: "Wound check", who: "Bed 1 · Sam Okafor", due: "Done 11:30", done: true },
+    { t: "Vitals check", who: "Bed 3 · Jordan Reyes", due: "Overdue since 13:55", late: true },
+    { t: "Recheck vitals", who: "Bed 4 · Mateo Silva", due: "Due 14:35" },
+    { t: "Recheck temperature", who: "Bed 2 · Zara Ahmed", due: "Due 14:50" },
+    { t: "Fluid balance review", who: "Bed 7 · Leo Brandt", due: "Due 15:00" },
+    { t: "Discharge checklist", who: "Bed 5 · Priya Nair", due: "Due 16:00" }
+  ];
+  const list = document.getElementById("tasks");
+  list.replaceChildren(...tasks.map((k, i) => {
+    const li = document.createElement("li");
+    li.className = "task";
+    li.innerHTML = `<input type="checkbox" id="task-${i}" ${k.done ? "checked" : ""}><label for="task-${i}">${k.t}<small>${k.who}</small></label>
+      <span class="due num ${k.late ? "is-late" : ""}">${k.late ? icon.clock : ""}${k.due}</span>`;
+    return li;
+  }));
+  function count() {
+    const boxes = [...list.querySelectorAll("input")];
+    const done = boxes.filter((b) => b.checked).length;
+    document.getElementById("task-count").textContent = `${done} of ${boxes.length} done`;
+    document.getElementById("task-bar").style.transform = `scaleX(${done / boxes.length})`;
+  }
+  list.addEventListener("change", count);
+  count();
+</script>
+</body>
+</html>

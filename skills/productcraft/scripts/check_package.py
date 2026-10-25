@@ -4,6 +4,8 @@ import argparse, json, re, pathlib, sys
 
 PATTERN_FIELDS = ('id', 'title', 'category', 'principle', 'rule', 'guardrail')
 UI_RULE_FIELDS = ('id', 'category', 'title', 'why', 'do', 'avoid')
+GUIDED_MODULES = ('engineering-workflow','engineering-practices','ui-distiller','code-security-review','credential-shield','launchguard','legal-ready','agent-safety','codebase-map','documents','builder-tools')
+TESTED_MODULES = ('engineering-workflow','engineering-practices','code-security-review','credential-shield','launchguard','legal-ready','agent-safety','codebase-map','documents','builder-tools')
 
 def check(root):
     root=pathlib.Path(root)
@@ -55,20 +57,20 @@ def check(root):
             missing=[f for f in UI_RULE_FIELDS if not r.get(f)]
             if missing: failures.append(f"UI rule {r.get('id')} missing {', '.join(missing)}")
     examples=check_examples(root,{r.get('id') for r in ui_rules},failures)
-    for p in ['WORKSPACE-SETUP-PROMPT.txt','README.md','LICENSE','modules/product-design.md','modules/interaction-feedback.md','modules/forms-conversion.md','modules/data-and-product-surfaces.md','modules/responsive-accessibility.md','modules/ethical-persuasion.md','assets/review-template.md','modules/launchguard/references/security-baseline.md','modules/ui-rules.md','modules/language-choice.md']:
+    for p in ['WORKSPACE-SETUP-PROMPT.txt','README.md','LICENSE','modules/product-design.md','modules/interaction-feedback.md','modules/forms-conversion.md','modules/data-and-product-surfaces.md','modules/responsive-accessibility.md','modules/ethical-persuasion.md','assets/review-template.md','modules/launchguard/references/security-baseline.md','modules/ui-rules.md','modules/language-choice.md','modules/lean-output.md','modules/ui-distiller/references/taste.md','modules/ui-distiller/references/style-catalog.md']:
         if not (root/p).is_file(): failures.append('missing '+p)
-    for slug in ['ui-distiller','credential-shield','launchguard']:
+    for slug in GUIDED_MODULES:
         d=root/'modules'/slug
         if not (d/'GUIDE.md').is_file(): failures.append('missing module guide '+slug)
         if not (d/'references').is_dir(): failures.append('missing specialist references '+slug)
-    for slug in ['credential-shield','launchguard']:
+    for slug in TESTED_MODULES:
         d=root/'modules'/slug
         if not (d/'scripts').is_dir() or not (d/'tests').is_dir(): failures.append('missing executable/tests for '+slug)
     if failures:
         print('FAIL',len(failures))
         for x in failures: print('-',x)
         return 1
-    print(f'PASS: one skill entry, {len(patterns)} patterns, {len(ui_rules)} UI rules, {examples} reference screens, 3 specialist modules, guides and tools present')
+    print(f'PASS: one skill entry, {len(patterns)} patterns, {len(ui_rules)} UI rules, {examples} reference screens, {len(GUIDED_MODULES)} guided modules, guides and tools present')
     return 0
 
 def check_examples(root,rule_ids,failures):

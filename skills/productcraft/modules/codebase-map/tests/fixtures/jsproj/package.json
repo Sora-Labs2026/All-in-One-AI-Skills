@@ -1,0 +1,14 @@
+{
+  "name": "demo-web",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "bin": { "demo-cli": "./bin/cli.js" },
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "deploy": "DEPLOY_TOKEN=abc123 node scripts/deploy.js",
+    "build": "next build",
+    "dev": "next dev",
+    "test": "node --test"
+  },
+  "dependencies": { "next": "15.0.0", "react": "19.0.0", "express": "4.0.0" }
+}

@@ -116,9 +116,9 @@
       padding: var(--space-8);
       color: #ffffff;
       background:
-        radial-gradient(70% 55% at 85% 95%, rgba(99, 102, 241, 0.55), transparent 70%),
+        radial-gradient(70% 55% at 85% 95%, rgba(74, 108, 240, 0.55), transparent 70%),
         radial-gradient(50% 40% at 10% 0%, rgba(67, 56, 202, 0.45), transparent 70%),
-        linear-gradient(160deg, #1e1b4b 0%, #312e81 60%, #3730a3 100%);
+        linear-gradient(160deg, #0d1b4f 0%, #1a3192 60%, #2443c4 100%);
       display: flex; flex-direction: column;
     }
     .auth-brand::before {
@@ -146,16 +146,16 @@
       overflow: hidden; display: flex; flex-direction: column;
     }
     .pv-top { height: 44px; flex: none; display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-4); border-bottom: 1px solid #eceef2; }
-    .pv-logo { width: 20px; height: 20px; border-radius: 6px; background: #4f46e5; }
+    .pv-logo { width: 20px; height: 20px; border-radius: 6px; background: #2b50e0; }
     .pv-search { width: 180px; height: 20px; border-radius: var(--radius-pill); background: #f1f3f5; margin-left: var(--space-4); }
-    .pv-avatar { width: 24px; height: 24px; border-radius: 50%; margin-left: auto; background: linear-gradient(135deg, #a5b4fc, #6366f1); }
+    .pv-avatar { width: 24px; height: 24px; border-radius: 50%; margin-left: auto; background: linear-gradient(135deg, #b3cbff, #4a6cf0); }
     .pv-body { flex: 1; display: flex; min-height: 0; }
     .pv-side { width: 128px; flex: none; padding: var(--space-4) var(--space-3); display: grid; align-content: start; gap: var(--space-3); border-right: 1px solid #eceef2; background: #fafbfc; }
     .pv-side span { height: 12px; border-radius: var(--radius-pill); background: #e3e6ea; }
     .pv-side span:nth-child(2) { width: 80%; }
     .pv-side span:nth-child(3) { width: 65%; }
     .pv-side span:nth-child(4) { width: 75%; }
-    .pv-side span.is-active { height: 24px; border-radius: 6px; background: #eef2ff; box-shadow: inset 3px 0 0 #4f46e5; }
+    .pv-side span.is-active { height: 24px; border-radius: 6px; background: #eef2ff; box-shadow: inset 3px 0 0 #2b50e0; }
     .pv-main { flex: 1; padding: var(--space-4); display: grid; grid-template-rows: auto 1fr; gap: var(--space-3); min-width: 0; }
     .pv-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
     .pv-kpi { border: 1px solid #eceef2; border-radius: var(--radius-sm); padding: var(--space-3); display: grid; gap: var(--space-2); }
@@ -290,15 +290,15 @@
                 <svg viewBox="0 0 576 354">
                   <defs>
                     <linearGradient id="pv-fill" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0" stop-color="#6366f1" stop-opacity="0.28"/>
-                      <stop offset="1" stop-color="#6366f1" stop-opacity="0"/>
+                      <stop offset="0" stop-color="#4a6cf0" stop-opacity="0.28"/>
+                      <stop offset="1" stop-color="#4a6cf0" stop-opacity="0"/>
                     </linearGradient>
                   </defs>
                   <g stroke="#eceef2" stroke-width="1"><path d="M0 88h576M0 176h576M0 264h576"/></g>
                   <path d="M0 270 C50 258 80 214 130 216 S210 160 260 166 S340 100 390 108 S490 40 576 26 V354 H0 Z" fill="url(#pv-fill)"/>
-                  <path d="M0 270 C50 258 80 214 130 216 S210 160 260 166 S340 100 390 108 S490 40 576 26" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round"/>
-                  <path d="M0 310 C70 302 120 280 180 284 S290 250 350 256 S470 214 576 200" fill="none" stroke="#a5b4fc" stroke-width="2.5" stroke-dasharray="6 6" stroke-linecap="round"/>
-                  <circle cx="390" cy="108" r="6" fill="#ffffff" stroke="#4f46e5" stroke-width="3"/>
+                  <path d="M0 270 C50 258 80 214 130 216 S210 160 260 166 S340 100 390 108 S490 40 576 26" fill="none" stroke="#2b50e0" stroke-width="3" stroke-linecap="round"/>
+                  <path d="M0 310 C70 302 120 280 180 284 S290 250 350 256 S470 214 576 200" fill="none" stroke="#b3cbff" stroke-width="2.5" stroke-dasharray="6 6" stroke-linecap="round"/>
+                  <circle cx="390" cy="108" r="6" fill="#ffffff" stroke="#2b50e0" stroke-width="3"/>
                 </svg>
               </div>
             </div>
@@ -309,8 +309,8 @@
           <div class="row">
             <svg width="64" height="64" viewBox="0 0 64 64">
               <circle cx="32" cy="32" r="24" fill="none" stroke="#eef2ff" stroke-width="10"/>
-              <circle cx="32" cy="32" r="24" fill="none" stroke="#4f46e5" stroke-width="10" stroke-dasharray="98 151" stroke-linecap="round" transform="rotate(-90 32 32)"/>
-              <circle cx="32" cy="32" r="24" fill="none" stroke="#a5b4fc" stroke-width="10" stroke-dasharray="30 151" stroke-dashoffset="-104" stroke-linecap="round" transform="rotate(-90 32 32)"/>
+              <circle cx="32" cy="32" r="24" fill="none" stroke="#2b50e0" stroke-width="10" stroke-dasharray="98 151" stroke-linecap="round" transform="rotate(-90 32 32)"/>
+              <circle cx="32" cy="32" r="24" fill="none" stroke="#b3cbff" stroke-width="10" stroke-dasharray="30 151" stroke-dashoffset="-104" stroke-linecap="round" transform="rotate(-90 32 32)"/>
             </svg>
             <div class="bars"><i style="width: 90%; background: #374151"></i><i style="width: 70%"></i><i style="width: 50%"></i></div>
           </div>

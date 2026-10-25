@@ -1,0 +1,5 @@
+# fixture ignore rules (copied to .gitignore by the tests)
+generated/
+*.log
+!keep.log
+/local_only.py

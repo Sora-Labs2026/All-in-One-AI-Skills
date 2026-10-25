@@ -46,6 +46,8 @@ Read this reference when developing a visual language or deciding whether to kee
 
 ## Anti-pattern detection, with judgment
 
+Visual and verbal defaults (color, type, surfaces, imagery, copy, motion) and their replacements are covered in `taste.md`.
+
 | Symptom | More intentional alternative |
 | --- | --- |
 | Giant welcome banner in a working app | Immediate task, status, and a short contextual title |

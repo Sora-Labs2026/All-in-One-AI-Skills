@@ -1,0 +1,733 @@
+<!doctype html>
+<!-- ProductCraft example: cards-2. Original Sora Labs example, MIT License.
+     Demonstrates: CMP-13, CMP-15, CMP-10, CMP-23, CMP-30, CMP-31, CMP-32, CMP-17, CMP-06, CMP-26, CMP-27,
+     BTN-01, BTN-14, ENG-01, ENG-03, ENG-07, COP-08, COP-10, COP-11, TYP-09, COL-07, FBK-03, FBK-06,
+     ICO-04, MOB-01, MOB-10, LAY-07, SCR-02, SCR-15, DRK-09 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Cards, continued</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    /* Six-track sheet grid so wide and compact cards share one rhythm (LAY-08) */
+    .variants.card-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .span-2 { grid-column: span 2; }
+    .span-3 { grid-column: span 3; }
+    .span-4 { grid-column: span 4; }
+    .variant-stage { flex: 1; grid-template-columns: minmax(0, 1fr); }
+    .theme-scope { width: 100%; display: grid; place-items: center; color: var(--text); }
+    h4 { margin: 0; font-size: var(--text-sm); font-weight: 600; }
+    svg.i { width: 20px; height: 20px; flex: none; }
+    .icon-btn.hit-44 { width: 44px; height: 44px; }
+    .field-label { display: block; margin-bottom: var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+
+    /* v7 contact card: avatar ring over the cover, labeled contact rows, one primary action (CMP-13, BTN-01) */
+    .contact { width: 100%; max-width: 344px; padding: 0; overflow: hidden; }
+    .contact-cover { height: 72px; background: var(--accent-soft); }
+    .contact-cover svg { display: block; width: 100%; height: 100%; }
+    .contact-body { padding: 0 var(--space-5) var(--space-5); }
+    .contact-id { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-3); margin-top: -32px; }
+    .avatar.avatar-64 { position: relative; width: 64px; height: 64px; font-size: var(--text-lg); box-shadow: 0 0 0 4px var(--surface); }
+    .presence { position: absolute; right: 0; bottom: 0; width: 16px; height: 16px; border-radius: var(--radius-pill); background: var(--text-3); box-shadow: 0 0 0 3px var(--surface); }
+    .contact-name { margin-top: var(--space-3); font-size: var(--text-lg); }
+    .contact-role { font-size: var(--text-sm); color: var(--text-2); }
+    .contact-list { display: grid; margin: var(--space-4) 0 0; padding: var(--space-2) 0 0; list-style: none; border-top: 1px solid var(--border); }
+    .contact-row { display: grid; grid-template-columns: 20px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); min-height: 52px; }
+    .contact-row > svg { color: var(--text-3); }
+    .contact-row .k { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .contact-row .val { display: block; font-size: var(--text-sm); color: var(--text); overflow-wrap: anywhere; }
+    .contact-row a.val { color: var(--accent-ink); }
+    .copy-note { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-xs); font-weight: 600; color: var(--success); }
+    .copy-note svg { width: 14px; height: 14px; }
+    .copy-note:empty { display: none; }
+    .contact-actions { display: flex; gap: var(--space-2); margin-top: var(--space-4); }
+    .contact-actions .btn-primary { flex: 1; }
+    .contact-actions .btn { min-height: 44px; }
+    .contact-actions a.btn:hover { text-decoration: none; }
+    .contact-actions .icon-btn { border-color: var(--border); }
+
+    /* v8 fare card: route, fare choice, conditions up front, money summary with the amount on the button (COP-11, SCR-15, BTN-14) */
+    .fare { width: 100%; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr) 256px; overflow: hidden; }
+    .fare-main { display: grid; gap: var(--space-5); padding: var(--space-5); }
+    .fare-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+    .fare-head p { margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    .route { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); }
+    .stop { display: grid; gap: 2px; }
+    .stop.end { text-align: right; }
+    .stop time { font-size: var(--text-xl); font-weight: 700; line-height: 1.2; }
+    .stop .code { font-size: var(--text-sm); font-weight: 700; letter-spacing: 0.02em; }
+    .stop .place { font-size: var(--text-xs); color: var(--text-3); }
+    .leg { display: grid; justify-items: center; gap: var(--space-1); font-size: var(--text-xs); color: var(--text-2); }
+    .leg strong { font-size: var(--text-sm); color: var(--text); }
+    .leg-line { position: relative; width: 100%; height: 20px; display: grid; place-items: center; color: var(--accent-ink); }
+    .leg-line::before { content: ""; position: absolute; left: 4px; right: 4px; top: 50%; border-top: 2px solid var(--border); }
+    .leg-line::after { content: ""; position: absolute; inset: 6px 0; background:
+      radial-gradient(circle at 4px 50%, var(--text-3) 3px, transparent 3.5px),
+      radial-gradient(circle at calc(100% - 4px) 50%, var(--text-3) 3px, transparent 3.5px); }
+    .leg-line svg { position: relative; z-index: 1; width: 20px; height: 20px; padding: 0 var(--space-1); box-sizing: content-box; background: var(--surface); }
+    .tz-note { margin-top: calc(var(--space-3) * -1); font-size: var(--text-xs); color: var(--text-3); }
+    .fare-seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
+    .fare-seg button { display: grid; gap: 0; min-height: 48px; padding: var(--space-1) var(--space-2); line-height: 1.3; }
+    .fare-seg button span { font-size: var(--text-xs); font-weight: 400; color: var(--text-3); }
+    .fare-seg button[aria-checked="true"] span { color: var(--text-2); }
+    .conditions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4) var(--space-5); margin: 0; padding: 0; list-style: none; }
+    .conditions li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: var(--space-2); font-size: var(--text-sm); line-height: 1.4; }
+    .conditions svg { margin-top: 0; }
+    .conditions .is-yes svg { color: var(--success); }
+    .conditions .is-fee svg { color: var(--warning); }
+    .conditions .is-no svg { color: var(--text-3); }
+    .cond-name { display: block; font-weight: 600; color: var(--text); }
+    .cond-detail { display: block; color: var(--text-2); }
+    .fare-price { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-5); background: var(--surface-2); border-left: 1px solid var(--border); }
+    .fare-price .eyebrow { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .fare-total { font-size: var(--text-2xl); font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; }
+    .fare-total { margin-top: var(--space-1); }
+    .fare-total small { display: block; margin-top: var(--space-1); font-size: var(--text-sm); font-weight: 400; letter-spacing: 0; color: var(--text-2); }
+    .fare-policy { display: flex; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-2); }
+    .fare-policy svg { width: 18px; height: 18px; color: var(--success); }
+    .money { display: grid; gap: var(--space-2); margin: 0; padding: var(--space-3) 0 0; border-top: 1px solid var(--border); font-size: var(--text-sm); }
+    .money div { display: flex; justify-content: space-between; gap: var(--space-3); }
+    .money dt { color: var(--text-2); }
+    .money dd { margin: 0; text-align: right; font-weight: 600; }
+    .money .total { padding-top: var(--space-2); border-top: 1px solid var(--border); }
+    .money .total dt { color: var(--text); font-weight: 600; }
+    .fare-actions { display: grid; gap: var(--space-2); margin-top: auto; justify-items: center; }
+    /* Stable width: every label shares one grid cell, only the active one is visible (ENG-03) */
+    .fare-cta { display: grid; place-items: center; }
+    .fare-cta .cta-label { grid-area: 1 / 1; visibility: hidden; }
+    .fare-cta .cta-label.is-on { visibility: visible; }
+    .fare-actions a { font-size: var(--text-sm); font-weight: 600; min-height: 32px; display: inline-flex; align-items: center; }
+
+    /* v9 weather: units as a radio group, consequence first, hourly strip with labeled rain chance (COP-10, CMP-23) */
+    .weather { width: 100%; max-width: 520px; display: grid; gap: var(--space-5); --accent: #0369a1; --accent-hover: #075985; --accent-soft: #e0f2fe; --accent-ink: #075985; --focus: #0369a1; }
+    .wx-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); }
+    .wx-head p { margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    .wx-now { display: grid; grid-template-columns: 72px auto minmax(0, 1fr); align-items: center; gap: var(--space-4); }
+    .wx-art { width: 72px; height: 72px; }
+    .wx-temp { font-size: 48px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; } /* hero figure: proportional digits */
+    .wx-desc { display: grid; gap: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    .wx-desc strong { font-size: var(--text-md); color: var(--text); }
+    .wx-alert { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--accent-soft); font-size: var(--text-sm); color: var(--text); }
+    .wx-alert svg { color: var(--accent-ink); }
+    .wx-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin: 0; }
+    .wx-stats div { display: grid; gap: 2px; }
+    .wx-stats dt { font-size: var(--text-xs); color: var(--text-3); }
+    .wx-stats dd { margin: 0; font-size: var(--text-sm); font-weight: 600; }
+    .wx-hours-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); margin-bottom: var(--space-2); }
+    .wx-hours-head span { font-size: var(--text-xs); color: var(--text-3); }
+    .hours { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: var(--space-1); margin: 0; padding: var(--space-1); list-style: none; border-radius: var(--radius-md); background: var(--surface-2); }
+    .hour { display: grid; justify-items: center; gap: var(--space-2); padding: var(--space-3) 0 var(--space-2); border-radius: var(--radius-sm); font-size: var(--text-xs); color: var(--text-2); }
+    .hour.is-now { background: var(--surface); box-shadow: var(--shadow-sm); color: var(--text); font-weight: 600; }
+    .hour svg { width: 22px; height: 22px; color: var(--text-2); }
+    .hour .t { font-size: var(--text-md); font-weight: 600; color: var(--text); }
+    .rain-bar { position: relative; width: 6px; height: 24px; border-radius: var(--radius-pill); background: var(--border); overflow: hidden; }
+    .rain-bar span { position: absolute; left: 0; right: 0; bottom: 0; height: var(--p); background: var(--accent); }
+    .hour .p { color: var(--text-2); font-weight: 400; }
+    .hour.is-likely .p { color: var(--accent-ink); font-weight: 700; }
+
+    /* v10 task card: meta as label/value pairs, avatar stack with ring, real checkboxes and a live count (CMP-31, FBK-06) */
+    .task { width: 100%; max-width: 500px; display: grid; gap: var(--space-4); }
+    .task-top { display: flex; align-items: center; gap: var(--space-2); }
+    .task-crumb { flex: 1; font-size: var(--text-xs); color: var(--text-3); }
+    .task-top .icon-btn { margin: calc(var(--space-2) * -1) calc(var(--space-2) * -1) calc(var(--space-2) * -1) 0; }
+    .task-title { font-size: var(--text-lg); }
+    .task-meta { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: var(--space-6); margin: 0; }
+    .task-meta dt { margin-bottom: var(--space-1); font-size: var(--text-xs); color: var(--text-3); }
+    .task-meta dd { display: flex; align-items: center; gap: var(--space-2); min-height: 32px; margin: 0; font-size: var(--text-sm); font-weight: 600; }
+    .task-meta dd svg { width: 18px; height: 18px; color: var(--text-2); }
+    .task-meta .soon { font-weight: 400; color: var(--text-2); }
+    .task-meta .prio svg { color: var(--warning); }
+    .stack { display: flex; margin: 0; padding: 0; list-style: none; }
+    .stack li + li { margin-left: -6px; }
+    .stack .avatar { box-shadow: 0 0 0 2px var(--surface); }
+    .stack .tone-a { background: #fef3c7; color: #92400e; }
+    .stack .tone-b { background: #dcfce7; color: #166534; }
+    .stack .tone-c { background: #e0e7ff; color: #182f96; }
+    .stack .tone-more { background: var(--surface-2); color: var(--text-2); }
+    .checklist { display: grid; gap: var(--space-3); padding: var(--space-4); border-radius: var(--radius-md); background: var(--surface-2); }
+    .check-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-3); }
+    .check-count { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .task-progress { width: 100%; height: 8px; border: 0; border-radius: var(--radius-pill); background: var(--border); appearance: none; overflow: hidden; }
+    .task-progress::-webkit-progress-bar { background: var(--border); border-radius: var(--radius-pill); }
+    .task-progress::-webkit-progress-value { background: var(--accent); border-radius: var(--radius-pill); transition: width var(--dur-med) var(--ease-out); }
+    .task-progress::-moz-progress-bar { background: var(--accent); border-radius: var(--radius-pill); }
+    .check-items { display: grid; margin: 0; padding: 0; list-style: none; }
+    .check-items label { display: flex; align-items: center; gap: var(--space-3); min-height: 40px; font-size: var(--text-sm); cursor: pointer; }
+    .check-items input { flex: none; width: 18px; height: 18px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+    .check-items input:checked + span { color: var(--text-3); text-decoration: line-through; }
+    .task-foot { display: flex; align-items: center; gap: var(--space-4); font-size: var(--text-sm); color: var(--text-2); }
+    .task-foot span { display: inline-flex; align-items: center; gap: var(--space-1); }
+    .task-foot svg { width: 18px; height: 18px; }
+    .task-foot time { margin-left: auto; font-size: var(--text-xs); color: var(--text-3); }
+
+    /* v11 compact player: artwork, title, labeled seek bar with times, then a larger play button (CMP-30) */
+    .player { width: 100%; max-width: 520px; display: grid; gap: var(--space-4); }
+    .player-top { display: grid; grid-template-columns: 88px minmax(0, 1fr); align-items: center; gap: var(--space-4); }
+    .art { width: 88px; height: 88px; border-radius: var(--radius-md); overflow: hidden; }
+    .art svg { display: block; width: 100%; height: 100%; }
+    .ep-show { font-size: var(--text-xs); color: var(--text-3); }
+    .ep-title { margin-top: 2px; font-size: var(--text-lg); }
+    .ep-meta { margin-top: var(--space-1); font-size: var(--text-sm); color: var(--text-2); }
+    .seek { display: grid; gap: var(--space-1); }
+    .seek-range { --p: 26%; width: 100%; height: 24px; margin: 0; background: transparent; appearance: none; -webkit-appearance: none; cursor: pointer; }
+    .seek-range::-webkit-slider-runnable-track { height: 4px; border-radius: var(--radius-pill); background: linear-gradient(to right, var(--accent) var(--p), rgba(255, 255, 255, 0.16) var(--p)); }
+    .seek-range::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -6px; border: 0; border-radius: var(--radius-pill); background: var(--text); }
+    .seek-range::-moz-range-track { height: 4px; border-radius: var(--radius-pill); background: rgba(255, 255, 255, 0.16); }
+    .seek-range::-moz-range-progress { height: 4px; border-radius: var(--radius-pill); background: var(--accent); }
+    .seek-range::-moz-range-thumb { width: 16px; height: 16px; border: 0; border-radius: var(--radius-pill); background: var(--text); }
+    .seek-times { display: flex; justify-content: space-between; gap: var(--space-3); font-size: var(--text-xs); color: var(--text-2); }
+    .seek-times .chapter { color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .controls { display: flex; align-items: center; justify-content: space-between; padding: 0 var(--space-2); }
+    .controls .icon-btn { width: 44px; height: 44px; border-radius: var(--radius-pill); color: var(--text); }
+    .controls .icon-btn svg { width: 24px; height: 24px; }
+    .speed { min-width: 52px; min-height: 44px; padding: 0 var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-pill); background: transparent; color: var(--text); font-size: var(--text-sm); font-weight: 700; cursor: pointer; }
+    .speed:hover { background: var(--surface-2); }
+    .play { display: grid; place-items: center; width: 64px; height: 64px; border: 0; border-radius: var(--radius-pill); background: var(--accent); color: var(--on-accent); cursor: pointer; transition: background-color var(--dur-fast); }
+    .play:hover { background: var(--accent-hover); }
+    .play svg { width: 28px; height: 28px; }
+    .play .i-pause, .play[data-state="playing"] .i-play { display: none; }
+    .play[data-state="playing"] .i-pause { display: block; }
+    .save[aria-pressed="true"] { color: var(--accent); }
+    .save[aria-pressed="true"] svg { fill: currentColor; }
+
+    /* v12 benchmark stat cards: value, signed gap vs benchmark, both bars on one stated scale (CMP-17, COP-10) */
+    .bench-wrap { width: 100%; display: grid; gap: var(--space-3); }
+    .bench-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+    .bench { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-5); }
+    .bench-head { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); }
+    .bench-head h3 { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .bench-head span { font-size: var(--text-xs); color: var(--text-3); white-space: nowrap; }
+    .bench-value { font-size: var(--text-2xl); font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+    .bench-value small { font-size: var(--text-lg); font-weight: 600; color: var(--text-2); }
+    .bench .delta span { font-weight: 400; color: var(--text-3); }
+    .bars { display: grid; gap: var(--space-2); margin: var(--space-3) 0 0; padding: 0; list-style: none; }
+    .bar-row { display: grid; grid-template-columns: 72px minmax(0, 1fr) 36px; align-items: center; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-2); }
+    .bar-row strong { text-align: right; color: var(--text); }
+    .bar-track { height: 8px; border-radius: var(--radius-pill); background: var(--surface-2); }
+    .bar-track span { display: block; width: var(--w); height: 100%; border-radius: var(--radius-pill); background: var(--accent); }
+    .bar-row.is-bench .bar-track span { background: var(--bench); }
+    .bar-scale { display: grid; grid-template-columns: 72px minmax(0, 1fr) 36px; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-3); }
+    .bar-scale span:nth-child(2) { display: flex; justify-content: space-between; }
+    .bench-note { margin-top: auto; padding-top: var(--space-3); border-top: 1px solid var(--border); font-size: var(--text-sm); color: var(--text-2); }
+    .bench-foot { font-size: var(--text-xs); color: var(--text-3); text-align: center; }
+    :root { --bench: #7b8290; }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M4 7.5l8 5.5 8-5.5"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-phone" viewBox="0 0 24 24"><path d="M5.2 4h3.3l1.6 4-2.1 1.4a10.5 10.5 0 0 0 6.6 6.6l1.4-2.1 4 1.6v3.3a1.6 1.6 0 0 1-1.7 1.6A16 16 0 0 1 3.6 5.7 1.6 1.6 0 0 1 5.2 4z"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11.5" height="11.5" rx="2.5"/><path d="M15.5 8.5V6.5a2.5 2.5 0 0 0-2.5-2.5H6.5A2.5 2.5 0 0 0 4 6.5V13a2.5 2.5 0 0 0 2.5 2.5h2"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3.5"/><path d="M3 19.5c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5M15.5 5.2a3.5 3.5 0 0 1 0 6.6M17.5 14.3c2 .6 3.5 2.6 3.5 5.2"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.25" fill="currentColor"/><circle cx="12" cy="12" r="1.25" fill="currentColor"/><circle cx="19" cy="12" r="1.25" fill="currentColor"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-message" viewBox="0 0 24 24"><path d="M20 11.5a8 8 0 0 1-11.7 7.1L4 19.8l1.2-4A8 8 0 1 1 20 11.5z"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-plane" viewBox="0 0 24 24"><path d="M21.5 12c0-.8-.9-1.5-2.2-1.5H15l-4-7h-2l2 7H6.5l-2-2.5H3l1 4-1 4h1.5l2-2.5H11l-2 7h2l4-7h4.3c1.3 0 2.2-.7 2.2-1.5z"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-yes" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.2l2.4 2.4 4.6-4.8"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-no" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.2 9.2l5.6 5.6M14.8 9.2l-5.6 5.6"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-fee" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M14.5 9.6c-.4-.9-1.3-1.4-2.5-1.4-1.4 0-2.4.7-2.4 1.8s1 1.6 2.4 1.9 2.5.8 2.5 2-1 1.9-2.5 1.9c-1.1 0-2.1-.5-2.5-1.4M12 6.7v1.5M12 15.8v1.5"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6L6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-partly" viewBox="0 0 24 24"><path d="M7.6 10.2A3.6 3.6 0 0 1 13.9 7"/><path d="M10 2.5v1.2M4.3 4.6l.9.9M2.5 10.2h1.2M15.7 4.6l-.9.9"/><path d="M9 20h8.5a3.5 3.5 0 0 0 .3-7 5 5 0 0 0-9.6.9A3.1 3.1 0 0 0 9 20z"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-cloud" viewBox="0 0 24 24"><path d="M7.5 18.5h9.5a4 4 0 0 0 .4-8 5.5 5.5 0 0 0-10.6 1.2A3.4 3.4 0 0 0 7.5 18.5z"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-rain" viewBox="0 0 24 24"><path d="M7.5 15h9.5a3.5 3.5 0 0 0 .3-7 5 5 0 0 0-9.6 1A3 3 0 0 0 7.5 15z"/><path d="M8.5 18l-1 2.5M12.5 18l-1 2.5M16.5 18l-1 2.5"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-umbrella" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 18 0z"/><path d="M12 12v6.5a2 2 0 0 0 4 0"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-clip" viewBox="0 0 24 24"><path d="M19.5 11.5l-7.6 7.6a4.9 4.9 0 0 1-6.9-6.9l7.8-7.8a3.3 3.3 0 0 1 4.6 4.6l-7.8 7.8a1.6 1.6 0 0 1-2.3-2.3l7.1-7.1"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-back15" viewBox="0 0 24 24"><path d="M4.8 13.5A7.5 7.5 0 1 0 7 6.7"/><path d="M7.3 2.8v4.1h4.1"/><text x="12.6" y="16.4" font-size="7.2" font-weight="700" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor" stroke="none">15</text></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-fwd30" viewBox="0 0 24 24"><path d="M19.2 13.5A7.5 7.5 0 1 1 17 6.7"/><path d="M16.7 2.8v4.1h-4.1"/><text x="11.4" y="16.4" font-size="7.2" font-weight="700" font-family="system-ui, sans-serif" text-anchor="middle" fill="currentColor" stroke="none">30</text></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5l7 2.8v5.2c0 4.4-3 7.7-7 9-4-1.3-7-4.6-7-9V6.3z"/><path d="M9 12.2l2.2 2.2 4-4.2"/></symbol>
+    <symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-bookmark" viewBox="0 0 24 24"><path d="M6.5 3.5h11v17l-5.5-4-5.5 4z"/></symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="6"/><path d="M8 15.5c2.5 0 3.5-7 8-7"/></svg>
+          ProductCraft · Example screens
+        </span>
+        <h1>Cards, continued</h1>
+        <p>Six more single-topic cards: a contact card, a flight fare, a weather forecast, a project task, a compact podcast player and benchmark stats. Each keeps a fixed anatomy, states its period and units, and uses real controls.</p>
+      </div>
+      <p class="subtle">Versions v7 to v12 · light and dark</p>
+    </header>
+
+    <div class="variants card-grid">
+      <!-- v7 -->
+      <section class="variant span-2" aria-labelledby="v7">
+        <h2 class="variant-label" id="v7"><span class="v">v7</span> Contact card with actions</h2>
+        <div class="variant-stage">
+          <article class="card contact" aria-labelledby="contact-name">
+            <div class="contact-cover" aria-hidden="true">
+              <svg viewBox="0 0 344 72" preserveAspectRatio="xMidYMid slice">
+                <circle cx="300" cy="-6" r="62" fill="#cfdcff" opacity="0.7"/>
+                <circle cx="236" cy="80" r="36" fill="#e0e7ff"/>
+                <path d="M0 56 C70 30 120 74 200 44" stroke="#b3cbff" stroke-width="2" fill="none" opacity="0.7"/>
+              </svg>
+            </div>
+            <div class="contact-body">
+              <div class="contact-id">
+                <span class="avatar avatar-64" aria-hidden="true">PN<span class="presence"></span></span>
+                <span class="pill pill-neutral">Away until Mon, Oct 26</span>
+              </div>
+              <h3 class="contact-name" id="contact-name">Priya Nair</h3>
+              <p class="contact-role">Senior product designer · Growth</p>
+              <ul class="contact-list">
+                <li class="contact-row">
+                  <svg class="i" aria-hidden="true"><use href="#i-mail"/></svg>
+                  <span><span class="k">Email</span><a class="val" href="mailto:priya.nair@example.com" id="contact-email">priya.nair@example.com</a><span class="copy-note" role="status" id="copy-note"></span></span>
+                  <button type="button" class="icon-btn hit-44" id="copy-email" aria-label="Copy email address" title="Copy email address"><svg aria-hidden="true"><use href="#i-copy"/></svg></button>
+                </li>
+                <li class="contact-row">
+                  <svg class="i" aria-hidden="true"><use href="#i-phone"/></svg>
+                  <span><span class="k">Work phone</span><span class="val num">+1 555-0142</span></span>
+                </li>
+                <li class="contact-row">
+                  <svg class="i" aria-hidden="true"><use href="#i-clock"/></svg>
+                  <span><span class="k">Local time</span><span class="val"><time datetime="2026-10-24T10:12+01:00">10:12 AM</time> in Lisbon (UTC+1)</span></span>
+                </li>
+                <li class="contact-row">
+                  <svg class="i" aria-hidden="true"><use href="#i-users"/></svg>
+                  <span><span class="k">Team</span><span class="val">Growth design · reports to Leo Brandt</span></span>
+                </li>
+              </ul>
+              <div class="contact-actions">
+                <button type="button" class="btn btn-primary"><svg aria-hidden="true"><use href="#i-message"/></svg>Message</button>
+                <a class="btn btn-secondary" href="tel:+15550142"><svg aria-hidden="true"><use href="#i-phone"/></svg>Call</a>
+                <button type="button" class="icon-btn hit-44" aria-label="More actions for Priya Nair" title="More actions"><svg aria-hidden="true"><use href="#i-more"/></svg></button>
+              </div>
+            </div>
+          </article>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-13</code> <code>BTN-01</code> <code>ICO-04</code> <code>FBK-03</code> <code>MOB-01</code> <code>SCR-02</code></p>
+      </section>
+
+      <!-- v8 -->
+      <section class="variant span-4" aria-labelledby="v8">
+        <h2 class="variant-label" id="v8"><span class="v">v8</span> Flight fare card with conditions up front</h2>
+        <div class="variant-stage">
+          <article class="card fare" data-accent="teal" aria-labelledby="fare-title">
+            <div class="fare-main">
+              <header class="fare-head">
+                <div>
+                  <h3 id="fare-title">Lisbon to Copenhagen</h3>
+                  <p>Outbound · <time datetime="2026-10-30">Fri, Oct 30, 2026</time> · 2 travelers</p>
+                </div>
+                <span class="pill pill-accent">Nonstop</span>
+              </header>
+              <div class="route">
+                <div class="stop">
+                  <time datetime="2026-10-30T07:45+00:00">7:45 AM</time>
+                  <span class="code">LIS</span>
+                  <span class="place">Lisbon · Terminal 1</span>
+                </div>
+                <div class="leg">
+                  <strong>3h 45m</strong>
+                  <span class="leg-line" aria-hidden="true"><svg><use href="#i-plane"/></svg></span>
+                  <span>Flight SR 482 · Sora Air</span>
+                </div>
+                <div class="stop end">
+                  <time datetime="2026-10-30T12:30+01:00">12:30 PM</time>
+                  <span class="code">CPH</span>
+                  <span class="place">Copenhagen · Terminal 3</span>
+                </div>
+              </div>
+              <p class="tz-note">Times are local. Copenhagen is 1 hour ahead of Lisbon.</p>
+              <div>
+                <span class="field-label" id="fare-label">Fare type</span>
+                <div class="segmented fare-seg" role="radiogroup" aria-labelledby="fare-label" id="fare-seg"></div>
+              </div>
+              <ul class="conditions" id="conditions" aria-label="Fare conditions"></ul>
+            </div>
+            <aside class="fare-price" aria-label="Price summary">
+              <div>
+                <p class="eyebrow" id="fare-name"></p>
+                <p class="fare-total"><span class="num" id="fare-each"></span> <small>per traveler</small></p>
+              </div>
+              <dl class="money" id="fare-money" aria-live="polite"></dl>
+              <p class="fare-policy"><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg><span>Every fare can be cancelled free of charge within 24 hours of booking.</span></p>
+              <div class="fare-actions">
+                <button type="button" class="btn btn-primary btn-block fare-cta" id="fare-cta"></button>
+                <a href="#fare-rules">Read full fare rules</a>
+              </div>
+            </aside>
+          </article>
+        </div>
+        <p class="rule-ids">Rules: <code>COP-11</code> <code>SCR-15</code> <code>BTN-14</code> <code>ENG-03</code> <code>CMP-23</code> <code>CMP-32</code> <code>COL-07</code></p>
+      </section>
+
+      <!-- v9 -->
+      <section class="variant span-3" aria-labelledby="v9">
+        <h2 class="variant-label" id="v9"><span class="v">v9</span> Weather card with hourly strip and units</h2>
+        <div class="variant-stage plain">
+          <article class="card weather" aria-labelledby="wx-title" id="weather">
+            <header class="wx-head">
+              <div>
+                <h3 id="wx-title">Lisbon</h3>
+                <p>Sat, Oct 24 · updated <time datetime="2026-10-24T10:05+01:00">10:05 AM</time></p>
+              </div>
+              <div class="segmented" role="radiogroup" aria-label="Units" id="wx-units">
+                <button type="button" role="radio" aria-checked="true" tabindex="0" data-unit="metric">°C, km/h</button>
+                <button type="button" role="radio" aria-checked="false" tabindex="-1" data-unit="imperial">°F, mph</button>
+              </div>
+            </header>
+            <div class="wx-now">
+              <svg class="wx-art" viewBox="0 0 72 72" aria-hidden="true">
+                <circle cx="30" cy="28" r="14" fill="#fbbf24"/>
+                <g stroke="#f59e0b" stroke-width="3" stroke-linecap="round"><path d="M30 6v5M30 45v5M8 28h5M10.4 8.4l3.5 3.5M46.1 8.4l-3.5 3.5M10.4 47.6l3.5-3.5"/></g>
+                <path d="M28 60h28a10 10 0 0 0 1-20 14 14 0 0 0-27 3.5A8.3 8.3 0 0 0 28 60z" fill="#e2e8f0" stroke="#94a3b8" stroke-width="2"/>
+              </svg>
+              <p class="wx-temp"><span data-temp="17">17°</span><span class="visually-hidden" data-unit-word>Celsius</span></p>
+              <div class="wx-desc">
+                <strong>Partly cloudy</strong>
+                <span>Feels like <span data-temp="16">16°</span></span>
+                <span>High <span data-temp="20">20°</span> · Low <span data-temp="14">14°</span></span>
+              </div>
+            </div>
+            <p class="wx-alert"><svg class="i" aria-hidden="true"><use href="#i-umbrella"/></svg><span><strong>Rain likely from 4 PM.</strong> Take an umbrella if you will be out this afternoon.</span></p>
+            <dl class="wx-stats">
+              <div><dt>Wind</dt><dd><span data-wind="14">14 km/h</span> NW</dd></div>
+              <div><dt>Humidity</dt><dd class="num">68%</dd></div>
+              <div><dt>UV index</dt><dd>3, moderate</dd></div>
+              <div><dt>Sunset</dt><dd><time datetime="2026-10-24T18:42+01:00">6:42 PM</time></dd></div>
+            </dl>
+            <section aria-labelledby="wx-hours-title">
+              <div class="wx-hours-head">
+                <h4 id="wx-hours-title">Next 8 hours</h4>
+                <span>Temperature and chance of rain</span>
+              </div>
+              <ol class="hours" id="wx-hours"></ol>
+            </section>
+          </article>
+        </div>
+        <p class="rule-ids">Rules: <code>COP-10</code> <code>CMP-23</code> <code>CMP-10</code> <code>ENG-07</code> <code>COL-07</code> <code>TYP-09</code></p>
+      </section>
+
+      <!-- v10 -->
+      <section class="variant span-3" aria-labelledby="v10">
+        <h2 class="variant-label" id="v10"><span class="v">v10</span> Project task card with checklist progress</h2>
+        <div class="variant-stage">
+          <article class="card task" aria-labelledby="task-title">
+            <div class="task-top">
+              <p class="task-crumb">Sora Pay · Release 2.4</p>
+              <span class="pill pill-accent">In progress</span>
+              <button type="button" class="icon-btn hit-44" aria-label="More actions for Ship saved cards at checkout" title="More actions"><svg aria-hidden="true"><use href="#i-more"/></svg></button>
+            </div>
+            <h3 class="task-title" id="task-title">Ship saved cards at checkout</h3>
+            <dl class="task-meta">
+              <div>
+                <dt>Due date</dt>
+                <dd><svg aria-hidden="true"><use href="#i-calendar"/></svg><time datetime="2026-10-27">Tue, Oct 27</time> <span class="soon">in 3 days</span></dd>
+              </div>
+              <div>
+                <dt>Priority</dt>
+                <dd class="prio"><svg aria-hidden="true"><use href="#i-flag"/></svg>High</dd>
+              </div>
+              <div>
+                <dt>Assignees</dt>
+                <dd>
+                  <ul class="stack" aria-label="Assigned to Avery Stone, Jordan Reyes, Nina Park and Sam Okafor">
+                    <li><span class="avatar tone-a" title="Avery Stone" aria-hidden="true">AS</span></li>
+                    <li><span class="avatar tone-b" title="Jordan Reyes" aria-hidden="true">JR</span></li>
+                    <li><span class="avatar tone-c" title="Nina Park" aria-hidden="true">NP</span></li>
+                    <li><span class="avatar tone-more" title="Sam Okafor" aria-hidden="true">+1</span></li>
+                  </ul>
+                </dd>
+              </div>
+            </dl>
+            <section class="checklist" aria-labelledby="check-title">
+              <div class="check-head">
+                <h4 id="check-title">Checklist</h4>
+                <span class="check-count num" id="check-count" aria-live="polite">4 of 6 done</span>
+              </div>
+              <progress class="task-progress" id="task-progress" max="6" value="4" aria-labelledby="check-title">4 of 6</progress>
+              <ul class="check-items" id="check-items">
+                <li><label><input type="checkbox" checked><span>Review card vault API with Leo</span></label></li>
+                <li><label><input type="checkbox" checked><span>Design error and expired-card states</span></label></li>
+                <li><label><input type="checkbox" checked><span>Get checkout copy approved by legal</span></label></li>
+                <li><label><input type="checkbox" checked><span>QA with test card •••• 4821</span></label></li>
+                <li><label><input type="checkbox"><span>Screen reader pass on the payment form</span></label></li>
+                <li><label><input type="checkbox"><span>Draft release notes</span></label></li>
+              </ul>
+            </section>
+            <footer class="task-foot">
+              <span><svg aria-hidden="true"><use href="#i-message"/></svg><span class="num">8</span> comments</span>
+              <span><svg aria-hidden="true"><use href="#i-clip"/></svg><span class="num">3</span> files</span>
+              <time datetime="2026-10-24T08:10" title="Oct 24, 2026, 8:10 AM">Updated 2 h ago</time>
+            </footer>
+          </article>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-31</code> <code>FBK-06</code> <code>CMP-13</code> <code>MOB-10</code> <code>SCR-02</code> <code>CMP-15</code></p>
+      </section>
+
+      <!-- v11 -->
+      <section class="variant span-3" aria-labelledby="v11">
+        <h2 class="variant-label" id="v11"><span class="v">v11</span> Compact podcast player, dark theme</h2>
+        <div class="variant-stage dark">
+          <div class="theme-scope" data-theme="dark">
+            <article class="card player" aria-labelledby="ep-title" id="player">
+              <div class="player-top">
+                <div class="art" aria-hidden="true">
+                  <svg viewBox="0 0 88 88">
+                    <defs><linearGradient id="art-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#312e81"/><stop offset="1" stop-color="#0f766e"/></linearGradient></defs>
+                    <rect width="88" height="88" fill="url(#art-bg)"/>
+                    <circle cx="66" cy="22" r="26" fill="#8db2ff" opacity="0.35"/>
+                    <g fill="#e0e7ff"><rect x="16" y="40" width="5" height="16" rx="2.5"/><rect x="25" y="32" width="5" height="32" rx="2.5"/><rect x="34" y="44" width="5" height="8" rx="2.5"/><rect x="43" y="28" width="5" height="40" rx="2.5"/><rect x="52" y="38" width="5" height="20" rx="2.5"/><rect x="61" y="42" width="5" height="12" rx="2.5"/></g>
+                  </svg>
+                </div>
+                <div>
+                  <p class="ep-show">Build Notes by Sora Labs · Episode 42</p>
+                  <h3 class="ep-title" id="ep-title">Designing for slow networks</h3>
+                  <p class="ep-meta">Hana Kim with Owen Clarke · <time datetime="2026-10-21">Oct 21</time> · 48 min</p>
+                </div>
+              </div>
+              <div class="seek">
+                <input class="seek-range" type="range" id="seek" min="0" max="2895" value="760" step="1" aria-label="Playback position">
+                <div class="seek-times num" aria-hidden="true">
+                  <span id="elapsed">12:40</span>
+                  <span class="chapter" id="chapter">Chapter 3 of 6: Offline-first forms</span>
+                  <span>48:15</span>
+                </div>
+              </div>
+              <div class="controls">
+                <button type="button" class="speed num" id="speed" aria-label="Playback speed 1×">1×</button>
+                <button type="button" class="icon-btn" id="back" aria-label="Back 15 seconds" title="Back 15 seconds"><svg aria-hidden="true"><use href="#i-back15"/></svg></button>
+                <button type="button" class="play" id="play" aria-label="Play" data-state="paused">
+                  <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.2v13.6a.8.8 0 0 0 1.2.7l10.6-6.8a.8.8 0 0 0 0-1.4L9.2 4.5A.8.8 0 0 0 8 5.2z" fill="currentColor"/></svg>
+                  <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/><rect x="13.5" y="5" width="4" height="14" rx="1.2" fill="currentColor"/></svg>
+                </button>
+                <button type="button" class="icon-btn" id="fwd" aria-label="Forward 30 seconds" title="Forward 30 seconds"><svg aria-hidden="true"><use href="#i-fwd30"/></svg></button>
+                <button type="button" class="icon-btn save" aria-pressed="false" aria-label="Save episode" title="Save episode" id="save"><svg aria-hidden="true"><use href="#i-bookmark"/></svg></button>
+              </div>
+            </article>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-30</code> <code>ICO-04</code> <code>MOB-01</code> <code>ENG-01</code> <code>DRK-09</code> <code>CMP-27</code></p>
+      </section>
+
+      <!-- v12 -->
+      <section class="variant span-3" aria-labelledby="v12">
+        <h2 class="variant-label" id="v12"><span class="v">v12</span> Stat cards against a benchmark</h2>
+        <div class="variant-stage">
+          <div class="bench-wrap">
+            <div class="bench-row" id="bench-row"></div>
+            <p class="bench-foot">Benchmark: median of 140 Sora Shop stores selling home goods, same dates.</p>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-17</code> <code>COP-10</code> <code>COL-07</code> <code>ENG-07</code> <code>COP-08</code> <code>TYP-09</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // One locale and one set of formatters for every amount (COP-08)
+    const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+    const one = new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+    // Single-choice controls as radio groups with a roving tabindex and arrow keys (CMP-23)
+    function radioGroup(group, onSelect) {
+      const options = [...group.querySelectorAll('[role="radio"]')];
+      const select = (option, focus) => {
+        options.forEach((o) => { const on = o === option; o.setAttribute("aria-checked", on); o.tabIndex = on ? 0 : -1; });
+        if (focus) option.focus();
+        onSelect(option);
+      };
+      options.forEach((o, i) => {
+        o.addEventListener("click", () => select(o));
+        o.addEventListener("keydown", (e) => {
+          const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+          if (!step) return;
+          e.preventDefault();
+          select(options[(i + step + options.length) % options.length], true);
+        });
+      });
+      select(options.find((o) => o.getAttribute("aria-checked") === "true") || options[0]);
+    }
+
+    // v7: copy the address and confirm in place (FBK-03)
+    document.getElementById("copy-email").addEventListener("click", async () => {
+      const note = document.getElementById("copy-note");
+      try {
+        await navigator.clipboard.writeText(document.getElementById("contact-email").textContent);
+        note.innerHTML = '<svg aria-hidden="true"><use href="#i-check"/></svg>Copied';
+      } catch (e) {
+        note.textContent = "Copy failed. Select the address to copy it.";
+      }
+      setTimeout(() => (note.textContent = ""), 3000);
+    });
+
+    // v8: fares as data; conditions, money summary and button label render from the selected fare (COP-11, SCR-15, BTN-14)
+    (function () {
+      const travelers = 2;
+      const taxesEach = 42;
+      const fares = [
+        { id: "basic", name: "Basic", price: 189, conditions: [
+          ["yes", "Cabin bag", "Included, 1 bag up to 8 kg"],
+          ["fee", "Checked bag", "Not included, add for $35"],
+          ["no", "Changes", "Not allowed"],
+          ["no", "Refund", "No refund"] ] },
+        { id: "standard", name: "Standard", price: 248, conditions: [
+          ["yes", "Cabin bag", "Included, 1 bag up to 8 kg"],
+          ["yes", "Checked bag", "Included, 1 bag up to 23 kg"],
+          ["fee", "Changes", "$45 fee plus any fare difference"],
+          ["no", "Refund", "Travel credit only"] ] },
+        { id: "flex", name: "Flex", price: 329, conditions: [
+          ["yes", "Cabin bag", "Included, 1 bag up to 8 kg"],
+          ["yes", "Checked bag", "Included, 2 bags up to 23 kg"],
+          ["yes", "Changes", "Free until 2 h before departure"],
+          ["yes", "Refund", "Full refund until Oct 29"] ] },
+      ];
+      const words = { yes: "Included", fee: "Fee applies", no: "Not available" };
+      const seg = document.getElementById("fare-seg");
+      const cta = document.getElementById("fare-cta");
+      seg.innerHTML = fares.map((f) => `<button type="button" role="radio" aria-checked="${f.id === "standard"}" data-fare="${f.id}">${f.name}<span class="num">${usd.format(f.price).replace(".00", "")} each</span></button>`).join("");
+      cta.innerHTML = fares.map((f) => `<span class="cta-label" data-fare="${f.id}">Continue · ${usd.format(f.price * travelers)}</span>`).join("");
+
+      radioGroup(seg, (option) => {
+        const f = fares.find((x) => x.id === option.dataset.fare);
+        const base = (f.price - taxesEach) * travelers;
+        document.getElementById("conditions").innerHTML = f.conditions.map(([kind, name, detail]) =>
+          `<li class="is-${kind}"><svg class="i" aria-hidden="true"><use href="#i-${kind}"/></svg><span><span class="cond-name">${name}<span class="visually-hidden">: ${words[kind]}</span></span><span class="cond-detail">${detail}</span></span></li>`).join("");
+        document.getElementById("fare-name").textContent = `${f.name} fare, taxes included`;
+        document.getElementById("fare-each").textContent = usd.format(f.price);
+        document.getElementById("fare-money").innerHTML =
+          `<div><dt>Fare × ${travelers} travelers</dt><dd class="num">${usd.format(base)}</dd></div>` +
+          `<div><dt>Taxes and airport fees</dt><dd class="num">${usd.format(taxesEach * travelers)}</dd></div>` +
+          `<div class="total"><dt>Total</dt><dd class="num">${usd.format(f.price * travelers)}</dd></div>`;
+        cta.querySelectorAll(".cta-label").forEach((l) => l.classList.toggle("is-on", l.dataset.fare === f.id));
+      });
+    })();
+
+    // v9: store raw metric values, convert and format at render time (ENG-07, CMP-23)
+    (function () {
+      const card = document.getElementById("weather");
+      const hours = [
+        { time: "Now", c: 17, icon: "partly", sky: "Partly cloudy", rain: 0 },
+        { time: "11 AM", c: 18, icon: "partly", sky: "Partly cloudy", rain: 0 },
+        { time: "12 PM", c: 19, icon: "sun", sky: "Sunny", rain: 5 },
+        { time: "1 PM", c: 20, icon: "sun", sky: "Sunny", rain: 5 },
+        { time: "2 PM", c: 20, icon: "partly", sky: "Partly cloudy", rain: 10 },
+        { time: "3 PM", c: 19, icon: "cloud", sky: "Cloudy", rain: 40 },
+        { time: "4 PM", c: 18, icon: "rain", sky: "Showers", rain: 70 },
+        { time: "5 PM", c: 17, icon: "rain", sky: "Showers", rain: 60 },
+      ];
+      const list = document.getElementById("wx-hours");
+      list.innerHTML = hours.map((h, i) => `
+        <li class="hour${i === 0 ? " is-now" : ""}${h.rain >= 50 ? " is-likely" : ""}">
+          <span>${h.time}</span>
+          <svg aria-hidden="true"><use href="#i-${h.icon}"/></svg>
+          <span class="visually-hidden">${h.sky}, </span>
+          <span class="t" data-temp="${h.c}">${h.c}°</span>
+          <span class="rain-bar" aria-hidden="true"><span style="--p: ${h.rain}%"></span></span>
+          <span class="p num"><span class="visually-hidden">Rain chance </span>${h.rain}%</span>
+        </li>`).join("");
+      const toF = (c) => Math.round((c * 9) / 5 + 32);
+      radioGroup(document.getElementById("wx-units"), (option) => {
+        const imperial = option.dataset.unit === "imperial";
+        card.querySelectorAll("[data-temp]").forEach((el) => {
+          const c = Number(el.dataset.temp);
+          el.textContent = (imperial ? toF(c) : c) + "°";
+        });
+        card.querySelectorAll("[data-wind]").forEach((el) => {
+          const kmh = Number(el.dataset.wind);
+          el.textContent = imperial ? `${Math.round(kmh * 0.621)} mph` : `${kmh} km/h`;
+        });
+        card.querySelector("[data-unit-word]").textContent = imperial ? "Fahrenheit" : "Celsius";
+      });
+    })();
+
+    // v10: checklist count and progress follow the real checkboxes, announced politely (CMP-31, FBK-06)
+    (function () {
+      const boxes = [...document.querySelectorAll("#check-items input")];
+      const count = document.getElementById("check-count");
+      const bar = document.getElementById("task-progress");
+      const update = () => {
+        const done = boxes.filter((b) => b.checked).length;
+        count.textContent = `${done} of ${boxes.length} done`;
+        bar.value = done;
+        bar.textContent = `${done} of ${boxes.length}`;
+      };
+      boxes.forEach((b) => b.addEventListener("change", update));
+      update();
+    })();
+
+    // v11: player state lives on the play button; seek bar, times and labels follow it (CMP-30)
+    (function () {
+      const seek = document.getElementById("seek");
+      const play = document.getElementById("play");
+      const speedBtn = document.getElementById("speed");
+      const save = document.getElementById("save");
+      const elapsed = document.getElementById("elapsed");
+      const chapter = document.getElementById("chapter");
+      const chapters = [[0, "Intro"], [214, "Why slow networks matter"], [630, "Offline-first forms"], [1290, "Optimistic saves"], [1985, "Testing on throttled links"], [2610, "Listener questions"]];
+      const speeds = [1, 1.25, 1.5, 2];
+      let speed = 0, timer = null;
+      const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+      const spoken = (s) => `${Math.floor(s / 60)} minutes ${Math.floor(s % 60)} seconds`;
+      function render() {
+        const t = Number(seek.value), max = Number(seek.max);
+        seek.style.setProperty("--p", (t / max) * 100 + "%");
+        seek.setAttribute("aria-valuetext", `${spoken(t)} of ${spoken(max)}`);
+        elapsed.textContent = clock(t);
+        const idx = chapters.findLastIndex(([start]) => start <= t);
+        chapter.textContent = `Chapter ${idx + 1} of ${chapters.length}: ${chapters[idx][1]}`;
+      }
+      function setPlaying(on) {
+        play.dataset.state = on ? "playing" : "paused";
+        play.setAttribute("aria-label", on ? "Pause" : "Play");
+        clearInterval(timer);
+        // Example only: replace with your audio element's currentTime and timeupdate events.
+        if (on) timer = setInterval(() => {
+          seek.value = Math.min(Number(seek.max), Number(seek.value) + speeds[speed]);
+          if (Number(seek.value) >= Number(seek.max)) setPlaying(false);
+          render();
+        }, 1000);
+      }
+      play.addEventListener("click", () => setPlaying(play.dataset.state !== "playing"));
+      document.getElementById("back").addEventListener("click", () => { seek.value = Number(seek.value) - 15; render(); });
+      document.getElementById("fwd").addEventListener("click", () => { seek.value = Number(seek.value) + 30; render(); });
+      speedBtn.addEventListener("click", () => {
+        speed = (speed + 1) % speeds.length;
+        speedBtn.textContent = speeds[speed] + "×";
+        speedBtn.setAttribute("aria-label", `Playback speed ${speeds[speed]}×`);
+      });
+      save.addEventListener("click", () => save.setAttribute("aria-pressed", save.getAttribute("aria-pressed") !== "true"));
+      seek.addEventListener("input", render);
+      render();
+    })();
+
+    // v12: stat cards from raw values; direction and verdict follow whether lower is better (CMP-17, ENG-07)
+    (function () {
+      const stats = [
+        { label: "Checkout conversion", value: 3.8, benchmark: 2.9, max: 5, lowerIsBetter: false,
+          note: "Top 22% of similar stores: about 1 extra order per 110 visits." },
+        { label: "Refund rate", value: 4.6, benchmark: 3.1, max: 5, lowerIsBetter: true,
+          note: "Higher than 81% of similar stores. Lower is better." },
+      ];
+      document.getElementById("bench-row").innerHTML = stats.map((s, i) => {
+        const gap = s.value - s.benchmark;
+        const good = s.lowerIsBetter ? gap < 0 : gap > 0;
+        return `
+          <article class="card bench" aria-labelledby="bench-${i}">
+            <header class="bench-head"><h3 id="bench-${i}">${s.label}</h3><span>Oct 1 to 24</span></header>
+            <p class="bench-value">${one.format(s.value)}<small>%</small></p>
+            <span class="delta ${good ? "delta-good" : "delta-bad"}"><svg aria-hidden="true"><use href="#i-${gap > 0 ? "up" : "down"}"/></svg>${gap > 0 ? "+" : "−"}${one.format(Math.abs(gap))} pts <span>vs benchmark</span></span>
+            <ul class="bars">
+              <li class="bar-row"><span>Your store</span><span class="bar-track" aria-hidden="true"><span style="--w: ${(s.value / s.max) * 100}%"></span></span><strong class="num">${one.format(s.value)}%</strong></li>
+              <li class="bar-row is-bench"><span>Benchmark</span><span class="bar-track" aria-hidden="true"><span style="--w: ${(s.benchmark / s.max) * 100}%"></span></span><strong class="num">${one.format(s.benchmark)}%</strong></li>
+            </ul>
+            <div class="bar-scale num" aria-hidden="true"><span></span><span><span>0%</span><span>${s.max}%</span></span><span></span></div>
+            <p class="bench-note">${s.note}</p>
+          </article>`;
+      }).join("");
+    })();
+  </script>
+</body>
+</html>

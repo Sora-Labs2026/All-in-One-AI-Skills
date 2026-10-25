@@ -1,0 +1,916 @@
+<!doctype html>
+<!-- ProductCraft example: tables. Original Sora Labs example, MIT License.
+     Demonstrates: CMP-19, CMP-16, CMP-10, CMP-23, SCR-02, TYP-09, TYP-04, COL-07, FRM-05, FRM-06, FRM-10, FRM-11,
+     FRM-27, FBK-01, FBK-03, ENG-01, ENG-06, ENG-07, ENG-10, LAY-09, LAY-15, DRK-03, DRK-09, ICO-04, COP-01,
+     MOB-01, MOB-05 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Data tables</title>
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="gallery.css">
+  <style>
+    /* Page accent: a calm blue, checked for AA on every surface it touches (CMP-26) */
+    :root { --accent: #2563eb; --accent-hover: #1d4ed8; --accent-soft: #eff6ff; --accent-ink: #1d4ed8; --on-accent: #ffffff; --focus: #2563eb; --field-border: #8a909c; }
+    [data-theme="dark"] { --accent: #60a5fa; --accent-hover: #93c5fd; --accent-soft: rgba(96, 165, 250, 0.14); --accent-ink: #93c5fd; --on-accent: #0f1115; --focus: #93c5fd; --field-border: #6b7280; }
+    [hidden] { display: none !important; }
+
+    .sheet-header h1 { margin-top: var(--space-2); }
+    .tbl-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .tbl-grid > .variant { grid-column: span 3; }
+    .tbl-grid > .variant.full { grid-column: 1 / -1; }
+    .tbl-grid > .variant.wide { grid-column: span 4; }
+    .tbl-grid > .variant.narrow { grid-column: span 2; }
+    .variant > .variant-stage { flex: 1 0 auto; padding: var(--space-5); grid-template-columns: minmax(0, 1fr); }
+    .variant-stage.top { align-items: start; }
+
+    .i { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    .btn .i { width: 18px; height: 18px; }
+    .btn-sm { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+    .icon-btn.sm { width: 36px; height: 36px; }
+    .icon-btn.sm .i { width: 18px; height: 18px; }
+
+    /* Shared table card and table base (CMP-19, TYP-09) */
+    .tcard { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; color: var(--text); }
+    .tbar { display: flex; align-items: center; gap: var(--space-4); min-height: 64px; padding: var(--space-3) var(--space-5); }
+    .tbar h3 { font-size: var(--text-md); }
+    .tbar .subtle { margin-top: 2px; }
+    .tbar .grow { flex: 1; min-width: 0; }
+    .dt { width: 100%; border-collapse: separate; border-spacing: 0; font-size: var(--text-sm); }
+    .dt > thead > tr > th { height: 40px; padding: 0 var(--space-4); text-align: left; white-space: nowrap; font-size: var(--text-xs); font-weight: 600; color: var(--text-2); background: var(--surface-2); border-block: 1px solid var(--border); }
+    .dt > tbody > tr > td { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); vertical-align: middle; white-space: nowrap; }
+    .dt > tbody > tr:last-child > td { border-bottom: 0; }
+    .dt .r { text-align: right; }
+    .dt .amt { font-weight: 600; }
+    .who { display: flex; align-items: center; gap: var(--space-3); }
+    .who b { display: block; font-weight: 600; }
+    .who small, .sub { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .avatar.sm { width: 28px; height: 28px; font-size: 11px; }
+    .late { color: var(--danger); font-weight: 600; }
+    .tfoot-bar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) var(--space-5); border-top: 1px solid var(--border); background: var(--surface-2); font-size: var(--text-sm); color: var(--text-2); }
+    .tfoot-bar b { color: var(--text); }
+
+    /* v1 sortable header buttons and a sticky header inside the scroll area (CMP-19) */
+    .t1-stats { display: flex; gap: var(--space-6); margin: 0; }
+    .t1-stats dt { font-size: var(--text-xs); color: var(--text-3); }
+    .t1-stats dd { margin: 0; font-size: var(--text-lg); font-weight: 700; }
+    .t1-stats dd small { margin-left: var(--space-1); font-size: var(--text-xs); font-weight: 600; }
+    .t1-scroll { max-height: 352px; overflow: auto; overscroll-behavior: contain; }
+    .t1 thead th { position: sticky; top: 0; z-index: 1; }
+    .t1 > tbody > tr > td { height: 60px; }
+    .t1 .inv { font-weight: 600; color: var(--text); }
+    .sort { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; margin: 0 calc(-1 * var(--space-2)); padding: 0 var(--space-2); border: 0; border-radius: 6px; background: transparent; color: inherit; font-size: inherit; font-weight: 600; cursor: pointer; }
+    .sort:hover { background: var(--border); color: var(--text); }
+    .r .sort { flex-direction: row-reverse; }
+    .sort-ic { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .sort-ic path { opacity: 0.45; }
+    th[aria-sort] { color: var(--text); }
+    th[aria-sort] .sort-ic { color: var(--accent-ink); }
+    th[aria-sort="ascending"] .sort-ic .up, th[aria-sort="descending"] .sort-ic .down { opacity: 1; }
+    th[aria-sort="ascending"] .sort-ic .down, th[aria-sort="descending"] .sort-ic .up { opacity: 0; }
+
+    /* v2 selection: the whole row changes, the checkbox stays as the non-color cue (CMP-16) */
+    .t2 .check { width: 48px; padding-right: 0; }
+    .t2 > tbody > tr > td { padding-block: 10px; }
+    .hit { display: inline-grid; place-items: center; width: 36px; height: 36px; margin: -8px; border-radius: 6px; cursor: pointer; }
+    .hit:hover { background: var(--surface-2); }
+    .hit input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); cursor: pointer; }
+    .t2 tbody tr:has(input:checked) td { background: var(--accent-soft); }
+    .t2 tbody tr:has(input:checked) td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+    .t2 tbody tr:has(input:checked) .hit:hover { background: transparent; }
+    [data-selecting="true"] #t2-default, [data-selecting="false"] #t2-bulk { display: none; }
+    .bulk { display: flex; align-items: center; gap: var(--space-2); min-height: 64px; padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5); background: var(--accent-soft); }
+    .bulk .count { flex: 1; font-size: var(--text-sm); font-weight: 600; color: var(--accent-ink); }
+    .bulk .btn { background: var(--surface); }
+    .btn-danger-ghost { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
+    .btn-danger-ghost:hover { background: var(--danger-soft) !important; }
+    .bulk .icon-btn { color: var(--accent-ink); }
+    .bulk .icon-btn:hover { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent-ink); }
+    .role { color: var(--text-2); }
+
+    /* v3 inline edit: boxed inputs, reserved helper slots, error under the field (FRM-10, FRM-11) */
+    .t3 > tbody > tr > td { height: 58px; padding-block: 10px; }
+    .prod { display: flex; align-items: center; gap: var(--space-3); }
+    .prod b { display: block; font-weight: 600; }
+    .thumb { display: grid; place-items: center; width: 36px; height: 36px; flex: none; border-radius: var(--radius-sm); background: radial-gradient(110% 90% at 50% 15%, #ffffff 0, #e7eaee 80%); }
+    .thumb svg { width: 22px; height: 22px; }
+    .t3 tr.editing td { background: var(--surface-2); vertical-align: top; padding-top: var(--space-3); border-bottom: 0; }
+    .t3 tr.editing .prod { min-height: 40px; }
+    .field-wrap { display: inline-flex; align-items: center; width: 104px; height: 40px; border: 1px solid var(--field-border); border-radius: var(--radius-sm); background: var(--surface); }
+    .field-wrap:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent); }
+    .field-wrap .pre { padding-left: 10px; color: var(--text-3); font-size: var(--text-sm); }
+    .field-wrap input { width: 100%; min-width: 0; height: 100%; padding: 0 10px 0 4px; border: 0; background: transparent; text-align: right; font-size: var(--text-md); font-variant-numeric: tabular-nums; }
+    .field-wrap input:focus { outline: none; }
+    .field-wrap.short { width: 84px; }
+    .field-wrap.short input { padding-left: 10px; }
+    .field-wrap:has([aria-invalid="true"]) { border-color: var(--danger); background: var(--danger-soft); }
+    .helper { display: flex; align-items: center; justify-content: flex-end; gap: 4px; min-height: 20px; margin-top: 4px; font-size: var(--text-xs); color: var(--text-3); white-space: nowrap; }
+    .helper.err { color: var(--danger); font-weight: 600; }
+    .helper .i { width: 14px; height: 14px; }
+    .t3 tr.edit-actions td { padding: 0 var(--space-4) var(--space-3); background: var(--surface-2); }
+    .edit-strip { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); }
+    .edit-strip .hint { flex: 1; font-size: var(--text-xs); color: var(--text-3); }
+    kbd { display: inline-block; min-width: 20px; padding: 0 5px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 4px; background: var(--surface); font: 600 11px/16px var(--font); color: var(--text-2); text-align: center; }
+    .saved-note { display: inline-flex; align-items: center; gap: 4px; color: var(--success); font-size: var(--text-xs); font-weight: 600; }
+    .saved-note .i { width: 14px; height: 14px; }
+
+    /* v4 dark: lighter surfaces for elevation, hairlines, one bright primary (DRK-03, DRK-09) */
+    .t4 { --row-open: #1c2029; }
+    .t4 .mono, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+    .t4 .run b { display: block; font-weight: 600; }
+    #t4 > tbody > tr:not(.detail) > td { height: 60px; }
+    .t4 .x { width: 52px; padding-right: 0; }
+    .exp .i { transition: transform var(--dur-fast) var(--ease-out); }
+    .exp[aria-expanded="true"] .i { transform: rotate(90deg); }
+    .t4 tr.open td { background: var(--row-open); border-bottom-color: transparent; }
+    .t4 tr.detail > td { padding: 0 var(--space-5) var(--space-5) 68px; background: var(--row-open); }
+    .detail-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; gap: var(--space-4); }
+    .panel { padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); }
+    .panel h4 { margin: 0 0 var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .steps { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    .steps th { padding: 0 0 var(--space-2); text-align: left; font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .steps td { padding: var(--space-2) 0; border-top: 1px solid var(--border); }
+    .steps .r { text-align: right; }
+    .step-dot { display: inline-block; width: 8px; height: 8px; margin-right: var(--space-2); border-radius: 50%; background: var(--text-3); }
+    .step-dot.ok { background: var(--success); }
+    .step-dot.bad { background: var(--danger); }
+    .step-dot.run { background: var(--accent); }
+    .steps tfoot td { font-weight: 600; }
+    .fail-head { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; color: var(--danger); }
+    .fail-head .i { width: 18px; height: 18px; }
+    .fail-list { margin: var(--space-3) 0; padding: 0; list-style: none; display: grid; gap: var(--space-2); }
+    .fail-list li { padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); font-size: var(--text-sm); }
+    .fail-list li span { display: block; margin-top: 2px; color: var(--text-3); }
+    .panel .foot { margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--border); font-size: var(--text-xs); color: var(--text-3); }
+    .panel-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .panel p { font-size: var(--text-sm); color: var(--text-2); }
+
+    /* v5 density and column visibility on one root (ENG-06) */
+    .t5-tools { display: flex; align-items: center; gap: var(--space-3); }
+    .seg { display: inline-flex; padding: var(--space-1); gap: 2px; margin: 0; border: 0; border-radius: var(--radius-sm); background: var(--surface-2); }
+    .seg legend { float: left; margin-right: var(--space-2); }
+    .seg label { position: relative; display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 var(--space-3); border-radius: 6px; color: var(--text-2); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .seg label .i { width: 16px; height: 16px; }
+    .seg input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .seg label:has(input:checked) { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+    .seg label:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .tool-label { font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .menu-wrap { position: relative; }
+    .count-chip { padding: 0 6px; border-radius: var(--radius-pill); background: var(--surface-2); color: var(--text-2); font-size: var(--text-xs); line-height: 20px; }
+    .colmenu { position: absolute; top: calc(100% + 6px); right: 0; z-index: 3; width: 232px; padding: var(--space-1); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); box-shadow: var(--shadow-lg); }
+    .colmenu .m-label { padding: var(--space-2) var(--space-3) var(--space-1); font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .colmenu [role="menuitemcheckbox"], .colmenu [role="menuitem"] { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 34px; padding: 0 var(--space-3); border: 0; border-radius: 6px; background: transparent; color: var(--text); font-size: var(--text-sm); text-align: left; cursor: pointer; }
+    .colmenu [role^="menuitem"]:hover, .colmenu [role^="menuitem"]:focus-visible { background: var(--surface-2); }
+    .colmenu [role^="menuitem"]:focus-visible { outline-offset: -2px; }
+    .box { display: grid; place-items: center; width: 18px; height: 18px; flex: none; border: 1.5px solid var(--field-border); border-radius: 5px; color: transparent; }
+    .box .i { width: 14px; height: 14px; stroke-width: 2.5; }
+    [aria-checked="true"] > .box { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+    [aria-disabled="true"] > .box { opacity: 0.55; }
+    .colmenu [aria-disabled="true"] { cursor: default; }
+    .colmenu .fixed { margin-left: auto; font-size: var(--text-xs); color: var(--text-3); }
+    .colmenu hr { margin: var(--space-1) 0; border: 0; border-top: 1px solid var(--border); }
+    .colmenu .reset { color: var(--accent-ink); font-weight: 600; }
+    .t5[data-density="comfortable"] > tbody > tr > td { height: 56px; }
+    .t5[data-density="compact"] > thead > tr > th { height: 34px; }
+    .t5[data-density="compact"] > tbody > tr > td { height: 38px; padding-block: 0; }
+    .t5[data-density="compact"] .avatar { width: 22px; height: 22px; font-size: 10px; }
+    .t5[data-density="compact"] .pill { line-height: 18px; }
+    .t5[data-hidden~="plan"] [data-col="plan"], .t5[data-hidden~="seats"] [data-col="seats"], .t5[data-hidden~="contact"] [data-col="contact"],
+    .t5[data-hidden~="owner"] [data-col="owner"], .t5[data-hidden~="arr"] [data-col="arr"], .t5[data-hidden~="renewal"] [data-col="renewal"],
+    .t5[data-hidden~="health"] [data-col="health"] { display: none; }
+    .t5 .acct { font-weight: 600; }
+
+    /* v6 phone: each row becomes a card with labeled values (LAY-15) */
+    .t6 .phone { height: 568px; color: var(--text); }
+    .m-bar { display: flex; align-items: center; justify-content: space-between; padding: var(--space-1) var(--space-2); }
+    .m-bar h3 { font-size: var(--text-lg); }
+    .m-bar .icon-btn { width: 44px; height: 44px; color: var(--text); }
+    .m-sum { margin: var(--space-1) var(--space-4) 0; }
+    .m-sum p { font-size: var(--text-sm); color: var(--text-2); }
+    .m-sum strong { display: block; font-size: 28px; line-height: 1.2; letter-spacing: -0.01em; }
+    .m-sum .late { font-size: var(--text-sm); }
+    .chips { display: flex; gap: var(--space-2); margin: var(--space-3) 0 0; padding: 0 var(--space-4); border: 0; overflow-x: auto; scrollbar-width: none; }
+    .chip { position: relative; flex: none; }
+    .chip input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+    .chip span { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-pill); background: var(--surface); font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .chip span b { font-weight: 600; color: var(--text-3); }
+    .chip input:checked + span { border-color: var(--text); background: var(--text); color: var(--surface); }
+    .chip input:checked + span b { color: #c9ced6; }
+    .chip input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .m-list { flex: 1; margin: var(--space-3) 0 0; padding: 0 var(--space-4) var(--space-4); list-style: none; display: grid; align-content: start; gap: var(--space-3); overflow: auto; }
+    .inv-card { display: block; padding: var(--space-3) var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); color: var(--text); }
+    .inv-card:hover { text-decoration: none; border-color: var(--field-border); }
+    .inv-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+    .inv-top b { font-size: var(--text-md); }
+    .inv-card .name { display: block; margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); }
+    .inv-card dl { display: grid; grid-template-columns: 1fr 1.25fr 1.2fr; gap: var(--space-2); margin: var(--space-2) 0 0; padding-top: var(--space-2); border-top: 1px solid var(--border); }
+    .inv-card dt { font-size: var(--text-xs); color: var(--text-3); }
+    .inv-card dd { margin: 0; font-size: var(--text-sm); font-weight: 600; }
+    .inv-card dd small { display: block; font-size: var(--text-xs); font-weight: 600; }
+    .inv-card dl div:last-child { text-align: right; }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
+    <symbol id="i-chev-right" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+    <symbol id="i-chev-left" viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></symbol>
+    <symbol id="i-chev-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12"/><path d="M9 7V4h6v3"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-columns" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 4v16"/></symbol>
+    <symbol id="i-rows-loose" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-rows-tight" viewBox="0 0 24 24"><path d="M4 5h16M4 9.5h16M4 14h16M4 18.5h16"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></symbol>
+    <symbol id="i-retry" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/></symbol>
+    <!-- Product silhouettes for thumbnails -->
+    <symbol id="p-bottle" viewBox="0 0 24 24"><rect x="9.5" y="2" width="5" height="3.5" rx="1" fill="#2b2f36"/><rect x="7" y="6" width="10" height="16" rx="3.5" style="fill: var(--c, #5e7d55)"/></symbol>
+    <symbol id="p-tote" viewBox="0 0 24 24"><path d="M9 9V7a3 3 0 0 1 6 0v2" fill="none" stroke="#6b5a3e" stroke-width="1.6"/><rect x="5" y="9" width="14" height="12" rx="2" style="fill: var(--c, #d8c7a4)"/></symbol>
+    <symbol id="p-mug" viewBox="0 0 24 24"><path d="M16 10h1.5a2.5 2.5 0 0 1 0 5H16" fill="none" stroke="#7a3323" stroke-width="1.8"/><rect x="5" y="7" width="11" height="13" rx="2.5" style="fill: var(--c, #c8553d)"/></symbol>
+    <symbol id="p-shell" viewBox="0 0 24 24"><path d="M9 3h6l5 4-2 4-2-1v11H8V10l-2 1-2-4z" style="fill: var(--c, #8fb8d9)"/></symbol>
+    <symbol id="p-beanie" viewBox="0 0 24 24"><path d="M5 16a7 7 0 0 1 14 0z" style="fill: var(--c, #4b5563)"/><rect x="4" y="15.5" width="16" height="4.5" rx="1.5" fill="#2b2f36"/><circle cx="12" cy="7.5" r="2" fill="#2b2f36"/></symbol>
+  </svg>
+
+  <main class="sheet">
+    <header class="sheet-header">
+      <div>
+        <span class="sheet-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="6"/><path d="M7 10h10M7 14h10M11 10v8"/></svg>ProductCraft · Example screens</span>
+        <h1>Data tables</h1>
+        <p>Six table patterns built for triage: sorting, selection, inline edits, expandable detail, density and columns, and a phone fallback. Numbers right-aligned and tabular, every status a word.</p>
+      </div>
+      <p class="subtle">6 versions · light and dark</p>
+    </header>
+
+    <div class="variants tbl-grid">
+      <!-- v1: sortable table, aria-sort, sticky header -->
+      <section class="variant full" aria-labelledby="v1-title">
+        <h2 class="variant-label" id="v1-title"><span class="v">v1</span> Sortable invoices with a sticky header</h2>
+        <div class="variant-stage">
+          <div class="tcard" aria-labelledby="t1-title">
+            <div class="tbar">
+              <div class="grow">
+                <h3 id="t1-title">Invoices · Sora Pay</h3>
+                <p class="subtle" id="t1-status" role="status">October 2026 · sorted by due date, earliest first</p>
+              </div>
+              <dl class="t1-stats">
+                <div><dt>Outstanding</dt><dd class="num">$6,533.50</dd></div>
+                <div><dt>Overdue</dt><dd class="num late">$1,035.50<small>2 invoices</small></dd></div>
+              </dl>
+              <button class="btn btn-primary" type="button"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>New invoice</button>
+            </div>
+            <div class="t1-scroll" tabindex="0" role="region" aria-labelledby="t1-title">
+              <table class="dt t1" id="t1">
+                <caption class="visually-hidden">Invoices for October 2026. Column headers with buttons can be sorted.</caption>
+                <thead>
+                  <tr>
+                    <th scope="col" data-type="number" data-asc="lowest number first" data-desc="highest number first"><button class="sort" type="button">Invoice<svg class="sort-ic" viewBox="0 0 24 24" aria-hidden="true"><path class="up" d="M8 10l4-4 4 4"/><path class="down" d="M8 14l4 4 4-4"/></svg></button></th>
+                    <th scope="col" data-type="text" data-asc="A to Z" data-desc="Z to A"><button class="sort" type="button">Customer<svg class="sort-ic" viewBox="0 0 24 24" aria-hidden="true"><path class="up" d="M8 10l4-4 4 4"/><path class="down" d="M8 14l4 4 4-4"/></svg></button></th>
+                    <th scope="col" data-type="text" data-asc="oldest first" data-desc="newest first"><button class="sort" type="button">Issued<svg class="sort-ic" viewBox="0 0 24 24" aria-hidden="true"><path class="up" d="M8 10l4-4 4 4"/><path class="down" d="M8 14l4 4 4-4"/></svg></button></th>
+                    <th scope="col" data-type="text" data-asc="earliest first" data-desc="latest first" aria-sort="ascending"><button class="sort" type="button">Due date<svg class="sort-ic" viewBox="0 0 24 24" aria-hidden="true"><path class="up" d="M8 10l4-4 4 4"/><path class="down" d="M8 14l4 4 4-4"/></svg></button></th>
+                    <th scope="col" data-type="number" data-asc="most urgent first" data-desc="least urgent first"><button class="sort" type="button">Status<svg class="sort-ic" viewBox="0 0 24 24" aria-hidden="true"><path class="up" d="M8 10l4-4 4 4"/><path class="down" d="M8 14l4 4 4-4"/></svg></button></th>
+                    <th scope="col" class="r" data-type="number" data-asc="smallest first" data-desc="largest first"><button class="sort" type="button">Amount<svg class="sort-ic" viewBox="0 0 24 24" aria-hidden="true"><path class="up" d="M8 10l4-4 4 4"/><path class="down" d="M8 14l4 4 4-4"/></svg></button></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td data-sort="2041"><a class="inv num" href="#">#SL-2041</a></td>
+                    <td data-sort="Priya Nair"><div class="who"><span class="avatar sm" aria-hidden="true">PN</span><div><b>Priya Nair</b><small>priya.nair@example.com</small></div></div></td>
+                    <td data-sort="2026-10-01"><time datetime="2026-10-01">Oct 1, 2026</time></td>
+                    <td data-sort="2026-10-15"><time datetime="2026-10-15">Oct 15, 2026</time><span class="sub">Paid Oct 14</span></td>
+                    <td data-sort="4"><span class="pill pill-success">Paid</span></td>
+                    <td class="r num amt" data-sort="1280">$1,280.00</td>
+                  </tr>
+                  <tr>
+                    <td data-sort="2042"><a class="inv num" href="#">#SL-2042</a></td>
+                    <td data-sort="Leo Brandt"><div class="who"><span class="avatar sm" aria-hidden="true">LB</span><div><b>Leo Brandt</b><small>leo.brandt@example.com</small></div></div></td>
+                    <td data-sort="2026-10-02"><time datetime="2026-10-02">Oct 2, 2026</time></td>
+                    <td data-sort="2026-10-16"><time datetime="2026-10-16">Oct 16, 2026</time><span class="sub late">8 days late</span></td>
+                    <td data-sort="1"><span class="pill pill-danger">Overdue</span></td>
+                    <td class="r num amt" data-sort="640">$640.00</td>
+                  </tr>
+                  <tr>
+                    <td data-sort="2044"><a class="inv num" href="#">#SL-2044</a></td>
+                    <td data-sort="Sam Okafor"><div class="who"><span class="avatar sm" aria-hidden="true">SO</span><div><b>Sam Okafor</b><small>sam.okafor@example.com</small></div></div></td>
+                    <td data-sort="2026-10-07"><time datetime="2026-10-07">Oct 7, 2026</time></td>
+                    <td data-sort="2026-10-21"><time datetime="2026-10-21">Oct 21, 2026</time><span class="sub late">3 days late</span></td>
+                    <td data-sort="1"><span class="pill pill-danger">Overdue</span></td>
+                    <td class="r num amt" data-sort="395.5">$395.50</td>
+                  </tr>
+                  <tr>
+                    <td data-sort="2045"><a class="inv num" href="#">#SL-2045</a></td>
+                    <td data-sort="Nina Park"><div class="who"><span class="avatar sm" aria-hidden="true">NP</span><div><b>Nina Park</b><small>nina.park@example.com</small></div></div></td>
+                    <td data-sort="2026-10-09"><time datetime="2026-10-09">Oct 9, 2026</time></td>
+                    <td data-sort="2026-10-23"><time datetime="2026-10-23">Oct 23, 2026</time><span class="sub">Paid Oct 20</span></td>
+                    <td data-sort="4"><span class="pill pill-success">Paid</span></td>
+                    <td class="r num amt" data-sort="3420">$3,420.00</td>
+                  </tr>
+                  <tr>
+                    <td data-sort="2043"><a class="inv num" href="#">#SL-2043</a></td>
+                    <td data-sort="Hana Kim"><div class="who"><span class="avatar sm" aria-hidden="true">HK</span><div><b>Hana Kim</b><small>hana.kim@example.com</small></div></div></td>
+                    <td data-sort="2026-10-05"><time datetime="2026-10-05">Oct 5, 2026</time></td>
+                    <td data-sort="2026-11-04"><time datetime="2026-11-04">Nov 4, 2026</time><span class="sub">In 11 days</span></td>
+                    <td data-sort="2"><span class="pill pill-accent">Open</span></td>
+                    <td class="r num amt" data-sort="2150">$2,150.00</td>
+                  </tr>
+                  <tr>
+                    <td data-sort="2046"><a class="inv num" href="#">#SL-2046</a></td>
+                    <td data-sort="Mateo Silva"><div class="who"><span class="avatar sm" aria-hidden="true">MS</span><div><b>Mateo Silva</b><small>mateo.silva@example.com</small></div></div></td>
+                    <td data-sort="2026-10-12"><time datetime="2026-10-12">Oct 12, 2026</time></td>
+                    <td data-sort="2026-11-11"><time datetime="2026-11-11">Nov 11, 2026</time><span class="sub">In 18 days</span></td>
+                    <td data-sort="2"><span class="pill pill-accent">Open</span></td>
+                    <td class="r num amt" data-sort="875.25">$875.25</td>
+                  </tr>
+                  <tr>
+                    <td data-sort="2047"><a class="inv num" href="#">#SL-2047</a></td>
+                    <td data-sort="Zara Ahmed"><div class="who"><span class="avatar sm" aria-hidden="true">ZA</span><div><b>Zara Ahmed</b><small>zara.ahmed@example.com</small></div></div></td>
+                    <td data-sort="2026-10-16"><time datetime="2026-10-16">Oct 16, 2026</time></td>
+                    <td data-sort="2026-11-15"><time datetime="2026-11-15">Nov 15, 2026</time><span class="sub">In 22 days</span></td>
+                    <td data-sort="2"><span class="pill pill-accent">Open</span></td>
+                    <td class="r num amt" data-sort="1960">$1,960.00</td>
+                  </tr>
+                  <tr>
+                    <td data-sort="2048"><a class="inv num" href="#">#SL-2048</a></td>
+                    <td data-sort="Owen Clarke"><div class="who"><span class="avatar sm" aria-hidden="true">OC</span><div><b>Owen Clarke</b><small>owen.clarke@example.com</small></div></div></td>
+                    <td data-sort="2026-10-20"><time datetime="2026-10-20">Oct 20, 2026</time></td>
+                    <td data-sort="2026-11-19"><time datetime="2026-11-19">Nov 19, 2026</time><span class="sub">In 26 days</span></td>
+                    <td data-sort="2"><span class="pill pill-accent">Open</span></td>
+                    <td class="r num amt" data-sort="512.75">$512.75</td>
+                  </tr>
+                  <tr>
+                    <td data-sort="2049"><a class="inv num" href="#">#SL-2049</a></td>
+                    <td data-sort="Jordan Reyes"><div class="who"><span class="avatar sm" aria-hidden="true">JR</span><div><b>Jordan Reyes</b><small>jordan.reyes@example.com</small></div></div></td>
+                    <td data-sort="2026-10-23"><time datetime="2026-10-23">Oct 23, 2026</time></td>
+                    <td data-sort="2026-11-22"><time datetime="2026-11-22">Nov 22, 2026</time><span class="sub">Not sent yet</span></td>
+                    <td data-sort="3"><span class="pill pill-neutral">Draft</span></td>
+                    <td class="r num amt" data-sort="1045">$1,045.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="tfoot-bar"><span><b class="num">9</b> invoices · scroll for more, the header stays in place</span><span>Total billed <b class="num">$12,278.50</b></span></div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-19</code> <code>TYP-09</code> <code>SCR-02</code> <code>COL-07</code> <code>ENG-01</code></p>
+      </section>
+
+      <!-- v2: row selection with a bulk-action bar -->
+      <section class="variant" aria-labelledby="v2-title">
+        <h2 class="variant-label" id="v2-title"><span class="v">v2</span> Row selection with a bulk-action bar</h2>
+        <div class="variant-stage">
+          <div class="tcard" id="t2-root" data-selecting="true">
+            <div class="tbar" id="t2-default">
+              <div class="grow"><h3>Members</h3><p class="subtle">5 people · 3 active</p></div>
+              <button class="btn btn-secondary btn-sm" type="button"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>Invite</button>
+            </div>
+            <div class="bulk" id="t2-bulk" role="region" aria-label="Bulk actions">
+              <p class="count" id="t2-count" role="status"><span class="num">3</span> selected</p>
+              <button class="btn btn-secondary btn-sm" type="button"><svg class="i" aria-hidden="true"><use href="#i-user"/></svg>Change role</button>
+              <button class="btn btn-secondary btn-sm" type="button"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>Export</button>
+              <button class="btn btn-secondary btn-sm btn-danger-ghost" type="button"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>Remove</button>
+              <button class="icon-btn sm" type="button" id="t2-clear" aria-label="Clear selection" title="Clear selection"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button>
+            </div>
+            <table class="dt t2" id="t2">
+              <caption class="visually-hidden">Workspace members</caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="check"><label class="hit"><input type="checkbox" id="t2-all" aria-label="Select all members"></label></th>
+                  <th scope="col">Member</th>
+                  <th scope="col">Role</th>
+                  <th scope="col">Last active</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="check"><label class="hit"><input type="checkbox" aria-label="Select Avery Stone"></label></td>
+                  <td><div class="who"><span class="avatar sm" aria-hidden="true">AS</span><div><b>Avery Stone</b><small>avery.stone@example.com</small></div></div></td>
+                  <td class="role">Owner</td>
+                  <td><time datetime="2026-10-24T10:48">Just now</time></td>
+                  <td><span class="pill pill-success">Active</span></td>
+                </tr>
+                <tr>
+                  <td class="check"><label class="hit"><input type="checkbox" checked aria-label="Select Jordan Reyes"></label></td>
+                  <td><div class="who"><span class="avatar sm" aria-hidden="true">JR</span><div><b>Jordan Reyes</b><small>jordan.reyes@example.com</small></div></div></td>
+                  <td class="role">Admin</td>
+                  <td><time datetime="2026-10-24T08:40">2 h ago</time></td>
+                  <td><span class="pill pill-success">Active</span></td>
+                </tr>
+                <tr>
+                  <td class="check"><label class="hit"><input type="checkbox" checked aria-label="Select Priya Nair"></label></td>
+                  <td><div class="who"><span class="avatar sm" aria-hidden="true">PN</span><div><b>Priya Nair</b><small>priya.nair@example.com</small></div></div></td>
+                  <td class="role">Editor</td>
+                  <td><time datetime="2026-10-23T17:05">Yesterday</time></td>
+                  <td><span class="pill pill-success">Active</span></td>
+                </tr>
+                <tr>
+                  <td class="check"><label class="hit"><input type="checkbox" checked aria-label="Select Hana Kim"></label></td>
+                  <td><div class="who"><span class="avatar sm" aria-hidden="true">HK</span><div><b>Hana Kim</b><small>hana.kim@example.com</small></div></div></td>
+                  <td class="role">Viewer</td>
+                  <td><span class="muted">Not yet</span></td>
+                  <td><span class="pill pill-accent">Invited</span></td>
+                </tr>
+                <tr>
+                  <td class="check"><label class="hit"><input type="checkbox" aria-label="Select Owen Clarke"></label></td>
+                  <td><div class="who"><span class="avatar sm" aria-hidden="true">OC</span><div><b>Owen Clarke</b><small>owen.clarke@example.com</small></div></div></td>
+                  <td class="role">Viewer</td>
+                  <td><time datetime="2026-09-30T09:12">Sep 30</time></td>
+                  <td><span class="pill pill-warning">Suspended</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-16</code> <code>FRM-06</code> <code>ENG-06</code> <code>COP-01</code> <code>ICO-04</code> <code>SCR-02</code></p>
+      </section>
+
+      <!-- v3: inline edit with validation and save/cancel -->
+      <section class="variant" aria-labelledby="v3-title">
+        <h2 class="variant-label" id="v3-title"><span class="v">v3</span> Inline edit with validation</h2>
+        <div class="variant-stage">
+          <div class="tcard">
+            <div class="tbar">
+              <div class="grow"><h3 id="t3-title">Price list · Sora Shop</h3><p class="subtle">Each row saves on its own</p></div>
+              <p class="saved-note" id="t3-status" role="status"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Canvas tote saved</p>
+            </div>
+            <table class="dt t3" id="t3">
+              <caption class="visually-hidden">Product prices and stock. Use the edit button on a row to change its price or stock.</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Product</th>
+                  <th scope="col" class="r">Price</th>
+                  <th scope="col" class="r">Stock</th>
+                  <th scope="col" class="r"><span class="visually-hidden">Edit</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-name="Trail bottle" data-price="28" data-stock="142">
+                  <td><div class="prod"><span class="thumb" aria-hidden="true"><svg><use href="#p-bottle"/></svg></span><div><b>Trail bottle, 750 ml</b><span class="sub">Moss · TB-750-M</span></div></div></td>
+                  <td class="r num" data-cell="price">$28.00</td>
+                  <td class="r num" data-cell="stock">142</td>
+                  <td class="r"><button class="icon-btn sm" type="button" data-edit aria-label="Edit Trail bottle"><svg class="i" aria-hidden="true"><use href="#i-pencil"/></svg></button></td>
+                </tr>
+                <tr data-name="Canvas tote" data-price="36" data-stock="58">
+                  <td><div class="prod"><span class="thumb" aria-hidden="true"><svg><use href="#p-tote"/></svg></span><div><b>Canvas tote</b><span class="sub">Sand · CT-200-S</span></div></div></td>
+                  <td class="r num" data-cell="price">$36.00</td>
+                  <td class="r num" data-cell="stock">58</td>
+                  <td class="r"><button class="icon-btn sm" type="button" data-edit aria-label="Edit Canvas tote"><svg class="i" aria-hidden="true"><use href="#i-pencil"/></svg></button></td>
+                </tr>
+                <tr class="editing" data-name="Camp mug" data-price="18" data-stock="64">
+                  <td><div class="prod"><span class="thumb" aria-hidden="true"><svg><use href="#p-mug"/></svg></span><div><b>Camp mug</b><span class="sub">Rust · CM-350-R</span></div></div></td>
+                  <td class="r" data-cell="price">
+                    <span class="field-wrap"><span class="pre" aria-hidden="true">$</span><input id="t3-price" type="text" inputmode="decimal" value="19.50" aria-label="Price for Camp mug, in dollars" aria-describedby="t3-price-help"></span>
+                    <p class="helper num" id="t3-price-help">Was $18.00</p>
+                  </td>
+                  <td class="r" data-cell="stock">
+                    <span class="field-wrap short"><input id="t3-stock" type="text" inputmode="numeric" value="-4" aria-label="Stock for Camp mug" aria-invalid="true" aria-describedby="t3-stock-help"></span>
+                    <p class="helper err" id="t3-stock-help"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>Enter 0 or more</p>
+                  </td>
+                  <td class="r"></td>
+                </tr>
+                <tr class="edit-actions">
+                  <td colspan="4">
+                    <div class="edit-strip">
+                      <span class="hint"><kbd>Enter</kbd> saves · <kbd>Esc</kbd> cancels</span>
+                      <button class="btn btn-ghost btn-sm" type="button" data-cancel>Cancel</button>
+                      <button class="btn btn-primary btn-sm" type="button" data-save>Save changes</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr data-name="Rain shell" data-price="129" data-stock="0">
+                  <td><div class="prod"><span class="thumb" aria-hidden="true"><svg><use href="#p-shell"/></svg></span><div><b>Rain shell</b><span class="sub">Sky · RS-100-B</span></div></div></td>
+                  <td class="r num" data-cell="price">$129.00</td>
+                  <td class="r num" data-cell="stock">0</td>
+                  <td class="r"><button class="icon-btn sm" type="button" data-edit aria-label="Edit Rain shell"><svg class="i" aria-hidden="true"><use href="#i-pencil"/></svg></button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>FRM-11</code> <code>FRM-10</code> <code>FRM-05</code> <code>FBK-01</code> <code>FBK-03</code> <code>ICO-04</code></p>
+      </section>
+
+      <!-- v4: expandable rows with nested detail, dark theme -->
+      <section class="variant full" aria-labelledby="v4-title">
+        <h2 class="variant-label" id="v4-title"><span class="v">v4</span> Expandable rows with nested detail, dark</h2>
+        <div class="variant-stage dark">
+          <div class="tcard t4" data-theme="dark">
+            <div class="tbar">
+              <div class="grow"><h3>Deployments · Sora Cloud</h3><p class="subtle">Today, Sat Oct 24 · 4 runs so far</p></div>
+              <p class="subtle num">Success rate this week <b style="color: var(--text)">92%</b> · 46 of 50 runs</p>
+            </div>
+            <table class="dt" id="t4">
+              <caption class="visually-hidden">Latest deployment runs. Expand a row to see its steps.</caption>
+              <thead>
+                <tr>
+                  <th scope="col" class="x"><span class="visually-hidden">Details</span></th>
+                  <th scope="col">Run</th>
+                  <th scope="col">Service</th>
+                  <th scope="col">Branch</th>
+                  <th scope="col">Triggered by</th>
+                  <th scope="col">Started</th>
+                  <th scope="col" class="r">Duration</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-run="419">
+                  <td class="x"><button class="icon-btn sm exp" type="button" aria-expanded="false" aria-controls="run-419" aria-label="Show steps for run 419"><svg class="i" aria-hidden="true"><use href="#i-chev-right"/></svg></button></td>
+                  <td class="run"><b>Run 419</b><span class="sub">Batch reindex writes</span></td>
+                  <td>search-indexer</td>
+                  <td><span class="mono">release/2.8</span><span class="sub mono">3be44f0</span></td>
+                  <td>Leo Brandt</td>
+                  <td><time datetime="2026-10-24T10:51">10:51 AM</time></td>
+                  <td class="r num">1m 40s<span class="sub">so far</span></td>
+                  <td><span class="pill pill-accent">Running</span></td>
+                </tr>
+                <tr data-run="418">
+                  <td class="x"><button class="icon-btn sm exp" type="button" aria-expanded="false" aria-controls="run-418" aria-label="Show steps for run 418"><svg class="i" aria-hidden="true"><use href="#i-chev-right"/></svg></button></td>
+                  <td class="run"><b>Run 418</b><span class="sub">Retry card captures on timeout</span></td>
+                  <td>checkout-api</td>
+                  <td><span class="mono">main</span><span class="sub mono">a91f3c2</span></td>
+                  <td>Priya Nair</td>
+                  <td><time datetime="2026-10-24T10:42">10:42 AM</time></td>
+                  <td class="r num">4m 18s</td>
+                  <td><span class="pill pill-danger">Failed</span></td>
+                </tr>
+                <tr data-run="417">
+                  <td class="x"><button class="icon-btn sm exp" type="button" aria-expanded="false" aria-controls="run-417" aria-label="Show steps for run 417"><svg class="i" aria-hidden="true"><use href="#i-chev-right"/></svg></button></td>
+                  <td class="run"><b>Run 417</b><span class="sub">Move size guide into product tabs</span></td>
+                  <td>web-storefront</td>
+                  <td><span class="mono">main</span><span class="sub mono">7c0e1d9</span></td>
+                  <td>Hana Kim</td>
+                  <td><time datetime="2026-10-24T10:05">10:05 AM</time></td>
+                  <td class="r num">6m 02s</td>
+                  <td><span class="pill pill-success">Live</span></td>
+                </tr>
+                <tr data-run="416">
+                  <td class="x"><button class="icon-btn sm exp" type="button" aria-expanded="false" aria-controls="run-416" aria-label="Show steps for run 416"><svg class="i" aria-hidden="true"><use href="#i-chev-right"/></svg></button></td>
+                  <td class="run"><b>Run 416</b><span class="sub">Add idempotency keys to refunds</span></td>
+                  <td>checkout-api</td>
+                  <td><span class="mono">main</span><span class="sub mono">e12d8a7</span></td>
+                  <td>Priya Nair</td>
+                  <td><time datetime="2026-10-24T09:12">9:12 AM</time></td>
+                  <td class="r num">3m 51s</td>
+                  <td><span class="pill pill-warning">Rolled back</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>CMP-19</code> <code>LAY-09</code> <code>ENG-07</code> <code>DRK-03</code> <code>DRK-09</code> <code>ICO-04</code> <code>SCR-02</code></p>
+      </section>
+
+      <!-- v5: density toggle and column visibility menu -->
+      <section class="variant wide" aria-labelledby="v5-title">
+        <h2 class="variant-label" id="v5-title"><span class="v">v5</span> Density toggle and column menu</h2>
+        <div class="variant-stage">
+          <div class="tcard">
+            <div class="tbar">
+              <div class="grow"><h3 id="t5-title">Accounts · Sora CRM</h3><p class="subtle num">12 accounts · $90,576 ARR</p></div>
+              <div class="t5-tools">
+                <fieldset class="seg" id="t5-density">
+                  <legend class="visually-hidden">Row density</legend>
+                  <label><input type="radio" name="t5-density" value="comfortable"><svg class="i" aria-hidden="true"><use href="#i-rows-loose"/></svg>Comfortable</label>
+                  <label><input type="radio" name="t5-density" value="compact" checked><svg class="i" aria-hidden="true"><use href="#i-rows-tight"/></svg>Compact</label>
+                </fieldset>
+                <div class="menu-wrap">
+                  <button class="btn btn-secondary btn-sm" type="button" id="t5-colbtn" aria-haspopup="menu" aria-expanded="true" aria-controls="t5-menu"><svg class="i" aria-hidden="true"><use href="#i-columns"/></svg>Columns <span class="count-chip num" id="t5-colcount">5 of 8</span></button>
+                  <!-- Open on load for the preview; the button toggles it -->
+                  <div class="colmenu" id="t5-menu" role="menu" aria-labelledby="t5-colbtn">
+                    <p class="m-label" aria-hidden="true">Show columns</p>
+                    <button type="button" role="menuitemcheckbox" aria-checked="true" aria-disabled="true" tabindex="-1"><span class="box"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span>Account<span class="fixed">Always on</span></button>
+                    <button type="button" role="menuitemcheckbox" aria-checked="true" data-col="owner" tabindex="-1"><span class="box"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span>Owner</button>
+                    <button type="button" role="menuitemcheckbox" aria-checked="false" data-col="plan" tabindex="-1"><span class="box"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span>Plan</button>
+                    <button type="button" role="menuitemcheckbox" aria-checked="false" data-col="seats" tabindex="-1"><span class="box"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span>Seats</button>
+                    <button type="button" role="menuitemcheckbox" aria-checked="true" data-col="arr" tabindex="-1"><span class="box"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span>ARR</button>
+                    <button type="button" role="menuitemcheckbox" aria-checked="true" data-col="renewal" tabindex="-1"><span class="box"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span>Renewal</button>
+                    <button type="button" role="menuitemcheckbox" aria-checked="true" data-col="health" tabindex="-1"><span class="box"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span>Health</button>
+                    <button type="button" role="menuitemcheckbox" aria-checked="false" data-col="contact" tabindex="-1"><span class="box"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg></span>Last contact</button>
+                    <hr role="separator">
+                    <button type="button" role="menuitem" class="reset" id="t5-reset" tabindex="-1">Reset to default</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <table class="dt t5" id="t5" data-density="compact" data-hidden="plan seats contact">
+              <caption class="visually-hidden">Customer accounts</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Account</th>
+                  <th scope="col" data-col="owner">Owner</th>
+                  <th scope="col" data-col="plan">Plan</th>
+                  <th scope="col" class="r" data-col="seats">Seats</th>
+                  <th scope="col" class="r" data-col="arr">ARR</th>
+                  <th scope="col" data-col="renewal">Renewal</th>
+                  <th scope="col" data-col="health">Health</th>
+                  <th scope="col" data-col="contact">Last contact</th>
+                </tr>
+              </thead>
+              <tbody id="t5-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>ENG-06</code> <code>ENG-10</code> <code>CMP-10</code> <code>FRM-27</code> <code>ENG-07</code> <code>TYP-09</code></p>
+      </section>
+
+      <!-- v6: mobile fallback, rows become stacked cards with labeled values -->
+      <section class="variant narrow" aria-labelledby="v6-title">
+        <h2 class="variant-label" id="v6-title"><span class="v">v6</span> Phone: rows become cards</h2>
+        <div class="variant-stage t6">
+          <div class="phone">
+            <div class="phone-status"><span>9:41</span><span class="icons" aria-hidden="true"><span></span><span></span></span></div>
+            <div class="phone-body">
+              <div class="m-bar">
+                <button class="icon-btn" type="button" aria-label="Back"><svg class="i" aria-hidden="true"><use href="#i-chev-left"/></svg></button>
+                <h3>Invoices</h3>
+                <button class="icon-btn" type="button" aria-label="Search invoices"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></button>
+              </div>
+              <div class="m-sum">
+                <p>Unpaid in October</p>
+                <strong class="num">$6,533.50</strong>
+                <p><span class="late num">$1,035.50 overdue</span> · 2 invoices</p>
+              </div>
+              <fieldset class="chips" id="t6-filter">
+                <legend class="visually-hidden">Show invoices</legend>
+                <label class="chip"><input type="radio" name="t6" value="unpaid" checked><span>Unpaid <b class="num">6</b></span></label>
+                <label class="chip"><input type="radio" name="t6" value="paid"><span>Paid <b class="num">2</b></span></label>
+                <label class="chip"><input type="radio" name="t6" value="draft"><span>Draft <b class="num">1</b></span></label>
+                <label class="chip"><input type="radio" name="t6" value="all"><span>All <b class="num">9</b></span></label>
+              </fieldset>
+              <ul class="m-list" id="t6-list" aria-label="Invoices, sorted by due date">
+                <li data-group="paid" hidden><a class="inv-card" href="#"><span class="inv-top"><b class="num">#SL-2041</b><span class="pill pill-success">Paid</span></span><span class="name">Priya Nair</span>
+                  <dl><div><dt>Issued</dt><dd>Oct 1</dd></div><div><dt>Due</dt><dd>Oct 15<small class="muted">Paid Oct 14</small></dd></div><div><dt>Amount</dt><dd class="num">$1,280.00</dd></div></dl></a></li>
+                <li data-group="unpaid"><a class="inv-card" href="#"><span class="inv-top"><b class="num">#SL-2042</b><span class="pill pill-danger">Overdue</span></span><span class="name">Leo Brandt</span>
+                  <dl><div><dt>Issued</dt><dd>Oct 2</dd></div><div><dt>Due</dt><dd>Oct 16<small class="late">8 days late</small></dd></div><div><dt>Amount</dt><dd class="num">$640.00</dd></div></dl></a></li>
+                <li data-group="unpaid"><a class="inv-card" href="#"><span class="inv-top"><b class="num">#SL-2044</b><span class="pill pill-danger">Overdue</span></span><span class="name">Sam Okafor</span>
+                  <dl><div><dt>Issued</dt><dd>Oct 7</dd></div><div><dt>Due</dt><dd>Oct 21<small class="late">3 days late</small></dd></div><div><dt>Amount</dt><dd class="num">$395.50</dd></div></dl></a></li>
+                <li data-group="paid" hidden><a class="inv-card" href="#"><span class="inv-top"><b class="num">#SL-2045</b><span class="pill pill-success">Paid</span></span><span class="name">Nina Park</span>
+                  <dl><div><dt>Issued</dt><dd>Oct 9</dd></div><div><dt>Due</dt><dd>Oct 23<small class="muted">Paid Oct 20</small></dd></div><div><dt>Amount</dt><dd class="num">$3,420.00</dd></div></dl></a></li>
+                <li data-group="unpaid"><a class="inv-card" href="#"><span class="inv-top"><b class="num">#SL-2043</b><span class="pill pill-accent">Open</span></span><span class="name">Hana Kim</span>
+                  <dl><div><dt>Issued</dt><dd>Oct 5</dd></div><div><dt>Due</dt><dd>Nov 4<small class="muted">In 11 days</small></dd></div><div><dt>Amount</dt><dd class="num">$2,150.00</dd></div></dl></a></li>
+                <li data-group="unpaid"><a class="inv-card" href="#"><span class="inv-top"><b class="num">#SL-2046</b><span class="pill pill-accent">Open</span></span><span class="name">Mateo Silva</span>
+                  <dl><div><dt>Issued</dt><dd>Oct 12</dd></div><div><dt>Due</dt><dd>Nov 11<small class="muted">In 18 days</small></dd></div><div><dt>Amount</dt><dd class="num">$875.25</dd></div></dl></a></li>
+                <li data-group="unpaid"><a class="inv-card" href="#"><span class="inv-top"><b class="num">#SL-2047</b><span class="pill pill-accent">Open</span></span><span class="name">Zara Ahmed</span>
+                  <dl><div><dt>Issued</dt><dd>Oct 16</dd></div><div><dt>Due</dt><dd>Nov 15<small class="muted">In 22 days</small></dd></div><div><dt>Amount</dt><dd class="num">$1,960.00</dd></div></dl></a></li>
+                <li data-group="unpaid"><a class="inv-card" href="#"><span class="inv-top"><b class="num">#SL-2048</b><span class="pill pill-accent">Open</span></span><span class="name">Owen Clarke</span>
+                  <dl><div><dt>Issued</dt><dd>Oct 20</dd></div><div><dt>Due</dt><dd>Nov 19<small class="muted">In 26 days</small></dd></div><div><dt>Amount</dt><dd class="num">$512.75</dd></div></dl></a></li>
+                <li data-group="draft" hidden><a class="inv-card" href="#"><span class="inv-top"><b class="num">#SL-2049</b><span class="pill pill-neutral">Draft</span></span><span class="name">Jordan Reyes</span>
+                  <dl><div><dt>Issued</dt><dd>Oct 23</dd></div><div><dt>Due</dt><dd>Nov 22<small class="muted">Not sent yet</small></dd></div><div><dt>Amount</dt><dd class="num">$1,045.00</dd></div></dl></a></li>
+              </ul>
+            </div>
+            <div class="phone-home" aria-hidden="true"></div>
+          </div>
+        </div>
+        <p class="rule-ids">Rules: <code>LAY-15</code> <code>MOB-01</code> <code>MOB-05</code> <code>CMP-23</code> <code>TYP-04</code> <code>SCR-02</code></p>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    // CMP-19: sort rows by each cell's raw data-sort value and mirror the order in aria-sort and a status line.
+    (() => {
+      const table = document.getElementById("t1");
+      const body = table.tBodies[0];
+      const status = document.getElementById("t1-status");
+      table.querySelectorAll("th .sort").forEach((btn) => btn.addEventListener("click", () => {
+        const th = btn.closest("th");
+        const dir = th.getAttribute("aria-sort") === "ascending" ? "descending" : "ascending";
+        table.querySelectorAll("th[aria-sort]").forEach((h) => h.removeAttribute("aria-sort"));
+        th.setAttribute("aria-sort", dir);
+        const i = th.cellIndex, num = th.dataset.type === "number";
+        const rows = [...body.rows].sort((a, b) => {
+          const x = a.cells[i].dataset.sort, y = b.cells[i].dataset.sort;
+          const c = num ? x - y : x.localeCompare(y);
+          return dir === "ascending" ? c : -c;
+        });
+        body.append(...rows);
+        status.textContent = `October 2026 · sorted by ${btn.textContent.trim().toLowerCase()}, ${th.dataset[dir === "ascending" ? "asc" : "desc"]}`;
+      }));
+    })();
+
+    // CMP-16, ENG-06: one root attribute switches the toolbar to the bulk bar; the header box shows all, some or none.
+    (() => {
+      const root = document.getElementById("t2-root");
+      const all = document.getElementById("t2-all");
+      const boxes = [...document.querySelectorAll("#t2 tbody input")];
+      const count = document.getElementById("t2-count");
+      const sync = () => {
+        const n = boxes.filter((b) => b.checked).length;
+        all.checked = n === boxes.length;
+        all.indeterminate = n > 0 && n < boxes.length;
+        root.dataset.selecting = String(n > 0);
+        count.innerHTML = `<span class="num">${n}</span> selected`;
+      };
+      boxes.forEach((b) => b.addEventListener("change", sync));
+      all.addEventListener("change", () => { boxes.forEach((b) => (b.checked = all.checked)); sync(); });
+      document.getElementById("t2-clear").addEventListener("click", () => { boxes.forEach((b) => (b.checked = false)); sync(); all.focus(); });
+      sync();
+    })();
+
+    // FRM-11, FBK-01: one row edits at a time; Save validates both fields, shows the error under the field, then saves.
+    (() => {
+      const table = document.getElementById("t3");
+      const status = document.getElementById("t3-status");
+      const money = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+      const actions = table.querySelector(".edit-actions");
+      const priceCell = (v) => `<span class="field-wrap"><span class="pre" aria-hidden="true">$</span><input id="t3-price" type="text" inputmode="decimal" value="${v}" aria-describedby="t3-price-help"></span><p class="helper num" id="t3-price-help"></p>`;
+      const stockCell = (v) => `<span class="field-wrap short"><input id="t3-stock" type="text" inputmode="numeric" value="${v}" aria-describedby="t3-stock-help"></span><p class="helper" id="t3-stock-help"></p>`;
+      const icon = '<svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>';
+      const editBtn = (name) => `<button class="icon-btn sm" type="button" data-edit aria-label="Edit ${name}"><svg class="i" aria-hidden="true"><use href="#i-pencil"/></svg></button>`;
+      const close = (row) => {
+        row.classList.remove("editing");
+        row.cells[1].className = "r num"; row.cells[1].textContent = money.format(row.dataset.price);
+        row.cells[2].className = "r num"; row.cells[2].textContent = row.dataset.stock;
+        row.cells[3].innerHTML = editBtn(row.dataset.name);
+        actions.hidden = true;
+      };
+      const open = (row) => {
+        const current = table.querySelector("tr.editing");
+        if (current) close(current);
+        row.classList.add("editing");
+        row.cells[1].className = "r"; row.cells[1].innerHTML = priceCell(Number(row.dataset.price).toFixed(2));
+        row.cells[2].className = "r"; row.cells[2].innerHTML = stockCell(row.dataset.stock);
+        row.cells[3].innerHTML = "";
+        row.querySelector("#t3-price").setAttribute("aria-label", `Price for ${row.dataset.name}, in dollars`);
+        row.querySelector("#t3-stock").setAttribute("aria-label", `Stock for ${row.dataset.name}`);
+        row.querySelector("#t3-price-help").textContent = "Was " + money.format(row.dataset.price);
+        row.after(actions); actions.hidden = false;
+        row.querySelector("#t3-price").select();
+      };
+      const setError = (input, help, msg, fallback) => {
+        input.setAttribute("aria-invalid", String(!!msg));
+        help.className = msg ? "helper err" : "helper num";
+        help.innerHTML = msg ? icon + msg : fallback;
+      };
+      const save = async () => {
+        const row = table.querySelector("tr.editing");
+        const price = row.querySelector("#t3-price"), stock = row.querySelector("#t3-stock");
+        const p = price.value.trim().replace(/^\$/, ""), s = stock.value.trim();
+        const pErr = !/^\d+(\.\d{1,2})?$/.test(p) || Number(p) <= 0 ? "Enter a price like 19.50" : "";
+        const sErr = !/^-?\d+$/.test(s) ? "Use a whole number" : Number(s) < 0 ? "Enter 0 or more" : "";
+        setError(price, row.querySelector("#t3-price-help"), pErr, "Was " + money.format(row.dataset.price));
+        setError(stock, row.querySelector("#t3-stock-help"), sErr, "");
+        if (pErr || sErr) { (pErr ? price : stock).focus(); return; }
+        const btn = actions.querySelector("[data-save]");
+        btn.setAttribute("aria-disabled", "true"); btn.textContent = "Saving…";
+        // Example only: replace with a request to your API that saves the new price and stock.
+        await Promise.resolve();
+        row.dataset.price = p; row.dataset.stock = String(Number(s));
+        btn.removeAttribute("aria-disabled"); btn.textContent = "Save changes";
+        close(row);
+        status.innerHTML = `<svg class="i" aria-hidden="true"><use href="#i-check"/></svg>${row.dataset.name} saved`;
+        row.querySelector("[data-edit]").focus();
+      };
+      table.addEventListener("click", (e) => {
+        const edit = e.target.closest("[data-edit]");
+        if (edit) open(edit.closest("tr"));
+        if (e.target.closest("[data-save]")) save();
+        if (e.target.closest("[data-cancel]")) { const row = table.querySelector("tr.editing"); close(row); row.querySelector("[data-edit]").focus(); }
+      });
+      table.addEventListener("keydown", (e) => {
+        const row = e.target.closest("tr.editing");
+        if (!row || e.target.tagName !== "INPUT") return;
+        if (e.key === "Enter") { e.preventDefault(); save(); }
+        if (e.key === "Escape") { close(row); row.querySelector("[data-edit]").focus(); }
+      });
+    })();
+
+    // ENG-07, LAY-09: steps live as raw seconds and render into the detail row on first expand.
+    (() => {
+      const runs = {
+        419: { steps: [["Checkout", 4, "Passed"], ["Install", 44, "Passed"], ["Build", 52, "Running"], ["Test", null, "Waiting"], ["Deploy", null, "Waiting"]], note: "Building the image, step 3 of 5. Started 10:51 AM by Leo Brandt." },
+        418: { steps: [["Checkout", 6, "Passed"], ["Install", 42, "Passed"], ["Build", 92, "Passed"], ["Test", 118, "Failed"], ["Deploy", null, "Skipped"]],
+               failed: [["refunds.spec", "partial refund rounds to cents"], ["captures.spec", "retries after a 504 from the card network"]], tests: "2 of 214 tests failed in Test", foot: "Deploy was skipped, so production still runs Run 412 from 8:02 AM." },
+        417: { steps: [["Checkout", 5, "Passed"], ["Install", 39, "Passed"], ["Build", 130, "Passed"], ["Test", 108, "Passed"], ["Deploy", 80, "Passed"]], note: "Live on production since 10:11 AM. 3 of 3 health checks passing." },
+        416: { steps: [["Checkout", 5, "Passed"], ["Install", 41, "Passed"], ["Build", 90, "Passed"], ["Test", 75, "Passed"], ["Deploy", 20, "Passed"]], note: "Rolled back at 9:40 AM by Priya Nair after refund errors rose to 2.1%." },
+      };
+      const dur = (s) => s == null ? "—" : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+      const dot = { Passed: "ok", Failed: "bad", Running: "run" };
+      const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+      const render = (id) => {
+        const r = runs[id];
+        const total = r.steps.reduce((sum, s) => sum + (s[1] || 0), 0);
+        const rows = r.steps.map(([name, s, result]) => `<tr><td><span class="step-dot ${dot[result] || ""}" aria-hidden="true"></span>${name}</td><td>${result}</td><td class="r num">${dur(s)}</td></tr>`).join("");
+        const side = r.failed
+          ? `<div class="panel"><p class="fail-head"><svg class="i" aria-hidden="true"><use href="#i-alert"/></svg>${r.tests}</p>
+              <ul class="fail-list">${r.failed.map(([file, name]) => `<li>${esc(name)}<span class="mono">${file}</span></li>`).join("")}</ul>
+              <div class="panel-actions"><button class="btn btn-primary btn-sm" type="button"><svg class="i" aria-hidden="true"><use href="#i-retry"/></svg>Re-run failed tests</button><a class="btn btn-secondary btn-sm" href="#"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg>Open full log</a></div>
+              <p class="foot">${esc(r.foot)}</p></div>`
+          : `<div class="panel"><h4>Summary</h4><p>${esc(r.note)}</p></div>`;
+        return `<td colspan="8"><div class="detail-grid"><div class="panel"><table class="steps"><caption class="visually-hidden">Steps for run ${id}</caption>
+          <thead><tr><th scope="col">Step</th><th scope="col">Result</th><th scope="col" class="r">Time</th></tr></thead><tbody>${rows}</tbody>
+          <tfoot><tr><td>Total</td><td></td><td class="r num">${dur(total)}</td></tr></tfoot></table></div>${side}</div></td>`;
+      };
+      const toggle = (btn) => {
+        const row = btn.closest("tr"), id = row.dataset.run;
+        const open = btn.getAttribute("aria-expanded") !== "true";
+        let detail = document.getElementById("run-" + id);
+        if (!detail) { detail = document.createElement("tr"); detail.className = "detail"; detail.id = "run-" + id; detail.innerHTML = render(id); row.after(detail); }
+        detail.hidden = !open;
+        row.classList.toggle("open", open);
+        btn.setAttribute("aria-expanded", String(open));
+        btn.setAttribute("aria-label", `${open ? "Hide" : "Show"} steps for run ${id}`);
+      };
+      document.querySelectorAll("#t4 .exp").forEach((b) => b.addEventListener("click", () => toggle(b)));
+      toggle(document.querySelector('#t4 tr[data-run="418"] .exp'));
+    })();
+
+    // ENG-06, ENG-10: density and hidden columns live on the table root and persist safely in localStorage.
+    (() => {
+      const accounts = [
+        ["Maple Street Dental", "Avery Stone", "Business", 42, "2027-01-14", "Healthy", "2 days ago"],
+        ["Riverside Library", "Priya Nair", "Team", 18, "2026-11-03", "Needs attention", "12 days ago"],
+        ["Copper Kettle Bakery", "Leo Brandt", "Starter", 6, "2027-03-02", "Healthy", "Yesterday"],
+        ["Hillview Clinic", "Nina Park", "Business", 120, "2026-12-01", "At risk", "21 days ago"],
+        ["Bluebird Florist", "Sam Okafor", "Starter", 4, "2027-02-18", "Healthy", "5 days ago"],
+        ["Granite Works", "Mateo Silva", "Team", 35, "2026-11-20", "Healthy", "4 days ago"],
+        ["Seaside Yoga Studio", "Zara Ahmed", "Team", 9, "2026-12-12", "Needs attention", "9 days ago"],
+        ["Oakridge Veterinary", "Jordan Reyes", "Business", 28, "2027-04-06", "Healthy", "3 days ago"],
+        ["Northgate Tutoring", "Hana Kim", "Team", 22, "2027-01-29", "Healthy", "6 days ago"],
+        ["Lantern Coffee", "Owen Clarke", "Starter", 11, "2026-11-09", "At risk", "34 days ago"],
+        ["Summit Physio", "Avery Stone", "Business", 64, "2027-05-12", "Healthy", "Today"],
+        ["Willow Lane Books", "Priya Nair", "Starter", 3, "2026-12-30", "Needs attention", "15 days ago"],
+      ];
+      const perSeat = { Starter: 8, Team: 15, Business: 24 }; // USD per seat per month
+      const pill = { Healthy: "pill-success", "Needs attention": "pill-warning", "At risk": "pill-danger" };
+      const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+      const day = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+      const initials = (n) => n.split(" ").map((w) => w[0]).join("");
+      document.getElementById("t5-body").innerHTML = accounts.map(([name, owner, plan, seats, renew, health, contact]) => `<tr>
+        <td class="acct">${name}</td>
+        <td data-col="owner"><span class="who"><span class="avatar sm" aria-hidden="true">${initials(owner)}</span>${owner}</span></td>
+        <td data-col="plan">${plan}</td>
+        <td class="r num" data-col="seats">${seats}</td>
+        <td class="r num amt" data-col="arr">${usd.format(seats * perSeat[plan] * 12)}</td>
+        <td data-col="renewal"><time datetime="${renew}">${day.format(new Date(renew))}</time></td>
+        <td data-col="health"><span class="pill ${pill[health]}">${health}</span></td>
+        <td data-col="contact">${contact}</td></tr>`).join("");
+
+      const table = document.getElementById("t5");
+      const btn = document.getElementById("t5-colbtn");
+      const menu = document.getElementById("t5-menu");
+      const items = [...menu.querySelectorAll('[role^="menuitem"]')];
+      const checks = items.filter((i) => i.dataset.col);
+      const defaults = { density: "comfortable", hidden: "" };
+      const store = {
+        get() { try { return JSON.parse(localStorage.getItem("sora-accounts-table")) || null; } catch { return null; } },
+        set(v) { try { localStorage.setItem("sora-accounts-table", JSON.stringify(v)); } catch { /* storage blocked: keep the in-memory state */ } },
+      };
+      const apply = (state, persist) => {
+        table.dataset.density = state.density;
+        table.dataset.hidden = state.hidden;
+        document.querySelector(`input[name="t5-density"][value="${state.density}"]`).checked = true;
+        const hidden = state.hidden.split(" ").filter(Boolean);
+        checks.forEach((c) => c.setAttribute("aria-checked", String(!hidden.includes(c.dataset.col))));
+        document.getElementById("t5-colcount").textContent = `${8 - hidden.length} of 8`;
+        if (persist) store.set(state);
+      };
+      const current = () => ({ density: table.dataset.density, hidden: table.dataset.hidden });
+      const saved = store.get();
+      if (saved) apply(saved, false);
+
+      document.querySelectorAll('input[name="t5-density"]').forEach((r) => r.addEventListener("change", () => apply({ ...current(), density: r.value }, true)));
+      checks.forEach((c) => c.addEventListener("click", () => {
+        const hidden = new Set(table.dataset.hidden.split(" ").filter(Boolean));
+        hidden.has(c.dataset.col) ? hidden.delete(c.dataset.col) : hidden.add(c.dataset.col);
+        apply({ ...current(), hidden: [...hidden].join(" ") }, true);
+      }));
+      document.getElementById("t5-reset").addEventListener("click", () => apply(defaults, true));
+
+      // Menu keyboard: arrows and Home/End move, Escape and Tab close, focus returns to the button.
+      const setOpen = (open, focusFirst) => {
+        btn.setAttribute("aria-expanded", String(open));
+        menu.hidden = !open;
+        if (open && focusFirst) items[1].focus();
+      };
+      btn.addEventListener("click", () => setOpen(menu.hidden, true));
+      btn.addEventListener("keydown", (e) => { if (e.key === "ArrowDown") { e.preventDefault(); setOpen(true, true); } });
+      menu.addEventListener("keydown", (e) => {
+        const i = items.indexOf(document.activeElement);
+        const move = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key];
+        if (move !== undefined) { e.preventDefault(); items[(move + items.length) % items.length].focus(); }
+        if (e.key === "Escape") { setOpen(false); btn.focus(); }
+        if (e.key === "Tab") setOpen(false);
+      });
+      document.addEventListener("click", (e) => { if (!menu.hidden && !e.target.closest(".menu-wrap")) setOpen(false); });
+    })();
+
+    // LAY-15, CMP-23: native radios filter the phone card list; the count chip keeps the total visible.
+    (() => {
+      const list = document.getElementById("t6-list");
+      document.querySelectorAll('#t6-filter input').forEach((r) => r.addEventListener("change", () => {
+        list.querySelectorAll("li").forEach((li) => (li.hidden = r.value !== "all" && li.dataset.group !== r.value));
+        list.scrollTop = 0;
+      }));
+    })();
+  </script>
+</body>
+</html>
