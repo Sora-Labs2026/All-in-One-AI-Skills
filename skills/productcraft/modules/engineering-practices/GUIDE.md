@@ -177,6 +177,8 @@ Add these to the workflow module's report and to `../../assets/review-template.m
 - `../engineering-workflow/GUIDE.md`: tracks, planning, test-first, debugging, verification, review, parallel work and finishing a branch. It decides how to proceed; this module shapes what the result looks like.
 - `../launchguard/GUIDE.md` and `../launchguard/references/security-baseline.md`: authorization, input validation, response trimming, headers and dependency scanning are security controls; check the matching control when a contract, query or dependency changes (for example #7 lock record access, #13 parameterize queries, #17 trim API responses, #20 scan dependencies).
 - `../code-security-review/GUIDE.md`: deep, code-level review of whether a change is exploitable, including CI and supply-chain paths.
+
+- `../scientific-computing/GUIDE.md`: numerical solvers, time integration and stability, meshes, verification against exact or manufactured solutions, convergence studies, simulation campaigns, HPC jobs and scientific libraries; its `scripts/resource_check.py` reports usable cores, memory, disk and GPU signs before heavy compute, and `scripts/convergence_order.py` computes observed orders and grid convergence indices.
 - `../credential-shield/GUIDE.md`: rate limiting and abuse defense for login and account recovery; do not build a competing throttle here.
 
 - `../integrations/GUIDE.md`: the client side of third-party SaaS APIs (OAuth and scopes, provider webhooks, sandbox modes, provider rate limits, pagination and sync); the contract and resilience rules in this module still apply.

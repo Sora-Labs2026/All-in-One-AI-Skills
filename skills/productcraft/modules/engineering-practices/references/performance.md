@@ -40,6 +40,8 @@ Run these locally or in staging. Load tests and profilers against production or 
 - **Frontend field data:** the `web-vitals` library (`onLCP`, `onINP`, `onCLS`, and its attribution build for causes) reporting to your analytics endpoint, plus the Chrome UX Report for public sites.
 - **Microbenchmarks** (`pytest-benchmark`, `vitest bench`, Go `testing.B`, JMH) only for code the profile already showed is hot. They mislead easily: warm up, avoid dead-code elimination, use realistic inputs.
 
+- **Numerical, parallel and HPC code** (scaling studies, thread oversubscription, MPI and GPU profilers, Slurm job accounting, memory estimates for large arrays): `../../scientific-computing/references/hpc-and-profiling.md`.
+
 ## Backend practices
 
 - **N+1 queries.** One query for the list plus one per row. Detect by counting queries per request (ORM query logging, Django `assertNumQueries`, Rails `strict_loading`, a test helper that fails above N queries). Fix with a join, eager loading (`select_related` / `prefetch_related`, SQLAlchemy `selectinload`, Prisma `include`, ActiveRecord `includes`) or one batched query (`WHERE id = ANY($1)`). In GraphQL, batch with a DataLoader-style loader.
