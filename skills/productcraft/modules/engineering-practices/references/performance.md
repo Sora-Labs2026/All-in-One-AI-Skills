@@ -34,9 +34,13 @@ Run these locally or in staging. Load tests and profilers against production or 
 - **Load:** `k6 run load.js`, `npx autocannon -c 50 -d 30 http://localhost:3000/api/search`, `wrk -t4 -c50 -d30s <url>`. Report throughput and p50/p95/p99, not averages.
 - **CPU profiles:** Node `node --cpu-prof server.js` (open the `.cpuprofile` in browser DevTools) or `node --inspect`; Python `python -m cProfile -o out.prof app.py` and `python -m pstats out.prof`, or `py-spy record -o profile.svg -- python app.py`; Go `go test -bench . -cpuprofile cpu.out` then `go tool pprof cpu.out`; JVM async-profiler or JDK Flight Recorder. Read the flame graph from the widest frames down.
 - **Database:** PostgreSQL `EXPLAIN (ANALYZE, BUFFERS) <query>`. It executes the query, so wrap data-changing statements in `BEGIN; ... ROLLBACK;` and use a non-production copy. `pg_stat_statements` ranks queries by total time. MySQL `EXPLAIN ANALYZE` (8.0.18+) and the slow query log.
+
+- **Database plans in depth:** reading plans, designing indexes and engine-specific tuning for PostgreSQL, MySQL and SQL Server are in `../../data-engineering/references/sql-query-tuning.md`, `../../data-engineering/references/postgresql.md` and `../../data-engineering/references/mysql-and-sql-server.md`.
 - **Frontend lab:** `npx lighthouse http://localhost:3000 --output=json --output-path=./lighthouse.json`, browser DevTools Performance panel with CPU throttling (4x to 6x) to approximate mid-range phones, the bundler's analyzer or `npx source-map-explorer 'dist/assets/*.js'`.
 - **Frontend field data:** the `web-vitals` library (`onLCP`, `onINP`, `onCLS`, and its attribution build for causes) reporting to your analytics endpoint, plus the Chrome UX Report for public sites.
 - **Microbenchmarks** (`pytest-benchmark`, `vitest bench`, Go `testing.B`, JMH) only for code the profile already showed is hot. They mislead easily: warm up, avoid dead-code elimination, use realistic inputs.
+
+- **Numerical, parallel and HPC code** (scaling studies, thread oversubscription, MPI and GPU profilers, Slurm job accounting, memory estimates for large arrays): `../../scientific-computing/references/hpc-and-profiling.md`.
 
 ## Backend practices
 

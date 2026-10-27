@@ -167,6 +167,8 @@ with pd.ExcelWriter("orders.xlsx", engine="openpyxl") as xw:
 ## CSV
 
 - CSV has no types, formulas, formatting or sheets. Agree on delimiter, encoding (UTF-8; add a BOM with `encoding="utf-8-sig"` if the recipient opens it in Excel and has non-ASCII text) and date format.
+
+- Profile a CSV you receive before converting or loading it: `python3 <productcraft>/modules/data-engineering/scripts/csv_profile.py file.csv` reports encoding, delimiter, column types, leading zeros, ambiguous dates and formula-like values without printing cell values.
 - Excel interprets values on open (long numbers to scientific notation, `1-2` to a date, leading zeros dropped). If the recipient will open it in Excel and the data has such values, deliver `.xlsx` with text-typed columns instead.
 - Values starting with `=`, `+`, `-` or `@` can run as formulas when opened in a spreadsheet (CSV injection, CWE-1236). When exporting user-supplied data, prefix such cells with an apostrophe or deliver `.xlsx` with string-typed cells.
 

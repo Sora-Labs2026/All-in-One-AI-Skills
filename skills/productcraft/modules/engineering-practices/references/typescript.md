@@ -4,6 +4,9 @@ Read this when you write or review TypeScript, change `tsconfig.json`, model dom
 
 Types are only as trustworthy as their weakest boundary. The goal is that a value with a given type really has that shape at runtime, and that impossible states cannot be expressed.
 
+
+Framework-specific typing (React props and events, Vue `defineProps` and JSDoc-typed JavaScript, Angular signal inputs, NestJS DTOs and injected classes) is in the matching file under `../../stacks/references/`.
+
 ## Compiler configuration
 
 - `"strict": true` is the baseline. It enables `strictNullChecks`, `noImplicitAny`, `strictFunctionTypes`, `strictBindCallApply`, `strictPropertyInitialization`, `noImplicitThis`, `useUnknownInCatchVariables` and `alwaysStrict`.

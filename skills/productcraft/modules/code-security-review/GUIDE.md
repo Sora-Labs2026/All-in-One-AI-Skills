@@ -24,6 +24,8 @@
 - CI workflows react to issues, comments or pull requests from outsiders, or run an AI agent; dependencies, their publishers or their install-time code need review; a security patch (yours, a pull request's or an AI-generated one) needs validation before it is called fixed.
 - LaunchGuard needs deeper evidence for gate 4 (critical logic) or gate 5 (attacker perspective).
 - The code needs domain knowledge: C or C++, Rust with `unsafe` or FFI, code that implements or wires cryptography, smart contracts, a mobile app or the backend rules it relies on (Firebase, Supabase), or the user wants detection rules for suspicious files (YARA, detection only). Phase 3 names the matching guide.
+
+- A reachability question needs active testing of a running target (authorized content discovery or input fuzzing against a staging system), or the evidence is a captured HTTP session (a HAR file or proxy export) to analyze. These are [dynamic web testing](references/dynamic-web-testing.md) and [traffic captures](references/traffic-captures.md); the first needs written, scoped authorization before any request.
 - **Not for** routine feature work (use the scoped baseline check from the router), styling, or a question a short answer covers.
 
 ## Pick the depth first
@@ -128,6 +130,8 @@ Add `--json-out <path>` to keep results (written with mode 0600). `workflows`, `
 
 `scripts/firebase_rules.py --root .` reads Cloud Firestore, Cloud Storage and Realtime Database rules files offline (found through `firebase.json` or their usual names) and lists leads: rules with no effective condition, rules that only require a signed-in user, test-mode rules that stay open until a date, and creates or updates that never inspect the incoming data. It never contacts Firebase and never prints rule conditions. `--json`, `--json-out` and `--fail-on high|medium|low` work as above. Confirm each lead with the emulator tests in [mobile apps](references/mobile-apps.md#firebase-and-other-direct-to-client-backends).
 
+`scripts/har_summary.py capture.har` summarizes a captured HTTP session (a HAR file) offline and redacted: request counts by host, method, status class and content type, and a signals block counting authorization headers, cookies, `Set-Cookie` responses, bodies and secret-looking URL parameters by name. It never reads header values, cookie values, bodies or query-string values into its output, never touches the network and never modifies the file. `--verbose` lists each request with the query stripped and token-shaped path segments redacted; `--strict` exits 1 when a secret-looking parameter rides in a URL; `--json` emits the summary. Its signals are leads to confirm in the source, per [traffic captures](references/traffic-captures.md).
+
 ## References
 
 - [Audit phases](references/audit-phases.md): scope, inventory, hunting method, proof and refutation, severity, large codebases, diff reviews.
@@ -142,6 +146,9 @@ Add `--json-out <path>` to keep results (written with mode 0600). `workflows`, `
 - [Supply-chain review](references/supply-chain-review.md): install-time code, lockfile signals, dependency risk cards, update review, compromise response, release integrity.
 - [CI and agent workflows](references/ci-agent-workflows.md): events outsiders control, paths into scripts and agents, what an injected job reaches, safer designs, safe testing.
 - [Patch validation](references/patch-validation.md): base-versus-patched evidence, reach markers, root-cause variants, revert checks, extra checks for patches you did not write.
+
+- [Dynamic web testing](references/dynamic-web-testing.md): authorized-only content discovery and input fuzzing against a staging target, with written scope, rate limits and triage from tool hit to confirmed finding. Read only when active testing is explicitly in scope.
+- [Traffic captures](references/traffic-captures.md): analyzing a HAR file or proxy session export as sensitive input, with redaction of credentials and personal data, and the `har_summary.py` summarizer.
 - [Vulnerability classes](references/vulnerability-classes.md), [AI-generated code bugs](references/ai-generated-code-bugs.md), [language pitfalls](references/language-pitfalls.md): what to hunt for and how each class is confirmed.
 - Domain guides, read only for matching code: [C and C++](references/c-and-cpp.md) (memory-safety classes, sanitizers, hardened builds and how to check them in a binary), [Rust](references/rust.md) (`unsafe` soundness, FFI, panics, integer behavior, async), [cryptographic implementation](references/crypto-implementation.md) (constructions, timing side channels, wiping secrets, randomness), [smart contracts](references/smart-contracts.md) (invariants, token integration, upgrades, Foundry fuzz and invariant tests, other chains), [mobile apps](references/mobile-apps.md) (APK and IPA review, hardcoded keys, Firebase and other backend rules, deep links) and [YARA rules](references/yara-rules.md) (defensive detection rules and how to test them).
 

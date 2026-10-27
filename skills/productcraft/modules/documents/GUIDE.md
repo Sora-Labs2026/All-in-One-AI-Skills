@@ -10,6 +10,8 @@ It is not a writing guide (the content comes from the user and the task), not a 
 
 - A task's input or deliverable is a `.docx`, `.xlsx`, `.xlsm`, `.csv` meant for a spreadsheet, `.pptx` or `.pdf` file, or a legacy `.doc`, `.xls` or `.ppt`.
 - The user wants text, tables or data pulled out of such a file, a form filled, files merged or split, a format converted, or a template filled in.
+
+- Documents must become Markdown or plain text for a language model, a search index or a retrieval pipeline. Read "Documents to Markdown" in `references/convert-and-render.md`.
 - An application feature generates or parses office files or PDFs (exports, invoices, reports, imports). Use the references for library behavior; build the feature with the project's normal workflow and tests.
 - The deliverable is an animated GIF or a short looping clip: a demo for a README or release note, a chat emoji or reaction, an animation drawn in code, a trimmed screen recording. Read `references/animated-media.md`.
 - Do **not** activate for Markdown or HTML documentation in the repository, or for charts and dashboards rendered in the app.
@@ -114,12 +116,16 @@ Report: output paths; what the file contains; which checks ran (re-open, inspect
 - Exported CSV or spreadsheet data built from user input: guard against formula injection as described in `references/excel-xlsx.md`.
 - Packaging a document workflow as a reusable skill or an MCP tool: `../builder-tools/GUIDE.md`.
 
+- The content of papers, theses, proposals, talks and posters, verified citations and `.bib` files, researched articles and internal updates: `../research-writing/GUIDE.md`. This module builds and checks the files; that one covers what goes in them.
+
+- A theme or brand applied across decks, documents, sheets and charts; reveal.js talks; posters, infographics and EPUB ebooks; video made with code; image enhancement; filing invoices and receipts: `../creative-media/GUIDE.md`.
+
 ## References
 
 - `references/word-docx.md`: create, read in body order, replace text across runs, comments, tracked changes, checks.
 - `references/excel-xlsx.md`: formulas versus cached values, create, LibreOffice recalculation, error scan, safe edits, pandas, CSV.
 - `references/powerpoint-pptx.md`: templates and 16:9, create, extract, template edits, reorder and delete slides, design checks.
 - `references/pdf.md`: inspect, extract, merge and split, encrypt, forms, reportlab generation and fonts, overlays.
-- `references/convert-and-render.md`: LibreOffice headless, pandoc, page rendering, contact sheets, fidelity limits.
+- `references/convert-and-render.md`: LibreOffice headless, pandoc, documents to Markdown (pandoc, MarkItDown, Docling, OCR first; licenses, security and quality checks), page rendering, contact sheets, fidelity limits.
 - `references/animated-media.md`: GIF or video, frame rate, palette and loop settings, frames drawn with Pillow, ffmpeg palette conversion, making files smaller, read-back and a flash-rate check, accessibility (flash limits, pausing, reduced motion, alt text), privacy in screen recordings.
 - `scripts/ooxml_inspect.py`: read-only pre-delivery inspection of `.docx`, `.xlsx` and `.pptx`; `--json` and `--fail-on attention` for automation. Tests: `python3 -m unittest discover -s <productcraft>/modules/documents/tests -v`.

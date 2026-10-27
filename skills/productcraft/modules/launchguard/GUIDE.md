@@ -90,6 +90,8 @@
 - [Safe operational boundaries](references/safe-operations.md)
 - [Standards and vendor documentation](references/standards.md)
 
+- [Cloud infrastructure: plan review, IAM and public exposure in infrastructure code](../cloud-infrastructure/GUIDE.md)
+
 ## Working with other ProductCraft modules
 
 - Delegate deep credential-stuffing/campaign-defense work to [Credential Shield](../credential-shield/GUIDE.md) instead of creating competing throttling systems. LaunchGuard checks that auth-abuse protection exists and is tested.

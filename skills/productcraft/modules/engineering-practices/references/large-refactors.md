@@ -4,6 +4,9 @@ Read this when a change restructures code across many files or modules: wide ren
 
 A refactor changes structure and keeps behavior. Every step leaves the main branch building, passing its tests and deployable. The workflow module covers characterization tests and keeping diffs small for ordinary changes (`../../engineering-workflow/GUIDE.md`); this file covers what is different at scale.
 
+
+Replacing or upgrading a whole legacy system (choosing the strategy, recovering its specification from the code, golden-master tests, shadow traffic and parallel runs, moving its data, runtime and framework upgrades) is in `../../stacks/references/legacy-modernization.md`.
+
 ## Decide whether and where it pays
 
 - Refactor code you are about to change, or code that keeps causing bugs and slow changes. Restructuring stable code nobody touches buys little.

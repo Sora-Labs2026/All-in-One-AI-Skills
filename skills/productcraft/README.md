@@ -1,8 +1,10 @@
 # ProductCraft
 
-**A Sora Labs Agent Skill** · version 1.7.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
+**A Sora Labs Agent Skill** · version 1.8.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
 
 ProductCraft is one installable skill that teaches a coding agent to build, harden and ship software that **shows the important thing first, behaves honestly, is proven by checks that actually ran, works on every device, and is secure and lawful where it matters**. It routes each task to only the modules that task needs: a bug fix reads the engineering workflow, a table change reads the table guidance, an auth change reads the auth-defense module, a destructive command triggers the agent-safety stop-check, and a launch reads the security and legal-readiness reviews.
+
+Beyond application code, it covers the work around it: language and framework guides, cloud infrastructure, databases and data engineering, machine learning and statistics, scientific computing, life sciences, research writing, creative media, third-party API integrations and blockchain development. Each is a module with its own guide, focused references and tested helper scripts, read only when a task needs it.
 
 It is a working skill for real codebases, not a theme pack, legal service or security certification. Its reference screens are code to learn from, not a component kit to paste. The agent changes your real codebase and reports what it actually tested.
 
@@ -26,7 +28,17 @@ It is a working skill for real codebases, not a theme pack, legal service or sec
 | **Agent safety** | Stop-check before destructive commands, secrets handled by name only, guided setup scripts the user runs for secrets, vetting third-party skills, plugins, MCP servers and hooks; optional command guard; isolating the agent in a devcontainer, container or VM | `modules/agent-safety/GUIDE.md` |
 | **Codebase map** | Getting oriented in unfamiliar repositories: entry points, routes, import graph, symbols, hotspots, exclusions, import chains and dependency diagrams | `modules/codebase-map/GUIDE.md` |
 | **Documents** | Word, Excel, PowerPoint and PDF: create, edit with formatting intact, extract, convert, fill forms, verified by rendering; animated GIFs and short clips with size, flash-rate and alt-text checks | `modules/documents/GUIDE.md` |
-| **Builder tools** | Authoring and evaluating Agent Skills, designing and testing MCP servers, Playwright browser tests | `modules/builder-tools/GUIDE.md` |
+| **Builder tools** | Authoring and evaluating Agent Skills, designing and testing MCP servers, Playwright browser tests, linting agent configuration, finding, importing and updating skills safely | `modules/builder-tools/GUIDE.md` |
+| **Stacks** | Language and framework guides that write code a maintainer of the stack would accept: Python, Django, FastAPI, Go, Rust, Java and Spring, Kotlin, C# and .NET, C++, PHP and Laravel, Ruby and Rails, Swift, React, Next.js, Vue and Nuxt, Angular, NestJS, React Native and Expo, Flutter, GraphQL, realtime, WordPress, Shopify, HTML email, game engines, firmware, Salesforce, CLI tools; system design and legacy modernization; a stack and version detector | `modules/stacks/GUIDE.md` |
+| **Cloud infrastructure** | Terraform and OpenTofu (style, modules and state, tests, imports, Stacks, provider development), AWS CDK and serverless AWS, Azure modules, machine images, Kubernetes and Helm, containers and registries, GPU and serverless compute, static hosting, infrastructure pipelines, cost, architecture, SLOs, incidents, monitoring and chaos engineering; plan and diff only, with a Terraform plan reviewer | `modules/cloud-infrastructure/GUIDE.md` |
+| **Data engineering** | SQL correctness and tuning, PostgreSQL, MySQL and SQL Server, safe read-only database access, pandas, Polars, DuckDB, Dask and Spark, Parquet and Zarr, exploratory analysis and data quality, charts and publication figures, geospatial and graph data, MATLAB interop, Kaggle, official statistics, filings and market-data APIs; an offline CSV profiler | `modules/data-engineering/GUIDE.md` |
+| **ML engineering** | Models and LLM features with honest evaluation: leakage-safe splits, baselines and paired comparisons, scikit-learn, SHAP, UMAP, survival analysis, forecasting and time series, graph networks, PyTorch, Lightning and Transformers, fine-tuning, reinforcement learning, statistical tests and Bayesian models, MLOps, recommenders, RAG, prompts inside products and LLM evaluation | `modules/ml-engineering/GUIDE.md` |
+| **Scientific computing** | Solvers, time integration and stability, discretization and meshes, verification and convergence studies, parameter studies with provenance, Slurm and profiling, SymPy, Astropy, quantum computing (Qiskit, Cirq, PennyLane, QuTiP), molecular dynamics, fluids, discrete-event simulation, materials and multi-objective optimization | `modules/scientific-computing/GUIDE.md` |
+| **Life sciences** | Sequences, reads and variants, genomic intervals, single-cell and bulk expression, phylogenetics and microbiome, proteins and docking, cheminformatics, mass spectrometry, metabolic models; public biological, chemical and clinical databases with their licenses; DICOM and pathology images, de-identification, physiological signals, EHR models, clinical document drafts, medical-device quality systems, lab automation and lab data platforms. Research output, never medical advice | `modules/life-sciences/GUIDE.md` |
+| **Research writing** | Literature search and systematic reviews, scholarly APIs, verified citations and BibTeX, source appraisal, hypotheses, scientific papers and reporting checklists, peer review, grants, stress tests for plans (devil's advocate, pre-mortem, red team, what-if), diagrams, posters, talks, paper pages, reports, newsletters, meeting notes, market and web research | `modules/research-writing/GUIDE.md` |
+| **Creative media** | Generative art with seeded editions, posters and canvas designs, infographics, themes and brand application, reveal.js decks, programmatic video, prompting image and video models, image enhancement, EPUB books, file and invoice organization | `modules/creative-media/GUIDE.md` |
+| **Integrations** | Third-party APIs: OAuth and scopes, token storage, webhooks with signature checks and deduplication, idempotency, rate limits, pagination, sync and contract tests; Stripe, Plaid, Supabase, Google Workspace, Jira, Confluence, Linear, Outline and membership platforms | `modules/integrations/GUIDE.md` |
+| **Blockchain development** | Move on Aptos (language, objects and tokens, tests and the Move Prover, gas, CLI, TypeScript SDK, wallets, indexer) and Solana RPC; testnet first, no keys in chat, no investment advice | `modules/blockchain-dev/GUIDE.md` |
 | **UI rules** | A rulebook of screen-level rules with IDs (spacing, type, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, screens, motion, front-end engineering, brand identity) | `modules/ui-rules.md` |
 | **Language choice** | Offers Rust for new projects, services or performance-critical components, with honest trade-offs, and remembers the answer | `modules/language-choice.md` |
 | **Lean output** | Opt-in shorter answers that never shorten safety warnings, security findings, errors or legal caveats | `modules/lean-output.md` |
@@ -66,7 +78,19 @@ The pattern library covers foundations, feedback, forms, interaction, navigation
 | Making a repository public, choosing a license, cleaning up branches and issues | Engineering practices' open-sourcing or repository-hygiene reference |
 | Word, Excel, PowerPoint or PDF files | Documents |
 | An animated GIF, a chat emoji or a short demo clip | Documents (animated media) |
-| Writing a skill, building an MCP server, Playwright tests | Builder tools |
+| Writing a skill, building an MCP server, Playwright tests, linting agent configuration, importing or updating skills | Builder tools |
+| Requirements and acceptance criteria for a new feature, handing a task to a hosted coding agent, a Markdown task board | Engineering workflow's matching reference |
+| Authorized dynamic web testing, captured HTTP traffic (HAR) | Code security review (dynamic testing, traffic captures) |
+| Code in a specific language or framework, a toolchain, system design, legacy modernization, a framework upgrade | Stacks |
+| Terraform, AWS CDK, Kubernetes, containers, cloud cost, SLOs, incidents, monitoring | Cloud infrastructure (plan and diff only) |
+| SQL and databases, dataframes and large data, exploring a dataset, analysis charts, geospatial and graph data, public economic data | Data engineering |
+| Training or evaluating models, statistics and A/B tests, ML pipelines, RAG and LLM features | ML engineering |
+| Simulations, numerical methods, HPC jobs, scientific and quantum-computing libraries | Scientific computing |
+| Genomics, single-cell, cheminformatics, biomedical databases, medical imaging, clinical documents, lab automation | Life sciences |
+| Literature reviews, citations, scientific writing, peer review, grants, stress-testing a plan, posters and talks, reports and research | Research writing |
+| Generative art, posters, infographics, themes, reveal.js, programmatic video, image prompts and enhancement, EPUB, organizing files | Creative media |
+| Stripe, Plaid, Supabase, Google Workspace, Jira, Linear and other third-party APIs, OAuth and webhooks | Integrations |
+| Move on Aptos, Solana RPC, dApps and wallets | Blockchain development |
 | A new project, service or performance-critical component with no language fixed | Language choice (asks once about Rust) |
 | A broad, ambiguous product task | Product design + interaction, then only what is relevant |
 
@@ -144,6 +168,25 @@ Use productcraft to get this repository ready to make public under Apache-2.0.
 
 Use productcraft to triage the scanner results in results.sarif and check which
 GitHub Actions workflows outsiders can trigger.
+
+Use productcraft to upgrade this Django service to the next LTS and keep CI green.
+
+Use productcraft to review this Terraform change and tell me what the plan would
+destroy before anyone applies it.
+
+Use productcraft to find out why this PostgreSQL query got slow and fix it with
+before-and-after plans.
+
+Use productcraft to compare these two models honestly and tell me whether the new
+one is really better.
+
+Use productcraft to run a differential expression analysis on these counts and
+check the design for confounding first.
+
+Use productcraft to draft the related-work section with citations you have verified.
+
+Use productcraft to add Stripe checkout with verified webhooks and idempotent
+fulfilment.
 ```
 
 ### Optional persistent project rule
@@ -236,12 +279,23 @@ LaunchGuard ships a 20-control baseline in `modules/launchguard/references/secur
 | `modules/code-security-review/scripts/supply_chain.py` | Maps which GitHub Actions workflows outsiders can trigger and where their text flows (AI agent prompts and environments, environment files, reusable-workflow and composite-action inputs, agent output in scripts); reads ten lockfile formats for install-time code, sources outside the registry, mixed registries and credentials in URLs |
 | `modules/code-security-review/scripts/sarif_triage.py` | Summarizes Semgrep, CodeQL and other SARIF with correctly resolved levels, lists results that are new against a baseline, and writes untriaged results as leads the findings validator accepts |
 | `modules/code-security-review/scripts/firebase_rules.py` | Reads Firestore, Storage and Realtime Database rules offline and flags open, test-mode, signed-in-only and unvalidated-write rules; never prints rule conditions |
+| `modules/code-security-review/scripts/har_summary.py` | Summarizes a captured HTTP session (HAR): request counts, hosts, methods, status classes and content types, plus a report of where credentials and tokens appear; never prints header, cookie, body or query values |
 | `modules/legal-ready/scripts/legal_scan.py` | Scans a project for legal-readiness signals: policy pages, consent mechanism, third-party trackers, images without alt text, pre-ticked consent, unsubscribe links, a data deletion route |
 | `modules/agent-safety/scripts/guard_command.py` | Classifies a shell command as allow, ask or deny with a reason and a safer alternative; usable as an opt-in pre-tool hook; also checks commands inside awk `system()` calls and GNU `parallel` templates |
 | `modules/agent-safety/scripts/scan_skill.py` | Read-only static scan of a third-party skill, plugin, MCP server or hook folder before installation |
 | `modules/codebase-map/scripts/map_codebase.py` | Maps a repository: entry points, routes, Python and JS/TS import graph, top-level symbols and hotspots; never opens credential files; `--exclude` leaves out tracked folders the task does not need |
 | `modules/documents/scripts/ooxml_inspect.py` | Inspects Word, Excel and PowerPoint files for tracked changes, comments, hidden content, leftover placeholders, uncalculated formulas and off-slide shapes |
 | `modules/builder-tools/scripts/lint_skill.py` | Lints an Agent Skill folder: frontmatter limits, broken file references, oversized files without contents lists, stray caches |
+| `modules/stacks/scripts/detect_stack.py` | Detects stacks, version pins, package managers, lockfiles and the project's own build, test, lint and format commands from manifests, task runners and CI files; never opens credential files |
+| `modules/cloud-infrastructure/scripts/plan_review.py` | Reviews Terraform or OpenTofu plan JSON: deletes and replacements of data stores, protection switched off, IAM changes and wildcard grants, inbound access from anywhere, public data, imports and moves; never prints attribute values |
+| `modules/data-engineering/scripts/csv_profile.py` | Offline profile of a CSV or TSV file: encoding and delimiter, types, nulls, distinct counts, numeric summaries, keys and suspicious values; prints no cell values unless asked |
+| `modules/ml-engineering/scripts/split_check.py`, `compare_scores.py`, `rank_metrics.py` | Leakage across dataset splits; paired model comparison (corrected resampled t-test, bootstrap, McNemar, Holm and Benjamini-Hochberg); ranking metrics |
+| `modules/scientific-computing/scripts/resource_check.py`, `convergence_order.py` | Usable cores, memory, disk and GPU signs without running other programs; observed order of convergence, Richardson extrapolation and grid convergence index |
+| `modules/life-sciences/scripts/interval_check.py`, `counts_check.py`, `bio_id_check.py`, `dicom_phi_check.py` | Interval files and coordinate conversion; count matrices and sample sheets before differential expression; identifier shapes across 47 types; identifying data left in DICOM headers, values hidden |
+| `modules/research-writing/scripts/bib_check.py` | Offline BibTeX check: duplicate keys and DOIs, missing fields per entry type, malformed DOIs and years, unbalanced braces, cited versus defined keys |
+| `modules/creative-media/scripts/organize_plan.py` | Plans file moves by type and date, or checks a rename list, with collisions resolved; never touches files; can emit apply and undo scripts that never overwrite |
+| `modules/integrations/scripts/integration_scan.py` | Finds risky integration code: unverified or re-serialized webhooks, plain digest comparisons, payments without idempotency keys, credentials in URLs, broad scopes, server secrets in client modules |
+| `modules/blockchain-dev/scripts/move_check.py` | Finds risky Move packages and dApp repositories: tracked key files, public functions returning refs or signers, exposed randomness, moving-branch dependencies |
 | `assets/review-template.md` | Template for the agent's change report |
 
 Every script uses the Python 3 standard library only, is read-only toward the project it inspects and never touches the network.
@@ -263,7 +317,7 @@ python3 -m unittest discover -s tests -v
 for t in modules/*/tests; do python3 -m unittest discover -s "$t" -v; done
 ```
 
-The suites hold 342 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
+The suites hold 754 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
 
 ## Package layout
 
@@ -294,7 +348,17 @@ productcraft/
 │   ├── agent-safety/            # stop-check, secrets, guided setup, isolation, extension vetting, command guard, scanner
 │   ├── codebase-map/            # repository mapper and how to use it
 │   ├── documents/               # Word, Excel, PowerPoint, PDF and animated media guides, OOXML inspector
-│   └── builder-tools/           # Agent Skills, MCP servers, Playwright; skill linter
+│   ├── builder-tools/           # Agent Skills, MCP servers, Playwright, agent config; skill linter
+│   ├── stacks/                  # language and framework guides; stack detector
+│   ├── cloud-infrastructure/    # IaC and cloud, plan and diff only; plan reviewer
+│   ├── data-engineering/        # SQL, dataframes, EDA, charts, public data; CSV profiler
+│   ├── ml-engineering/          # evaluation, ML, statistics, LLM apps; split and score checks
+│   ├── scientific-computing/    # numerical methods, HPC, scientific libraries; resource and convergence checks
+│   ├── life-sciences/           # bio and chem analysis, databases, clinical, lab; interval, counts, ID, DICOM checks
+│   ├── research-writing/        # literature, citations, papers, reviews, talks; BibTeX checker
+│   ├── creative-media/          # art, posters, video, images, EPUB, file organization; move planner
+│   ├── integrations/            # third-party APIs, OAuth, webhooks; integration scanner
+│   └── blockchain-dev/          # Move on Aptos and Solana; Move checker
 ├── examples/                    # reference screens: HTML pages, tokens.css, gallery.css, README index
 ├── references/
 │   ├── ui-rules/                # UI rulebook, one file per category

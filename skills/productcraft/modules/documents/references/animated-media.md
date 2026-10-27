@@ -23,7 +23,7 @@ Platform limits change, so check the target's current help page and say which li
 ## Plan the clip
 
 Settle these before drawing or recording:
-- **Length:** 1 to 3 seconds for an emoji or reaction, 4 to 15 seconds for a demo. Anything longer belongs in a video with controls.
+- **Length:** 1 to 3 seconds for an emoji or reaction, 4 to 15 seconds for a demo. Anything longer belongs in a video with controls; for longer video built from code, see `../../creative-media/references/remotion-video.md`.
 - **Frame rate:** 10 to 20 fps for drawn motion and emoji; 15 to 25 fps for screen recordings with scrolling or a moving cursor.
 - **Size:** render at the size it will be displayed (twice that for sharp high-density screens, if the file budget allows). H.264 needs even width and height.
 - **Content:** one idea per clip. For an emoji, one bold shape that reads at 24 px: thick strokes, strong contrast, no small text. For a demo, the real product at a readable zoom, one task from start to result.

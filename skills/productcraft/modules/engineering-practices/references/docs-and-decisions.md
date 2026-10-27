@@ -55,6 +55,8 @@ A README lets a newcomer run, test and change the project without asking anyone.
 - Comment **why**, not what: the constraint, the invariant, the unit, the non-obvious consequence, the link to the issue or ADR. The code already says what it does.
 - Document hazards where they bite: "must run before the first render", "amount is in minor units", "the provider sends this webhook twice".
 - Public functions and types get API documentation in the language's convention (JSDoc or TSDoc, Python docstrings, Rustdoc, Godoc): purpose, parameters, return value, errors raised, and a short example for non-trivial APIs.
+
+- Generate reference documentation and run its examples with the tool the project already uses (Sphinx or MkDocs with doctests, Go `Example` tests, rustdoc doctests, Javadoc or Dokka, .NET XML documentation, DocC, YARD); `../../stacks/GUIDE.md` lists the toolchain per stack.
 - Delete commented-out code; version control keeps history.
 - A `TODO` carries an owner or issue reference; otherwise do the work now or file the issue.
 
@@ -104,6 +106,8 @@ When a project has domain terms that are easy to confuse (customer, account, use
 - Runbooks for alerts and operational tasks live next to the code; their minimum content is in `observability.md`.
 - Keep diagrams as text (for example Mermaid) next to the documents that use them, so they are reviewed and updated with the code. Draw the level the reader needs: system context, deployable parts, or internals of one part, not all at once.
 
+- Choosing the diagram type, Mermaid syntax and its pitfalls, accessible titles and descriptions, and rendering checks are in `../../research-writing/references/diagrams-and-mermaid.md`.
+
 ## Design docs, specs and proposals written with the user
 
 For a longer document the user will circulate (a design doc, spec, RFC or proposal):
@@ -113,6 +117,9 @@ For a longer document the user will circulate (a design doc, spec, RFC or propos
 3. **Draft one section at a time,** starting with the one that carries the decision or the most uncertainty. List what it must say, draft it, and let the user correct it before moving on. Mark unknowns `[[OPEN: ...]]` instead of filling them with plausible guesses.
 4. **Test it on a cold reader.** Give only the document to a fresh helper (or ask the user to send it to a colleague) together with the questions its readers will ask. Every question answered wrongly or not at all marks a gap. Check that each number and claim has a source.
 5. **Final pass:** one term per concept (see "Domain vocabulary"), no sections that repeat or contradict each other, a summary at the top that matches the body, and every `[[OPEN]]` either resolved or listed at the end.
+
+
+Documents outside engineering (articles, newsletters, status updates, research papers, grant proposals) use the same gather, outline, section-by-section and cold-reader method; `../../research-writing/GUIDE.md` adds source verification, citations and the formats for those documents.
 
 ## Writing style
 

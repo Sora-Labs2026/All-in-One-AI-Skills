@@ -171,6 +171,9 @@ aws rds create-db-snapshot --db-instance-identifier app-dev --db-snapshot-identi
 
 Scope deletions to one named resource. Suggest the platform's own guards where they are missing: Terraform `lifecycle { prevent_destroy = true }`, database deletion protection, S3 versioning.
 
+
+Before asking about a Terraform or OpenTofu apply or destroy, run `python3 <productcraft>/modules/cloud-infrastructure/scripts/plan_review.py plan.json` on the JSON plan (`terraform show -json tfplan > plan.json`) and include its deletions, replacements and IAM findings in the confirmation. The full plan-and-diff workflow is in `../../cloud-infrastructure/GUIDE.md`.
+
 ## 9. Publishing and deploying
 
 | Recognize | Guard rules |

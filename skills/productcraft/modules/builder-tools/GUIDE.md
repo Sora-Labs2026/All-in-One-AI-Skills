@@ -16,6 +16,9 @@ This module covers how to build and verify these three artifacts. Security revie
 
 Do **not** activate for a single prompt or instruction line (put it in the project's agent instructions file), for API clients that are not MCP servers, or for unit tests that need no browser.
 
+
+Prompts, tool schemas and structured outputs inside an application's own LLM features, retrieval pipelines and their evaluation sets belong to `../ml-engineering/GUIDE.md` (`../ml-engineering/references/prompt-design.md`, `../ml-engineering/references/rag-systems.md`, `../ml-engineering/references/llm-evaluation.md`).
+
 ## Ground rules
 
 1. **Read what exists first.** Existing skills, server code, test config, package scripts and CI. Extend the project's conventions instead of adding a parallel setup.
@@ -34,6 +37,9 @@ Do **not** activate for a single prompt or instruction line (put it in the proje
 | Design MCP tools, schemas, errors, auth | `references/mcp-server-design.md` | review checklist at its end |
 | Implement and test an MCP server | `references/mcp-server-build-and-test.md` | unit tests through an in-process client; Inspector |
 | Browser tests, screenshots, console errors | `references/playwright-web-testing.md` | `npx playwright test` or a standalone check |
+
+| Lint agent configuration (instruction files, hooks, MCP, plugins) | `references/agent-config-linting.md` | correctness pass here; safety verdict via `../agent-safety/GUIDE.md` |
+| Find, import or update a skill safely | `references/skill-housekeeping.md` | fetch without running; vet with `../agent-safety/`; `scripts/lint_skill.py` |
 
 ## Track 1: Skill
 
@@ -119,4 +125,7 @@ For any track, report: files created or changed; commands run and their results 
 - `references/mcp-server-design.md`: surface, naming, granularity, schemas, outputs, errors, pagination, annotations, auth and secrets, transports, checklist.
 - `references/mcp-server-build-and-test.md`: SDK versions, layout, a complete Python server, TypeScript shape, in-process tests, Inspector, agent evaluation.
 - `references/playwright-web-testing.md`: server lifecycle, selectors, waiting, screenshots, error fixture, failure simulation, signed-in state, flakiness, Python.
+
+- `references/agent-config-linting.md`: checking agent instruction files (`CLAUDE.md`, `AGENTS.md`), hooks, MCP declarations and plugin manifests for correctness, with the safety checks handed to agent safety; how it relates to `lint_skill.py` and `scan_skill.py`.
+- `references/skill-housekeeping.md`: finding a skill before building one, importing a third-party skill safely (fetch, pull complete, vet, pin), and updating one as a reviewed diff against the trusted version without overwriting good files with partial downloads.
 - `scripts/lint_skill.py`: read-only skill linter. Tests: `python3 -m unittest discover -s <productcraft>/modules/builder-tools/tests -v`.

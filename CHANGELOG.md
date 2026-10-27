@@ -1,5 +1,26 @@
 # Changelog
 
+## ProductCraft 1.8.0 (2026-10-27)
+
+- Ten new modules, each with a `GUIDE.md`, focused references and tested standard-library helpers, reached through the router only when a task needs them:
+  - **Stacks:** guides for Python, Django, FastAPI, Go, Rust, Java and Spring, Kotlin, C# and .NET, C++, PHP and Laravel, Ruby and Rails, Swift, React, Next.js, Vue and Nuxt, Angular, NestJS, React Native and Expo, Flutter, GraphQL, realtime, WordPress, Shopify, HTML email, game engines, firmware, Salesforce and CLI tools, plus system design and legacy modernization. `detect_stack.py` reports stacks, versions and the project's own commands.
+  - **Cloud infrastructure:** Terraform and OpenTofu, AWS CDK and serverless AWS, Azure modules, machine images, Kubernetes, containers, GPU and static hosting, pipelines, cost, architecture, SRE, monitoring and chaos engineering, under a plan-and-diff-only rule. `plan_review.py` reviews plan JSON.
+  - **Data engineering:** SQL tuning, PostgreSQL, MySQL and SQL Server, safe database access, pandas, Polars, DuckDB, Dask and Spark, storage formats, EDA, charts and publication figures, geospatial and graph data, MATLAB interop, Kaggle and public statistics, filings and market data. `csv_profile.py` profiles delimited files offline.
+  - **ML engineering:** leakage-safe evaluation, classical and deep learning, explainability, forecasting and time series, graph networks, fine-tuning, reinforcement learning, statistical inference and Bayesian models, MLOps, recommenders, RAG, prompts inside products and LLM evaluation. `split_check.py`, `compare_scores.py` and `rank_metrics.py`.
+  - **Scientific computing:** solvers, time integration and stability, meshes, verification and convergence studies, parameter studies, Slurm and profiling, and scientific and quantum-computing libraries. `resource_check.py` and `convergence_order.py`.
+  - **Life sciences:** sequences, variants, intervals, single-cell and bulk expression, phylogenetics, proteins, cheminformatics, mass spectrometry and metabolic models; public biological, chemical and clinical databases with their license terms; medical imaging, de-identification, physiological signals, EHR models, clinical document drafts, medical-device quality systems, lab automation and lab data platforms. `interval_check.py`, `counts_check.py`, `bio_id_check.py` and `dicom_phi_check.py`.
+  - **Research writing:** literature search and systematic reviews, scholarly APIs, verified citations, appraisal, hypotheses, scientific papers and reporting checklists, peer review, grants, plan stress tests, diagrams, posters, talks, paper pages and everyday writing. `bib_check.py` checks BibTeX.
+  - **Creative media:** generative art, posters, infographics, themes, reveal.js, programmatic video, prompting generation models with likeness and labeling rules, image enhancement, EPUB and file and invoice organization. `organize_plan.py` plans moves without touching files.
+  - **Integrations:** OAuth and tokens, webhooks, reliability and contract tests, with Stripe, Plaid, Supabase, Google Workspace, Jira, Confluence, Linear, Outline and membership platforms. `integration_scan.py` finds risky integration code.
+  - **Blockchain development:** Move on Aptos (language, objects and tokens, tests and the Move Prover, gas, CLI, SDK and wallets, indexer) and Solana RPC. `move_check.py` finds risky packages and key files.
+- Engineering workflow: requirements workshops with acceptance criteria, complete deliverables without placeholder code, Markdown task boards, delegating tasks to hosted coding agents with outside-PR review, and grouping related test failures by root cause while debugging.
+- Engineering practices: combinatorial and pairwise test design in the advanced-testing reference.
+- Builder tools: linting agent configuration and finding, importing and updating skills safely.
+- Code security review: authorized dynamic web testing and captured HTTP traffic, with `har_summary.py`, which never prints the values it finds.
+- Codebase map: map-reduce over very large repositories with parallel helpers.
+- Documents: converting documents to Markdown.
+- The router, the package checker and CI cover all 21 guided modules; the suites hold 754 tests.
+
 ## ProductCraft 1.7.0 (2026-10-25)
 
 - Code security review:

@@ -177,8 +177,20 @@ Add these to the workflow module's report and to `../../assets/review-template.m
 - `../engineering-workflow/GUIDE.md`: tracks, planning, test-first, debugging, verification, review, parallel work and finishing a branch. It decides how to proceed; this module shapes what the result looks like.
 - `../launchguard/GUIDE.md` and `../launchguard/references/security-baseline.md`: authorization, input validation, response trimming, headers and dependency scanning are security controls; check the matching control when a contract, query or dependency changes (for example #7 lock record access, #13 parameterize queries, #17 trim API responses, #20 scan dependencies).
 - `../code-security-review/GUIDE.md`: deep, code-level review of whether a change is exploitable, including CI and supply-chain paths.
+
+- `../scientific-computing/GUIDE.md`: numerical solvers, time integration and stability, meshes, verification against exact or manufactured solutions, convergence studies, simulation campaigns, HPC jobs and scientific libraries; its `../scientific-computing/scripts/resource_check.py` reports usable cores, memory, disk and GPU signs before heavy compute, and `../scientific-computing/scripts/convergence_order.py` computes observed orders and grid convergence indices.
 - `../credential-shield/GUIDE.md`: rate limiting and abuse defense for login and account recovery; do not build a competing throttle here.
+
+- `../integrations/GUIDE.md`: the client side of third-party SaaS APIs (OAuth and scopes, provider webhooks, sandbox modes, provider rate limits, pagination and sync); the contract and resilience rules in this module still apply.
 - `../interaction-feedback.md` and `../ui-rules.md`: honest pending and error states in the interface when a backend call is slow or degraded.
 - `../language-choice.md`: a new service or performance-critical component whose language is not fixed yet.
+
+- `../stacks/GUIDE.md`: the language and framework the change is written in: versions and toolchains detected from the manifests, the ecosystem's own build, test, lint and format commands, idioms and pitfalls per stack, system design and service boundaries, and legacy modernization.
 - `../legal-ready/GUIDE.md`: asset licenses and other legal questions around a public release; the license choice stays with the owner.
+
+- `../data-engineering/GUIDE.md`: writing and tuning SQL with plans and indexes, PostgreSQL, MySQL and SQL Server operations, read-only access to real databases, dataframes and larger-than-memory data, exploratory analysis and data-quality checks, analysis charts and external data APIs. This module keeps schema changes and migrations.
 - `../agent-safety/GUIDE.md`: the stop-check before deleting branches or worktrees during cleanup.
+
+- `../ml-engineering/GUIDE.md`: model training, evaluation and comparison, ML pipelines and model registries, drift monitoring, and LLM features (RAG, prompts, evaluation suites); its `../ml-engineering/scripts/split_check.py` checks dataset splits for leakage.
+
+- `../cloud-infrastructure/GUIDE.md`: infrastructure as code, Kubernetes, containers, cloud cost and architecture, infrastructure pipelines, SLOs, incidents, monitoring stacks and chaos experiments, under a plan-and-diff-only rule.
