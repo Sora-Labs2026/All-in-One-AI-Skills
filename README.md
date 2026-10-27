@@ -10,7 +10,7 @@ Each skill in this repository is a folder of instructions, references, scripts a
 
 | Skill | Version | What it does |
 |---|---|---|
-| [**ProductCraft**](skills/productcraft/README.md) | 1.7.0 | One routed skill to build, harden and ship software: engineering workflow and practices with advanced testing and open-source readiness, UI design with a rulebook, pattern library and 165 reference screens, interaction, forms and data views, code security review with static analysis, supply-chain review and domain guides, pre-launch security and auth-abuse defense, agent safety, legal launch readiness, codebase mapping, office documents and animated GIFs, and builder tools for skills, MCP servers and Playwright tests. |
+| [**ProductCraft**](skills/productcraft/README.md) | 1.8.0 | One routed skill to build, harden and ship software, plus the data, science, research and media work around it: engineering workflow and practices with advanced testing and open-source readiness, UI design with a rulebook, pattern library and 165 reference screens, interaction, forms and data views, code security review with static analysis, supply-chain review and domain guides, pre-launch security and auth-abuse defense, agent safety, legal launch readiness, codebase mapping, office documents and animated GIFs, builder tools for skills, MCP servers and Playwright tests, language and framework guides, cloud infrastructure, data engineering, ML engineering, scientific computing, life sciences, research writing, creative media, API integrations and blockchain development. |
 
 ## ProductCraft
 
@@ -31,7 +31,17 @@ ProductCraft helps an agent build, harden and ship software that shows the impor
 - **Agent safety**: a stop-check before destructive commands, secrets handled by name only, guided setup scripts so secret values never pass through the conversation, vetting of third-party skills, plugins, MCP servers and hooks, an optional command guard, and guidance for isolating the agent in a devcontainer, container or VM
 - **Codebase map**: a read-only mapper for entry points, routes, imports and hotspots in unfamiliar repositories, with exclusions, import chains and dependency diagrams
 - **Documents**: Word, Excel, PowerPoint and PDF with open-source tools, every output verified by rendering, plus animated GIFs with size, flash-rate and alt-text checks
-- **Builder tools**: authoring and evaluating Agent Skills, designing and testing MCP servers, Playwright browser tests
+- **Builder tools**: authoring and evaluating Agent Skills, designing and testing MCP servers, Playwright browser tests, linting agent configuration and keeping skills up to date safely
+- **Stacks**: language and framework guides for back end, web, mobile, platforms, game engines, firmware and CLI tools, plus system design and legacy modernization, with a stack detector
+- **Cloud infrastructure**: Terraform, AWS CDK, Azure, Kubernetes, containers, cost, SLOs, monitoring and chaos engineering under a plan-and-diff-only rule, with a Terraform plan reviewer
+- **Data engineering**: SQL tuning and databases, dataframes and large data, exploratory analysis, charts and publication figures, geospatial, graph and public economic data, with an offline CSV profiler
+- **ML engineering**: honest model evaluation, classical and deep learning, forecasting, fine-tuning, statistics and Bayesian models, MLOps, RAG and LLM evaluation
+- **Scientific computing**: numerical methods with verification and convergence studies, HPC jobs and scientific and quantum-computing libraries
+- **Life sciences**: genomics, single-cell, cheminformatics, public biomedical databases, medical imaging, clinical document drafts, medical-device quality and lab automation, as research output and never medical advice
+- **Research writing**: literature reviews, verified citations, scientific papers, peer review, grants, plan stress tests, posters, talks and everyday writing
+- **Creative media**: generative art, posters, infographics, themes, slides, programmatic video, image prompts and enhancement, EPUB and safe file organization
+- **Integrations**: Stripe, Plaid, Supabase, Google Workspace, Jira, Linear and other APIs, with OAuth, webhooks, idempotency and rate limits done right
+- **Blockchain development**: Move on Aptos and Solana RPC, testnet first, with no keys in the chat and no investment advice
 - **UI rules**: a rulebook of screen-level rules with IDs (such as `BTN-02`) covering spacing, typography, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, common screens, motion, front-end engineering and brand identity
 - **Language choice**: for new projects, services or performance-critical components, asks once whether to use Rust and states the trade-offs (faster runtime, slower compiles, more AI tokens, no automatic page-load gain)
 - **Pattern library**: UI/UX patterns, each with a principle, an implementation rule and a guardrail

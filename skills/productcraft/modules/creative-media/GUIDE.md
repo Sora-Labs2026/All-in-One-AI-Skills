@@ -131,6 +131,7 @@ For a product launch, merge this into the inventory described in `../legal-ready
 - `../integrations/GUIDE.md` and `../agent-safety/GUIDE.md` for calling hosted generation APIs with keys handled safely.
 - `../cloud-infrastructure/GUIDE.md` before any cloud rendering resources are created.
 - `../builder-tools/references/playwright-web-testing.md` for the headless browser used to render and check pages, posters and slides.
+- `../research-writing/GUIDE.md` for the content side of research posters, talks and paper pages: venue rules, verified citations and reporting standards.
 
 ## Scripts
 

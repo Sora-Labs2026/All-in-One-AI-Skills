@@ -181,6 +181,8 @@ Look at the rendered slides for each of these:
 - Contrast and size: body text readable from the back of a room (as a rule of thumb, no smaller than about 18 pt for projected slides), text over photos legible. For color contrast use the same ratios as screens (`modules/ui-rules.md`, color and contrast category).
 - One message per slide; numbers in charts and tables match the source data.
 
+- For talks (planning to the time slot, claim titles, redrawing figures for the screen, rehearsal and backup slides) see `../../research-writing/references/slides-and-talks.md`; for posters, `../../research-writing/references/posters.md`.
+
 ## Checks before delivery
 
 1. Re-open: slide count and order, layout names, titles, notes present where expected.

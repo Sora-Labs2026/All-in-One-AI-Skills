@@ -116,6 +116,8 @@ Report: output paths; what the file contains; which checks ran (re-open, inspect
 - Exported CSV or spreadsheet data built from user input: guard against formula injection as described in `references/excel-xlsx.md`.
 - Packaging a document workflow as a reusable skill or an MCP tool: `../builder-tools/GUIDE.md`.
 
+- The content of papers, theses, proposals, talks and posters, verified citations and `.bib` files, researched articles and internal updates: `../research-writing/GUIDE.md`. This module builds and checks the files; that one covers what goes in them.
+
 - A theme or brand applied across decks, documents, sheets and charts; reveal.js talks; posters, infographics and EPUB ebooks; video made with code; image enhancement; filing invoices and receipts: `../creative-media/GUIDE.md`.
 
 ## References

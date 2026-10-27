@@ -17,7 +17,7 @@ This module covers how to build and verify these three artifacts. Security revie
 Do **not** activate for a single prompt or instruction line (put it in the project's agent instructions file), for API clients that are not MCP servers, or for unit tests that need no browser.
 
 
-Prompts, tool schemas and structured outputs inside an application's own LLM features, retrieval pipelines and their evaluation sets belong to `../ml-engineering/GUIDE.md` (`references/prompt-design.md`, `references/rag-systems.md`, `references/llm-evaluation.md`).
+Prompts, tool schemas and structured outputs inside an application's own LLM features, retrieval pipelines and their evaluation sets belong to `../ml-engineering/GUIDE.md` (`../ml-engineering/references/prompt-design.md`, `../ml-engineering/references/rag-systems.md`, `../ml-engineering/references/llm-evaluation.md`).
 
 ## Ground rules
 
