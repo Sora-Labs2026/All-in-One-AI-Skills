@@ -16,6 +16,8 @@ Related patterns in `../references/pattern-library.md`: 9, 24, 26-28, 30, 33, 35
 ## Checkout/payment constraints
 
 - Payment gateway's certified/tokenized inputs handle PAN/CVC; application must not store raw card data. Server recomputes amounts and validates product/discount/ownership. Verify signatures, idempotency and settlement before access. A UI can show pending, never fake paid status.
+
+- The provider side of checkout (Checkout Sessions or the Payment Element, fulfillment webhooks, test mode and test cards) is in `integrations/references/payments-stripe.md`; connect-your-bank flows backed by Plaid are in `integrations/references/bank-data-plaid.md`.
 - Ethical conversion: reduce unnecessary fields, state price/recurrence and restrictions, provide a clear path to cancel. Do not hide default add-ons, insert fake urgency, or trick users into consent. Read `ethical-persuasion.md`.
 
 ## Verification

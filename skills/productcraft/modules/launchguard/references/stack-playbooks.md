@@ -45,6 +45,8 @@ Select ONLY the patterns relevant to the inspected repository; verify current ve
 - Verify each webhook's claimed `customer`, `product`, `subscription` or `order` association against trusted records before changing another user's entitlements.
 - Use one ledger/source of truth for grants/credits and transaction ids, with transactions/unique constraints to handle races. Be explicit about pending vs success and delayed/cancelled states.
 
+- Build-side detail for Stripe, membership and digital-product platforms, and provider webhooks: `../../integrations/references/payments-stripe.md`, `../../integrations/references/memberships-and-digital-products.md` and `../../integrations/references/webhooks.md`.
+
 ## AI / LLM apps
 
 - Keep provider API keys server-side. Validate user permissions before retrieval, embeddings, tools, vector search filters and backend actions.

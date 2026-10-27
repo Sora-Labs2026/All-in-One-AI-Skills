@@ -178,6 +178,8 @@ Add these to the workflow module's report and to `../../assets/review-template.m
 - `../launchguard/GUIDE.md` and `../launchguard/references/security-baseline.md`: authorization, input validation, response trimming, headers and dependency scanning are security controls; check the matching control when a contract, query or dependency changes (for example #7 lock record access, #13 parameterize queries, #17 trim API responses, #20 scan dependencies).
 - `../code-security-review/GUIDE.md`: deep, code-level review of whether a change is exploitable, including CI and supply-chain paths.
 - `../credential-shield/GUIDE.md`: rate limiting and abuse defense for login and account recovery; do not build a competing throttle here.
+
+- `../integrations/GUIDE.md`: the client side of third-party SaaS APIs (OAuth and scopes, provider webhooks, sandbox modes, provider rate limits, pagination and sync); the contract and resilience rules in this module still apply.
 - `../interaction-feedback.md` and `../ui-rules.md`: honest pending and error states in the interface when a backend call is slow or degraded.
 - `../language-choice.md`: a new service or performance-critical component whose language is not fixed yet.
 
