@@ -60,6 +60,8 @@ Each signal you add should help answer one of them. Rough split: **metrics** say
 - **Every alert is actionable and links to a runbook.** Use two severities: page (users are affected now) and ticket (fix within days). An alert that is routinely acknowledged and ignored should be fixed or deleted.
 - **Runbook minimum:** what the alert means, the first query or dashboard to check, common causes with their fix or mitigation, and who to escalate to. Keep runbooks next to the code (for example `docs/runbooks/<alert-name>.md`) and update them after every incident that used them.
 
+- Choosing SLIs and objectives with the owner, error budget policies, incident response and postmortems are in `../../cloud-infrastructure/references/sre-practice.md`. Prometheus rules, Alertmanager routing, OpenTelemetry Collector pipelines and cloud alarms are in `../../cloud-infrastructure/references/monitoring-stack.md`.
+
 ## Dashboards
 
 - One overview per service: traffic, error rate, latency percentiles, saturation, and each dependency's error rate and latency, with deploy markers.

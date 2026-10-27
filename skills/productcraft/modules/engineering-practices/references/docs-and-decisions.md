@@ -55,6 +55,8 @@ A README lets a newcomer run, test and change the project without asking anyone.
 - Comment **why**, not what: the constraint, the invariant, the unit, the non-obvious consequence, the link to the issue or ADR. The code already says what it does.
 - Document hazards where they bite: "must run before the first render", "amount is in minor units", "the provider sends this webhook twice".
 - Public functions and types get API documentation in the language's convention (JSDoc or TSDoc, Python docstrings, Rustdoc, Godoc): purpose, parameters, return value, errors raised, and a short example for non-trivial APIs.
+
+- Generate reference documentation and run its examples with the tool the project already uses (Sphinx or MkDocs with doctests, Go `Example` tests, rustdoc doctests, Javadoc or Dokka, .NET XML documentation, DocC, YARD); `../../stacks/GUIDE.md` lists the toolchain per stack.
 - Delete commented-out code; version control keeps history.
 - A `TODO` carries an owner or issue reference; otherwise do the work now or file the issue.
 

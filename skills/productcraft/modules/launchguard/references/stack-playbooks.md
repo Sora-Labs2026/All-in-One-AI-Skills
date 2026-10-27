@@ -10,6 +10,8 @@ Select ONLY the patterns relevant to the inspected repository; verify current ve
 - Guard RSC/client component boundaries, cache poisoning/sensitive caching, open redirect callback URLs, CSRF when auth uses automatically sent cookies, session cookie attributes, CSP compatible with framework and external payment scripts.
 - Avoid XSS through untrusted HTML, markdown renderers, file names, and AI-generated page content.
 
+- While writing framework code, the matching stack reference adds version-specific hooks (server and client boundaries, caching per major version, patched releases, HTML sinks): `../../stacks/references/nextjs.md`, `../../stacks/references/react.md`, `../../stacks/references/vue-nuxt.md`, `../../stacks/references/angular.md`. WordPress plugins and Shopify apps: `../../stacks/references/wordpress.md` and `../../stacks/references/shopify.md`.
+
 ## Supabase / Postgres
 
 - Browser Supabase publishable/legacy anon key is normal; secret/service-role key is server-only and bypasses RLS when used as administrative context.

@@ -6,6 +6,9 @@ Reference for the `code-security-review` module. Read only the section for the s
 
 **Separate guides:** [C and C++](c-and-cpp.md), [Rust](rust.md), [smart contracts in depth](smart-contracts.md), [mobile apps and their backends](mobile-apps.md).
 
+
+Writing idiomatic code in these stacks (toolchains, versions, framework behavior such as ORM loading and transactions) is in `../../stacks/GUIDE.md`; this file covers only the security traps.
+
 ## JavaScript and TypeScript
 
 ### Node.js and TypeScript

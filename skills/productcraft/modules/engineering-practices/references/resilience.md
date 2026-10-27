@@ -102,6 +102,8 @@ async function withRetry<T>(
 - Use a fake dependency (or a local proxy that injects faults) to return 503, hang past the timeout, reset connections and return malformed data. Assert the timeout fires, retries stop at the cap, the breaker opens and the fallback runs.
 - Run fault-injection experiments only in local, CI or staging environments, and in shared environments only with the owner's approval.
 
+- Planned chaos experiments and game days (hypothesis, blast radius, abort conditions, tools) are in `../../cloud-infrastructure/references/chaos-engineering.md`.
+
 ## Checks (done when)
 
 - [ ] Every outbound call in the change has an explicit timeout, and nested timeouts fit inside the caller's deadline.

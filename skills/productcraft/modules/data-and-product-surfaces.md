@@ -29,6 +29,8 @@ Rules that keep charts honest:
 - A logarithmic axis only when it is labeled as such and the audience reads one.
 - Large series: aggregate on the server to what the chart can show (about one point per pixel column), and draw thousands of marks on a canvas rather than as SVG elements.
 
+- Charts made in analysis code (notebooks, reports, shared HTML, papers) rather than in the product UI: `data-engineering/references/plotting.md` and `data-engineering/references/publication-figures.md`, which apply these same honesty rules.
+
 ## Scheduling/calendar
 
 7-column (or configured locale week) grids, time labels, event vertical position and height correspond to start/end, stable collision layout. Support overlap, all-day events, timezone/DST, unavailable periods, clear event tooltips and keyboard-accessible list view. For date selection, preserve cross-month ranges and consistent inclusive/exclusive semantics.

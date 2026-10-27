@@ -4,7 +4,7 @@
 
 **Purpose:** Make every code change the way a careful senior engineer would: agree on what "done" means before typing, change as little as fully solves the problem, prove the result with commands that actually ran, and leave a branch someone else can review and merge without surprises. It applies to backend, frontend, scripts, infrastructure code and tests alike. It is a way of working, not a ritual: the amount of process follows the risk of the change.
 
-This module covers *how the work is done*. For *what good code looks like* in a given area (API design, performance, observability, CI/CD, documentation, language idioms) read `../engineering-practices/GUIDE.md`. Security-sensitive changes also go through LaunchGuard; screens also go through UI Distiller.
+This module covers *how the work is done*. For *what good code looks like* in a given area (API design, performance, observability, CI/CD, documentation) read `../engineering-practices/GUIDE.md`; for the toolchain, idioms and pitfalls of a specific language or framework read `../stacks/GUIDE.md`. Security-sensitive changes also go through LaunchGuard; screens also go through UI Distiller.
 
 ## Pick a track before you start
 
@@ -125,6 +125,16 @@ python3 <productcraft>/modules/engineering-workflow/scripts/diff_scope.py --git 
 ```
 
 `<productcraft>` is the folder where the ProductCraft skill is installed. Findings are prompts to look, not verdicts; tests and review decide. `--strict` exits 1 on any WARN for use in a local pre-commit check.
+
+## Specialized references
+
+Beyond the per-phase references above, read these when the task calls for them:
+
+- `references/requirements-and-acceptance.md` — the request is a *feature* whose behavior and boundaries are not pinned down yet: run a short requirements workshop, write testable requirements and acceptance criteria, then carry them in as the done-when checks of phase 1.
+- `references/complete-deliverables.md` — before handing over files or a patch, and whenever a long response tempts you to abbreviate: deliver whole code with no elision, and split long output at clean boundaries instead of compressing it.
+- `references/markdown-task-boards.md` — the work has several independent threads at different stages, or spans sessions, and a durable board reads better than a flat checklist.
+- `references/delegating-to-coding-agents.md` — the user wants a self-contained task handed to a hosted asynchronous coding agent: scope it, point it at a branch, and review the returned diff like any outside pull request.
+
 
 ## What to report
 

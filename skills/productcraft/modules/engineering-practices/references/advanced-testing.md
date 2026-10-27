@@ -13,6 +13,8 @@ These techniques sit on top of a few readable example tests; they do not replace
 | Mutation testing | You must know whether the suite would catch a bug in critical code (authorization, billing, parsers), before a risky refactor, or when coverage is high and bugs still escape | No fast, deterministic suite exists yet | CPU minutes to hours; always scope it |
 | Differential testing | Two implementations should agree: old and new during a refactor, fast and simple, your code and a mature library, two builds or platforms | No second implementation exists and none is cheap to write | Low once inputs exist |
 | Metamorphic testing | No oracle gives the exact output (ranking, simulation, ML inference, geometry, report generators), but you know how the output must change when the input changes | An exact expected value is easy to work out by hand | Low |
+
+| Combinatorial / pairwise tests | Several independent parameters interact and the full cross-product is too large to run: feature flags, configuration matrices, input-field combinations, platform and locale grids | One or two parameters, or the parameters are not independent so most combinations are invalid | Low once the model exists |
 | Known-answer vectors | A published standard defines inputs and outputs: hashes, MACs, encodings, TOTP, Unicode, URL parsing | The domain publishes no vectors | Low |
 
 ## Property-based testing
@@ -225,6 +227,28 @@ When the exact output is unknown, test how it must change. Run the code on an in
 | ML inference and ranking | Tiny input perturbations that should not matter (case, trailing space) leave the label or top result unchanged, within an agreed rate |
 
 Generate the base inputs with a property-testing library and assert the relation as the property.
+
+## Combinatorial and pairwise testing
+
+When a feature has several independent parameters, the number of full combinations explodes (five parameters with four values each is 1,024 cases), but most defects that depend on configuration are triggered by the interaction of just two parameters. Pairwise (2-way) testing generates the smallest set of cases in which every pair of values from any two parameters appears together at least once, which usually cuts the case count by 80-90% while still catching the two-parameter interaction bugs. It complements the techniques above; it is a way to *choose* cases, not an oracle, so each generated case still needs an expected result.
+
+### Build the model
+
+1. **Name the parameters** that genuinely vary and affect behavior: inputs, flags, roles, environments, platforms. Leave out anything fixed.
+2. **Choose values by equivalence partitioning**, not every literal. `FileSize: empty, small, at-limit, over-limit` beats ten sizes. Add the boundary values that matter as their own values.
+3. **Add constraints** to exclude combinations that cannot occur or make no sense (`IF browser = Safari THEN os = macOS`). Under-constraining generates impossible cases; over-constraining drops real ones, so review what the generator produces.
+4. **Generate** with a pairwise tool (for example Microsoft's PICT, or the all-pairs support built into some property and parameterized-test frameworks) rather than hand-picking, which misses pairs and wastes cases.
+
+### Use it well
+
+- **Raise the strength only where it pays.** Move from 2-way to 3-way for a small set of parameters whose three-way interaction is known to be risky (an authorization decision that depends on role, resource state and flag together), not across the board; higher strength grows the case count fast.
+- **Keep the known edge cases.** Seed the required cases (a specific invalid combination from a past bug) so the generator always includes them, the way `@example` pins a property-test case.
+- **Give every generated case an expected result.** Determine it from the requirements or a reference implementation; a combinatorial suite with vague "should work" assertions reduces cases without checking anything (the discriminating-check rule above).
+- **Boundary values are separate.** Pairwise covers interactions between parameters, not the extremes within one; test zero, one, maximum and over-limit for each quantity in their own cases.
+- **Re-generate when parameters or constraints change.** The set is derived from the model, so regenerate rather than editing cases by hand.
+
+Pairwise reduces a configuration space to a runnable suite; property-based tests (above) cover the value space within one configuration. Large or safety-relevant features often want both: pairwise for which combinations to run, properties for what must hold in each.
+
 
 ## Known-answer vectors
 

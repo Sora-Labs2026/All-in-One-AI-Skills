@@ -157,7 +157,7 @@ The same thinking applies to modules, packages, components and classes.
 1. Update the schema with an example request and response, including at least one error, before writing the handler.
 2. Generate or derive types from the source of truth; never maintain two hand-written copies.
 3. Validate requests at runtime against the schema with the project's validator.
-4. Add or run a breaking-change check in CI if the toolchain has one (for example `oasdiff breaking`, `buf breaking`, `graphql-inspector diff`).
+4. Add or run a breaking-change check in CI if the toolchain has one (for example `oasdiff breaking`, `buf breaking`, `graphql-inspector diff`). Lint the schema the same way (Spectral or Redocly CLI for OpenAPI, `buf lint` for protobuf), and let client authors try it against a mock server generated from the schema (for example Prism) before the handler exists.
 5. For important consumers, add contract tests (consumer-driven contracts or schema-based tests) so a provider change that breaks them fails before release.
 
 ## Checks (done when)

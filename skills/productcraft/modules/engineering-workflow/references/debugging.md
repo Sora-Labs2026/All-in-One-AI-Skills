@@ -73,6 +73,19 @@ Stop editing code when three fix attempts have failed, or when each fix exposes 
 - **Fails only in CI:** compare CI and local versions, environment, caches, OS, locale and time zone, file-system case sensitivity and parallelism. Run the failing step locally in the same container image if the project provides one.
 - **Suspected regression from one specific change:** run the same reproduction at the change's base and head commits in two worktrees before blaming it, and rule out a pre-existing or merely exposed bug (`reviewing-changes.md`, step 8).
 
+## Many failing tests at once
+
+A wall of failures after a refactor, a dependency bump or a merge is not many bugs to fix one by one; it is usually a few causes with wide fallout. Triage before you edit:
+
+1. **Group the failures** by error type (import or collection error, type or signature error, assertion), by the module or file they share, and by the suspected cause. Read the first few in each group rather than the whole list.
+2. **Fix infrastructure first.** Import, collection and configuration errors stop tests from even running and often account for most of the list; clearing them usually drops the failure count sharply and reveals the real logic failures underneath.
+3. **Then signature and API changes** (a renamed symbol, a changed argument), then genuine logic failures last.
+4. **One group at a time.** Fix the highest-impact group, rerun just that group's tests (`pytest tests/path -q`, `pytest -k "pattern"`, or the equivalent from `test-first.md`), confirm it is green, then move on. Do not start the next group until the current one passes.
+5. **Rerun the whole suite at the end** to catch regressions a focused run missed.
+
+Each group still gets the root-cause treatment above: find where the bad value or state starts, fix it once in the shared code rather than patching each failing test. Never make the count fall by deleting, skipping or loosening tests you do not understand (the suspicious-change table in `test-first.md`); that hides the regression instead of fixing it.
+
+
 ## Debug log template
 
 ```text

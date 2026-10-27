@@ -91,6 +91,18 @@ git log --since=6.months --format= --name-only | grep -v '^$' | sort | uniq -c |
 - Re-run the map after adding, moving or renaming modules. It is cheap.
 - To prove a refactor did not create cycles or orphans, save `--json` before and after to a temporary folder and compare `hotspots.cycles` and the edges (recipe in the reference). Report the comparison with the tests you ran.
 
+## Very large codebases: map-reduce with helpers
+
+When a question spans a repository too large to hold in one context ("where is every endpoint that writes to the ledger, and which skip the tenant check"), do not read file after file into your own context until it degrades. Treat the codebase as external storage and work in a map-reduce shape, which pairs with the parallel-helper rules in `../engineering-workflow/references/parallel-work.md`.
+
+1. **Filter first (peek, don't load).** Use the map, `git grep -l`, and structural searches to reduce the whole tree to the handful of files that can possibly matter. Name them; do not read their bodies yet.
+2. **Map in parallel.** Give each helper one file or one small chunk and a single, identical question with a fixed output shape ("list each route in this file and whether it calls `require_tenant`, as a table"). Each helper starts clean, so your context stays free for coordination. Only you start helpers; a helper does not spawn its own.
+3. **Reduce.** Collect the helper outputs and combine them into one answer, looking for the pattern or the gap across components. A chain that crosses files (a value that enters in one and is trusted in another) is visible only at this step, so keep each helper's output structured enough to join.
+4. **Recurse on the gaps.** If the combined answer is incomplete, run a second pass on just the missing pieces rather than redoing the whole sweep.
+
+When helpers are not available, the same shape works with a script: write a standard-library Python pass that scans each file, extracts the fact you need (a regex or `ast` check) and prints one line per file, then read the script's output instead of the files. Keep no more than a few files in your own context at once. Every helper or script result is a lead to confirm in the code, the same as any map output.
+
+
 ## What the map cannot see
 
 - Imports built at runtime: computed `import()` paths, `importlib`, `__import__`, plugin entry points, dependency-injection containers, reflection and string-based routing.
@@ -127,5 +139,7 @@ Exit status is 0 on success and 2 for a bad argument, a missing root or a focus 
 
 - `../engineering-workflow/GUIDE.md`: how the change itself is planned, made and verified. The map serves its "read before you write" step and its blast-radius check.
 - `../engineering-practices/GUIDE.md` and `../engineering-practices/references/large-refactors.md`: how to stage a refactor that the map helped you plan.
+
+- `../stacks/GUIDE.md`: versions, package managers, tools and commands for each subproject (`../stacks/scripts/detect_stack.py` complements the map), and the idioms of the stack you are about to change.
 - `../launchguard/GUIDE.md`: the route and entry-point lists help LaunchGuard's inventory step (gate 0). They do not replace its authorization checks for each route.
 - `../lean-output.md`: when the user asked for brief answers, report map findings as short tables and keep the paths exact.

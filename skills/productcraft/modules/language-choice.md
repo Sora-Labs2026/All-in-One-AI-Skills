@@ -42,6 +42,8 @@ To make a site **load** faster, first apply the usual levers: smaller images in 
 
 - Keep Rust where it pays. Put the hot path in a separate service or a WebAssembly module behind a small interface, and keep the UI in the project's existing framework unless the user wants everything in Rust.
 - Use established crates (for example `tokio`, `axum`, `serde`, `sqlx`, `wasm-bindgen`) and the standard tooling: `cargo fmt`, `cargo clippy`, `cargo test`.
+
+- Workspace setup, error types, Tokio pitfalls, testing and compile times: `stacks/references/rust-engineering.md`.
 - Keep the development loop fast. Use `cargo check` while iterating, split code into smaller crates, and build `--release` only for measurements and production.
 - For WebAssembly, keep the bundle small (`wasm-opt`, lazy loading) so the module does not slow the first page load.
 - Measure before and after with real workloads, and report the numbers and the build-time cost honestly.

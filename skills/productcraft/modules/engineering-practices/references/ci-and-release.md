@@ -49,6 +49,8 @@ Workflows run with credentials and are an attack path. Check at least:
 
 Deeper CI and supply-chain review belongs to `../../code-security-review/GUIDE.md` and LaunchGuard control #20.
 
+Pipelines that plan and apply infrastructure as code (OIDC trust per environment, plans only on trusted code, sensitive plan files kept private, approval before apply) are covered in `../../cloud-infrastructure/references/iac-pipelines.md`.
+
 ## Build once, deploy many
 
 - Build one immutable artifact per commit (container image referenced by digest, package, bundle), stamp it with the commit SHA and version, and promote that same artifact through staging to production. Rebuilding per environment means production runs something that was never tested.
