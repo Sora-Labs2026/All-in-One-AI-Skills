@@ -1,5 +1,20 @@
 # Changelog
 
+## ProductCraft 1.9.0 (2026-10-28)
+
+- UI rulebook: 298 rules. Four new rules; existing IDs and text are unchanged.
+  - CMP-34 encodes quantities by position or length, not area or radius: no nested circles or radial bars for comparing totals.
+  - CMP-35 keeps live event feeds readable while they update: new events wait behind a button, with Pause, absolute timestamps and batched announcements.
+  - SCR-27 shows which environment, account and scope a screen acts on, with production unmistakable and the scope restated in destructive actions.
+  - SCR-28 shows what automation decided, the evidence, what was already done with Undo, and what still needs a person, with confidence only when it is calibrated.
+- Reference screens grow to 49 pages with 170 screens. Five new dashboards:
+  - v17, people operations: leave approvals with coverage against minimum staffing, and a payroll run that adds up.
+  - v18, security operations: approvals with evidence and blast radius, and a live feed that holds new events.
+  - v19, wind farm: lost energy by cause, and a power curve.
+  - v20, small-business cash: accounts that sum to the total, and masked cards with freeze.
+  - v21, smart-home wall panel: live watts with loads that sum, and direct device controls.
+  - Every new page passes the contrast audit, and the README galleries show all 21 dashboards.
+
 ## ProductCraft 1.8.0 (2026-10-27)
 
 - Ten new modules, each with a `GUIDE.md`, focused references and tested standard-library helpers, reached through the router only when a task needs them:

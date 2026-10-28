@@ -40,7 +40,7 @@ When a change touches a screen and nothing narrower applies, check at least: `LA
 
 ## Reference screens
 
-`../examples/` shows the rules applied in 44 original pages with 165 screens. There are 16 dashboards for different domains, plus several versions each of sign-in and account access, verification codes and PINs, settings, navigation, tab bars, search, charts, cards, data tables, calendars, buttons, form controls, menus and overlays, feedback, commerce, pricing, landing pages, onboarding and error states, mobile apps, messaging and assistants, and brand guidelines. `../examples/README.md` lists every version and its main rule IDs.
+`../examples/` shows the rules applied in 49 original pages with 170 screens. There are 21 dashboards for different domains, plus several versions each of sign-in and account access, verification codes and PINs, settings, navigation, tab bars, search, charts, cards, data tables, calendars, buttons, form controls, menus and overlays, feedback, commerce, pricing, landing pages, onboarding and error states, mobile apps, messaging and assistants, and brand guidelines. `../examples/README.md` lists every version and its main rule IDs.
 
 When building a surface that matches one of them, open that page and read the versions that fit. Take the structure, semantics, states and rule-driven details, then express them through the project's own components and tokens. Do not copy the sample brand, sample data or the example token values into the product.
 

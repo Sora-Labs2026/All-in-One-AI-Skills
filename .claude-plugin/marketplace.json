@@ -5,13 +5,13 @@
   },
   "metadata": {
     "description": "All-in-One AI Skills by Sora Labs: production-minded Agent Skills for coding agents.",
-    "version": "1.8.0"
+    "version": "1.9.0"
   },
   "plugins": [
     {
       "name": "productcraft",
-      "description": "One routed skill to build, harden and ship software: engineering workflow and practices with advanced testing and open-source readiness, UI design with a rulebook, pattern library and 165 reference screens, interaction, forms and data views, code security review with static analysis, supply-chain review and domain guides, LaunchGuard pre-launch security with a 20-control baseline, Credential Shield auth-abuse defense, agent safety with sandboxing guidance, legal launch readiness, codebase mapping, Word/Excel/PowerPoint/PDF documents and animated GIFs, and builder tools for Agent Skills, MCP servers and Playwright tests. Also covers language and framework guides, cloud infrastructure, data engineering, ML and statistics, scientific computing, life sciences, research writing, creative media, API integrations and blockchain development. Offers Rust for new performance-critical work, with honest trade-offs.",
-      "version": "1.8.0",
+      "description": "One routed skill to build, harden and ship software: engineering workflow and practices with advanced testing and open-source readiness, UI design with a rulebook, pattern library and 170 reference screens, interaction, forms and data views, code security review with static analysis, supply-chain review and domain guides, LaunchGuard pre-launch security with a 20-control baseline, Credential Shield auth-abuse defense, agent safety with sandboxing guidance, legal launch readiness, codebase mapping, Word/Excel/PowerPoint/PDF documents and animated GIFs, and builder tools for Agent Skills, MCP servers and Playwright tests. Also covers language and framework guides, cloud infrastructure, data engineering, ML and statistics, scientific computing, life sciences, research writing, creative media, API integrations and blockchain development. Offers Rust for new performance-critical work, with honest trade-offs.",
+      "version": "1.9.0",
       "author": {
         "name": "Sora Labs"
       },
