@@ -58,7 +58,7 @@
       "prefix": "CMP",
       "file": "references/ui-rules/components.md",
       "title": "Components and design system",
-      "rules": 33
+      "rules": 35
     },
     {
       "prefix": "ICO",
@@ -82,7 +82,7 @@
       "prefix": "SCR",
       "file": "references/ui-rules/screen-patterns.md",
       "title": "Screen patterns",
-      "rules": 26
+      "rules": 28
     },
     {
       "prefix": "STY",
@@ -2969,6 +2969,38 @@
       "note": null
     },
     {
+      "id": "CMP-34",
+      "category": "components",
+      "title": "Encode quantities by position or length, not area or radius",
+      "why": "People compare positions and lengths accurately but misjudge areas, and a circle whose radius doubles covers four times the area, so radius-scaled circles exaggerate every difference.",
+      "do": [
+        "Compare values with bars from a zero baseline, dots on a shared axis or lines; sort bars by value unless the categories have a natural order such as months.",
+        "When a circle must carry a value, such as bubbles on a map, scale its area rather than its radius and print the value beside it.",
+        "Use a gauge or progress bar only for one value against a known target or range, and show the target."
+      ],
+      "avoid": [
+        "Nested or concentric circles, radial bars or 3D shapes for comparing totals such as yearly revenue.",
+        "Dot-matrix or segmented bars whose dots cannot be counted and whose exact values are not available on focus or in a table."
+      ],
+      "note": "A pie or donut is acceptable for two to four parts of one whole when every part is labeled with its value."
+    },
+    {
+      "id": "CMP-35",
+      "category": "components",
+      "title": "Keep live event feeds readable while they update",
+      "why": "A feed that inserts rows while someone reads or clicks moves the target under the pointer and floods screen readers.",
+      "do": [
+        "Hold new events while the user is scrolled away from the top or interacting with a row, and show a \"12 new events\" button that loads them.",
+        "Give each operational event a severity word and icon, one line on what happened, the affected asset and an absolute timestamp with time zone, newest first, with relative time as a secondary label.",
+        "Offer Pause and Resume, and show the connection state and last update time (\"Live · updated 09:24:18 UTC\").",
+        "Announce only important events, batched, in a polite live region (\"3 new critical events\"), never every row."
+      ],
+      "avoid": [
+        "Auto-scrolling the list, re-sorting it while a row has focus, or severity shown by color alone."
+      ],
+      "note": null
+    },
+    {
       "id": "ICO-01",
       "category": "icons-imagery",
       "title": "Use one icon family and one style",
@@ -3838,6 +3870,38 @@
         "A modal accept or reject dialog for every suggestion."
       ],
       "note": null
+    },
+    {
+      "id": "SCR-27",
+      "category": "screen-patterns",
+      "title": "Show which environment, account and scope a screen acts on",
+      "why": "Operations, admin and finance screens look the same in production and staging and across accounts, and acting on the wrong one is a common cause of serious incidents.",
+      "do": [
+        "Keep the organization or account, the environment and the region or data scope in the top bar of every page, as a switcher whose current value is spelled out (\"Production · eu-west-1\").",
+        "Make production unmistakable without relying on color alone: a labeled badge, a distinct top border and the word \"Production\" inside confirmation dialogs.",
+        "Restate the scope in every destructive or bulk action (\"Revoke 3 API keys in Production, Acme Corp?\").",
+        "Keep the scope and time range in the URL, and print them on exports, reports and shared links."
+      ],
+      "avoid": [
+        "A scope switcher hidden in a menu, or production and test data that look the same."
+      ],
+      "note": null
+    },
+    {
+      "id": "SCR-28",
+      "category": "screen-patterns",
+      "title": "Show what automation decided, why, and what still needs a person",
+      "why": "Automated detections and responses act on people's systems and money; operators can trust, correct or undo them only when they see the evidence and the limits of what was done.",
+      "do": [
+        "For each automated decision, show what was detected or done, the evidence (signals, rule or model, data window), when, and the scope it touched.",
+        "Record automated actions in an audit trail that names the rule or playbook that acted, with Undo or rollback where the action allows it.",
+        "Leave consequential or irreversible steps, such as blocking accounts, deleting data, moving money or changing production, to an explicit human approval with the evidence on the same screen.",
+        "Show confidence only when it is calibrated, as a plain band or range with its basis (\"High: 9 of the last 10 similar alerts were confirmed\")."
+      ],
+      "avoid": [
+        "Unexplained scores such as \"AI confidence 97%\", rates without a denominator, or counts of automated actions presented as outcomes."
+      ],
+      "note": "Label generated summaries and insights as generated, as in SCR-26."
     },
     {
       "id": "STY-01",

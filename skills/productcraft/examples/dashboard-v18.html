@@ -1,0 +1,752 @@
+<!doctype html>
+<!-- ProductCraft example: dashboard-v18 (security operations, "Sora Shield", light console theme). Original Sora Labs example, MIT License.
+     Fictional company, people, hosts and events for interface demonstration only. IP addresses come from the documentation ranges.
+     Demonstrates: SCR-01, SCR-02, SCR-27, SCR-28, LAY-01, LAY-02, LAY-05, LAY-08, LAY-09, TYP-01, TYP-09, COL-01, COL-02,
+     COL-06, COL-07, COL-10, CMP-17, CMP-18, CMP-19, CMP-23, CMP-26, CMP-29, CMP-34, CMP-35, FBK-04, FBK-08, FBK-10,
+     FBK-11, FBK-18, FBK-23, BTN-01, BTN-10, BTN-15, FRM-27, NAV-03, COP-01, COP-08, COP-13, ENG-03, ENG-05, ENG-06, ENG-07, ENG-09 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Security operations dashboard</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* Light console theme: cool gray ground, hairlines instead of shadows, a small radius scale and one petrol accent (COL-02, CMP-26).
+       White on accent #0d5c70 is 7.6:1; accent ink #0a4a5a on soft #e5f1f4 is 8.5:1; text-3 #5b6270 is 5.4:1 on the ground and 6.1:1 on white (COL-01).
+       Monospace is only for identifiers, addresses and timestamps (TYP-01). */
+    :root {
+      --mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+      --bg: #eef0f2; --surface-2: #f4f5f7; --border: #d9dde3; --text: #14171c; --text-3: #5b6270;
+      --accent: #0d5c70; --accent-hover: #0a4a5a; --accent-soft: #e5f1f4; --accent-ink: #0a4a5a; --focus: #0d5c70;
+      --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px;
+      /* Production marker: ink badge with white label 16.6:1, tape-yellow icon on ink 9.1:1 */
+      --prod: #1b1f24; --tape: #f2b630;
+      /* Severity: text on its tint (crit 6.8, high 6.4, med 6.4, low 8.9, ok 6.5 :1); marks on white (crit 6.5, high 5.2, med 5.0, ok 5.0 :1) (COL-06) */
+      --crit: #a3161a; --crit-soft: #fdecec; --crit-mark: #b91c1c;
+      --high: #9a3412; --high-soft: #ffedd5; --high-mark: #c2410c;
+      --med: #92400e; --med-soft: #fef3c7; --med-mark: #b45309;
+      --low: #374151; --low-soft: #eceef1;
+      --ok: #166534; --ok-soft: #dcfce7; --ok-mark: #15803d; --success: var(--ok); --success-soft: var(--ok-soft);
+      --track: #e6e9ed;
+    }
+    body { font-size: 14px; }
+    code, .mono { font-family: var(--mono); font-size: 1em; font-variant-numeric: tabular-nums; }
+    .i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .card { padding: var(--space-5); box-shadow: none; border-radius: var(--radius-lg); }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-4); }
+    .card-head p { font-size: var(--text-sm); color: var(--text-2); }
+    .btn { min-height: 36px; font-size: var(--text-sm); padding: 0 var(--space-3); }
+    .btn-sm { min-height: 32px; padding: 0 10px; font-size: var(--text-xs); }
+
+    /* Production is unmistakable without color: hazard-striped top edge, a labeled badge, and the word in every dialog (SCR-27) */
+    .tape, .confirm::before { height: 6px; background: repeating-linear-gradient(-45deg, var(--prod) 0 8px, var(--tape) 8px 16px); }
+    .topbar { display: flex; align-items: center; gap: var(--space-5); height: 56px; padding: 0 var(--space-6); background: var(--surface); border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: var(--space-2); color: var(--text); font-weight: 700; }
+    .brand:hover { text-decoration: none; }
+    .brand svg { width: 28px; height: 28px; }
+    .nav { display: flex; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+    .nav a { display: flex; align-items: center; min-height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-md); color: var(--text-2); font-size: var(--text-sm); font-weight: 600; }
+    .nav a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+    .nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent-ink); }
+    .me { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; font-size: var(--text-sm); line-height: 1.3; }
+    .me small { display: block; color: var(--text-3); font-size: var(--text-xs); }
+    .scope { display: flex; align-items: center; gap: var(--space-2) var(--space-3); flex-wrap: wrap; padding: var(--space-2) var(--space-6); background: var(--surface); border-bottom: 1px solid var(--border); font-size: var(--text-sm); }
+    .scope-label { color: var(--text-2); font-weight: 600; }
+    .sw { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 var(--space-2) 0 var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .sw:hover { background: var(--surface-2); }
+    .sw small { color: var(--text-3); font-weight: 500; }
+    .prod-badge { display: inline-flex; align-items: center; gap: 6px; padding: 0 var(--space-2); min-height: 26px; border-radius: var(--radius-sm); background: var(--prod); color: #fff; font-size: var(--text-xs); font-weight: 700; }
+    .prod-badge .i { color: var(--tape); width: 14px; height: 14px; }
+    .sw.is-prod { padding-left: 3px; border-color: var(--prod); }
+    .scope .sep { color: var(--text-3); }
+    .range { margin-left: auto; color: var(--text-2); }
+
+    /* Page grid: decisions lead, the live feed runs beside them (LAY-05, LAY-08) */
+    .page { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: var(--space-5); padding: var(--space-5) var(--space-6) var(--space-7); }
+    .head { grid-column: 1 / -1; display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4) var(--space-6); flex-wrap: wrap; }
+    .head h1 { text-wrap: balance; }
+    .head p { max-width: 68ch; margin-top: var(--space-1); color: var(--text-2); }
+    .stats { display: flex; gap: var(--space-5); margin: 0; }
+    .stats dt { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .stats dd { margin: 0; font-size: var(--text-lg); font-weight: 700; }
+    .stats .lead dd { font-size: var(--text-2xl); line-height: 1.1; }
+    .main-col { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-5); align-content: start; min-width: 0; }
+
+    /* Severity: word + distinct icon shape + tint (COL-07, SCR-02) */
+    .sev { display: inline-flex; align-items: center; gap: 5px; padding: 0 var(--space-2) 0 6px; border-radius: var(--radius-sm); font-size: var(--text-xs); font-weight: 700; line-height: 22px; white-space: nowrap; }
+    .sev .i { width: 14px; height: 14px; }
+    .sev-crit { color: var(--crit); background: var(--crit-soft); }
+    .sev-high { color: var(--high); background: var(--high-soft); }
+    .sev-med { color: var(--med); background: var(--med-soft); }
+    .sev-low, .sev-info { color: var(--low); background: var(--low-soft); }
+    .pill-wait { color: var(--accent-ink); background: var(--accent-soft); }
+
+    /* Decisions awaiting approval: evidence, blast radius and what automation already did, side by side (SCR-28) */
+    .dec-list { display: grid; gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+    .dec { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+    .dec.is-open { border-color: #b9c0c9; }
+    .dec-head { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding: var(--space-3) var(--space-4); }
+    .dec-head h3 { font-size: var(--text-md); }
+    .dec-toggle { display: flex; align-items: center; gap: var(--space-2); width: 100%; padding: 0; border: 0; background: none; text-align: left; font-weight: 600; cursor: pointer; }
+    .dec-toggle .i { color: var(--text-2); transition: transform var(--dur-fast); }
+    .dec-toggle[aria-expanded="true"] .i { transform: rotate(180deg); }
+    .wait { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-xs); color: var(--text-2); white-space: nowrap; }
+    .dec-what { padding: 0 var(--space-4) var(--space-3); color: var(--text-2); max-width: 90ch; }
+    .dec-body[hidden], .dec-actions[hidden] { display: none; }
+    .dec-body { display: grid; grid-template-columns: 1.25fr 1fr 1fr; border-top: 1px solid var(--border); }
+    .dec-body > section { padding: var(--space-4); min-width: 0; }
+    .dec-body > section + section { border-left: 1px solid var(--border); }
+    .dec-body h4 { margin: 0 0 var(--space-2); font-size: var(--text-xs); font-weight: 700; color: var(--text-2); }
+    .signals, .blast, .auto { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+    .signals li { display: grid; font-size: var(--text-sm); }
+    .signals small, .auto small { font-size: var(--text-xs); color: var(--text-3); }
+    .facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-1) var(--space-3); margin: var(--space-3) 0 0; padding-top: var(--space-3); border-top: 1px dashed var(--border); font-size: var(--text-xs); }
+    .facts dt { color: var(--text-2); font-weight: 600; }
+    .facts dd { margin: 0; }
+    .band { font-weight: 700; }
+    .blast li { position: relative; padding-left: var(--space-4); font-size: var(--text-sm); }
+    .blast li::before { content: ""; position: absolute; left: 2px; top: 8px; width: 6px; height: 6px; border-radius: 1px; background: var(--text-3); }
+    .auto li { display: grid; gap: 2px; font-size: var(--text-sm); }
+    .auto .row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); flex-wrap: wrap; }
+    .deadline { display: flex; gap: var(--space-2); margin-top: var(--space-3); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--accent-soft); font-size: var(--text-xs); }
+    .dec-actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); flex-wrap: wrap; padding: var(--space-3) var(--space-4); border-top: 1px solid var(--border); background: var(--surface-2); border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+    .dur { margin-right: auto; display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .segmented button { min-height: 28px; font-size: var(--text-xs); }
+    .decided { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; padding: 0 var(--space-4) var(--space-3); font-size: var(--text-sm); }
+    .decided .i { color: var(--ok-mark); }
+
+    /* Live feed: held rows, "N new events" button, pause, connection state (CMP-35, CMP-29); the filter is a real switch (FRM-27) */
+    .feed { display: flex; flex-direction: column; min-height: 0; padding: var(--space-4) 0 0; }
+    .feed .card-head { padding: 0 var(--space-4); margin-bottom: var(--space-3); }
+    .conn { display: inline-flex; align-items: center; gap: 6px; font-size: var(--text-xs); color: var(--text-2); }
+    .conn::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--ok-mark); }
+    .conn[data-state="paused"]::before { background: transparent; box-shadow: inset 0 0 0 2px var(--text-3); }
+    .feed-tools { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: 0 var(--space-4) var(--space-3); border-bottom: 1px solid var(--border); }
+    .switch-row { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 32px; padding: 0; border: 0; background: none; font-size: var(--text-xs); font-weight: 600; color: var(--text-2); cursor: pointer; }
+    .track { position: relative; width: 32px; height: 18px; border-radius: 9px; background: #8a919c; transition: background var(--dur-fast); }
+    .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform var(--dur-fast); }
+    [aria-checked="true"] > .track { background: var(--accent); }
+    [aria-checked="true"] > .track::after { transform: translateX(14px); }
+    .feed-body { position: relative; flex: 1; min-height: 420px; }
+    .scroller { position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain; }
+    .events { margin: 0; padding: 0; list-style: none; }
+    .events:focus-visible { outline-offset: -2px; }
+    .newbar { position: sticky; top: 0; z-index: 1; display: flex; width: 100%; justify-content: center; gap: var(--space-2); min-height: 36px; border: 0; border-bottom: 1px solid #b9d7df; background: var(--accent-soft); color: var(--accent-ink); font-size: var(--text-sm); font-weight: 700; cursor: pointer; align-items: center; }
+    .newbar[hidden] { display: none; }
+    .ev { display: grid; grid-template-columns: 82px minmax(0, 1fr); gap: 2px var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); transition: background-color 1.2s; }
+    .ev[hidden] { display: none; }
+    .ev.is-new { background: #f2f8fa; }
+    .ev:focus-visible { outline-offset: -2px; }
+    .ev .sev { justify-self: start; align-self: start; }
+    .ev-what { font-size: var(--text-sm); font-weight: 600; line-height: 1.35; }
+    .ev-meta { grid-column: 2; font-size: var(--text-xs); color: var(--text-2); overflow-wrap: anywhere; }
+    .ev-meta time { color: var(--text); }
+
+    /* Attack path: five layers left to right, nodes labeled with status words and icons (SCR-28, COL-07) */
+    .path-scroll { overflow-x: auto; }
+    .path-scroll svg { display: block; width: 100%; min-width: 904px; max-width: 904px; height: auto; }
+    .path-scroll text { font-family: var(--font); font-size: 12px; fill: var(--text-2); }
+    .path-scroll .stage { font-size: 13px; font-weight: 700; fill: var(--text); }
+    .path-scroll .n-name { font-family: var(--mono); font-weight: 700; fill: var(--text); }
+    .path-scroll .n-status { font-weight: 700; }
+    .link { stroke: var(--text-3); stroke-width: 2; }
+    .link.limited { stroke-dasharray: 5 4; }
+    .link.none { stroke-dasharray: 1 5; stroke-linecap: round; }
+    .node rect { stroke-width: 1.5; }
+    .node .n-ic { fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    .node:focus { outline: none; }
+    .node:focus-visible rect, .node:hover rect { stroke: var(--focus); stroke-width: 3; }
+    .k-src rect { fill: var(--surface-2); stroke: var(--text-3); } .k-src { color: var(--text-2); } .k-src .n-status { fill: var(--text-2); }
+    .k-bad rect { fill: var(--crit-soft); stroke: var(--crit-mark); } .k-bad { color: var(--crit); } .k-bad .n-status { fill: var(--crit); }
+    .k-warn rect { fill: var(--med-soft); stroke: var(--med-mark); } .k-warn { color: var(--med); } .k-warn .n-status { fill: var(--med); }
+    .k-ok rect { fill: var(--ok-soft); stroke: var(--ok-mark); } .k-ok { color: var(--ok); } .k-ok .n-status { fill: var(--ok); }
+    .path-foot { display: flex; justify-content: space-between; gap: var(--space-2) var(--space-5); flex-wrap: wrap; margin-top: var(--space-3); font-size: var(--text-xs); color: var(--text-2); }
+    .path-detail { min-height: 20px; font-size: var(--text-sm); color: var(--text); }
+    .legend { display: flex; gap: var(--space-4); flex-wrap: wrap; }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend svg { width: 28px; height: 8px; }
+    details { margin-top: var(--space-3); font-size: var(--text-sm); }
+    summary { cursor: pointer; font-weight: 600; color: var(--accent-ink); }
+    .scroll-hint { display: none; margin-bottom: var(--space-2); font-size: var(--text-xs); color: var(--text-2); }
+
+    /* Tables (CMP-19): real markup, tabular numbers, status words */
+    .tbl { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    .tbl th { padding: var(--space-2) var(--space-3); text-align: left; font-size: var(--text-xs); font-weight: 600; color: var(--text-2); background: var(--surface-2); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .tbl td { padding: var(--space-3); border-bottom: 1px solid var(--border); vertical-align: top; }
+    .tbl td small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+    .tbl tr:hover td { background: #f8f9fa; }
+    .tbl small.mono { white-space: nowrap; }
+    .tbl-wrap { position: relative; overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius-md); }
+    .tbl-wrap .tbl { min-width: 1000px; }
+    /* The time column stays pinned while the table scrolls sideways on narrow screens (CMP-19) */
+    .tbl-wrap th:first-child, .tbl-wrap td:first-child { position: sticky; left: 0; z-index: 1; background: var(--surface); box-shadow: inset -1px 0 0 var(--border); }
+    .tbl-wrap th:first-child { background: var(--surface-2); }
+    .nowrap { white-space: nowrap; }
+
+    /* Detection quality: counts with their denominators, one bar per value against its target (CMP-34, COP-13) */
+    .ratios { display: grid; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+    .ratio h3 { font-size: var(--text-sm); }
+    .ratio .r-val { font-size: var(--text-sm); color: var(--text-2); }
+    .ratio .r-val b { font-size: var(--text-lg); color: var(--text); }
+    .r-bar { position: relative; height: 10px; margin: var(--space-2) 0 6px; border-radius: 2px; background: var(--track); }
+    .r-bar:focus-visible { outline-offset: 3px; }
+    .r-fill { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: var(--accent); }
+    .r-target { position: absolute; top: -4px; bottom: -4px; width: 3px; margin-left: -1px; background: var(--text); box-shadow: 0 0 0 2px var(--surface); }
+    .r-foot { display: flex; gap: var(--space-1) var(--space-3); flex-wrap: wrap; font-size: var(--text-xs); color: var(--text-2); }
+    .verdict { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; }
+    .verdict .i { width: 14px; height: 14px; }
+    .verdict.is-ok { color: var(--ok); } .verdict.is-miss { color: var(--med); }
+    .q-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-6); }
+    .times { display: grid; gap: var(--space-4); margin: 0; align-content: start; }
+    .times > div { padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--surface-2); }
+    .times dt { font-size: var(--text-sm); font-weight: 600; }
+    .times dd { margin: 0; }
+    .times .big { font-size: var(--text-xl); font-weight: 700; line-height: 1.3; }
+    .times .def { font-size: var(--text-xs); color: var(--text-2); }
+    .delta-good .i { width: 14px; height: 14px; }
+
+    /* Threat categories: sorted bars from zero, previous week as a tick on the same axis (CMP-34, CMP-18) */
+    .bars { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+    .bar-row { display: grid; grid-template-columns: 128px minmax(0, 1fr) 28px; gap: var(--space-2); align-items: center; font-size: var(--text-sm); }
+    .b-track { position: relative; height: 18px; }
+    .b-fill { position: absolute; inset: 0 auto 0 0; border-radius: 0 2px 2px 0; background: var(--accent); }
+    .b-fill:focus-visible { outline-offset: 2px; }
+    .b-prev { position: absolute; top: -3px; bottom: -3px; width: 3px; margin-left: -1px; background: var(--text); box-shadow: 0 0 0 1.5px var(--surface); pointer-events: none; }
+    .b-val { text-align: right; font-weight: 700; }
+    .axis { display: grid; grid-template-columns: 128px minmax(0, 1fr) 28px; gap: var(--space-2); margin-top: var(--space-1); font-size: var(--text-xs); color: var(--text-2); }
+    .ticks { position: relative; height: 18px; border-top: 1px solid var(--text-3); }
+    .ticks span { position: absolute; top: 2px; transform: translateX(-50%); }
+    .bar-detail { min-height: 40px; margin-top: var(--space-3); font-size: var(--text-xs); color: var(--text-2); }
+
+    /* Confirmation dialog restates the scope (SCR-27, FBK-08) */
+    .confirm { width: min(520px, calc(100% - 32px)); padding: 0; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); }
+    .confirm::before { content: ""; display: block; }
+    .confirm::backdrop { background: rgba(20, 23, 28, 0.5); }
+    .confirm form { display: grid; gap: var(--space-4); padding: var(--space-5); }
+    .confirm h2 { font-size: var(--text-lg); }
+    .dlg-scope { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; font-size: var(--text-sm); font-weight: 600; }
+    #dlg-body p { color: var(--text-2); font-size: var(--text-sm); }
+    #dlg-body ul { margin: var(--space-2) 0 0; padding-left: 18px; display: grid; gap: var(--space-1); font-size: var(--text-sm); }
+    .ack { display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3); border-radius: var(--radius-md); background: var(--med-soft); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .ack input { width: 18px; height: 18px; margin: 1px 0 0; accent-color: var(--accent); }
+    .field label { display: block; margin-bottom: 6px; font-size: var(--text-sm); font-weight: 600; }
+    .field textarea { width: 100%; padding: var(--space-2) var(--space-3); border: 1px solid #8a919c; border-radius: var(--radius-md); font-size: 16px; resize: vertical; }
+    .dlg-hint { min-height: 20px; font-size: var(--text-sm); color: var(--med); font-weight: 600; }
+    .dlg-actions { display: flex; justify-content: flex-end; gap: var(--space-2); flex-wrap: wrap; }
+    .btn[aria-busy="true"] { cursor: progress; }
+    .toast { position: fixed; left: 50%; bottom: var(--space-5); z-index: 5; max-width: min(560px, calc(100% - 32px)); transform: translateX(-50%); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--prod); color: #fff; font-size: var(--text-sm); }
+    .toast:empty { display: none; }
+    .foot { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--text-3); }
+
+    @media (max-width: 1180px) {
+      .page { grid-template-columns: minmax(0, 1fr); }
+      /* One column: decisions, then the live feed, then the path and the rest */
+      .main-col { display: contents; }
+      .path-card { order: 1; }
+      .page > .card:not(.feed, .path-card), .foot { order: 2; }
+      .feed-body { flex: none; min-height: 0; height: 480px; }
+      .dec-body { grid-template-columns: 1fr 1fr; }
+      .dec-body > .ev-sec { grid-column: 1 / -1; border-bottom: 1px solid var(--border); }
+      .dec-body > section + section { border-left: 0; }
+      .dec-body > section:last-child { border-left: 1px solid var(--border); }
+    }
+    @media (max-width: 860px) {
+      .nav, .range { display: none; }
+      .topbar, .scope { padding-left: var(--space-4); padding-right: var(--space-4); }
+      .page { padding: var(--space-4); }
+      .q-grid, .dec-body { grid-template-columns: minmax(0, 1fr); }
+      .dec-body > section:last-child { border-left: 0; border-top: 1px solid var(--border); }
+      .scroll-hint { display: block; }
+    }
+    @media (max-width: 560px) {
+      .me span:last-child, .scope .sep { display: none; }
+      .stats { gap: var(--space-4); }
+      .dec-head { grid-template-columns: auto minmax(0, 1fr); }
+      .dec-head .wait { grid-column: 1 / -1; }
+      .dec-actions .btn { flex: 1 1 auto; }
+      .dur { width: 100%; justify-content: space-between; }
+      .bar-row, .axis { grid-template-columns: 124px minmax(0, 1fr) 24px; }
+      .feed-tools { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-crit" viewBox="0 0 24 24"><path d="M8.2 3h7.6L21 8.2v7.6L15.8 21H8.2L3 15.8V8.2z"/><path d="M12 7.5v5.5M12 16.5h.01"/></symbol>
+  <symbol id="i-high" viewBox="0 0 24 24"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5M12 17.5h.01"/></symbol>
+  <symbol id="i-med" viewBox="0 0 24 24"><path d="M12 2.8 21.2 12 12 21.2 2.8 12z"/><path d="M12 8v5M12 16h.01"/></symbol>
+  <symbol id="i-low" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12h7"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5.5v13M15 5.5v13"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M7.5 5v14l11-7z"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 10 5 0 10z" fill="#5b6270"/></marker>
+</svg>
+
+<header>
+  <div class="tape" aria-hidden="true"></div>
+  <div class="topbar">
+    <a class="brand" href="#" aria-label="Sora Shield home">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="6" fill="#0d5c70"/><path d="M16 6.5 24 9.5v6.2c0 4.9-3.4 8.4-8 9.8-4.6-1.4-8-4.9-8-9.8V9.5z" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/><path d="m12.5 16 2.5 2.5 4.5-5" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Sora Shield
+    </a>
+    <nav aria-label="Main">
+      <ul class="nav">
+        <li><a href="#" aria-current="page">Overview</a></li>
+        <li><a href="#">Detections</a></li>
+        <li><a href="#">Incidents</a></li>
+        <li><a href="#">Playbooks</a></li>
+        <li><a href="#">Audit trail</a></li>
+      </ul>
+    </nav>
+    <p class="me"><span class="avatar" aria-hidden="true">IC</span><span>Ines Calder<small>On call until 18:00 UTC</small></span></p>
+  </div>
+  <!-- Scope bar on every page: environment, account and region spelled out as switchers (SCR-27) -->
+  <div class="scope" role="region" aria-label="Scope">
+    <span class="scope-label">Acting on</span>
+    <button class="sw is-prod" type="button" aria-haspopup="listbox" aria-label="Environment: Production. Change environment"><span class="prod-badge"><svg class="i" aria-hidden="true"><use href="#i-high"/></svg>Production</span><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></button>
+    <span class="sep" aria-hidden="true">·</span>
+    <button class="sw" type="button" aria-haspopup="listbox" aria-label="Account: Acme Retail. Change account">Acme Retail<svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></button>
+    <span class="sep" aria-hidden="true">·</span>
+    <button class="sw" type="button" aria-haspopup="listbox" aria-label="Region: us-east-1. Change region"><span class="mono">us-east-1</span><svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></button>
+    <p class="range">Last 24 hours · <time class="mono" datetime="2026-10-27T14:07Z">Oct 27 14:07</time> to <time class="mono" datetime="2026-10-28T14:07Z">Oct 28 14:07 UTC</time></p>
+  </div>
+</header>
+
+<main class="page">
+  <!-- One decision leads the page: what needs a person now (SCR-01, LAY-05) -->
+  <div class="head">
+    <div>
+      <h1>Security decisions, Wed Oct 28</h1>
+      <p id="head-summary"></p>
+    </div>
+    <dl class="stats num">
+      <div class="lead"><dt>Waiting for you</dt><dd id="st-wait"></dd></div>
+      <div><dt>Oldest waiting</dt><dd id="st-old"></dd></div>
+      <div><dt>Open incidents</dt><dd>1</dd></div>
+    </dl>
+  </div>
+
+  <div class="main-col">
+    <section aria-labelledby="dec-title">
+      <div class="card-head">
+        <h2 id="dec-title">Waiting for approval</h2>
+        <p>Most severe first. Playbooks already did what they may do alone; these steps need a person.</p>
+      </div>
+      <ol class="dec-list" id="decisions"></ol>
+    </section>
+
+    <section class="card path-card" aria-labelledby="path-title">
+      <div class="card-head">
+        <div>
+          <h2 id="path-title">Attack paths, last 2 hours</h2>
+          <p>The token misuse reached customer data; the sign-in attack stopped short of it.</p>
+        </div>
+        <p class="scroll-hint">Scroll sideways to follow each path.</p>
+      </div>
+      <div class="path-scroll"><svg id="path-svg" viewBox="0 0 904 232" role="group" aria-label="Attack paths from the internet to data, two incidents"></svg></div>
+      <div class="path-foot">
+        <p class="path-detail" id="path-detail">Focus or point at a layer for its evidence.</p>
+        <p class="legend" aria-hidden="true">
+          <span><svg viewBox="0 0 28 8"><path d="M1 4h26" stroke="#5b6270" stroke-width="2"/></svg>Reached the next layer</span>
+          <span><svg viewBox="0 0 28 8"><path d="M1 4h26" stroke="#5b6270" stroke-width="2" stroke-dasharray="5 4"/></svg>Slowed by a control</span>
+          <span><svg viewBox="0 0 28 8"><path d="M2 4h24" stroke="#5b6270" stroke-width="2" stroke-dasharray="1 5" stroke-linecap="round"/></svg>No activity seen</span>
+        </p>
+      </div>
+      <details><summary>Show the paths as a table</summary><div class="tbl-wrap" style="margin-top:12px"><table class="tbl" id="path-table"></table></div></details>
+    </section>
+  </div>
+
+  <section class="card feed" aria-labelledby="feed-title">
+    <div class="card-head">
+      <h2 id="feed-title">Live events</h2>
+      <p class="conn" id="conn" data-state="live"></p>
+    </div>
+    <div class="feed-tools">
+      <button class="switch-row" type="button" role="switch" aria-checked="false" id="sev-only"><span class="track" aria-hidden="true"></span>High and critical only</button>
+      <button class="btn btn-secondary btn-sm" type="button" id="pause" aria-pressed="false"><svg class="i" aria-hidden="true"><use href="#i-pause"/></svg><span>Pause</span></button>
+    </div>
+    <div class="feed-body">
+      <div class="scroller" id="scroller">
+        <button class="newbar" type="button" id="newbar" hidden></button>
+        <ol class="events" id="events" aria-label="Events, newest first"></ol>
+      </div>
+    </div>
+    <p class="visually-hidden" aria-live="polite" id="feed-say"></p>
+  </section>
+
+  <section class="card" aria-labelledby="q-title">
+    <div class="card-head">
+      <div>
+        <h2 id="q-title">Detection quality, last 30 days</h2>
+        <p><time datetime="2026-09-29">Sep 29</time> to <time datetime="2026-10-28">Oct 28</time>, compared with Aug 30 to Sep 28. Rates show their counts.</p>
+      </div>
+    </div>
+    <div class="q-grid">
+      <ul class="ratios" id="ratios"></ul>
+      <dl class="times" id="times"></dl>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="cat-title">
+    <h2 id="cat-title">Top threat categories</h2>
+    <p class="subtle" id="cat-sum"></p>
+    <ol class="bars" id="bars" style="margin-top:16px"></ol>
+    <div class="axis" aria-hidden="true"><span></span><span class="ticks" id="ticks"></span><span></span></div>
+    <p class="subtle" style="text-align:center">Alerts, Oct 22 to 28 · tick: previous 7 days</p>
+    <p class="bar-detail" id="bar-detail">Focus a bar for its share and change.</p>
+  </section>
+
+  <section class="card" style="grid-column: 1 / -1" aria-labelledby="audit-title">
+    <div class="card-head">
+      <div>
+        <h2 id="audit-title" tabindex="-1">Automation audit trail, today</h2>
+        <p>Every automatic and approved action, with the playbook that ran it. Undo restores the previous state in Production.</p>
+      </div>
+      <div class="segmented" role="radiogroup" aria-label="Show actions" id="audit-filter"></div>
+    </div>
+    <p class="scroll-hint">Scroll sideways for the result and Undo; the time stays pinned.</p>
+    <div class="tbl-wrap"><table class="tbl" id="audit"></table></div>
+  </section>
+
+  <p class="foot">Fictional company, people, hosts and events for interface demonstration only. Addresses are from the documentation ranges 192.0.2.0/24, 198.51.100.0/24 and 203.0.113.0/24.</p>
+</main>
+
+<!-- Approval and undo dialog: names the action, restates Production and the scope, focus starts on Cancel (FBK-08, SCR-27, ENG-05) -->
+<dialog class="confirm" id="dlg" aria-labelledby="dlg-title" aria-describedby="dlg-body">
+  <form method="dialog">
+    <p class="dlg-scope"><span class="prod-badge"><svg class="i" aria-hidden="true"><use href="#i-high"/></svg>Production</span>Acme Retail · <span class="mono">us-east-1</span></p>
+    <h2 id="dlg-title"></h2>
+    <div id="dlg-body"></div>
+    <label class="ack" id="dlg-ack-row"><input type="checkbox" id="dlg-ack"><span id="dlg-ack-text"></span></label>
+    <div class="field"><label for="dlg-note">Note for the audit trail (optional)</label><textarea id="dlg-note" rows="2"></textarea></div>
+    <p class="dlg-hint" id="dlg-hint" aria-live="polite"></p>
+    <div class="dlg-actions">
+      <button class="btn btn-secondary" type="submit" value="cancel" id="dlg-cancel">Cancel</button>
+      <button class="btn" type="button" id="dlg-ok"></button>
+    </div>
+  </form>
+</dialog>
+<p class="toast" role="status" id="toast"></p>
+
+<script>
+  // Example only: every record below is fictional and would come from your API. Raw values, formatted at render (ENG-07, COP-08).
+  const DAY = Date.UTC(2026, 9, 28), T = (h, m, s = 0) => DAY + ((h * 60 + m) * 60 + s) * 1000;
+  const T0 = T(14, 7, 3), started = performance.now(), now = () => T0 + Math.round(performance.now() - started);
+  const clock = new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23", timeZone: "UTC" });
+  const n = new Intl.NumberFormat(undefined), plural = new Intl.PluralRules(undefined), pct = new Intl.NumberFormat(undefined, { style: "percent" });
+  const mins = new Intl.NumberFormat(undefined, { style: "unit", unit: "minute", unitDisplay: "short" });
+  const rel = new Intl.RelativeTimeFormat(undefined, { style: "short", numeric: "auto" });
+  const utc = (t) => `${clock.format(t)} UTC`;
+  const timeEl = (t) => `<time class="mono" datetime="${new Date(t).toISOString().slice(0, 19)}Z">${utc(t)}</time>`;
+  const ago = (t) => { const s = Math.max(0, Math.round((now() - t) / 1000)); return s < 60 ? rel.format(-s, "second") : s < 3600 ? rel.format(-Math.floor(s / 60), "minute") : rel.format(-Math.floor(s / 3600), "hour"); };
+  const ic = (name) => `<svg class="i" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+  const SEV = { crit: "Critical", high: "High", med: "Medium", low: "Low", info: "Info" };
+  const sev = (s) => `<span class="sev sev-${s}">${ic(s)}${SEV[s]}</span>`;
+  const $ = (id) => document.getElementById(id);
+  const ME = "Ines Calder";
+  const scopeText = (x) => (/^\d+ [a-z]/.test(x) ? x : `<code>${x}</code>`); // counts read as words, identifiers as code
+
+  // Automation audit trail: the single record the decision cards also read from (SCR-28, ENG-06)
+  const audit = [
+    { id: "a1", t: T(14, 1, 41), pb: "Contain leaked service token", pbId: "pb-token-contain v3", action: "Limit token to inventory endpoints, read-only", scope: "tok_…9f3a (svc-inventory-sync)", res: "ok", note: "Customer reads stopped at 14:01:41 UTC", undo: true, undoFx: "The token can read customer records again, from any address." },
+    { id: "a2", t: T(14, 1, 40), pb: "Contain leaked service token", pbId: "pb-token-contain v3", action: "Open incident and page on-call", scope: "INC-2291", res: "ok", note: "Paged Ines Calder", undo: "Nothing to undo" },
+    { id: "a6", t: T(13, 44, 12), pb: "Contain credential stuffing", pbId: "pb-credstuff v5", action: "Propose: force password reset", scope: "37 customer accounts", res: "wait", decision: "d-reset" },
+    { id: "a3", t: T(13, 44, 11), pb: "Contain credential stuffing", pbId: "pb-credstuff v5", action: "Require MFA at next sign-in", scope: "37 customer accounts", res: "ok", undo: true, undoFx: "The 37 accounts can sign in with a password alone again." },
+    { id: "a4", t: T(13, 44, 10), pb: "Contain credential stuffing", pbId: "pb-credstuff v5", action: "End active sessions", scope: "37 customer accounts", res: "ok", undo: "Can't undo: sessions ended" },
+    { id: "a7", t: T(13, 43, 6), pb: "Contain credential stuffing", pbId: "pb-credstuff v5", action: "Propose: block range at the edge", scope: "203.0.113.0/24", res: "wait", decision: "d-ip" },
+    { id: "a5", t: T(13, 43, 5), pb: "Contain credential stuffing", pbId: "pb-credstuff v5", action: "Rate-limit sign-ins to 5 per minute per address", scope: "203.0.113.0/24", res: "ok", note: "Ends 15:43:05 UTC", undo: true, undoFx: "Sign-in attempts from 256 addresses return to normal limits at once." },
+    { id: "a8", t: T(11, 20, 33), pb: "Quarantine suspicious upload", pbId: "pb-upload-quarantine v2", action: "Move file to quarantine", scope: "uploads/returns/RMA-55102.pdf", res: "undone", note: "By Lena Vogt at 11:34:02 UTC: false positive", undo: "Undone" },
+    { id: "a9", t: T(9, 15, 2), pb: "Rotate exposed key", pbId: "pb-key-rotate v4", action: "Rotate webhook signing key", scope: "payments-webhook", res: "failed", note: "Vault timed out after 30 s; key unchanged", undo: "retry" }
+  ];
+  const byId = (id) => audit.find((a) => a.id === id);
+
+  // Decisions: evidence, window, rule, playbook, calibrated band (or none), blast radius, and what already ran (SCR-28)
+  const decisions = [
+    { id: "d-token", sev: "crit", since: T(14, 1, 40), title: "Disable service token <code>svc-inventory-sync</code>", plain: "service token svc-inventory-sync",
+      what: "A service token read 1,284 customer records from a network it has never used. The playbook limited the token; disabling it needs a person.",
+      signals: [["<b>1,284</b> calls to <code>GET /v1/customers</code> in 9 min", "30-day baseline: 0 calls"], ["First use from <code>198.51.100.23</code> (hosting network)", "Known addresses: 2, both in <code>10.20.0.0/16</code>"], ["User agent <code>python-requests/2.31</code>", "The service normally sends <code>sora-sync/4.2</code>"]],
+      win: [T(13, 52, 7), T(14, 1, 15), "9 min 8 s"], rules: [["DET-0311", "token used from a new network"], ["DET-0207", "unusual read volume"]], pb: "Contain leaked service token",
+      band: ["Medium", "3 of the last 5 alerts from <code>DET-0311</code> were confirmed (90 days)"],
+      blast: ["Stops 3 services that share the token: <code>svc-inventory-sync</code>, <code>svc-price-feed</code>, <code>svc-reorder</code>", "Stock levels on <code>shop.example.com</code> freeze until a new token is issued, about 10 min", "Sign-in, checkout and payments are not affected"],
+      auto: ["a1", "a2"], ask: () => "Disable token tok_…9f3a?", ok: () => "Disable token in Production", danger: true, act: () => "Disable token", done: () => "Token tok_…9f3a disabled", scope: "tok_…9f3a (svc-inventory-sync)",
+      ack: "I understand inventory sync stops until a new token is issued.", undoFx: "The token works again with its limited, read-only access." },
+    { id: "d-ip", sev: "high", since: T(13, 43, 6), title: "Block <code>203.0.113.0/24</code> at the edge", plain: "range 203.0.113.0/24",
+      what: "A credential-stuffing burst hit the sign-in API from one /24 range. It is rate-limited now; a block stops all traffic from it.",
+      signals: [["<b>18,412</b> failed sign-ins from <b>214</b> addresses in the range", "Average 10.6 attempts per second"], ["<b>37</b> sign-ins succeeded, 0.2% of 18,449 attempts", "Their sessions are ended and MFA is required"], ["9,281 of 9,870 usernames tried (94%) are on a breached-credential list", "List updated Oct 26"]],
+      win: [T(13, 12, 30), T(13, 41, 30), "29 min"], rules: [["DET-0142", "sign-in velocity"]], pb: "Contain credential stuffing",
+      band: ["High", "9 of the last 10 bursts that matched <code>DET-0142</code> were confirmed attacks (90 days)"],
+      blast: ["Blocks all traffic, not only sign-ins, from 256 addresses at the <code>us-east-1</code> edge", "Last 7 days, 4 customer accounts used this range without a failed sign-in (2 orders, $184.20)", "<code>eu-west-1</code> is not affected; the range sent it no traffic"],
+      auto: ["a5", "a4", "a3"], durs: ["1 hour", "24 hours", "7 days"], dur: 1, deadline: T(15, 43, 5),
+      ask: (d) => `Block 203.0.113.0/24 for ${d}?`, ok: (d) => `Block for ${d} in Production`, act: (d) => `Block range for ${d}`, done: (d) => `203.0.113.0/24 blocked for ${d}`, scope: "203.0.113.0/24", undoFx: "Traffic from 256 addresses reaches the edge again." },
+    { id: "d-reset", sev: "med", since: T(13, 44, 12), title: "Force password reset for 37 customer accounts", plain: "37 customer accounts",
+      what: "These accounts signed in successfully during the burst. Sessions are ended and MFA is required; a reset also emails each customer.",
+      signals: [["35 of 37 used a password on the breached-credential list", "The other 2 used passwords last changed in 2023"], ["All 37 sign-ins came from <code>203.0.113.0/24</code>", "None of these accounts used the range before Oct 28"], ["2 accounts changed their shipping address within 5 min", "Orders <code>A-88213</code> and <code>A-88240</code> are held for review"]],
+      win: [T(13, 12, 30), T(13, 41, 30), "29 min"], rules: [["DET-0142", "sign-in velocity"]], pb: "Contain credential stuffing",
+      band: null, bandNote: "Not shown: this step has run 2 times, too few to calibrate.",
+      blast: ["37 customers must choose a new password at their next sign-in", "Sends 37 emails from <code>security@example.com</code>; sent emails can't be recalled", "Support usually hears from about 1 customer per 10 resets"],
+      auto: ["a4", "a3"], ask: () => "Force a password reset for 37 accounts?", ok: () => "Force reset in Production", act: () => "Force password reset", done: () => "Password reset forced for 37 accounts", scope: "37 customer accounts", undoFx: null }
+  ];
+  decisions.forEach((d, i) => { d.state = "waiting"; d.open = i === 0; });
+
+  function renderSummary() {
+    const waiting = decisions.filter((d) => d.state === "waiting");
+    $("st-wait").textContent = n.format(waiting.length);
+    $("st-old").textContent = waiting.length ? mins.format(Math.floor((now() - Math.min(...waiting.map((d) => d.since))) / 60000)) : "None";
+    const rl = byId("a5").res === "ok" && decisions[1].state === "waiting";
+    $("head-summary").innerHTML = waiting.length
+      ? `${n.format(waiting.length)} ${plural.select(waiting.length) === "one" ? "automated response in Production waits" : "automated responses in Production wait"} for your approval.${rl ? ` The rate limit on <code>203.0.113.0/24</code> ends at ${timeEl(T(15, 43, 5))} unless you decide.` : ""}`
+      : "Nothing is waiting for approval. New proposals from playbooks appear here first.";
+  }
+
+  function resultCell(a) {
+    const map = { ok: ["pill-success", "Succeeded"], wait: ["pill-wait", "Waiting for approval"], undone: ["pill-neutral", "Undone"], dismissed: ["pill-neutral", "Dismissed"], failed: ["pill-danger", "Failed"] };
+    return `<span class="pill ${map[a.res][0]}">${map[a.res][1]}</span>${a.note ? `<small>${a.note}</small>` : ""}`;
+  }
+  function undoCell(a) {
+    if (a.res === "wait") return `<a href="#${a.decision}">Decide above</a>`;
+    if (a.undo === "retry") return `<button class="btn btn-secondary btn-sm" type="button" data-retry="${a.id}">Retry…</button>`;
+    if (a.undo === true && a.res === "ok") return `<button class="btn btn-secondary btn-sm" type="button" data-undo="${a.id}">Undo…<span class="visually-hidden"> ${a.action}</span></button>`;
+    return `<span class="subtle">${a.res === "undone" ? "Undone" : a.res === "dismissed" ? "Nothing changed" : a.undo}</span>`;
+  }
+
+  function renderDecisions() {
+    $("decisions").innerHTML = decisions.map((d) => {
+      if (d.state !== "waiting") {
+        const a = byId(d.result);
+        return `<li class="dec" id="${d.id}" tabindex="-1"><div class="dec-head">${sev(d.sev)}<h3>${d.title}</h3><p class="wait">${d.state === "approved" ? "Approved" : "Dismissed"}</p></div><p class="decided">${ic("check")}<span>${d.state === "approved" ? `${d.doneText}. Approved` : "Proposal dismissed"} by you at ${timeEl(a.t)}.</span>${a.undo === true && a.res === "ok" ? `<button class="btn btn-secondary btn-sm" type="button" data-undo="${a.id}">Undo…</button>` : ""}</p></li>`;
+      }
+      const head = `<div class="dec-head">${sev(d.sev)}<h3><button class="dec-toggle" type="button" aria-expanded="${d.open}" aria-controls="${d.id}-body" data-toggle="${d.id}"><span>${d.title}</span>${ic("chev")}</button></h3>
+        <p class="wait num">${ic("clock")}Waiting <span data-since="${d.since}">${mins.format(Math.floor((now() - d.since) / 60000))}</span></p></div>`;
+      const dur = d.durs ? `<div class="dur"><span id="${d.id}-dur">Block for</span><div class="segmented" role="radiogroup" aria-labelledby="${d.id}-dur">${d.durs.map((x, i) => `<button type="button" role="radio" aria-checked="${i === d.dur}" tabindex="${i === d.dur ? 0 : -1}" data-dur="${d.id}:${i}">${x}</button>`).join("")}</div></div>` : "";
+      return `<li class="dec${d.open ? " is-open" : ""}" id="${d.id}">${head}<p class="dec-what">${d.what}</p>
+        <div class="dec-body" id="${d.id}-body" ${d.open ? "" : "hidden"}>
+          <section class="ev-sec"><h4>Evidence</h4><ul class="signals">${d.signals.map(([a, b]) => `<li><span>${a}</span><small>${b}</small></li>`).join("")}</ul>
+            <dl class="facts"><dt>Window</dt><dd>${timeEl(d.win[0])} to ${timeEl(d.win[1])}, <span class="nowrap">${d.win[2]}</span></dd><dt>${d.rules.length > 1 ? "Rules" : "Rule"}</dt><dd>${d.rules.map(([id, name]) => `<code>${id}</code> ${name}`).join("; ")}</dd><dt>Playbook</dt><dd>${d.pb}</dd>
+            <dt>Confidence</dt><dd>${d.band ? `<span class="band">${d.band[0]}:</span> ${d.band[1]}` : d.bandNote}</dd></dl></section>
+          <section><h4>If you approve</h4><ul class="blast">${d.blast.map((b) => `<li>${b}</li>`).join("")}</ul></section>
+          <section><h4>Already done automatically</h4><ol class="auto">${d.auto.map((id) => { const a = byId(id); return `<li><span>${a.action}</span><span class="row"><small>${timeEl(a.t)}</small>${a.undo === true && a.res === "ok" ? `<button class="btn btn-secondary btn-sm" type="button" data-undo="${a.id}">Undo…<span class="visually-hidden"> ${a.action}</span></button>` : `<small>${a.res === "undone" ? "Undone" : a.undo}</small>`}</span></li>`; }).join("")}</ol>
+            ${d.deadline && byId("a5").res === "ok" ? `<p class="deadline">${ic("clock")}<span>If nobody decides, the rate limit ends at ${timeEl(d.deadline)} and the range returns to normal limits.</span></p>` : ""}</section>
+        </div>
+        <div class="dec-actions" ${d.open ? "" : "hidden"}>${dur}<button class="btn btn-ghost" type="button" data-dismiss="${d.id}">Dismiss…</button><button class="btn ${d.danger ? "btn-danger" : "btn-primary"}" type="button" data-approve="${d.id}">${d.act(d.durs ? d.durs[d.dur] : "")}…</button></div></li>`;
+    }).join("");
+  }
+
+  function renderAudit() {
+    const f = $("audit-filter").querySelector('[aria-checked="true"]')?.dataset.f || "all";
+    const tests = { all: () => true, undo: (a) => a.undo === true && a.res === "ok", attention: (a) => a.res === "wait" || a.res === "failed" };
+    const labels = { all: "All", undo: "Can undo", attention: "Needs attention" };
+    $("audit-filter").innerHTML = Object.keys(tests).map((k) => `<button type="button" role="radio" aria-checked="${k === f}" tabindex="${k === f ? 0 : -1}" data-f="${k}">${labels[k]} <span class="num">${audit.filter(tests[k]).length}</span></button>`).join("");
+    const rows = audit.filter(tests[f]).sort((a, b) => b.t - a.t);
+    $("audit").innerHTML = `<caption class="visually-hidden">Automated and approved actions in Production, Acme Retail, us-east-1, Oct 28</caption>
+      <thead><tr><th scope="col">Time (UTC)</th><th scope="col">Playbook</th><th scope="col">Action</th><th scope="col">Scope</th><th scope="col">Result</th><th scope="col">Undo</th></tr></thead>
+      <tbody>${rows.map((a) => `<tr><td class="nowrap">${timeEl(a.t)}</td><td>${a.pb}${a.pbId ? `<small class="mono">${a.pbId}</small>` : ""}</td><td>${a.action}</td><td>${scopeText(a.scope)}</td><td>${resultCell(a)}</td><td class="nowrap">${undoCell(a)}</td></tr>`).join("")}</tbody>`;
+  }
+
+  const renderAll = () => { renderSummary(); renderDecisions(); renderAudit(); };
+
+  // Dialog: one component for approve, dismiss, undo and retry. Verdict shows only after the request answers (FBK-11, FBK-10)
+  const dlg = $("dlg"), okBtn = $("dlg-ok");
+  let pending = null, opener = null;
+  const request = () => new Promise((resolve) => setTimeout(resolve, 900)); // Example only: replace with a request to your API.
+  function ask(cfg, from) {
+    pending = cfg; opener = from;
+    $("dlg-title").textContent = cfg.title;
+    $("dlg-body").innerHTML = `<p>${cfg.lead}</p>${cfg.items ? `<ul>${cfg.items.map((x) => `<li>${x}</li>`).join("")}</ul>` : ""}`;
+    $("dlg-ack-row").hidden = !cfg.ack; $("dlg-ack").checked = false; $("dlg-ack-text").textContent = cfg.ack || "";
+    $("dlg-note").value = ""; $("dlg-hint").textContent = "";
+    okBtn.className = `btn ${cfg.danger ? "btn-danger" : "btn-primary"}`;
+    okBtn.textContent = cfg.ok; okBtn.style.minWidth = ""; okBtn.removeAttribute("aria-busy");
+    okBtn.setAttribute("aria-disabled", String(!!cfg.ack));
+    dlg.showModal();
+    $("dlg-cancel").focus();
+  }
+  $("dlg-ack").addEventListener("change", (e) => { okBtn.setAttribute("aria-disabled", String(!e.target.checked)); $("dlg-hint").textContent = ""; });
+  okBtn.addEventListener("click", async () => {
+    if (okBtn.getAttribute("aria-busy") === "true") return;
+    if (okBtn.getAttribute("aria-disabled") === "true") { $("dlg-hint").textContent = "Check the box above to confirm you understand the impact."; $("dlg-ack").focus(); return; }
+    okBtn.style.minWidth = `${okBtn.offsetWidth}px`; // ENG-03: the button keeps its size while busy
+    okBtn.setAttribute("aria-busy", "true"); okBtn.textContent = "Working…";
+    await request();
+    const note = $("dlg-note").value.trim();
+    dlg.close("done");
+    pending.run(note);
+    renderAll();
+  });
+  // Focus returns to the opener, or to the record that replaced it after a re-render
+  dlg.addEventListener("close", () => { (document.contains(opener) ? opener : $(pending?.focus || "audit-title")).focus(); });
+
+  const toast = (msg) => { $("toast").textContent = msg; clearTimeout(toast.t); toast.t = setTimeout(() => { $("toast").textContent = ""; }, 8000); };
+  const log = (row) => { audit.unshift({ id: `m${audit.length + 1}`, t: now(), pb: `Manual: ${ME}`, pbId: "", ...row }); return audit[0].id; };
+
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("button, a"); if (!b) return;
+    const d = decisions.find((x) => x.id === (b.dataset.toggle || b.dataset.approve || b.dataset.dismiss));
+    if (b.dataset.toggle) { d.open = !d.open; renderDecisions(); document.querySelector(`[data-toggle="${d.id}"]`).focus(); }
+    else if (b.dataset.approve) {
+      const head = `<div class="dec-head">${sev(d.sev)}<h3><button class="dec-toggle" type="button" aria-expanded="${d.open}" aria-controls="${d.id}-body" data-toggle="${d.id}"><span>${d.title}</span>${ic("chev")}</button></h3>
+        <p class="wait num">${ic("clock")}Waiting <span data-since="${d.since}">${mins.format(Math.floor((now() - d.since) / 60000))}</span></p></div>`;
+      const dur = d.durs ? d.durs[d.dur] : "";
+      ask({ title: d.ask(dur), lead: `This changes <b>Production</b> for Acme Retail in <code>us-east-1</code>. Evidence: ${d.signals[0][0]}.`, items: d.blast, ack: d.ack, danger: d.danger, ok: d.ok(dur),
+        run: (note) => { d.state = "approved"; const w = audit.find((a) => a.decision === d.id); if (w) { w.res = "ok"; w.note = "Approved by you"; }
+          d.result = log({ action: d.act(dur), scope: d.scope, res: "ok", note: note || undefined, undo: d.undoFx ? true : "Can't undo: emails sent", undoFx: d.undoFx });
+          d.doneText = d.done(dur); toast(`${d.doneText} in Production · Acme Retail · us-east-1.`); }, focus: d.id }, b);
+    } else if (b.dataset.dismiss) {
+      ask({ title: `Dismiss the proposal for ${d.plain}?`, lead: "Nothing changes in Production. The automatic steps already taken stay in place, and the dismissal is recorded with your note.", ok: "Dismiss proposal",
+        run: (note) => { d.state = "dismissed"; const w = audit.find((a) => a.decision === d.id); if (w) { w.res = "dismissed"; w.note = "By you"; }
+          d.result = log({ action: `Dismiss proposal: ${d.plain}`, scope: d.scope, res: "ok", note: note || undefined, undo: "Nothing to undo" }); toast("Proposal dismissed. Nothing changed in Production."); }, focus: d.id }, b);
+    } else if (b.dataset.undo) {
+      const a = byId(b.dataset.undo);
+      ask({ title: `Undo “${a.action}”?`, lead: `This changes <b>Production</b> now for ${scopeText(a.scope)}.`, items: [a.undoFx, "The original action stays in the audit trail."], danger: true, ok: "Undo in Production",
+        run: () => { a.res = "undone"; a.note = `By you at ${utc(now())}`; log({ action: `Undo: ${a.action}`, scope: a.scope, res: "ok", undo: "Run the step again to redo" }); toast(`Undone in Production: ${a.action}.`); } }, b);
+    } else if (b.dataset.retry) {
+      const a = byId(b.dataset.retry);
+      ask({ title: `Retry “${a.action}”?`, lead: `The provider accepts the old key for 10 min after rotation, so webhooks keep arriving. Scope: ${scopeText(a.scope)}.`, ok: "Retry in Production",
+        run: () => { a.undo = "Retried"; log({ pb: a.pb, pbId: a.pbId, action: `${a.action} (retry by you)`, scope: a.scope, res: "ok", undo: "Nothing to undo" }); toast("Key rotated in Production."); } }, b);
+    } else if (b.dataset.dur) { const [id, i] = b.dataset.dur.split(":"); decisions.find((x) => x.id === id).dur = +i; renderDecisions(); document.querySelector(`[data-dur="${id}:${i}"]`).focus(); }
+    else if (b.dataset.f) { [...$("audit-filter").children].forEach((x) => x.setAttribute("aria-checked", String(x === b))); renderAudit(); $("audit-filter").querySelector('[aria-checked="true"]').focus(); }
+  });
+  // Radio groups: arrow keys move the selection (CMP-23)
+  document.addEventListener("keydown", (e) => {
+    const r = e.target.closest('[role="radio"]'); const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    if (!r || !step) return;
+    e.preventDefault();
+    const all = [...r.parentElement.children]; all[(all.indexOf(r) + step + all.length) % all.length].click();
+  });
+
+  // Attack paths: two incidents across five layers, drawn from data with exact evidence on focus (SCR-28, CMP-18)
+  const stages = ["Internet", "Edge", "Identity", "App", "Data"];
+  const KIND = { src: ["dot", "Source"], bad: ["crit", "Compromised"], warn: ["med", "At risk"], ok: ["check", "Contained"] };
+  const lanes = [
+    { name: "Token misuse", ref: "INC-2291", links: ["full", "full", "full", "full"], nodes: [
+      ["198.51.100.23", "src", "Source, new network", "First seen 13:52:07 UTC. Hosting network, no prior traffic to Acme Retail."],
+      ["api-gw-use1", "warn", "Passed: valid token", "The gateway accepted the token because it was valid; 1,284 calls passed."],
+      ["svc-inventory-sync", "bad", "Compromised", "Token tok_…9f3a used from 198.51.100.23 with an unfamiliar user agent."],
+      ["customer-api", "ok", "Contained 14:01", "Token limited to inventory endpoints at 14:01:41 UTC; later calls were rejected."],
+      ["customers-db", "bad", "Exposed: 1,284 rows", "Names and emails of 1,284 customers were read between 13:52 and 14:01 UTC. No payment data."]] },
+    { name: "Credential stuffing", ref: "DET-0142", links: ["full", "limited", "full", "none"], nodes: [
+      ["203.0.113.0/24", "src", "Source, 214 IPs", "214 addresses sent 18,449 sign-in attempts in 29 minutes."],
+      ["edge-waf-use1", "warn", "Rate-limited 13:43", "5 sign-in attempts per minute per address since 13:43:05 UTC; block waits for approval."],
+      ["auth-service", "warn", "At risk: 37 accounts", "37 sign-ins succeeded; sessions ended and MFA required at 13:44 UTC."],
+      ["storefront", "warn", "2 orders held", "2 accounts changed shipping addresses; orders A-88213 and A-88240 held for review."],
+      ["orders-db", "ok", "No access seen", "No queries from the 37 sessions reached the orders database."]] }
+  ];
+  const NW = 158, NH = 58, X = (i) => i * 186 + 1, LY = [52, 164];
+  $("path-svg").innerHTML = stages.map((s, i) => `<text class="stage" x="${X(i) + NW / 2}" y="16" text-anchor="middle">${s}</text>`).join("") +
+    lanes.map((ln, li) => { const y = LY[li], cy = y + NH / 2;
+      return `<text x="${X(0)}" y="${y - 10}">${ln.name} · <tspan class="n-name" style="font-weight:400">${ln.ref}</tspan></text>` +
+        ln.links.map((k, i) => `<line class="link ${k}" x1="${X(i) + NW + 3}" y1="${cy}" x2="${X(i + 1) - 4}" y2="${cy}"${k === "none" ? "" : ' marker-end="url(#arrow)"'}/>`).join("") +
+        ln.nodes.map(([name, k, status, detail], i) => `<g class="node k-${k}" tabindex="0" role="img" aria-label="${stages[i]}, ${name}: ${status}. ${detail}" data-detail="${stages[i]} · ${name}: ${detail}">
+          <rect x="${X(i)}" y="${y}" width="${NW}" height="${NH}" rx="6"/><text class="n-name" x="${X(i) + 10}" y="${y + 23}">${name}</text>
+          <use class="n-ic" href="#i-${KIND[k][0]}" x="${X(i) + 9}" y="${y + 33}" width="14" height="14"/><text class="n-status" x="${X(i) + 28}" y="${y + 45}">${status}</text></g>`).join(""); }).join("");
+  $("path-table").innerHTML = `<thead><tr><th scope="col">Path</th>${stages.map((s) => `<th scope="col">${s}</th>`).join("")}</tr></thead><tbody>${lanes.map((ln) => `<tr><th scope="row">${ln.name}</th>${ln.nodes.map(([name, , status]) => `<td><code>${name}</code><small>${status}</small></td>`).join("")}</tr>`).join("")}</tbody>`;
+  const showNode = (e) => { const g = e.target.closest?.(".node"); if (g) $("path-detail").textContent = g.dataset.detail; };
+  $("path-svg").addEventListener("focusin", showNode);
+  $("path-svg").addEventListener("pointerover", showNode);
+
+  // Detection quality: every rate with its numerator, denominator, target and comparison in percentage points (CMP-17, COP-13)
+  const ratios = [
+    { name: "Alerts confirmed", num: 41, den: 52, of: "closed high and critical alerts", target: 0.75, dir: "min", prev: [35, 50] },
+    { name: "Incidents detected before a report", num: 17, den: 19, of: "confirmed incidents", target: 0.9, dir: "min", prev: [15, 18] },
+    { name: "Automatic actions undone by analysts", num: 6, den: 148, of: "playbook actions", target: 0.05, dir: "max", prev: [9, 131] }
+  ];
+  $("ratios").innerHTML = ratios.map((r) => {
+    const v = r.num / r.den, pv = r.prev[0] / r.prev[1], pp = Math.round((v - pv) * 100), met = r.dir === "min" ? v >= r.target : v < r.target;
+    const tgt = `target: ${r.dir === "min" ? "" : "under "}${pct.format(r.target)}${r.dir === "min" ? " or more" : ""}`;
+    const good = r.dir === "min" ? pp > 0 : pp < 0;
+    return `<li class="ratio"><h3>${r.name}</h3><p class="r-val num"><b>${r.num} of ${n.format(r.den)}</b> ${r.of} (${pct.format(v)})</p>
+      <div class="r-bar" tabindex="0" role="img" aria-label="${r.name}: ${r.num} of ${r.den}, ${pct.format(v)}; ${tgt}"><span class="r-fill" style="width:${v * 100}%"></span><span class="r-target" style="left:${r.target * 100}%"></span></div>
+      <p class="r-foot num"><span class="verdict ${met ? "is-ok" : "is-miss"}">${ic(met ? "check" : "med")}${met ? "Meets" : "Misses"} ${tgt}</span><span class="delta ${good ? "delta-good" : "delta-bad"}">${ic(pp > 0 ? "up" : "down")}${pp > 0 ? "+" : "−"}${Math.abs(pp)} pp vs previous 30 days (${r.prev[0]} of ${r.prev[1]})</span></p></li>`;
+  }).join("");
+  $("times").innerHTML = [
+    ["Mean time to detect", "6 min 40 s", "−1 min 50 s", "From the first malicious event in the logs to the alert. Mean of the 17 incidents Sora Shield detected."],
+    ["Mean time to respond", "23 min", "−8 min", "From the alert to containment: the first action, automatic or approved, that stopped the activity. Same 17 incidents."]
+  ].map(([k, v, dlt, def]) => `<div><dt>${k}</dt><dd class="big num">${v}</dd><dd class="delta delta-good num">${ic("down")}${dlt} vs previous 30 days</dd><dd class="def">${def}</dd></div>`).join("");
+
+  // Threat categories: sorted by value, bars from zero, exact values printed and on focus (CMP-34)
+  const cats = [["Credential attacks", 23, 14], ["Web exploits", 17, 19], ["Bot scraping", 12, 11], ["Token misuse", 6, 2], ["Endpoint malware", 4, 5], ["Reported phishing", 3, 3], ["Data exfiltration", 2, 1]].sort((a, b) => b[1] - a[1]);
+  const total = cats.reduce((s, c) => s + c[1], 0), prevTotal = cats.reduce((s, c) => s + c[2], 0), MAX = 25;
+  $("cat-sum").textContent = `Credential attacks lead with ${cats[0][1]} of ${total} alerts, up from ${cats[0][2]}; token misuse tripled. Previous 7 days: ${prevTotal} alerts.`;
+  $("bars").innerHTML = cats.map(([name, v, p]) => `<li class="bar-row"><span>${name}</span><span class="b-track"><span class="b-fill" tabindex="0" role="img" style="width:${(v / MAX) * 100}%" aria-label="${name}: ${v} alerts, ${pct.format(v / total)} of ${total}; previous 7 days ${p}" data-detail="${name}: ${v} alerts, ${pct.format(v / total)} of ${total}. Previous 7 days: ${p} (${v - p > 0 ? "+" : v - p < 0 ? "−" : "±"}${Math.abs(v - p)})."></span><span class="b-prev" style="left:${(p / MAX) * 100}%"></span></span><span class="b-val num">${v}</span></li>`).join("");
+  $("ticks").innerHTML = [0, 5, 10, 15, 20, 25].map((t) => `<span class="num" style="left:${(t / MAX) * 100}%">${t}</span>`).join("");
+  const showBar = (e) => { const b = e.target.closest?.(".b-fill"); if (b) $("bar-detail").textContent = b.dataset.detail; };
+  $("bars").addEventListener("focusin", showBar);
+  $("bars").addEventListener("pointerover", showBar);
+
+  // Live feed: new events are held behind a button, never inserted under the reader; pause, resume and connection state (CMP-35)
+  const feed = [
+    [T(14, 6, 52), "high", "Token call rejected by the new limit", "GET /v1/customers", "198.51.100.23"],
+    [T(14, 5, 31), "med", "WAF blocked an SQL injection pattern", "shop.example.com/search", "192.0.2.77"],
+    [T(14, 4, 10), "low", "Admin signed in from a new browser on a known device", "l.vogt@example.com", ""],
+    [T(14, 2, 47), "info", "Incident opened and on-call paged", "INC-2291", ""],
+    [T(14, 1, 41), "info", "Playbook limited the token to inventory endpoints", "tok_…9f3a", ""],
+    [T(14, 1, 15), "crit", "Unusual data read: 1,284 customer records in 9 min", "customers-db", "198.51.100.23"],
+    [T(13, 58, 3), "med", "Bot scraping product pages, 412 requests per minute", "shop.example.com/p/*", "192.0.2.140"],
+    [T(13, 52, 7), "high", "Service token used from a new network", "svc-inventory-sync", "198.51.100.23"],
+    [T(13, 43, 5), "info", "Playbook rate-limited sign-ins from the range", "edge-waf-use1", "203.0.113.0/24"],
+    [T(13, 41, 30), "crit", "Credential-stuffing burst: 18,412 failed sign-ins in 29 min", "auth-service", "203.0.113.0/24"]
+  ];
+  const pool = [
+    ["low", "Rate-limited sign-in attempt", "auth-service", "203.0.113.41"], ["med", "WAF blocked a path traversal attempt", "shop.example.com/static", "192.0.2.19"],
+    ["high", "Token call rejected by the new limit", "GET /v1/customers", "198.51.100.23"], ["low", "Rate-limited sign-in attempt", "auth-service", "203.0.113.188"],
+    ["crit", "Sign-in succeeded with a breached password", "auth-service", "192.0.2.201"], ["info", "Detection rules synced, 0 changes", "rules v2026.10.28", ""]
+  ];
+  let held = [[T(14, 7, 1), ...pool[0]], [T(14, 7, 2), ...pool[1]]], paused = false, lastUpdate = T0, pi = 2, critHeld = 0;
+  const row = ([t, s, what, asset, src]) => `<li class="ev" tabindex="-1" data-sev="${s}">${sev(s)}<p class="ev-what">${what}</p>
+    <p class="ev-meta"><code>${asset}</code>${src ? ` · from <code>${src}</code>` : ""}<br>${timeEl(t)} · <span data-rel="${t}">${ago(t)}</span></p></li>`;
+  const events = $("events"), newbar = $("newbar");
+  function renderFeed() { events.innerHTML = feed.map(row).join(""); applyFilter(); renderHeld(); }
+  function renderHeld() {
+    newbar.hidden = paused || !held.length;
+    newbar.innerHTML = `${ic("up")}Show ${held.length} new ${held.length === 1 ? "event" : "events"}`;
+    const c = $("conn");
+    c.dataset.state = paused ? "paused" : "live";
+    c.innerHTML = paused ? `<b>Paused</b> · ${held.length} held` : `<b>Live</b> · updated ${timeEl(lastUpdate)}`;
+  }
+  function applyFilter() { const only = $("sev-only").getAttribute("aria-checked") === "true"; events.querySelectorAll(".ev").forEach((li) => { li.hidden = only && !["crit", "high"].includes(li.dataset.sev); }); }
+  newbar.addEventListener("click", () => {
+    const count = held.length;
+    held.sort((a, b) => b[0] - a[0]);
+    events.insertAdjacentHTML("afterbegin", held.map(row).join(""));
+    feed.unshift(...held); held = []; critHeld = 0;
+    const fresh = [...events.querySelectorAll(".ev")].slice(0, count);
+    fresh.forEach((li) => { li.classList.add("is-new"); setTimeout(() => li.classList.remove("is-new"), 4000); });
+    applyFilter(); renderHeld();
+    (fresh.find((li) => !li.hidden) || events).focus();
+  });
+  $("pause").addEventListener("click", (e) => {
+    paused = !paused;
+    const b = e.currentTarget; b.setAttribute("aria-pressed", String(paused));
+    b.innerHTML = `${ic(paused ? "play" : "pause")}<span>${paused ? "Resume" : "Pause"}</span>`;
+    renderHeld();
+  });
+  $("sev-only").addEventListener("click", (e) => { const on = e.currentTarget.getAttribute("aria-checked") !== "true"; e.currentTarget.setAttribute("aria-checked", String(on)); applyFilter(); });
+  // Simulated stream: example only, replace with your event socket. Critical arrivals are announced in batches, never row by row.
+  function arrive() {
+    const ev = [now(), ...pool[pi++ % pool.length]];
+    held.push(ev); lastUpdate = ev[0];
+    if (ev[1] === "crit") critHeld++;
+    renderHeld();
+    setTimeout(arrive, 6000 + (pi % 3) * 2000);
+  }
+  setTimeout(arrive, 6000);
+  setInterval(() => { if (critHeld && !paused) $("feed-say").textContent = `${critHeld} new critical ${critHeld === 1 ? "event" : "events"} held. Use Show new events to read.`; }, 15000);
+  // Relative times tick on the next whole second (ENG-09); minutes waiting refresh with them
+  (function tick() {
+    events.querySelectorAll("[data-rel]").forEach((s) => { s.textContent = ago(+s.dataset.rel); });
+    document.querySelectorAll("[data-since]").forEach((s) => { s.textContent = mins.format(Math.floor((now() - +s.dataset.since) / 60000)); });
+    if ((now() / 1000) % 60 < 1) renderSummary();
+    setTimeout(tick, 1000 - (now() % 1000));
+  })();
+
+  renderAll(); renderFeed();
+  try { history.replaceState(null, "", "?env=production&account=acme-retail&region=us-east-1&range=24h"); } catch (e) { /* file previews may refuse; the scope bar still shows it */ }
+</script>
+</body>
+</html>

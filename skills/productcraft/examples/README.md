@@ -1,6 +1,6 @@
 # ProductCraft reference screens
 
-These are original example screens showing ProductCraft's UI rules applied to real product surfaces. There are 44 pages and 165 screens: 16 dashboards and 28 pages of component and flow versions.
+These are original example screens showing ProductCraft's UI rules applied to real product surfaces. There are 49 pages and 170 screens: 21 dashboards and 28 pages of component and flow versions.
 
 Each page is plain HTML and CSS. A little JavaScript adds real behavior: switches, sorting, segmented controls, code entry, command palettes, dialogs, drawers and collapsing sidebars. No page makes external requests. Every page cites the rule IDs it demonstrates, in its top comment and under each version.
 
@@ -35,6 +35,11 @@ Every dashboard leads with the decision it supports (SCR-01) and keeps one focal
 | `dashboard-v14.html` | Grid load forecast: will demand exceed capacity? | Answer tile, forecast band vs capacity line, peak-risk alerts, generation mix |
 | `dashboard-v15.html` | Accounts payable: what do I approve and pay? | Master-detail bills, line items that add up, approval steps, cash out by week |
 | `dashboard-v16.html` | Clinic monitoring: which patients need attention now? | Urgency-sorted patients, out-of-range flags with ranges, vitals band chart, care tasks |
+| `dashboard-v17.html` | People operations: what needs HR action this week? | Scope bar with entity, location and period; deadline strip; leave approvals with day-by-day coverage against minimum staffing; payroll run that adds up, with blockers; onboarding checklist that clears payroll blockers live |
+| `dashboard-v18.html` | Security operations: what needs a human security decision right now? | Production scope bar with a hazard-striped edge, approval cards with evidence, blast radius and undoable automatic steps, calibrated confidence with its basis, live feed that holds new events behind a button, attack-path lanes, rates with denominators, playbook audit trail |
+| `dashboard-v19.html` | Wind farm: which turbines are losing energy and why? | Lost energy against expected with causes that add up, turbines sorted by lost MWh with automated-stop evidence, power curve with bin averages, direction bars instead of a wind rose, stops matched to a low-wind forecast with a work-limit slider and a confirm dialog |
+| `dashboard-v20.html` | Small-business cash: how much cash do we have, and what is coming in and going out? | Scope strip with entity, currency and period, total cash split by account with runway and its basis, money in vs out by month with net values, masked company cards with freeze confirmation, filterable transactions, revenue by year as bars, report named for scope and period |
+| `dashboard-v21.html` | Smart-home wall panel: what is on, and what is using power right now? | Live watts with ranked loads that sum to the total and cost per hour, device tiles with switch, slider and temperature stepper, scene radios, unlock dialog that restates door and home, hourly energy bars with a table, opt-in Home or Away presence |
 
 ## Components and flows
 

@@ -1,6 +1,6 @@
 # ProductCraft
 
-**A Sora Labs Agent Skill** · version 1.8.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
+**A Sora Labs Agent Skill** · version 1.9.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
 
 ProductCraft is one installable skill that teaches a coding agent to build, harden and ship software that **shows the important thing first, behaves honestly, is proven by checks that actually ran, works on every device, and is secure and lawful where it matters**. It routes each task to only the modules that task needs: a bug fix reads the engineering workflow, a table change reads the table guidance, an auth change reads the auth-defense module, a destructive command triggers the agent-safety stop-check, and a launch reads the security and legal-readiness reviews.
 
@@ -43,7 +43,7 @@ It is a working skill for real codebases, not a theme pack, legal service or sec
 | **Language choice** | Offers Rust for new projects, services or performance-critical components, with honest trade-offs, and remembers the answer | `modules/language-choice.md` |
 | **Lean output** | Opt-in shorter answers that never shorten safety warnings, security findings, errors or legal caveats | `modules/lean-output.md` |
 | **Pattern library** | One principle, one implementation rule and one guardrail for each UI/UX pattern | `references/pattern-library.md` |
-| **Reference screens** | 44 original HTML pages with 165 screens: 16 dashboards plus auth, settings, navigation, search, charts, cards, tables, forms, overlays, feedback, commerce, pricing, landing pages, mobile, messaging, onboarding and brand | `examples/README.md` |
+| **Reference screens** | 49 original HTML pages with 170 screens: 21 dashboards plus auth, settings, navigation, search, charts, cards, tables, forms, overlays, feedback, commerce, pricing, landing pages, mobile, messaging, onboarding and brand | `examples/README.md` |
 
 The pattern library covers foundations, feedback, forms, interaction, navigation, responsive layout, data views, conversion, safety and advanced patterns such as live presence, chat and view transitions. A machine-readable version is in `references/pattern-index.json`.
 
@@ -230,9 +230,9 @@ Add this to your project's `CLAUDE.md` or `AGENTS.md` so the agent keeps using P
 
 ## Reference screens
 
-`examples/` holds 44 original reference pages with 165 screens, including 16 dashboards. Each page is plain HTML and CSS with no external requests, cites the rule IDs it demonstrates and passes a WCAG AA contrast check. The router points an agent at the page that matches its task. The agent studies the semantics, states and details, then rebuilds the pattern with the project's own components and tokens. [`examples/README.md`](examples/README.md) lists every page and version.
+`examples/` holds 49 original reference pages with 170 screens, including 21 dashboards. Each page is plain HTML and CSS with no external requests, cites the rule IDs it demonstrates and passes a WCAG AA contrast check. The router points an agent at the page that matches its task. The agent studies the semantics, states and details, then rebuilds the pattern with the project's own components and tokens. [`examples/README.md`](examples/README.md) lists every page and version.
 
-### Dashboards v1–v16
+### Dashboards v1–v21
 
 |   |   |   |   |
 |---|---|---|---|
@@ -240,6 +240,8 @@ Add this to your project's `CLAUDE.md` or `AGENTS.md` so the agent keeps using P
 | <a href="../../docs/screens/dashboard-v5.jpg"><img src="../../docs/screens/thumbs/dashboard-v5.jpg" alt="v5 example screen"></a><br><b>v5</b> · Sales CRM · <a href="examples/dashboard-v5.html">HTML</a> | <a href="../../docs/screens/dashboard-v6.jpg"><img src="../../docs/screens/thumbs/dashboard-v6.jpg" alt="v6 example screen"></a><br><b>v6</b> · Learning · <a href="examples/dashboard-v6.html">HTML</a> | <a href="../../docs/screens/dashboard-v7.jpg"><img src="../../docs/screens/thumbs/dashboard-v7.jpg" alt="v7 example screen"></a><br><b>v7</b> · Property · <a href="examples/dashboard-v7.html">HTML</a> | <a href="../../docs/screens/dashboard-v8.jpg"><img src="../../docs/screens/thumbs/dashboard-v8.jpg" alt="v8 example screen"></a><br><b>v8</b> · Workspace admin · <a href="examples/dashboard-v8.html">HTML</a> |
 | <a href="../../docs/screens/dashboard-v9.jpg"><img src="../../docs/screens/thumbs/dashboard-v9.jpg" alt="v9 example screen"></a><br><b>v9</b> · Credit score (dark) · <a href="examples/dashboard-v9.html">HTML</a> | <a href="../../docs/screens/dashboard-v10.jpg"><img src="../../docs/screens/thumbs/dashboard-v10.jpg" alt="v10 example screen"></a><br><b>v10</b> · Creator (dark) · <a href="examples/dashboard-v10.html">HTML</a> | <a href="../../docs/screens/dashboard-v11.jpg"><img src="../../docs/screens/thumbs/dashboard-v11.jpg" alt="v11 example screen"></a><br><b>v11</b> · Fitness · <a href="examples/dashboard-v11.html">HTML</a> | <a href="../../docs/screens/dashboard-v12.jpg"><img src="../../docs/screens/thumbs/dashboard-v12.jpg" alt="v12 example screen"></a><br><b>v12</b> · Smart home (dark) · <a href="examples/dashboard-v12.html">HTML</a> |
 | <a href="../../docs/screens/dashboard-v13.jpg"><img src="../../docs/screens/thumbs/dashboard-v13.jpg" alt="v13 example screen"></a><br><b>v13</b> · Logistics · <a href="examples/dashboard-v13.html">HTML</a> | <a href="../../docs/screens/dashboard-v14.jpg"><img src="../../docs/screens/thumbs/dashboard-v14.jpg" alt="v14 example screen"></a><br><b>v14</b> · Grid forecast · <a href="examples/dashboard-v14.html">HTML</a> | <a href="../../docs/screens/dashboard-v15.jpg"><img src="../../docs/screens/thumbs/dashboard-v15.jpg" alt="v15 example screen"></a><br><b>v15</b> · Accounts payable · <a href="examples/dashboard-v15.html">HTML</a> | <a href="../../docs/screens/dashboard-v16.jpg"><img src="../../docs/screens/thumbs/dashboard-v16.jpg" alt="v16 example screen"></a><br><b>v16</b> · Clinic monitoring · <a href="examples/dashboard-v16.html">HTML</a> |
+| <a href="../../docs/screens/dashboard-v17.jpg"><img src="../../docs/screens/thumbs/dashboard-v17.jpg" alt="v17 example screen"></a><br><b>v17</b> · People operations · <a href="examples/dashboard-v17.html">HTML</a> | <a href="../../docs/screens/dashboard-v18.jpg"><img src="../../docs/screens/thumbs/dashboard-v18.jpg" alt="v18 example screen"></a><br><b>v18</b> · Security operations · <a href="examples/dashboard-v18.html">HTML</a> | <a href="../../docs/screens/dashboard-v19.jpg"><img src="../../docs/screens/thumbs/dashboard-v19.jpg" alt="v19 example screen"></a><br><b>v19</b> · Wind farm · <a href="examples/dashboard-v19.html">HTML</a> | <a href="../../docs/screens/dashboard-v20.jpg"><img src="../../docs/screens/thumbs/dashboard-v20.jpg" alt="v20 example screen"></a><br><b>v20</b> · Business cash · <a href="examples/dashboard-v20.html">HTML</a> |
+| <a href="../../docs/screens/dashboard-v21.jpg"><img src="../../docs/screens/thumbs/dashboard-v21.jpg" alt="v21 example screen"></a><br><b>v21</b> · Home wall panel · <a href="examples/dashboard-v21.html">HTML</a> |   |   |   |
 
 ### Components and flows
 

@@ -1,0 +1,747 @@
+<!doctype html>
+<!-- ProductCraft example: dashboard-v20 (small-business cash management, light, top bar with scope strip, "Sora Treasury"). Original Sora Labs example, MIT License.
+     The business, people, banks and figures are fictional; nothing here is financial advice.
+     Demonstrates: SCR-01, SCR-02, SCR-23, SCR-27, LAY-01, LAY-02, LAY-05, LAY-08, TYP-02, TYP-04, TYP-09, COL-01, COL-06, COL-07, COL-10,
+     CMP-07, CMP-12, CMP-15, CMP-16, CMP-17, CMP-18, CMP-19, CMP-20, CMP-23, CMP-26, CMP-34, NAV-03, NAV-17, FRM-01, FRM-05, FRM-09, FRM-11, FRM-22,
+     BTN-01, BTN-08, BTN-14, FBK-04, FBK-10, FBK-11, FBK-18, COP-01, COP-08, COP-09, COP-10, COP-12, ENG-05, ENG-07, ENG-10, MOT-04 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Business cash management dashboard</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* Page accent: petrol, routed through the accent tokens (CMP-26). Measured (COL-01): white on #0f5f6e 7.29:1,
+       #0d5562 on #e8f2f3 7.39:1 and on #f1f3f5 7.57:1, #0f5f6e on #f4f6f6 6.72:1, #646b78 on #f4f6f6 4.94:1, on #f1f3f5 4.82:1 and on #e8f2f3 4.71:1,
+       #4b5563 on #e8f2f3 6.63:1, toast text white on #15171a 17.9:1, toast icon #7fd3c1 10.25:1 and close icon #c9ced6 11.36:1 on #15171a.
+       Graphics at 3:1 or more: money-in bars #0f5f6e on white 7.29:1, money-out bars #7a8494 on white 3.78:1 and on #f1f3f5 3.4:1,
+       control borders #858d99 on white 3.35:1, high-use meter #b45309 on white 5.02:1. */
+    :root {
+      --accent: #0f5f6e; --accent-hover: #0b4c58; --accent-soft: #e8f2f3; --accent-ink: #0d5562; --focus: #0f5f6e;
+      --bg: #f4f6f6; --line-strong: #858d99; --c-in: #0f5f6e; --c-out: #7a8494; --text-display: 40px; --text-input: 16px;
+    }
+    .i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+    /* Resting cards separate by border only; shadows are kept for popovers, dialogs and the toast (CMP-07) */
+    .card { box-shadow: none; border-radius: var(--radius-md); min-width: 0; } .btn-sm { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+    .link-btn { padding: 0; border: 0; background: none; color: var(--accent-ink); font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+
+    /* Top bar: brand, sections and account, with the scope strip inside the same header on every page (SCR-27) */
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); } .bar-row { display: flex; align-items: center; gap: var(--space-6); min-height: 56px; padding: 0 var(--space-6); }
+    .brand { display: flex; align-items: center; gap: var(--space-2); color: var(--text); font-weight: 700; white-space: nowrap; }
+    .brand:hover { text-decoration: none; } .brand svg { width: 28px; height: 28px; } .brand .tile { fill: var(--accent); }
+    .brand .sun { fill: none; stroke: var(--on-accent); stroke-width: 2.5; stroke-linecap: round; } .nav ul { display: flex; gap: var(--space-5); margin: 0; padding: 0; list-style: none; }
+    .nav a { display: inline-flex; align-items: center; min-height: 56px; border-bottom: 2px solid transparent; color: var(--text-2); font-size: var(--text-sm); font-weight: 600; white-space: nowrap; }
+    .nav a:hover { color: var(--text); text-decoration: none; }
+    /* Current section: ink, weight and an underline, not color alone (NAV-03) */
+    .nav a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); } .bar-row .avatar { margin-left: auto; }
+    .scope { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2) var(--space-5); padding: var(--space-2) var(--space-6); border-top: 1px solid var(--border); font-size: var(--text-sm); }
+    .scope-item { position: relative; display: flex; align-items: center; gap: var(--space-2); } .scope-label { color: var(--text-2); } .scope-value { font-weight: 600; }
+    .scope-btn, .scope select { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .scope-btn .i { width: 16px; height: 16px; color: var(--text-2); } .scope-sync { margin-left: auto; color: var(--text-2); font-size: var(--text-xs); }
+
+    /* Anchored popovers: disclosure buttons with aria-expanded, closed by Escape or an outside click (NAV-17, CMP-12) */
+    .pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 20; width: min(320px, calc(100vw - 32px)); padding: var(--space-3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); font-size: var(--text-sm); color: var(--text-2); }
+    .pop[hidden] { display: none; } .pop.end { left: auto; right: 0; } .pop-title { display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); color: var(--text); font-weight: 600; }
+    .pop ul { display: grid; gap: 2px; margin: 0; padding: 0; list-style: none; }
+    .pop li a { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 0 var(--space-2); padding: var(--space-2); border-radius: var(--radius-sm); color: var(--text); }
+    .pop li a:hover { background: var(--surface-2); text-decoration: none; } .pop li a[aria-current="true"] { background: var(--accent-soft); }
+    .pop li a small { grid-column: 2; color: var(--text-2); font-size: var(--text-xs); }
+
+    .main { max-width: 1440px; margin: 0 auto; padding: var(--space-5) var(--space-6) var(--space-7); }
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5); }
+    .page-head p { margin-top: var(--space-1); color: var(--text-2); } .export { display: grid; justify-items: end; gap: var(--space-1); }
+    .export small { max-width: 100%; color: var(--text-2); font-size: var(--text-xs); overflow-wrap: anywhere; }
+    /* 12-column grid: the answer row first, then the working row (LAY-08) */
+    .grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-4); } .grid + .grid { margin-top: var(--space-4); }
+    .span-5 { grid-column: span 5; } .span-7 { grid-column: span 7; } .span-8 { grid-column: span 8; align-self: start; } .span-4 { grid-column: span 4; }
+    .stack { display: grid; gap: var(--space-4); align-content: start; min-width: 0; } .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+    .card-head > div { min-width: 0; } .card-head h2 { font-size: var(--text-md); }
+    .takeaway { margin-top: 2px; font-size: var(--text-sm); color: var(--text-2); } .foot { margin-top: var(--space-3); font-size: var(--text-xs); color: var(--text-2); }
+
+    /* Cash card: the answer, large, with its as-of time, parts that add up and the runway basis (SCR-01, LAY-05, CMP-17) */
+    .cash { display: grid; gap: var(--space-4); align-content: start; } .cash-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .cash-top h2 { font-size: var(--text-sm); color: var(--text-2); }
+    .eye { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 32px; padding: 0 var(--space-2); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--text-2); font-size: var(--text-xs); font-weight: 600; white-space: nowrap; cursor: pointer; }
+    .eye:hover { background: var(--surface-2); color: var(--text); } .eye .off, .eye[aria-pressed="true"] .on { display: none; } .eye[aria-pressed="true"] .off { display: block; }
+    .headline { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-4); align-items: end; }
+    .figure { font-size: var(--text-display); font-weight: 700; line-height: 1.1; letter-spacing: -0.02em; } .figure .cents { font-size: var(--text-xl); color: var(--text-2); letter-spacing: 0; }
+    .cash-sub { display: flex; flex-wrap: wrap; gap: 2px var(--space-3); margin-top: var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .runway { padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); background: var(--accent-soft); text-align: right; }
+    .runway dt { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .runway dd { margin: 0; font-size: var(--text-xl); font-weight: 700; line-height: 1.2; color: var(--accent-ink); } .runway dd small { font-size: var(--text-sm); font-weight: 600; }
+    .basis { font-size: var(--text-xs); color: var(--text-2); } .quick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); }
+    .quick .btn { padding: 0 var(--space-2); } .accts { margin: 0; padding: 0; list-style: none; }
+    .acct { display: grid; grid-template-columns: minmax(0, 1fr) 64px 128px; gap: var(--space-3); align-items: center; min-height: 52px; padding: var(--space-2) 0; border-top: 1px solid var(--border); }
+    .acct strong { display: block; font-size: var(--text-sm); font-weight: 600; } .acct small { display: block; font-size: var(--text-xs); color: var(--text-2); }
+    .acct small .i { width: 14px; height: 14px; margin-right: 4px; vertical-align: -2px; } .acct .short { color: var(--warning); font-weight: 600; } .acct .ok { color: var(--success); font-weight: 600; }
+    .share { height: 6px; border-radius: var(--radius-pill); background: var(--surface-2); } .share span { display: block; width: calc(var(--v) * 1%); height: 100%; border-radius: inherit; background: var(--c-in); }
+    .acct-bal { text-align: right; font-size: var(--text-sm); font-weight: 600; } .acct-bal small { font-weight: 500; }
+    .acct-total { display: flex; justify-content: space-between; gap: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--text); font-size: var(--text-sm); font-weight: 700; }
+    /* Hide balances: the real text stays in the DOM but hidden; bullets show in its place (SCR-23) */
+    [data-masked="true"] .mask { position: relative; display: inline-block; min-width: 6ch; visibility: hidden; }
+    [data-masked="true"] .mask::after { content: "••••••"; position: absolute; right: 0; top: 0; visibility: visible; color: var(--text-2); letter-spacing: 0.1em; }
+    [data-masked="true"] .figure .mask::after { left: 0; right: auto; color: var(--text); }
+
+    /* In vs out: paired bars from zero, a readout that doubles as the legend, net under each month (CMP-18, CMP-34) */
+    .flow { display: flex; flex-direction: column; }
+    .readout { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-5); margin-top: var(--space-4); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--surface-2); font-size: var(--text-xs); color: var(--text-2); }
+    .readout span { display: inline-flex; align-items: center; gap: var(--space-2); } .readout b, .readout strong { color: var(--text); font-size: var(--text-sm); }
+    .key { display: inline-block; width: 10px; height: 10px; border-radius: 2px; background: var(--c-in); } .key.out { background: var(--c-out); } .key.fc { background: none; border: 2px dashed var(--c-in); }
+    .scroll-x { flex: 1; display: flex; min-height: 0; } .chart { flex: 1; display: grid; grid-template-columns: 52px minmax(0, 1fr); grid-template-rows: minmax(220px, 1fr) auto auto; margin-top: var(--space-4); }
+    .y-axis { position: relative; grid-row: 1; font-size: var(--text-xs); color: var(--text-2); } .y-axis span { position: absolute; right: var(--space-2); bottom: calc(var(--p) * 1% - 8px); line-height: 16px; }
+    .plot { position: relative; grid-row: 1; grid-column: 2; border-bottom: 1px solid var(--text-3); }
+    .gridline { position: absolute; left: 0; right: 0; bottom: calc(var(--p) * 1%); border-top: 1px solid var(--border); }
+    .cols { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); }
+    .col { display: flex; align-items: flex-end; justify-content: center; gap: 3px; height: 100%; padding: 0; border: 0; border-radius: var(--radius-sm) var(--radius-sm) 0 0; background: transparent; cursor: default; }
+    .col:hover, .col.is-active { background: rgba(15, 95, 110, 0.07); } .col:focus-visible { outline-offset: -2px; }
+    .col > .in, .col > .out { width: min(18px, 32%); height: calc(var(--h) * 1%); border-radius: 3px 3px 0 0; background: var(--c-in); } .col > .out { background: var(--c-out); }
+    .x-row { grid-column: 2; display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); padding-top: var(--space-2); font-size: var(--text-xs); color: var(--text-2); text-align: center; }
+    .x-row .is-active { color: var(--text); font-weight: 700; } .row-label { grid-column: 1; padding-top: var(--space-2); font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .net-row { font-weight: 600; color: var(--text); white-space: nowrap; } details.as-table { margin-top: var(--space-3); font-size: var(--text-sm); }
+    details.as-table summary { width: fit-content; color: var(--accent-ink); font-weight: 600; cursor: pointer; }
+    .mini-table { width: 100%; margin-top: var(--space-2); border-collapse: collapse; font-size: var(--text-xs); }
+    .mini-table th, .mini-table td { padding: var(--space-1) var(--space-2); border-bottom: 1px solid var(--border); text-align: right; }
+    .mini-table th:first-child, .mini-table td:first-child { text-align: left; } .mini-table th { color: var(--text-2); font-weight: 600; }
+
+    /* Transactions: search, filter chips as a radio group, status pills, signed tabular amounts (CMP-19, CMP-20, CMP-23) */
+    .tools { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-4); } .search { position: relative; flex: 1 1 220px; }
+    .search .i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-2); }
+    .search input { width: 100%; min-height: 40px; padding: 0 var(--space-3) 0 38px; border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); font-size: var(--text-input); }
+    .chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+    .chip { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 32px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--surface); color: var(--text-2); font-size: var(--text-xs); font-weight: 600; cursor: pointer; }
+    .chip .i { display: none; width: 14px; height: 14px; }
+    .chip[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); } .chip[aria-checked="true"] .i { display: block; }
+    .tx { width: 100%; margin-top: var(--space-3); border-collapse: collapse; font-size: var(--text-sm); }
+    .tx th { padding: var(--space-2) var(--space-3); background: var(--surface-2); color: var(--text-2); font-size: var(--text-xs); font-weight: 600; text-align: left; white-space: nowrap; }
+    .tx td { padding: var(--space-3); border-top: 1px solid var(--border); vertical-align: middle; } .tx tbody tr:hover { background: var(--surface-2); } .tx .r { text-align: right; }
+    .payee { display: block; font-weight: 600; } .tx small { display: block; font-size: var(--text-xs); color: var(--text-2); } .tx .m-only { display: none; }
+    .amt { font-weight: 600; white-space: nowrap; } .is-declined .amt { color: var(--text-2); font-weight: 500; } .empty { padding: var(--space-6) var(--space-3); text-align: center; color: var(--text-2); }
+    .tx-foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: var(--space-2); }
+
+    /* Company cards: last four only, spend against limit, freeze switch, details gated by re-authentication (SCR-23, FRM-22) */
+    .ccards { margin: var(--space-2) 0 0; padding: 0; list-style: none; } .ccard { display: grid; gap: var(--space-3); padding: var(--space-4) 0; border-top: 1px solid var(--border); }
+    .ccard:last-child { padding-bottom: 0; } .cc-top { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; }
+    .plate { position: relative; width: 44px; height: 30px; border-radius: 5px; background: var(--accent); }
+    .plate::after { content: ""; position: absolute; left: 7px; top: 9px; width: 9px; height: 7px; border-radius: 2px; background: var(--accent-soft); } .is-frozen .plate { background: var(--c-out); }
+    .cc-top strong { display: block; font-size: var(--text-sm); } .cc-top small { display: block; font-size: var(--text-xs); color: var(--text-2); }
+    .spend-top { display: flex; justify-content: space-between; gap: var(--space-2); font-size: var(--text-xs); color: var(--text-2); } .spend-top strong { color: var(--text); font-size: var(--text-sm); }
+    .meter { height: 8px; margin: var(--space-2) 0; border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; }
+    .meter span { display: block; width: calc(var(--v) * 1%); height: 100%; border-radius: inherit; background: var(--accent); }
+    .meter.is-high span { background: var(--warning); } .is-frozen .meter span { background: var(--c-out); }
+    .spend-foot { display: flex; align-items: center; gap: var(--space-1); font-size: var(--text-xs); color: var(--text-2); }
+    .spend-foot.is-high { color: var(--warning); font-weight: 600; } .spend-foot .i { width: 14px; height: 14px; }
+    .cc-actions { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .freeze { display: inline-flex; align-items: center; gap: var(--space-3); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    /* Off track border #7c8390 is 3.8:1 on white; the off knob #6b7280 is 4.4:1 on its track (FRM-22) */
+    .switch { position: relative; flex: none; width: 44px; height: 26px; padding: 0; border: 1px solid #7c8390; border-radius: var(--radius-pill); background: var(--surface-2); cursor: pointer; transition: background-color var(--dur-fast); }
+    .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #6b7280; transition: transform var(--dur-fast) var(--ease-out); }
+    .switch[aria-checked="true"] { background: var(--accent); border-color: var(--accent); }
+    .switch[aria-checked="true"]::after { transform: translateX(18px); background: var(--on-accent); } .reveal { position: relative; }
+
+    /* Revenue by year: columns from zero with the value on each, forecast drawn as an outline, never circles (CMP-34) */
+    .years .chart { grid-template-rows: 180px auto; } .col.year { flex-direction: column; align-items: center; justify-content: flex-end; gap: var(--space-1); }
+    .col.year .val { font-size: var(--text-xs); font-weight: 700; color: var(--text); white-space: nowrap; }
+    .col.year .bar { display: flex; flex-direction: column; width: min(44px, 64%); height: calc(var(--h) * 1%); } .bar .booked { flex: 1; border-radius: 3px 3px 0 0; background: var(--c-in); }
+    .bar .fc { height: calc(var(--f) * 1%); border: 2px dashed var(--c-in); border-bottom: 0; border-radius: 3px 3px 0 0; } .bar .fc + .booked { border-radius: 0; }
+
+    /* Dialogs: native <dialog> with showModal(), so the page behind is inert and Escape cancels (CMP-12, ENG-05) */
+    dialog { width: min(460px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 0; border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); }
+    dialog::backdrop { background: rgba(21, 23, 26, 0.5); } dialog form { display: grid; gap: var(--space-4); padding: var(--space-5); }
+    .dlg-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); } .dlg-head h2 { font-size: var(--text-lg); } .dlg-head .icon-btn { margin: -8px -8px 0 0; }
+    .scope-tag { display: inline-flex; margin-top: var(--space-1); padding: 2px var(--space-2); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text-2); font-size: var(--text-xs); font-weight: 600; }
+    .dlg-text { font-size: var(--text-sm); color: var(--text-2); } .two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+    .field { display: grid; gap: var(--space-1); min-width: 0; margin: 0; padding: 0; border: 0; }
+    .field label, .field legend { padding: 0; font-size: var(--text-sm); font-weight: 600; } .field .opt { font-weight: 400; color: var(--text-2); }
+    .field input, .field select { width: 100%; min-height: 44px; padding: 0 var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--surface); font-size: var(--text-input); }
+    .field [aria-invalid="true"] { border-color: var(--danger); box-shadow: 0 0 0 1px var(--danger); } .money { position: relative; } .money input { padding-left: 26px; }
+    .money span { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-2); } .hint { font-size: var(--text-xs); color: var(--text-2); }
+    .err { display: flex; align-items: center; gap: var(--space-1); font-size: var(--text-xs); font-weight: 600; color: var(--danger); } .err:empty { display: none; } .err .i { width: 14px; height: 14px; }
+    .review { padding: var(--space-3); border-radius: var(--radius-sm); background: var(--surface-2); font-size: var(--text-sm); color: var(--text-2); } .review strong { color: var(--text); }
+    /* Type tiles: native radios under the styling; the selected tile gets tint, border and inset ring (FRM-09, CMP-16) */
+    .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+    .tiles .tile { position: relative; display: grid; gap: 2px; padding: var(--space-3); border: 1px solid var(--line-strong); border-radius: var(--radius-sm); font-size: var(--text-sm); font-weight: 600; cursor: pointer; }
+    .tile small { font-size: var(--text-xs); font-weight: 400; color: var(--text-2); } .tile input { position: absolute; opacity: 0; }
+    .tile:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 0 0 1px var(--accent); }
+    .tile:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .trust { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; font-size: var(--text-xs); color: var(--text-2); }
+    .trust li { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--space-2); } .trust .i { width: 16px; height: 16px; color: var(--accent-ink); } .trust strong { color: var(--text); }
+    .dlg-foot { display: flex; justify-content: flex-end; gap: var(--space-2); flex-wrap: wrap; } .btn[aria-busy="true"] { cursor: progress; opacity: 0.8; }
+
+    /* Toast: bottom-left, clear of the content's center, pauses on hover and focus, closable (FBK-04) */
+    .toasts { position: fixed; left: var(--space-5); bottom: var(--space-5); z-index: 50; }
+    .toast { display: flex; align-items: flex-start; gap: var(--space-3); max-width: min(420px, calc(100vw - 32px)); padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4); border-radius: var(--radius-md); background: #15171a; color: #ffffff; font-size: var(--text-sm); box-shadow: var(--shadow-lg); }
+    .toast > .i { margin-top: 2px; color: #7fd3c1; } .toast p { flex: 1; }
+    .toast .icon-btn { width: 32px; height: 32px; margin: -6px 0; color: #c9ced6; } .toast .icon-btn:hover { background: rgba(255, 255, 255, 0.1); color: #ffffff; }
+
+    @media (max-width: 1180px) {
+      .span-5, .span-7 { grid-column: span 6; } .span-8, .span-4 { grid-column: 1 / -1; } .side { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+    }
+    @media (max-width: 960px) { .span-5, .span-7 { grid-column: 1 / -1; } .flow .chart { min-height: 300px; } }
+    @media (max-width: 720px) {
+      .bar-row { flex-wrap: wrap; gap: 0 var(--space-4); padding: 0 var(--space-4); } .nav { order: 3; width: 100%; overflow-x: auto; margin-top: -8px; } .nav a { min-height: 44px; }
+      .scope { display: grid; grid-template-columns: minmax(0, 1fr); padding: var(--space-3) var(--space-4); } .scope-item { justify-content: space-between; } .scope-sync { margin-left: 0; }
+      .main { padding: var(--space-4) var(--space-4) var(--space-7); } .export { justify-items: stretch; width: 100%; } .side, .headline { grid-template-columns: minmax(0, 1fr); }
+      .runway { text-align: left; } .figure { font-size: var(--text-2xl); } .quick .btn { flex-direction: column; gap: 2px; min-height: 60px; font-size: var(--text-sm); }
+      .acct { grid-template-columns: minmax(0, 1fr) 112px; } .acct .share { display: none; }
+      /* Phone rows: payee and amount on line one, status pill and date on line two (CMP-20) */
+      .tx th:not(.keep), .tx td:not(.keep) { display: none; } .tx .m-only { display: flex; align-items: center; gap: var(--space-2); margin-top: var(--space-1); }
+      .flow .scroll-x { overflow-x: auto; } .flow .chart.is-12 { min-width: 560px; } .two { grid-template-columns: minmax(0, 1fr); } .toasts { left: var(--space-4); right: var(--space-4); bottom: var(--space-4); }
+    }
+  </style>
+</head>
+<body data-masked="false">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-transfer" viewBox="0 0 24 24"><path d="M4 8h15l-3.5-3.5M20 16H5l3.5 3.5"/></symbol>
+  <symbol id="i-request" viewBox="0 0 24 24"><path d="M12 4v10M7.5 9.5 12 14l4.5-4.5M4.5 15v3.5a1 1 0 0 0 1 1h13a1 1 0 0 0 1-1V15"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.4-4.4"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M4 4l16 16M9.9 5.8A9.6 9.6 0 0 1 12 5.5c6 0 9.5 6.5 9.5 6.5a17 17 0 0 1-3 3.8M6.3 7.6A16.6 16.6 0 0 0 2.5 12S6 18.5 12 18.5c1.6 0 3-.4 4.2-1"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.5 5 6v5.5c0 4.2 3 7.6 7 9 4-1.4 7-4.8 7-9V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+</svg>
+
+<header class="topbar">
+  <div class="bar-row">
+    <a class="brand" href="#"><svg viewBox="0 0 32 32" aria-hidden="true"><rect class="tile" width="32" height="32" rx="8"/><path class="sun" d="M9.5 19.5a6.5 6.5 0 0 1 13 0"/><path class="sun" d="M7.5 23.5h17"/></svg>Sora Treasury</a>
+    <nav class="nav" aria-label="Main"><ul><li><a href="#" aria-current="page">Cash</a></li><li><a href="#">Accounts</a></li><li><a href="#">Payments</a></li><li><a href="#">Cards</a></li><li><a href="#">Reports</a></li></ul></nav>
+    <span class="avatar" role="img" aria-label="Morgan Ellis, owner">ME</span>
+  </div>
+  <!-- Scope strip: entity, currency and period spelled out, kept in the URL and printed on exports (SCR-27) -->
+  <div class="scope" role="group" aria-label="Scope of this page">
+    <div class="scope-item">
+      <span class="scope-label" id="ent-label">Entity</span>
+      <button class="scope-btn" type="button" aria-expanded="false" aria-controls="ent-pop" aria-describedby="ent-label">Larch &amp; Finch Roasters LLC<svg class="i" aria-hidden="true"><use href="#i-chev"/></svg></button>
+      <div class="pop" id="ent-pop" hidden>
+        <p class="pop-title">Entities you can view</p>
+        <ul>
+          <li><a href="#" aria-current="true"><svg class="i" aria-hidden="true"><use href="#i-check"/></svg>Larch &amp; Finch Roasters LLC<small>EIN ••-•••4410 · 4 accounts · USD</small></a></li>
+          <li><a href="#"><span></span>Larch &amp; Finch Cafés LLC<small>EIN ••-•••7702 · 3 accounts · USD</small></a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="scope-item"><span class="scope-label">Currency</span><span class="scope-value">USD, US dollar</span></div>
+    <div class="scope-item"><label class="scope-label" for="period">Period</label>
+      <select id="period"><option value="6m">Last 6 months · May 1–Oct 28, 2026</option><option value="12m">Last 12 months · Nov 1, 2025–Oct 28, 2026</option></select></div>
+    <p class="scope-sync">Balances synced <time datetime="2026-10-28T09:40-04:00">Wed, Oct 28, 09:40 ET</time></p>
+  </div>
+</header>
+
+<main class="main" id="main">
+  <div class="page-head">
+    <div><h1>Cash position, October 2026</h1><p>Balances as of Oct 28 · money in and out for <span id="period-text">May 1–Oct 28, 2026</span></p></div>
+    <div class="export">
+      <button class="btn btn-secondary" type="button" id="download"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg><span>Download report</span></button>
+      <small class="num" id="file-name" role="status"></small>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- The answer to "how much cash do we have?" leads, with as-of time, parts that add up and runway basis (SCR-01, SCR-23) -->
+    <section class="card cash span-5" aria-labelledby="cash-title">
+      <div class="cash-top">
+        <h2 id="cash-title">Total cash across <span id="acct-count">4 accounts</span></h2>
+        <!-- Eye toggle keeps its label; aria-pressed carries the state and the choice is remembered (SCR-23, ENG-10) -->
+        <button class="eye" type="button" id="mask" aria-pressed="false"><svg class="i on" aria-hidden="true"><use href="#i-eye"/></svg><svg class="i off" aria-hidden="true"><use href="#i-eye-off"/></svg>Hide balances</button>
+      </div>
+      <div class="headline">
+        <div>
+          <p class="figure num"><span class="mask" id="total"></span></p>
+          <p class="cash-sub"><time datetime="2026-10-28T09:40-04:00">As of Wed, Oct 28, 09:40 ET</time>
+            <span><span class="delta delta-good"><svg class="i" aria-hidden="true"><use href="#i-up"/></svg><span class="mask num" id="mtd"></span></span> since Oct 1</span></p>
+        </div>
+        <dl class="runway"><dt>Runway</dt><dd class="num" id="runway"></dd></dl>
+      </div>
+      <p class="basis" id="runway-basis"></p>
+      <!-- Labeled quick actions, one primary; each opens a real dialog (SCR-23, BTN-01, BTN-08) -->
+      <div class="quick">
+        <button class="btn btn-primary" type="button" data-open="dlg-transfer" id="qa-transfer"><svg class="i" aria-hidden="true"><use href="#i-transfer"/></svg>Transfer</button>
+        <button class="btn btn-secondary" type="button" data-open="dlg-request"><svg class="i" aria-hidden="true"><use href="#i-request"/></svg>Request</button>
+        <button class="btn btn-secondary" type="button" data-open="dlg-account"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>Add account</button>
+      </div>
+      <div><ul class="accts" id="accts" aria-label="Accounts"></ul>
+        <p class="acct-total num"><span>Total of synced accounts</span><span class="mask" id="acct-sum"></span></p></div>
+    </section>
+
+    <section class="card flow span-7" aria-labelledby="flow-title" aria-describedby="flow-sum">
+      <h2 id="flow-title">Money in vs money out, by month</h2>
+      <p class="takeaway" id="flow-sum"></p>
+      <div class="readout" id="flow-read" aria-hidden="true"></div>
+      <div class="scroll-x">
+        <div class="chart" id="flow-chart">
+          <div class="y-axis" id="flow-y" aria-hidden="true"></div>
+          <div class="plot" id="flow-plot"><div class="cols" id="flow-cols" role="group" aria-label="Money in and out by month. Use the left and right arrow keys to move between months."></div></div>
+          <div class="x-row" id="flow-x" aria-hidden="true"></div>
+          <span class="row-label" aria-hidden="true">Net, $</span>
+          <div class="x-row net-row num" id="flow-net" aria-hidden="true"></div>
+        </div>
+      </div>
+      <p class="foot">USD per month, settled items only. Transfers between your own accounts are left out. October runs to Oct 28.</p>
+      <details class="as-table"><summary>Show as table</summary>
+        <table class="mini-table num"><caption class="visually-hidden">Money in, money out and net by month</caption>
+          <thead><tr><th scope="col">Month</th><th scope="col">Money in</th><th scope="col">Money out</th><th scope="col">Net</th></tr></thead><tbody id="flow-table"></tbody></table>
+      </details>
+    </section>
+  </div>
+
+  <div class="grid">
+    <section class="card span-8" aria-labelledby="tx-title">
+      <div class="card-head">
+        <div><h2 id="tx-title">Recent transactions</h2><p class="takeaway">Oct 21–28 · all accounts and cards · times in ET</p></div>
+        <a class="btn btn-ghost btn-sm" href="#">View all</a>
+      </div>
+      <div class="tools">
+        <div class="search"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg><label class="visually-hidden" for="tx-q">Search transactions</label>
+          <input id="tx-q" type="search" placeholder="Payee, memo or card" autocomplete="off"></div>
+        <div class="chips" role="radiogroup" aria-label="Status" id="chips"></div>
+      </div>
+      <table class="tx" aria-labelledby="tx-title">
+        <thead><tr><th scope="col">Date</th><th scope="col" class="keep">Description</th><th scope="col">Account</th><th scope="col">Status</th><th scope="col" class="r keep">Amount</th></tr></thead>
+        <tbody id="tx-body"></tbody></table>
+      <p class="foot tx-foot num" id="tx-foot"></p>
+    </section>
+
+    <div class="stack side span-4">
+      <section class="card" aria-labelledby="cards-title">
+        <div class="card-head">
+          <div><h2 id="cards-title">Company cards</h2><p class="takeaway num" id="cards-sum"></p></div>
+          <a class="btn btn-ghost btn-sm" href="#">Manage</a>
+        </div>
+        <ul class="ccards" id="ccards"></ul>
+      </section>
+
+      <section class="card years" aria-labelledby="rev-title" aria-describedby="rev-sum">
+        <h2 id="rev-title">Revenue by year</h2>
+        <p class="takeaway" id="rev-sum"></p>
+        <div class="readout" id="rev-read" aria-hidden="true"></div>
+        <div class="chart">
+          <div class="y-axis" id="rev-y" aria-hidden="true"></div>
+          <div class="plot"><div class="cols" id="rev-cols" role="group" aria-label="Revenue by year, 2022 to 2026. Use the left and right arrow keys to move between years."></div></div>
+          <div class="x-row" id="rev-x" aria-hidden="true"></div>
+        </div>
+        <p class="foot">Booked revenue, accrual basis. 2026 is booked to Oct 28; the dashed part is the forecast for the rest of the year.</p>
+        <details class="as-table"><summary>Show as table</summary>
+          <table class="mini-table num"><caption class="visually-hidden">Revenue by year</caption>
+            <thead><tr><th scope="col">Year</th><th scope="col">Revenue</th><th scope="col">Change</th></tr></thead><tbody id="rev-table"></tbody></table>
+        </details>
+      </section>
+    </div>
+  </div>
+</main>
+
+<!-- Transfer: amount in the button, live review that restates the scope, inline errors (BTN-14, FRM-11, SCR-27) -->
+<dialog id="dlg-transfer" aria-labelledby="tr-title">
+  <form method="dialog" novalidate>
+    <div class="dlg-head"><div><h2 id="tr-title">Transfer between accounts</h2><span class="scope-tag">Larch &amp; Finch Roasters LLC · USD</span></div>
+      <button class="icon-btn" value="cancel" formnovalidate aria-label="Close"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <div class="field"><label for="tr-from">From</label><select id="tr-from" name="from"></select></div>
+    <div class="field"><label for="tr-to">To</label><select id="tr-to" name="to" aria-describedby="tr-to-err"></select><p class="err" id="tr-to-err"></p></div>
+    <div class="field"><label for="tr-amount">Amount</label>
+      <div class="money"><span aria-hidden="true">$</span><input id="tr-amount" name="amount" inputmode="decimal" autocomplete="off" aria-describedby="tr-amount-hint tr-amount-err"></div>
+      <p class="hint num" id="tr-amount-hint"></p><p class="err" id="tr-amount-err"></p></div>
+    <div class="field"><label for="tr-memo">Memo <span class="opt">(optional)</span></label><input id="tr-memo" name="memo" maxlength="60" placeholder="e.g. Top-up for Oct 30 payroll"></div>
+    <p class="review num" id="tr-review"></p>
+    <div class="dlg-foot"><button class="btn btn-secondary" value="cancel" formnovalidate>Cancel</button><button class="btn btn-primary" value="go">Transfer</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-request" aria-labelledby="rq-title">
+  <form method="dialog" novalidate>
+    <div class="dlg-head"><div><h2 id="rq-title">Request a payment</h2><span class="scope-tag">Larch &amp; Finch Roasters LLC · USD</span></div>
+      <button class="icon-btn" value="cancel" formnovalidate aria-label="Close"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <div class="field"><label for="rq-who">Customer</label><input id="rq-who" name="who" autocomplete="organization" placeholder="e.g. Cobble Hill Grocers" aria-describedby="rq-who-err"><p class="err" id="rq-who-err"></p></div>
+    <div class="field"><label for="rq-email">Billing email</label><input id="rq-email" name="email" type="email" autocomplete="email" placeholder="ap@example.com" aria-describedby="rq-email-err"><p class="err" id="rq-email-err"></p></div>
+    <div class="two">
+      <div class="field"><label for="rq-amount">Amount</label><div class="money"><span aria-hidden="true">$</span><input id="rq-amount" name="amount" inputmode="decimal" autocomplete="off" aria-describedby="rq-amount-err"></div><p class="err" id="rq-amount-err"></p></div>
+      <div class="field"><label for="rq-due">Due date</label><input id="rq-due" name="due" type="date" value="2026-11-27" min="2026-10-28"></div>
+    </div>
+    <p class="review num" id="rq-review"></p>
+    <div class="dlg-foot"><button class="btn btn-secondary" value="cancel" formnovalidate>Cancel</button><button class="btn btn-primary" value="go">Send request</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-account" aria-labelledby="ac-title">
+  <form method="dialog" novalidate>
+    <div class="dlg-head"><div><h2 id="ac-title">Add an account</h2><span class="scope-tag">Joins Larch &amp; Finch Roasters LLC</span></div>
+      <button class="icon-btn" value="cancel" formnovalidate aria-label="Close"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <fieldset class="field"><legend>Account type</legend>
+      <div class="tiles">
+        <label class="tile"><input type="radio" name="kind" value="Bank account" checked>Bank account<small>Checking or savings</small></label>
+        <label class="tile"><input type="radio" name="kind" value="Card processor">Card processor<small>Sales waiting for payout</small></label>
+      </div>
+    </fieldset>
+    <div class="field"><label for="ac-inst">Bank or provider</label><input id="ac-inst" name="inst" autocomplete="off" placeholder="e.g. Harborline Credit Union" aria-describedby="ac-inst-err"><p class="err" id="ac-inst-err"></p></div>
+    <div class="field"><label for="ac-last">Last 4 digits of the account number</label><input id="ac-last" name="last" inputmode="numeric" maxlength="4" autocomplete="off" aria-describedby="ac-last-err"><p class="err" id="ac-last-err"></p></div>
+    <!-- Specific trust statements beside the step that asks for access (COP-12) -->
+    <ul class="trust">
+      <li><svg class="i" aria-hidden="true"><use href="#i-shield"/></svg><span><strong>Read-only.</strong> Sora Treasury sees balances and transactions but cannot move money out of a connected account.</span></li>
+      <li><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg><span><strong>Your sign-in stays with your bank.</strong> You approve access on the bank's own page.</span></li>
+    </ul>
+    <div class="dlg-foot"><button class="btn btn-secondary" value="cancel" formnovalidate>Cancel</button><button class="btn btn-primary" value="go">Connect account</button></div>
+  </form>
+</dialog>
+
+<!-- Freeze confirmation: names the card, holder and entity; focus starts on the safe choice (CMP-12, FRM-22, SCR-27) -->
+<dialog id="dlg-freeze" aria-labelledby="fz-title" aria-describedby="fz-text">
+  <form method="dialog">
+    <div class="dlg-head"><div><h2 id="fz-title"></h2><span class="scope-tag">Larch &amp; Finch Roasters LLC</span></div></div>
+    <p class="dlg-text" id="fz-text"></p>
+    <div class="dlg-foot"><button class="btn btn-secondary" value="cancel" autofocus>Keep card active</button><button class="btn btn-primary" value="freeze" id="fz-go"></button></div>
+  </form>
+</dialog>
+
+<div class="toasts" id="toasts" role="status"></div>
+
+<script>
+  // Raw values only; every number and date is formatted at render time with one locale (ENG-07, COP-08). Example data: replace with your API.
+  const LOCALE = "en-US", nf = (o) => new Intl.NumberFormat(LOCALE, o), cur = { style: "currency", currency: "USD" };
+  const usd = nf(cur), usd0 = nf({ ...cur, maximumFractionDigits: 0 }), usdK = nf({ ...cur, notation: "compact", maximumFractionDigits: 1 });
+  const usd3 = nf({ ...cur, notation: "compact", maximumSignificantDigits: 3 }), numK = nf({ notation: "compact", maximumFractionDigits: 1 });
+  const pct = nf({ style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1 }), pctS = nf({ style: "percent", maximumFractionDigits: 1, signDisplay: "exceptZero" });
+  const dt = (o) => new Intl.DateTimeFormat(LOCALE, { timeZone: "UTC", ...o });
+  const monShort = dt({ month: "short" }), monLong = dt({ month: "long", year: "numeric" }), dayF = dt({ month: "short", day: "numeric" });
+  const dayW = dt({ weekday: "short", month: "short", day: "numeric" }), timeF = dt({ hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  const signed = (v, f = usd) => (v < 0 ? "−" : "+") + "\u2060" + f.format(Math.abs(v)); // word joiner keeps the sign on its number
+  const r2 = (x) => Math.round(x * 100) / 100, $ = (s) => document.querySelector(s);
+  const ico = (id) => `<svg class="i" aria-hidden="true"><use href="#i-${id}"/></svg>`;
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const money = (v) => { const s = usd.format(v), i = s.lastIndexOf("."); return `${s.slice(0, i)}<span class="cents">${s.slice(i)}</span>`; };
+  const api = () => Promise.resolve({ ok: true }); // Example only: call your API and show the verdict only when it answers (FBK-11)
+
+  const scope = { entity: "Larch & Finch Roasters LLC", slug: "larch-finch-roasters-llc", currency: "USD", asOf: "2026-10-28", period: "6m" };
+  const PERIODS = { "6m": { n: 6, from: "2026-05-01", text: "May 1–Oct 28, 2026" }, "12m": { n: 12, from: "2025-11-01", text: "Nov 1, 2025–Oct 28, 2026" } };
+  const accounts = [
+    { id: "2207", name: "Operating checking", bank: "Northgate Bank", balance: 194312.46, movable: true },
+    { id: "9014", name: "Reserve savings", bank: "Northgate Bank · 3.60% APY", balance: 152418.09, movable: true },
+    { id: "5530", name: "Payroll checking", bank: "Northgate Bank", balance: 36880.00, movable: true },
+    { id: "7316", name: "Card processor", bank: "Tillwave · pays out Thu, Oct 29", balance: 8961.27, movable: false }
+  ];
+  const PAYROLL = { acct: "5530", amount: 38940.12, when: "Fri, Oct 30" };
+  // Settled money in and out per month, USD; October is month to date. Notes explain the outliers.
+  const flows = [
+    ["2025-11", 142380, 128450], ["2025-12", 168910, 151220, "Holiday gift boxes and seasonal staff"],
+    ["2026-01", 109640, 118930, "Post-holiday slowdown and the annual insurance premium"], ["2026-02", 104220, 101760],
+    ["2026-03", 116870, 109410], ["2026-04", 118450, 112880], ["2026-05", 121930, 116240],
+    ["2026-06", 117260, 121570, "Deposit on the green coffee contract"], ["2026-07", 119840, 114320], ["2026-08", 124510, 117690],
+    ["2026-09", 131780, 138260, "Roaster service and the Q4 packaging order"], ["2026-10", 118640, 109870]
+  ];
+  const tx = [ // [time ET, payee, memo, account, status, signed amount]
+    ["2026-10-28T09:12", "Cobble Hill Grocers", "Wholesale invoice 1184 · ACH", "Operating •••• 2207", "Pending", 4860.00],
+    ["2026-10-28T06:05", "Tillwave payout", "Card sales, Oct 26–27", "Operating •••• 2207", "Settled", 3214.55],
+    ["2026-10-27T16:40", "Payroll, Oct 16–31", "14 employees · settles Fri, Oct 30", "Payroll •••• 5530", "Pending", -38940.12],
+    ["2026-10-27T11:02", "Harbor Green Imports", "Green coffee, lot 26-114 · wire", "Operating •••• 2207", "Settled", -21480.00],
+    ["2026-10-26T14:18", "Kestrel Packaging Supply", "Ana Ruiz", "Card •••• 4821", "Settled", -612.40],
+    ["2026-10-26T08:47", "Brightline Dairy", "Theo Lindqvist", "Card •••• 0937", "Settled", -384.20],
+    ["2026-10-25T13:30", "Fieldstone Hardware", "Would pass the card's monthly limit", "Card •••• 0937", "Declined", -1140.00],
+    ["2026-10-24T10:15", "Juniper Street Café", "Wholesale invoice 1176 · ACH", "Operating •••• 2207", "Settled", 2145.00],
+    ["2026-10-23T09:00", "Northgate Bank", "Interest, Sep 23–Oct 22", "Reserve •••• 9014", "Settled", 458.21],
+    ["2026-10-23T07:30", "Pine & Pier Utilities", "Electric and gas, roastery · autopay", "Operating •••• 2207", "Settled", -1287.66],
+    ["2026-10-22T12:00", "Orchard Row Properties", "Rent, November · ACH", "Operating •••• 2207", "Settled", -9800.00],
+    ["2026-10-22T08:10", "Coastline Rail", "Jonah Mbeki", "Card •••• 6150", "Settled", -86.50],
+    ["2026-10-21T15:22", "Meridian Hotel Group", "Wholesale invoice 1169 · ACH", "Operating •••• 2207", "Settled", 7320.00],
+    ["2026-10-21T09:05", "Larkfield Software", "Ana Ruiz · monthly plan", "Card •••• 4821", "Pending", -149.00]
+  ].map(([t, who, memo, acct, status, amt]) => ({ t, who, memo, acct, status, amt }));
+  const cards = [
+    { id: "4821", holder: "Ana Ruiz", role: "Head roaster", kind: "Physical", limit: 5000, spent: 3412.60, recurring: "Larkfield Software, $149.00 a month" },
+    { id: "0937", holder: "Theo Lindqvist", role: "Café operations", kind: "Physical", limit: 3000, spent: 2871.15 },
+    { id: "6150", holder: "Jonah Mbeki", role: "Wholesale sales", kind: "Virtual", limit: 2500, spent: 640.30 }
+  ];
+  const revenue = [[2022, 864200], [2023, 1032750], [2024, 1216400], [2025, 1418900], [2026, 1214600, 354700]]; // [year, booked, forecast]
+
+  // Cash card: total, month-to-date change and runway all come from the same rows, so they always agree (COP-10).
+  const totalCash = () => r2(accounts.reduce((s, a) => s + (a.balance ?? 0), 0));
+  const acct = (id) => accounts.find((a) => a.id === id);
+  const base = flows.slice(-7, -1); // Apr–Sep: the last 6 full months
+  const avgOut = base.reduce((s, r) => s + r[2], 0) / base.length, avgIn = base.reduce((s, r) => s + r[1], 0) / base.length;
+  function renderCash() {
+    const total = totalCash(), pend = accounts.filter((a) => a.balance == null).length;
+    $("#total").innerHTML = money(total); $("#acct-sum").textContent = usd.format(total);
+    $("#mtd").textContent = signed(flows.at(-1)[1] - flows.at(-1)[2]);
+    $("#acct-count").textContent = `${accounts.length - pend} accounts` + (pend ? ` · ${pend} connecting` : "");
+    $("#runway").innerHTML = `${(total / avgOut).toFixed(1)} <small>months</small>`;
+    $("#runway-basis").textContent = `Runway is total cash ÷ average monthly money out over the last 6 full months, Apr–Sep (${usd0.format(avgOut)}), assuming nothing comes in. Money in averaged ${usd0.format(avgIn)} over the same months, so the balance has held steady.`;
+    $("#accts").innerHTML = accounts.map((a) => {
+      if (a.balance == null) return `<li class="acct"><div><strong>${esc(a.name)}</strong><small class="num">•••• ${a.id} · ${esc(a.bank)}</small></div><span class="pill pill-accent">Connecting</span><span class="acct-bal">–<span class="visually-hidden">No balance yet</span><small>After first sync</small></span></li>`;
+      const short = a.id === PAYROLL.acct ? r2(PAYROLL.amount - a.balance) : null;
+      // An exception gets an icon, words and a fix, not only a color (FBK-18, COL-07)
+      const note = short == null ? "" : short > 0
+        ? `<small class="short num">${ico("alert")}${usd.format(short)} short for ${PAYROLL.when} payroll · <button class="link-btn" type="button" data-open="dlg-transfer" data-amount="${short}">Cover it</button></small>`
+        : `<small class="ok num">${ico("check")}Covers ${PAYROLL.when} payroll of ${usd.format(PAYROLL.amount)}</small>`;
+      return `<li class="acct"><div><strong>${a.name}</strong><small class="num">•••• ${a.id} · ${a.bank}</small>${note}</div>
+        <div class="share" aria-hidden="true"><span style="--v:${(a.balance / total * 100).toFixed(1)}"></span></div>
+        <span class="acct-bal num"><span class="mask">${usd.format(a.balance)}</span><small>${pct.format(a.balance / total)} of total</small></span></li>`;
+    }).join("");
+  }
+
+  // Chart marks: one tab stop, arrow keys move, Home and End jump; hover and focus show exact values (CMP-18).
+  function rove(group, show, rest) {
+    const items = () => [...group.children];
+    group.addEventListener("keydown", (e) => {
+      const list = items(), i = list.indexOf(document.activeElement), n = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: list.length - 1 }[e.key];
+      if (n === undefined || i < 0) return;
+      const k = Math.max(0, Math.min(list.length - 1, n));
+      e.preventDefault(); list.forEach((b, j) => (b.tabIndex = j === k ? 0 : -1)); list[k].focus();
+    });
+    group.addEventListener("focusin", (e) => show(items().indexOf(e.target)));
+    group.addEventListener("pointerover", (e) => { const b = e.target.closest("button"); if (b) show(items().indexOf(b)); });
+    group.addEventListener("pointerleave", () => { if (!group.contains(document.activeElement)) show(rest()); });
+  }
+  const ticks = (el, max, step, fmt) => { let h = ""; for (let v = 0; v <= max; v += step) h += `<span style="--p:${v / max * 100}">${fmt(v)}</span>`; el.innerHTML = h; };
+  const gridlines = (plot, max, step) => { plot.querySelectorAll(".gridline").forEach((g) => g.remove());
+    for (let v = step; v <= max; v += step) plot.insertAdjacentHTML("afterbegin", `<span class="gridline" aria-hidden="true" style="--p:${v / max * 100}"></span>`); };
+
+  // Money in vs out: paired bars from a zero baseline, net printed under each month (CMP-18, CMP-34).
+  let fRows = [];
+  const mDate = (m) => Date.parse(m + "-01T00:00Z");
+  function renderFlow() {
+    const p = PERIODS[scope.period], cols = $("#flow-cols"), chart = $("#flow-chart");
+    fRows = flows.slice(-p.n);
+    const max = Math.ceil(Math.max(...fRows.flatMap((r) => [r[1], r[2]])) / 50000) * 50000, last = fRows.length - 1;
+    chart.style.setProperty("--n", p.n); chart.classList.toggle("is-12", p.n === 12);
+    ticks($("#flow-y"), max, 50000, (v) => usdK.format(v));
+    gridlines($("#flow-plot"), max, 50000);
+    cols.innerHTML = fRows.map((r, i) => `<button type="button" class="col" tabindex="${i === last ? 0 : -1}" aria-label="${monLong.format(mDate(r[0]))}${i === last ? " to date" : ""}: money in ${usd.format(r[1])}, money out ${usd.format(r[2])}, net ${signed(r[1] - r[2])}${r[3] ? ". " + r[3] : ""}"><span class="in" style="--h:${r[1] / max * 100}"></span><span class="out" style="--h:${r[2] / max * 100}"></span></button>`).join("");
+    $("#flow-x").innerHTML = fRows.map((r) => `<span>${monShort.format(mDate(r[0]))}</span>`).join("");
+    $("#flow-net").innerHTML = fRows.map((r) => `<span>${signed(r[1] - r[2], numK)}</span>`).join("");
+    $("#flow-table").innerHTML = fRows.map((r) => `<tr><th scope="row">${monLong.format(mDate(r[0]))}</th><td>${usd.format(r[1])}</td><td>${usd.format(r[2])}</td><td>${signed(r[1] - r[2])}</td></tr>`).join("");
+    const net = fRows.reduce((s, r) => s + r[1] - r[2], 0), up = fRows.filter((r) => r[1] > r[2]).length;
+    const low = fRows.reduce((a, r) => (r[1] - r[2] < a[1] - a[2] ? r : a));
+    $("#flow-sum").textContent = `Money in beat money out in ${up} of ${p.n} months, ${signed(net, usd0)} net since ${dt({ month: "short", day: "numeric", year: "numeric" }).format(Date.parse(p.from + "T00:00Z"))}. Lowest: ${monLong.format(mDate(low[0])).split(" ")[0]}, ${signed(low[1] - low[2], usd0)}` + (low[3] ? `, from ${low[3].charAt(0).toLowerCase() + low[3].slice(1)}.` : ".");
+    showFlow(last);
+  }
+  function showFlow(i) {
+    const r = fRows[i], last = i === fRows.length - 1;
+    document.querySelectorAll("#flow-cols .col").forEach((b, k) => b.classList.toggle("is-active", k === i));
+    document.querySelectorAll("#flow-x span").forEach((s, k) => s.classList.toggle("is-active", k === i));
+    $("#flow-read").innerHTML = `<b>${monLong.format(mDate(r[0]))}${last ? ", to date" : ""}</b><span><i class="key"></i>Money in <strong class="num">${usd.format(r[1])}</strong></span><span><i class="key out"></i>Money out <strong class="num">${usd.format(r[2])}</strong></span><span>Net <strong class="num">${signed(r[1] - r[2])}</strong></span>${r[3] ? `<span>${r[3]}</span>` : ""}`;
+  }
+  rove($("#flow-cols"), showFlow, () => fRows.length - 1);
+
+  // Revenue by year: columns from zero, never nested circles; 2026 = booked to date + an outlined forecast (CMP-34).
+  function renderRevenue() {
+    const max = 2000000, cols = $("#rev-cols"), last = revenue.length - 1, total = (r) => r[1] + (r[2] || 0);
+    const change = (i) => total(revenue[i]) / total(revenue[i - 1]) - 1, vs = (r, i) => `${pctS.format(change(i))} vs ${r[0] - 1}`;
+    ticks($("#rev-y"), max, 500000, (v) => usdK.format(v));
+    gridlines(cols.parentElement, max, 500000);
+    [cols, $("#rev-x")].forEach((el) => el.style.setProperty("--n", revenue.length));
+    cols.innerHTML = revenue.map((r, i) => `<button type="button" class="col year" tabindex="${i === last ? 0 : -1}" aria-label="${r[0]}: ${r[2] ? `${usd.format(r[1])} booked to Oct 28 plus ${usd.format(r[2])} forecast, ${usd.format(total(r))} in all` : usd.format(r[1])}${i ? ", " + vs(r, i) : ""}"><span class="val num">${usd3.format(total(r))}</span><span class="bar" style="--h:${total(r) / max * 100}">${r[2] ? `<span class="fc" style="--f:${r[2] / total(r) * 100}"></span>` : ""}<span class="booked"></span></span></button>`).join("");
+    $("#rev-x").innerHTML = revenue.map((r) => `<span>${r[0]}</span>`).join("");
+    $("#rev-table").innerHTML = revenue.map((r, i) => `<tr><th scope="row">${r[0]}${r[2] ? " (with forecast)" : ""}</th><td>${usd.format(total(r))}</td><td>${i ? pctS.format(change(i)) : "–"}</td></tr>`).join("");
+    const smallest = Math.min(...revenue.slice(1).map((_, k) => change(k + 1))) === change(last);
+    $("#rev-sum").textContent = `Up every year since ${revenue[0][0]}. 2026 is forecast at ${usd3.format(total(revenue[last]))}, ${pctS.format(change(last))}${smallest ? ", the smallest rise of the four" : ""}.`;
+    const show = (i) => {
+      const r = revenue[i];
+      cols.querySelectorAll(".col").forEach((b, k) => b.classList.toggle("is-active", k === i));
+      $("#rev-read").innerHTML = `<b>${r[0]}</b><span><i class="key"></i>${r[2] ? "Booked" : "Revenue"} <strong class="num">${usd.format(r[1])}</strong></span>` +
+        (r[2] ? `<span><i class="key fc"></i>Forecast <strong class="num">${usd.format(r[2])}</strong></span>` : "") + (i ? `<span>${vs(r, i)}</span>` : "");
+    };
+    rove(cols, show, () => last);
+    show(last);
+  }
+
+  // Transactions: search and status chips over one array, newest first (CMP-19, CMP-23).
+  const txState = { q: "", status: "All" };
+  const pillFor = { Settled: "pill-success", Pending: "pill-accent", Declined: "pill-danger" }; // Pending is waiting, so it wears the brand tint, not a verdict color (COL-10)
+  const counts = tx.reduce((c, t) => ((c[t.status] = (c[t.status] || 0) + 1), c), { All: tx.length });
+  $("#chips").innerHTML = ["All", "Settled", "Pending", "Declined"].map((s, i) => `<button class="chip" type="button" role="radio" aria-checked="${i === 0}" tabindex="${i === 0 ? 0 : -1}" data-status="${s}">${ico("check")}${s} <span class="num">${counts[s] || 0}</span></button>`).join("");
+  function renderTx() {
+    const q = txState.q.trim().toLowerCase();
+    const rows = tx.filter((t) => (txState.status === "All" || t.status === txState.status) && (!q || `${t.who} ${t.memo} ${t.acct}`.toLowerCase().includes(q)));
+    $("#tx-body").innerHTML = rows.map((t) => {
+      const d = Date.parse(t.t + "Z"), pill = `<span class="pill ${pillFor[t.status]}">${t.status}</span>`;
+      return `<tr class="${t.status === "Declined" ? "is-declined" : ""}"><td class="num"><time datetime="${t.t}-04:00">${dayF.format(d)}, ${timeF.format(d)}</time></td>
+        <td class="keep"><span class="payee">${esc(t.who)}</span><small>${esc(t.memo)}</small><small class="m-only num">${pill}${dayF.format(d)}</small></td><td class="num">${t.acct}</td><td>${pill}</td>
+        <td class="r keep amt num">${signed(t.amt)}${t.status === "Declined" ? "<small>Not charged</small>" : ""}</td></tr>`;
+    }).join("") || `<tr><td class="empty keep" colspan="5">No ${txState.status === "All" ? "" : txState.status.toLowerCase() + " "}transactions match “${esc(txState.q)}”. <button class="link-btn" type="button" id="tx-clear">Clear search</button></td></tr>`;
+    const live = rows.filter((t) => t.status !== "Declined"), sum = (f) => r2(live.filter(f).reduce((s, t) => s + t.amt, 0));
+    $("#tx-foot").innerHTML = `<span>Showing ${rows.length} of ${tx.length}</span><span>In ${signed(sum((t) => t.amt > 0))} · Out ${signed(sum((t) => t.amt < 0))} · declined items not counted</span>`;
+  }
+  $("#tx-q").addEventListener("input", (e) => { txState.q = e.target.value; renderTx(); });
+  $("#tx-body").addEventListener("click", (e) => { if (e.target.id === "tx-clear") { $("#tx-q").value = txState.q = ""; renderTx(); $("#tx-q").focus(); } });
+  const chips = [...document.querySelectorAll(".chip")];
+  const pick = (c) => { chips.forEach((x) => { x.setAttribute("aria-checked", String(x === c)); x.tabIndex = x === c ? 0 : -1; }); txState.status = c.dataset.status; renderTx(); };
+  chips.forEach((c, i) => {
+    c.addEventListener("click", () => pick(c));
+    c.addEventListener("keydown", (e) => { const s = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key]; if (!s) return; e.preventDefault(); const n = chips[(i + s + chips.length) % chips.length]; n.focus(); pick(n); });
+  });
+
+  // Company cards: last four only, spend against limit, freeze with confirmation, details gated by re-authentication (SCR-23).
+  function renderCards() {
+    const spent = cards.reduce((s, c) => s + c.spent, 0), limit = cards.reduce((s, c) => s + c.limit, 0);
+    $("#cards-sum").textContent = `October spend ${usd.format(spent)} of ${usd0.format(limit)} in limits`;
+    $("#ccards").innerHTML = cards.map((c) => {
+      const used = c.spent / c.limit, high = used >= 0.9;
+      return `<li class="ccard" data-id="${c.id}">
+        <div class="cc-top"><span class="plate" aria-hidden="true"></span><div><strong>${c.holder}</strong><small class="num">${c.role} · •••• ${c.id} · ${c.kind}</small></div><span class="pill pill-success">Active</span></div>
+        <div><div class="spend-top"><span>Spent in October</span><span class="num"><strong>${usd.format(c.spent)}</strong> of ${usd0.format(c.limit)}</span></div>
+          <div class="meter${high ? " is-high" : ""}" role="meter" aria-label="${c.holder}'s card, October spend" aria-valuemin="0" aria-valuemax="${c.limit}" aria-valuenow="${c.spent}" aria-valuetext="${usd.format(c.spent)} of ${usd0.format(c.limit)} limit"><span style="--v:${(used * 100).toFixed(1)}"></span></div>
+          <p class="spend-foot num${high ? " is-high" : ""}">${high ? ico("alert") : ""}${pct.format(used)} used · ${usd.format(r2(c.limit - c.spent))} left</p></div>
+        <div class="cc-actions">
+          <label class="freeze">Freeze card<button class="switch" type="button" role="switch" aria-checked="false" data-freeze="${c.id}" aria-label="Freeze card •••• ${c.id}, ${c.holder}"></button></label>
+          <div class="reveal"><button class="btn btn-ghost btn-sm" type="button" aria-expanded="false" aria-controls="cd-${c.id}">${ico("lock")}Show card details<span class="visually-hidden"> for •••• ${c.id}</span></button>
+            <div class="pop end" id="cd-${c.id}" hidden><p class="pop-title">${ico("lock")}Confirm it's you first</p>
+              <p>The full number, expiry and security code for •••• ${c.id} show only after you confirm with your passkey or a 6-digit code sent to ••• 0142. They hide again after 60 seconds and never appear in reports or exports.</p></div></div>
+        </div></li>`;
+    }).join("");
+  }
+  let pendingCard = null, freezeTrigger = null;
+  function setFrozen(c, on) {
+    const li = document.querySelector(`.ccard[data-id="${c.id}"]`), pill = li.querySelector(".pill");
+    c.frozen = on; li.classList.toggle("is-frozen", on); li.querySelector(".switch").setAttribute("aria-checked", String(on));
+    pill.className = "pill " + (on ? "pill-neutral" : "pill-success"); pill.textContent = on ? "Frozen" : "Active";
+  }
+  $("#ccards").addEventListener("click", (e) => {
+    const sw = e.target.closest("[data-freeze]"), c = sw && cards.find((x) => x.id === sw.dataset.freeze);
+    if (!c) return;
+    if (c.frozen) { setFrozen(c, false); toast(`Card •••• ${c.id} is active again. ${c.holder} can use it now.`); return; }
+    // Turning the switch on asks first and restates who and what it affects (FRM-22, SCR-27)
+    pendingCard = c; freezeTrigger = sw;
+    $("#fz-title").textContent = `Freeze ${c.holder}'s card •••• ${c.id}?`;
+    $("#fz-text").textContent = `New purchases on this card will be declined for ${scope.entity} until you unfreeze it. Charges already pending still settle.` + (c.recurring ? ` The recurring charge from ${c.recurring} will also be declined.` : "");
+    $("#fz-go").textContent = `Freeze card •••• ${c.id}`;
+    $("#dlg-freeze").showModal();
+  });
+  $("#dlg-freeze").addEventListener("close", (e) => {
+    if (e.target.returnValue === "freeze") { setFrozen(pendingCard, true); toast(`Card •••• ${pendingCard.id} frozen. New purchases will be declined.`); }
+    freezeTrigger.focus(); e.target.returnValue = "";
+  });
+
+  // Popovers: entity switcher and card-details notes; Escape or an outside click closes them and returns focus (NAV-17).
+  const closePops = () => document.querySelectorAll('[aria-controls][aria-expanded="true"]').forEach((t) => { t.setAttribute("aria-expanded", "false"); document.getElementById(t.getAttribute("aria-controls")).hidden = true; });
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("[aria-controls][aria-expanded]");
+    if (t) { const open = t.getAttribute("aria-expanded") !== "true"; closePops(); if (open) { t.setAttribute("aria-expanded", "true"); document.getElementById(t.getAttribute("aria-controls")).hidden = false; } return; }
+    if (!e.target.closest(".pop")) closePops();
+  });
+  document.addEventListener("keydown", (e) => { const t = document.querySelector('[aria-controls][aria-expanded="true"]'); if (e.key === "Escape" && t) { closePops(); t.focus(); } });
+
+  // Toast: one at a time, closable, timer paused while hovered or focused (FBK-04).
+  let toastTimer;
+  function toast(msg) {
+    $("#toasts").innerHTML = `<div class="toast">${ico("check")}<p>${msg}</p><button class="icon-btn" type="button" aria-label="Dismiss">${ico("x")}</button></div>`;
+    const t = $("#toasts").firstElementChild, arm = () => { clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), 5000); };
+    ["pointerenter", "focusin"].forEach((ev) => t.addEventListener(ev, () => clearTimeout(toastTimer)));
+    ["pointerleave", "focusout"].forEach((ev) => t.addEventListener(ev, arm));
+    t.querySelector("button").addEventListener("click", () => t.remove()); arm();
+  }
+
+  // Dialog flows: validate inline, show progress in the button, apply only after the API answers (FRM-11, FBK-10, FBK-11).
+  const parseAmt = (v) => { const n = parseFloat(String(v).replace(/[^0-9.]/g, "")); return Number.isFinite(n) ? r2(n) : 0; };
+  const setErr = (el, msg) => { el.setAttribute("aria-invalid", String(!!msg)); document.getElementById(el.id + "-err").innerHTML = msg ? ico("alert") + msg : ""; };
+  const options = (sel) => accounts.filter((a) => a.movable).map((a) => `<option value="${a.id}"${a.id === sel ? " selected" : ""}>${a.name} •••• ${a.id} · ${usd.format(a.balance)}</option>`).join("");
+  let opener = null;
+  function flow(id, cfg) {
+    const dlg = document.getElementById(id), form = dlg.querySelector("form"), go = form.querySelector('[value="go"]');
+    dlg.flow = cfg;
+    form.addEventListener("input", () => cfg.review && cfg.review(form, go));
+    form.addEventListener("submit", async (e) => {
+      if (e.submitter && e.submitter.value === "cancel") return;
+      e.preventDefault();
+      if (go.getAttribute("aria-busy") === "true") return;
+      const errs = cfg.check(form), names = Object.keys(errs);
+      form.querySelectorAll("[aria-invalid]").forEach((el) => setErr(el, ""));
+      names.forEach((n) => setErr(form.elements[n], errs[n]));
+      if (names.length) { form.elements[names[0]].focus(); return; }
+      const label = go.textContent;
+      go.setAttribute("aria-busy", "true"); go.textContent = cfg.busy;
+      const res = await api();
+      go.removeAttribute("aria-busy"); go.textContent = label;
+      if (res.ok) { const msg = cfg.run(form); dlg.close("done"); toast(msg); }
+    });
+    dlg.addEventListener("close", () => (opener && opener.isConnected ? opener : $("#qa-transfer")).focus());
+  }
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-open]"); if (!t) return;
+    const dlg = document.getElementById(t.dataset.open), form = dlg.querySelector("form");
+    opener = t; form.reset();
+    form.querySelectorAll("[aria-invalid]").forEach((el) => setErr(el, ""));
+    if (dlg.flow.prep) dlg.flow.prep(form, t);
+    if (dlg.flow.review) dlg.flow.review(form, form.querySelector('[value="go"]'));
+    dlg.showModal();
+  });
+  const scopeLine = () => `at <strong>${esc(scope.entity)}</strong>`;
+  flow("dlg-transfer", {
+    busy: "Transferring…",
+    prep(f, t) { f.from.innerHTML = options("2207"); f.to.innerHTML = options("5530"); if (t.dataset.amount) f.amount.value = parseAmt(t.dataset.amount).toFixed(2); },
+    check(f) {
+      const e = {}, from = acct(f.from.value), amt = parseAmt(f.amount.value);
+      if (f.from.value === f.to.value) e.to = "Choose a different account to move money into.";
+      if (!amt || amt > from.balance) e.amount = amt ? `${from.name} holds ${usd.format(from.balance)}. Enter that much or less.` : "Enter an amount to transfer.";
+      return e;
+    },
+    review(f, go) {
+      const from = acct(f.from.value), to = acct(f.to.value), amt = parseAmt(f.amount.value);
+      $("#tr-amount-hint").textContent = `${from.name} holds ${usd.format(from.balance)}. Between Northgate accounts, money arrives at once.`;
+      $("#tr-review").innerHTML = amt ? `Moves <strong>${usd.format(amt)}</strong> from ${from.name} •••• ${from.id} to ${to.name} •••• ${to.id} ${scopeLine()}. Total cash stays ${usd.format(totalCash())}.` : "Enter an amount to review the transfer.";
+      go.textContent = amt ? `Transfer ${usd.format(amt)}` : "Transfer";
+    },
+    run(f) {
+      const from = acct(f.from.value), to = acct(f.to.value), amt = parseAmt(f.amount.value);
+      from.balance = r2(from.balance - amt); to.balance = r2(to.balance + amt); renderCash();
+      return `Moved ${usd.format(amt)} to ${to.name} •••• ${to.id}. Total cash is unchanged.`;
+    }
+  });
+  flow("dlg-request", {
+    busy: "Sending…",
+    check: (f) => Object.assign({}, !f.who.value.trim() && { who: "Enter the customer's name." },
+      !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email.value.trim()) && { email: "Enter an email like ap@example.com." }, !parseAmt(f.amount.value) && { amount: "Enter the amount to request." }),
+    review(f, go) {
+      const amt = parseAmt(f.amount.value), into = acct("2207"), due = f.due.value ? dayW.format(Date.parse(f.due.value + "T00:00Z")) : "no due date";
+      $("#rq-review").innerHTML = `Sends a payment link${amt ? ` for <strong>${usd.format(amt)}</strong>` : ""}, due ${due}, paid into ${into.name} •••• ${into.id} ${scopeLine()}.`;
+      go.textContent = amt ? `Request ${usd.format(amt)}` : "Send request";
+    },
+    run: (f) => `Request for ${usd.format(parseAmt(f.amount.value))} sent to ${esc(f.email.value.trim())}.`
+  });
+  flow("dlg-account", {
+    busy: "Connecting…",
+    check: (f) => Object.assign({}, !f.inst.value.trim() && { inst: "Enter the bank or provider's name." }, !/^\d{4}$/.test(f.last.value) && { last: "Enter the last 4 digits of the account number." }),
+    run(f) {
+      const inst = f.inst.value.trim();
+      accounts.push({ id: f.last.value, name: f.kind.value, bank: inst, balance: null, movable: false }); renderCash();
+      return `${esc(inst)} •••• ${f.last.value} is connecting. Its balance joins the total after the first sync, usually within 5 minutes.`;
+    }
+  });
+
+  // Hide balances: aria-pressed state, remembered with storage wrapped in try/catch (SCR-23, ENG-10).
+  const maskBtn = $("#mask");
+  function setMasked(on) {
+    document.body.dataset.masked = String(on); maskBtn.setAttribute("aria-pressed", String(on));
+    try { localStorage.setItem("sora-treasury-mask", on ? "1" : "0"); } catch (e) { /* storage blocked: keep the default */ }
+  }
+  maskBtn.addEventListener("click", () => setMasked(maskBtn.getAttribute("aria-pressed") !== "true"));
+
+  // Scope lives in the URL and in the report's file name and header lines (SCR-27).
+  const fileName = () => `${scope.slug}_${scope.currency}_${PERIODS[scope.period].from}_to_${scope.asOf}_cash-report.csv`;
+  function applyScope() {
+    $("#period").value = scope.period; $("#period-text").textContent = PERIODS[scope.period].text; $("#file-name").textContent = fileName();
+    try { history.replaceState(null, "", `#entity=${scope.slug}&currency=${scope.currency}&period=${scope.period}`); } catch (e) { /* sandboxed URL: the page still works */ }
+    renderFlow();
+  }
+  $("#period").addEventListener("change", (e) => { scope.period = e.target.value; applyScope(); });
+  $("#download").addEventListener("click", (e) => {
+    const p = PERIODS[scope.period], q = (v) => `"${String(v).replace(/"/g, '""')}"`;
+    const lines = [["Sora Treasury cash report"], ["Entity", scope.entity], ["Currency", scope.currency], ["Period", `${p.from} to ${scope.asOf}`], ["Balances as of", "2026-10-28 09:40 ET"], [],
+      ["Account", "Number", "Balance"], ...accounts.map((a) => [a.name, "•••• " + a.id, a.balance ?? "Connecting"]), ["Total cash", "", totalCash()], [],
+      ["Month", "Money in", "Money out", "Net"], ...flows.slice(-p.n).map((r) => [r[0], r[1], r[2], r[1] - r[2]])];
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([lines.map((l) => l.map(q).join(",")).join("\r\n")], { type: "text/csv" })), download: fileName() });
+    a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    // After success the button says what happened, then returns to its verb (COP-09)
+    const span = e.currentTarget.querySelector("span");
+    span.textContent = "Downloaded"; $("#file-name").textContent = "Saved " + fileName();
+    setTimeout(() => { span.textContent = "Download report"; $("#file-name").textContent = fileName(); }, 2000);
+  });
+
+  try { const h = new URLSearchParams(location.hash.slice(1)).get("period"); if (PERIODS[h]) scope.period = h; } catch (e) {}
+  let masked = false; try { masked = localStorage.getItem("sora-treasury-mask") === "1"; } catch (e) {}
+  setMasked(masked);
+  renderCash(); renderTx(); renderCards(); renderRevenue(); applyScope();
+</script>
+</body>
+</html>
