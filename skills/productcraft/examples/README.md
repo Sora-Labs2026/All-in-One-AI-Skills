@@ -36,6 +36,7 @@ Every dashboard leads with the decision it supports (SCR-01) and keeps one focal
 | `dashboard-v15.html` | Accounts payable: what do I approve and pay? | Master-detail bills, line items that add up, approval steps, cash out by week |
 | `dashboard-v16.html` | Clinic monitoring: which patients need attention now? | Urgency-sorted patients, out-of-range flags with ranges, vitals band chart, care tasks |
 | `dashboard-v17.html` | People operations: what needs HR action this week? | Scope bar with entity, location and period; deadline strip; leave approvals with day-by-day coverage against minimum staffing; payroll run that adds up, with blockers; onboarding checklist that clears payroll blockers live |
+| `dashboard-v18.html` | Security operations: what needs a human security decision right now? | Production scope bar with a hazard-striped edge, approval cards with evidence, blast radius and undoable automatic steps, calibrated confidence with its basis, live feed that holds new events behind a button, attack-path lanes, rates with denominators, playbook audit trail |
 | `dashboard-v21.html` | Smart-home wall panel: what is on, and what is using power right now? | Live watts with ranked loads that sum to the total and cost per hour, device tiles with switch, slider and temperature stepper, scene radios, unlock dialog that restates door and home, hourly energy bars with a table, opt-in Home or Away presence |
 
 ## Components and flows
