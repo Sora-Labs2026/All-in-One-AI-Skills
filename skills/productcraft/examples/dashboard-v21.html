@@ -1,0 +1,746 @@
+<!doctype html>
+<!-- ProductCraft example: dashboard-v21 (smart-home wall panel for a landscape tablet, warm light, "Sora Home"). Original Sora Labs example, MIT License.
+     All people, addresses, readings, prices and the tariff are fictional; the power model in the script is for illustration, not metering.
+     Demonstrates: SCR-01, SCR-02, SCR-27, SCR-28, LAY-01, LAY-02, LAY-05, LAY-08, TYP-02, TYP-09, COL-01, COL-02, COL-06, COL-07,
+     CMP-07, CMP-10, CMP-12, CMP-15, CMP-16, CMP-17, CMP-18, CMP-19, CMP-20, CMP-23, CMP-26, CMP-34, FRM-06, FRM-08, FRM-22, FRM-27,
+     MOB-01, MOB-02, BTN-01, BTN-10, BTN-15, FBK-03, FBK-11, FBK-21, ICO-04, COP-01, COP-08, COP-09, COP-10, ENG-06, ENG-07, MOT-04 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1280">
+  <title>ProductCraft example: Smart-home wall panel</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* Warm light palette: a low-chroma stone ground, warm white cards and a moss accent that stays clear of the status hues (COL-02, COL-06).
+       Every accent use reads the tokens (CMP-26). Measured (COL-01):
+       text #1f1b16 on surface #fcfbf8 16.5:1, on bg #e8e4dd 13.5:1 · text-2 #4d463e on bg 7.3:1, on surface-2 8.2:1
+       text-3 #5f564c on bg 5.7:1, on surface 6.9:1, on surface-2 6.3:1, on accent-soft 6.2:1, on warning-soft 6.3:1
+       accent #4b5d1a on surface 7.1:1 · white on accent 7.3:1, on accent-hover 9.4:1 · accent-ink #3f4f14 on accent-soft 7.8:1
+       success #0b6b4a on success-soft #e5f2ea 5.7:1 · warning #8f4708 on warning-soft #fbeed8 6.0:1 · neutral #4d463e on #efebe4 7.8:1
+       danger #a52a1c on surface 6.9:1 · surface on text (selected segment) 16.5:1
+       Graphics (3:1): line-strong #8c8276 on surface 3.6:1, on surface-2 3.3:1, on accent-soft 3.3:1 · bar #938776 on surface 3.4:1
+       selected bar #2b2620 on surface 14.5:1 · accent fill on the unfilled slider track #d6cec2 4.7:1 */
+    :root {
+      --bg: #e8e4dd;
+      --surface: #fcfbf8;
+      --surface-2: #f3f0ea;
+      --border: #ddd6cb;
+      --line-strong: #8c8276;
+      --text: #1f1b16;
+      --text-2: #4d463e;
+      --text-3: #5f564c;
+      --accent: #4b5d1a;
+      --accent-hover: #3d4c14;
+      --accent-soft: #edf0df;
+      --accent-ink: #3f4f14;
+      --on-accent: #ffffff;
+      --focus: #4b5d1a;
+      --success: #0b6b4a;
+      --success-soft: #e5f2ea;
+      --warning: #8f4708;
+      --warning-soft: #fbeed8;
+      --danger: #a52a1c;
+      --neutral-ink: #4d463e;
+      --neutral-soft: #efebe4;
+      --track: #d6cec2;
+      --accent-line: #c9d0ad;
+      --bar: #938776;
+      --bar-light: #c8bfb2;
+      --bar-strong: #2b2620;
+      --text-display: 56px; /* one display step added to the shared scale for the focal figure (TYP-02) */
+      --shadow-sm: none;
+    }
+
+    /* Resting cards are separated by a 1px border and a tone step, never a shadow; only the dialog floats (CMP-07) */
+    .card { padding: var(--space-5); border-radius: var(--radius-lg); }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+    .card-head h2 { margin-bottom: 2px; }
+    .btn { min-height: 44px; }
+    .btn-primary[aria-disabled="true"] { background: var(--surface-2); color: var(--text-2); border-color: var(--line-strong); opacity: 1; }
+
+    /* Top bar: brand, the home this panel controls, outside conditions (SCR-27) */
+    .top { display: flex; align-items: center; gap: var(--space-5); padding: var(--space-3) var(--space-6); background: var(--surface); border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--text); font-weight: 700; }
+    .brand:hover { text-decoration: none; }
+    .brand svg { width: 32px; height: 32px; flex: none; }
+    .brand .tile { fill: var(--accent); }
+    .brand .sun { fill: none; stroke: var(--on-accent); stroke-width: 2.5; stroke-linecap: round; }
+    .scope, .weather, .hub { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-2); }
+    .scope { padding-left: var(--space-5); border-left: 1px solid var(--border); }
+    .scope b, .weather b { color: var(--text); font-weight: 600; }
+    .top svg.i { width: 18px; height: 18px; flex: none; color: var(--text-3); }
+    .top-end { display: flex; align-items: center; gap: var(--space-5); margin-left: auto; }
+    .hub svg.i { color: var(--success); }
+
+    /* 16px between cards, 24px inside them, so groups read as groups (LAY-01, LAY-02) */
+    .wrap { display: grid; gap: var(--space-4); max-width: 1360px; margin: 0 auto; padding: var(--space-5) var(--space-6) var(--space-7); }
+    .head h1 { font-size: var(--text-2xl); line-height: 1.2; }
+    .head p { margin-top: var(--space-1); color: var(--text-2); }
+
+    /* 12-column rows: power and the four device tiles share the first view, then scenes, then history (LAY-08) */
+    .row-a { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--space-4); align-items: start; }
+    .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); }
+    .row-c { display: grid; grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: var(--space-4); align-items: start; }
+    .side { display: grid; gap: var(--space-4); }
+
+    /* Power now: the focal figure, its cost per hour, then loads ranked by length from zero that sum to the total (LAY-05, CMP-34, TYP-09) */
+    .live { font-size: var(--text-xs); color: var(--text-3); }
+    .power-big { display: flex; align-items: baseline; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-4); }
+    .power-total { font-size: var(--text-display); font-weight: 700; line-height: 1; letter-spacing: -0.01em; }
+    .power-total .unit { font-size: var(--text-xl); font-weight: 600; color: var(--text-2); letter-spacing: 0; }
+    .power-cost { font-size: var(--text-lg); font-weight: 600; }
+    .power-cost small { display: block; font-size: var(--text-sm); font-weight: 400; color: var(--text-2); }
+    .usual { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
+    .pill svg { width: 12px; height: 12px; }
+    .pill.has-icon::before { display: none; }
+    .loads { list-style: none; margin: var(--space-4) 0 0; padding: 0; }
+    .load { display: grid; grid-template-columns: minmax(150px, 210px) minmax(0, 1fr) 76px; align-items: center; gap: var(--space-4); min-height: 48px; border-top: 1px solid var(--border); }
+    .load-name { font-size: var(--text-md); font-weight: 600; line-height: 1.3; }
+    .load-name small { display: block; font-size: var(--text-xs); font-weight: 400; color: var(--text-3); }
+    .load-bar { height: 12px; }
+    .load-bar i { display: block; width: calc(var(--v) * 1%); min-width: 4px; height: 100%; border-radius: 4px; background: var(--bar); }
+    .load:first-child .load-bar i { background: var(--bar-strong); }
+    .load-w { text-align: right; font-weight: 600; }
+    .load.is-rest .load-name { font-weight: 500; color: var(--text-2); }
+    .load-sum { display: flex; justify-content: space-between; gap: var(--space-4); padding-top: var(--space-3); border-top: 1px solid var(--text); font-weight: 700; }
+    .load-sum span:first-child { font-weight: 500; color: var(--text-2); }
+
+    /* Scenes: native radios in cards; the whole card is the target, the dot is the non-color cue (CMP-16, CMP-23, FRM-27) */
+    .scene-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin: var(--space-4) 0 0; padding: 0; border: 0; min-width: 0; }
+    .scene { position: relative; display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 2px var(--space-3); align-content: start; padding: var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); }
+    .scene:hover { border-color: var(--line-strong); }
+    .scene input { appearance: none; -webkit-appearance: none; width: 22px; height: 22px; margin: 1px 0 0; border: 2px solid var(--line-strong); border-radius: 50%; background: var(--surface); }
+    .scene input:checked { border-color: var(--accent); background: radial-gradient(circle, var(--accent) 0 5px, var(--surface) 5.5px); }
+    .scene input:focus-visible { outline: none; }
+    .scene:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .scene:has(input:checked) { border: 2px solid var(--accent); padding: calc(var(--space-4) - 1px); background: var(--accent-soft); }
+    .scene label { font-weight: 700; cursor: pointer; }
+    .scene label::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+    .scene-meta, .scene-changes { grid-column: 2; }
+    .scene-meta { font-size: var(--text-xs); color: var(--text-3); }
+    .scene-changes { list-style: none; margin: var(--space-2) 0 0; padding: 0; font-size: var(--text-sm); color: var(--text-2); }
+    .scene-changes li { position: relative; padding-left: 14px; }
+    .scene-changes li::before { content: ""; position: absolute; left: 2px; top: 9px; width: 5px; height: 5px; border-radius: 50%; background: var(--line-strong); }
+    .scene .now-pill { position: absolute; top: var(--space-3); right: var(--space-3); background: var(--accent); color: var(--on-accent); pointer-events: none; }
+    .scene-status { margin-top: var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
+    .scene-status:empty { margin: 0; }
+
+    /* Device tiles: one device each, state in words beside the control; "on" tiles take the accent tint (CMP-15, COL-07) */
+    .tile { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-4) var(--space-5) var(--space-5); border: 1px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); transition: background-color var(--dur-fast); }
+    .tile[data-on="true"] { background: var(--accent-soft); border-color: var(--accent-line); }
+    .tile-head { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); min-height: 48px; }
+    .tile-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text-3); }
+    .tile[data-on="true"] .tile-icon { background: var(--surface); color: var(--accent-ink); }
+    .tile-icon svg { width: 22px; height: 22px; }
+    .tile h3 { font-size: var(--text-md); line-height: 1.3; }
+    .tile-state { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .tile-foot { margin-top: auto; font-size: var(--text-sm); color: var(--text-2); }
+
+    /* Switch: a checkbox with role="switch"; 60x44 hit box, knob position plus fill, off track outlined at 3:1 (FRM-22, FRM-27, MOB-01) */
+    .switch { appearance: none; -webkit-appearance: none; position: relative; flex: none; width: 60px; height: 44px; margin: 0; border-radius: var(--radius-pill); background: transparent; cursor: pointer; }
+    .switch::before { content: ""; position: absolute; left: 4px; top: 6px; width: 52px; height: 32px; border: 2px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--surface-2); transition: background-color var(--dur-fast), border-color var(--dur-fast); }
+    .switch::after { content: ""; position: absolute; left: 10px; top: 12px; width: 20px; height: 20px; border-radius: 50%; background: var(--text-3); transition: transform var(--dur-fast) var(--ease-out); }
+    .switch:checked::before { border-color: var(--accent); background: var(--accent); }
+    .switch:checked::after { transform: translateX(20px); background: var(--on-accent); }
+
+    /* Brightness: input type="range", value shown beside the label, ends labeled, 44px thumb hit area (FRM-08) */
+    .slider-top { display: flex; align-items: baseline; justify-content: space-between; font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .slider-top output { font-size: var(--text-xl); font-weight: 700; color: var(--text); }
+    .range { --fill: 60%; appearance: none; -webkit-appearance: none; display: block; width: 100%; height: 44px; margin: 0; background: transparent; cursor: pointer; touch-action: pan-y; }
+    .range::-webkit-slider-runnable-track { height: 12px; border-radius: var(--radius-pill); background: linear-gradient(to right, var(--range-fill, var(--accent)) var(--fill), var(--track) var(--fill)); }
+    .range::-webkit-slider-thumb { -webkit-appearance: none; width: 44px; height: 44px; margin-top: -16px; border: 7px solid transparent; border-radius: 50%; background: var(--surface) padding-box; box-shadow: inset 0 0 0 3px var(--range-fill, var(--accent)); }
+    .range::-moz-range-track { height: 12px; border-radius: var(--radius-pill); background: var(--track); }
+    .range::-moz-range-progress { height: 12px; border-radius: var(--radius-pill); background: var(--accent); }
+    .range::-moz-range-thumb { width: 30px; height: 30px; border: 3px solid var(--accent); border-radius: 50%; background: var(--surface); box-sizing: border-box; }
+    .range:focus-visible { outline-offset: 0; border-radius: var(--radius-sm); }
+    .tile[data-on="false"] .range { --range-fill: var(--text-3); } /* kept level shown in neutral ink while the lamp is off; 4.6:1 on the track */
+    .slider-scale { display: flex; justify-content: space-between; font-size: var(--text-xs); color: var(--text-3); }
+
+    /* Air conditioner: room reading, target stepper with 52px buttons, mode as a radio segmented control (TYP-09, CMP-10, FRM-06) */
+    .ac-room { display: flex; justify-content: space-between; align-items: baseline; font-size: var(--text-sm); color: var(--text-2); }
+    .ac-room b { font-size: var(--text-md); color: var(--text); }
+    /* Stepper buttons are named icon controls with 8px between targets (ICO-04, MOB-02); transitions drop under reduced motion via tokens.css (MOT-04) */
+    .stepper { display: grid; grid-template-columns: 52px minmax(0, 1fr) 52px; align-items: center; gap: var(--space-2); }
+    .step { display: grid; place-items: center; width: 52px; height: 52px; padding: 0; border: 2px solid var(--line-strong); border-radius: 50%; background: var(--surface); color: var(--text); cursor: pointer; }
+    .step:hover { background: var(--surface-2); }
+    .step:focus-visible { border-radius: 50%; }
+    .step svg { width: 22px; height: 22px; }
+    .step[aria-disabled="true"] { border-color: var(--border); color: var(--text-3); cursor: not-allowed; }
+    .step-val { display: grid; justify-items: center; line-height: 1.15; }
+    .step-val span { font-size: var(--text-xs); font-weight: 600; color: var(--text-3); }
+    .step-val output { font-size: var(--text-2xl); font-weight: 700; }
+    .seg { display: flex; gap: 2px; margin: 0; padding: var(--space-1); border: 0; border-radius: var(--radius-md); background: var(--surface-2); min-width: 0; }
+    .tile[data-on="true"] .seg { background: var(--surface); }
+    .seg label { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; gap: var(--space-1); min-height: 44px; padding: 0 var(--space-3); border-radius: var(--radius-sm); font-size: var(--text-sm); font-weight: 600; color: var(--text-2); cursor: pointer; white-space: nowrap; }
+    .seg input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+    .seg label:has(input:checked) { background: var(--text); color: var(--surface); font-weight: 700; }
+    .seg label:has(input:focus-visible) { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+    /* Router: status pill with a word, connected devices that add up (SCR-02) */
+    .router-count { font-size: var(--text-2xl); font-weight: 700; line-height: 1.1; }
+    .router-count span { font-size: var(--text-md); font-weight: 500; color: var(--text-2); }
+    .facts { display: grid; gap: var(--space-2); margin: 0; font-size: var(--text-sm); }
+    .facts div { display: flex; justify-content: space-between; gap: var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--border); }
+    .facts dt { color: var(--text-2); }
+    .facts dd { margin: 0; font-weight: 600; }
+
+    /* Locks: one row per door, state as a pill; unlocking goes through a dialog, locking does not (BTN-15, CMP-20) */
+    .doors { list-style: none; margin: 0; padding: 0; display: grid; }
+    .door { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px var(--space-3); padding: var(--space-2) 0; border-top: 1px solid var(--border); }
+    .door:first-child { border-top: 0; padding-top: 0; }
+    .door-name { font-weight: 600; }
+    .door-note { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; font-size: var(--text-xs); color: var(--text-3); }
+    .door .btn { grid-column: 2; grid-row: 1 / span 2; min-width: 84px; padding: 0 var(--space-3); font-size: var(--text-sm); }
+    .door.is-unlocked { margin: 0 calc(var(--space-3) * -1); padding-left: var(--space-3); padding-right: var(--space-3); border-radius: var(--radius-sm); background: var(--warning-soft); }
+
+    /* Energy by hour: bars from zero with the exact value printed on each, one selected hour in ink (CMP-18, CMP-34) */
+    .kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); margin: var(--space-4) 0 0; }
+    .kpis dt { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .kpis dd { margin: 0; }
+    .kpis .val { display: block; font-size: var(--text-xl); font-weight: 700; line-height: 1.3; }
+    .kpis .val small { font-size: var(--text-md); font-weight: 600; color: var(--text-2); }
+    .kpis .sub { display: block; font-size: var(--text-sm); color: var(--text-2); }
+    .delta-bad { color: var(--danger); }
+    .chart { display: grid; grid-template-columns: 56px minmax(0, 1fr); margin-top: var(--space-5); }
+    .y-axis { position: relative; height: 220px; font-size: var(--text-xs); color: var(--text-3); }
+    .y-axis span { position: absolute; right: var(--space-3); bottom: calc(var(--p) * 1% - 8px); line-height: 16px; white-space: nowrap; }
+    .plot { position: relative; display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); height: 220px; border-bottom: 1px solid var(--text-3); background: linear-gradient(var(--border) 1px, transparent 1px) 0 0 / 100% 20%; }
+    .hour { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; font: inherit; }
+    .hour:hover { background: rgba(31, 27, 22, 0.04); }
+    .hour:focus-visible { outline-offset: -2px; border-radius: var(--radius-sm); }
+    .hour .v { margin-bottom: 4px; font-size: var(--text-xs); font-weight: 600; color: var(--text-2); }
+    .hour .b { display: block; width: min(60%, 30px); height: calc(var(--h) * 1%); border-radius: 4px 4px 0 0; background: var(--bar); }
+    .hour.is-partial .b { background: repeating-linear-gradient(-45deg, var(--bar) 0 4px, var(--bar-light) 4px 7px); box-shadow: inset 0 0 0 1.5px var(--bar); }
+    .hour[aria-checked="true"] .b { background: var(--bar-strong); box-shadow: none; }
+    .hour[aria-checked="true"] .v { color: var(--text); font-weight: 700; }
+    .x-axis { grid-column: 2; display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); padding-top: var(--space-1); font-size: var(--text-xs); color: var(--text-3); text-align: center; }
+    .x-title { grid-column: 2; margin-top: 2px; font-size: var(--text-xs); color: var(--text-3); text-align: right; }
+    .readout { margin-top: var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); background: var(--surface-2); font-size: var(--text-sm); color: var(--text-2); }
+    .readout b { color: var(--text); }
+    .hours-table { width: 100%; margin-top: var(--space-4); border-collapse: collapse; font-size: var(--text-sm); }
+    .hours-table caption { text-align: left; font-size: var(--text-xs); color: var(--text-3); padding-bottom: var(--space-2); }
+    .hours-table th, .hours-table td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border); text-align: right; }
+    .hours-table th:first-child, .hours-table td:first-child { text-align: left; }
+    .hours-table thead th { font-size: var(--text-xs); color: var(--text-2); }
+    .hours-table tfoot th, .hours-table tfoot td { border-top: 1px solid var(--text); border-bottom: 0; font-weight: 700; }
+    .table-scroll { max-height: 340px; overflow-y: auto; }
+    .table-scroll thead th { position: sticky; top: 0; background: var(--surface); }
+
+    /* Presence: opt-in only, and only Home or Away, in words and an icon (COL-07) */
+    .people { list-style: none; margin: var(--space-4) 0 0; padding: 0; }
+    .person { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); min-height: 56px; border-top: 1px solid var(--border); }
+    .person .avatar { width: 40px; height: 40px; background: var(--neutral-soft); color: var(--neutral-ink); }
+    .person .pill-home { color: var(--accent-ink); background: var(--accent-soft); }
+    .privacy { display: flex; gap: var(--space-2); margin-top: var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
+    .privacy svg { width: 18px; height: 18px; flex: none; margin-top: 2px; color: var(--text-3); }
+
+    /* Automation log: what ran, when, and the rule that ran it (SCR-28) */
+    .auto-log { list-style: none; margin: var(--space-3) 0 0; padding: 0; }
+    .auto-log li { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: var(--space-3); padding: var(--space-2) 0; border-top: 1px solid var(--border); font-size: var(--text-sm); }
+    .auto-log time { font-weight: 600; color: var(--text-2); }
+    .auto-log small { display: block; font-size: var(--text-xs); color: var(--text-3); }
+
+    /* Unlock dialog: native <dialog>, the only floating layer, so the only shadow (CMP-12) */
+    .confirm { width: min(440px, calc(100vw - 32px)); padding: var(--space-5); border: 0; border-radius: var(--radius-lg); background: var(--surface); color: var(--text); box-shadow: 0 24px 48px -12px rgba(31, 27, 22, 0.35); }
+    .confirm::backdrop { background: rgba(31, 27, 22, 0.5); }
+    .confirm-icon { display: grid; place-items: center; width: 44px; height: 44px; margin-bottom: var(--space-3); border-radius: 50%; background: var(--warning-soft); color: var(--warning); }
+    .confirm-icon svg { width: 22px; height: 22px; }
+    .confirm h2 { font-size: var(--text-xl); }
+    .confirm p { margin-top: var(--space-2); color: var(--text-2); }
+    .confirm p strong { color: var(--text); }
+    .confirm-actions { display: flex; justify-content: flex-end; gap: var(--space-3); margin-top: var(--space-5); flex-wrap: wrap; }
+
+    @media (max-width: 1180px) {
+      .row-a, .row-c { grid-template-columns: minmax(0, 1fr); }
+      .scene-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .side { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
+    }
+    @media (max-width: 760px) {
+      .top { flex-wrap: wrap; gap: var(--space-2) var(--space-4); padding: var(--space-3) var(--space-4); }
+      .scope { padding-left: 0; border-left: 0; }
+      .top-end { width: 100%; margin-left: 0; justify-content: space-between; }
+      .wrap { padding: var(--space-4) var(--space-4) var(--space-6); }
+      .card { padding: var(--space-4); }
+      .tiles { grid-template-columns: minmax(0, 1fr); }
+      .power-total { font-size: 44px; }
+      .load { grid-template-columns: minmax(0, 1fr) 68px; gap: var(--space-1) var(--space-3); padding: var(--space-2) 0; }
+      .load-bar { grid-column: 1 / -1; grid-row: 2; height: 8px; }
+      .kpis { grid-template-columns: minmax(0, 1fr); gap: var(--space-3); }
+      .chart { grid-template-columns: 40px minmax(0, 1fr); }
+      .y-axis span { right: var(--space-2); }
+      .hour .v { display: none; }
+      .x-axis span:not(:nth-child(6n+1)) { visibility: hidden; }
+    }
+    @media (max-width: 480px) {
+      .scene-grid { grid-template-columns: minmax(0, 1fr); }
+      .confirm-actions .btn { flex: 1 1 100%; }
+    }
+  </style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="#">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect class="tile" width="32" height="32" rx="8"/><path class="sun" d="M9.5 19.5a6.5 6.5 0 0 1 13 0"/><path class="sun" d="M7.5 23.5h17"/></svg>
+    Sora Home
+  </a>
+  <!-- The home this panel acts on, spelled out, and restated in the unlock dialog (SCR-27) -->
+  <p class="scope"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4.5l8 6.5v8.5a1 1 0 0 1-1 1h-4.5V15h-5v5.5H5a1 1 0 0 1-1-1z"/></svg><span>Controlling <b>14 Alder Row</b></span></p>
+  <div class="top-end">
+    <p class="weather"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z"/></svg><span>Outside <b class="num">9 °C</b>, clear</span></p>
+    <p class="hub"><svg class="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>Hub online</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <!-- The page title is the moment it describes, not a greeting (SCR-01) -->
+  <div class="head">
+    <h1>What's on at <time datetime="2026-10-28T19:42">19:42</time></h1>
+    <p id="summary">Wednesday, October 28</p>
+  </div>
+
+  <div class="row-a">
+    <!-- Focal card: answers "what is using power right now" in one figure, its cost and its parts (SCR-01, LAY-05, COP-10) -->
+    <section class="card" aria-labelledby="power-title">
+      <div class="card-head">
+        <h2 id="power-title">Using power now</h2>
+        <p class="live num">Live from the meter · updated 19:42:05</p>
+      </div>
+      <div class="power-big">
+        <p class="power-total num" id="power-total"></p>
+        <p class="power-cost num" id="power-cost"></p>
+      </div>
+      <p class="usual" id="power-usual"></p>
+      <ul class="loads" id="loads" aria-label="Loads, largest first"></ul>
+      <p class="load-sum num"><span>Total, all loads above</span><span id="load-sum"></span></p>
+    </section>
+
+    <div class="tiles">
+      <section class="tile" id="lamp-tile" aria-labelledby="lamp-title">
+        <div class="tile-head">
+          <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3.5h8l3 7H5z"/><path d="M12 10.5v9M8 20.5h8"/></svg></span>
+          <div><h3 id="lamp-title">Living-room lamp</h3><p class="tile-state num" id="lamp-state"></p></div>
+          <input class="switch" type="checkbox" role="switch" id="lamp-switch" aria-labelledby="lamp-title" aria-describedby="lamp-state">
+        </div>
+        <div>
+          <div class="slider-top"><label for="lamp-level">Brightness</label><output class="num" id="lamp-out" for="lamp-level"></output></div>
+          <input class="range" type="range" id="lamp-level" min="1" max="100" step="1" value="60">
+          <div class="slider-scale num" aria-hidden="true"><span>1%</span><span>100%</span></div>
+        </div>
+        <p class="tile-foot">Warm white, 2700 K · 18 W at full brightness</p>
+      </section>
+
+      <section class="tile" id="ac-tile" aria-labelledby="ac-title">
+        <div class="tile-head">
+          <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="8" rx="2"/><path d="M7 10h10M8 16.5v2.5M12 16.5V20M16 16.5v2.5"/></svg></span>
+          <div><h3 id="ac-title">Air conditioner</h3><p class="tile-state num" id="ac-state"></p></div>
+          <input class="switch" type="checkbox" role="switch" id="ac-switch" aria-labelledby="ac-title" aria-describedby="ac-state">
+        </div>
+        <p class="ac-room">Living room now <b class="num">20.5 °C</b></p>
+        <!-- Stepper: fixed names on the buttons, the value announced from the output; stops explain themselves (FRM-27, BTN-10, MOB-01) -->
+        <div class="stepper" role="group" aria-labelledby="ac-target-label">
+          <button class="step" type="button" id="ac-down" aria-label="Lower target temperature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 12h12"/></svg></button>
+          <div class="step-val"><span id="ac-target-label">Target</span><output class="num" id="ac-target" for="ac-down ac-up" aria-live="polite"></output></div>
+          <button class="step" type="button" id="ac-up" aria-label="Raise target temperature"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg></button>
+        </div>
+        <fieldset class="seg" id="ac-mode">
+          <legend class="visually-hidden">Mode</legend>
+          <label><input type="radio" name="ac-mode" value="heat" checked>Heat</label>
+          <label><input type="radio" name="ac-mode" value="cool">Cool</label>
+          <label><input type="radio" name="ac-mode" value="auto">Auto</label>
+        </fieldset>
+        <p class="tile-foot" id="ac-note"></p>
+      </section>
+
+      <section class="tile" aria-labelledby="locks-title">
+        <div class="tile-head">
+          <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+          <div><h3 id="locks-title">Door locks</h3><p class="tile-state" id="locks-state"></p></div>
+        </div>
+        <ul class="doors" id="doors"></ul>
+        <p class="tile-foot" id="locks-status" role="status">Each door locks itself 5 min after it closes.</p>
+      </section>
+
+      <section class="tile" aria-labelledby="router-title">
+        <div class="tile-head">
+          <span class="tile-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.5 16a5 5 0 0 1 7 0"/><path d="M12 19.5h.01"/></svg></span>
+          <div><h3 id="router-title">Wi-Fi router</h3><p class="tile-state num">12 W · up since Oct 21</p></div>
+          <span class="pill pill-success has-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>Online</span>
+        </div>
+        <p class="router-count num">21 <span>devices connected</span></p>
+        <dl class="facts num">
+          <div><dt>On the main network</dt><dd>19</dd></div>
+          <div><dt>On the guest network</dt><dd>2</dd></div>
+          <div><dt>Download</dt><dd>312 Mbps</dd></div>
+          <div><dt>Upload</dt><dd>48 Mbps</dd></div>
+        </dl>
+        <p class="tile-foot num">Internet speed tested at 19:30</p>
+      </section>
+    </div>
+  </div>
+
+  <section class="card" aria-labelledby="scenes-title">
+    <div class="card-head">
+      <div><h2 id="scenes-title">Scenes</h2><p class="subtle">Pick one, then switch. Scenes can lock doors but never unlock them.</p></div>
+      <!-- One primary action that names the outcome; unavailable with a reason while the picked scene is already on (BTN-01, BTN-10, COP-01) -->
+      <button class="btn btn-primary" type="button" id="scene-apply" aria-describedby="scene-status"></button>
+    </div>
+    <fieldset class="scene-grid" id="scene-grid" aria-labelledby="scenes-title"></fieldset>
+    <p class="scene-status" id="scene-status" role="status"></p>
+  </section>
+
+  <div class="row-c">
+    <section class="card" aria-labelledby="energy-title">
+      <div class="card-head">
+        <div>
+          <h2 id="energy-title">Energy today by hour</h2>
+          <p class="muted" id="energy-takeaway"></p>
+        </div>
+        <!-- One view of the data at a time; radios, so arrow keys and the selected fill come from the input (CMP-23) -->
+        <fieldset class="seg" id="energy-view">
+          <legend class="visually-hidden">Show energy as</legend>
+          <label><input type="radio" name="energy-view" value="chart" checked>Chart</label>
+          <label><input type="radio" name="energy-view" value="table">Table</label>
+        </fieldset>
+      </div>
+      <!-- Totals as labeled pairs with the comparison period in words (CMP-17) -->
+      <dl class="kpis" id="kpis"></dl>
+      <div id="chart-view">
+        <div class="chart">
+          <div class="y-axis num" id="y-axis" aria-hidden="true"></div>
+          <!-- Each hour is a focusable radio with its exact value; arrow keys move between hours (CMP-18, CMP-34) -->
+          <div class="plot" id="plot" role="radiogroup" aria-label="Hour of the day, use arrow keys to read each hour"></div>
+          <div class="x-axis num" id="x-axis" aria-hidden="true"></div>
+          <p class="x-title" aria-hidden="true">Hour starting · kWh per hour</p>
+        </div>
+        <p class="readout num" id="readout"></p>
+      </div>
+      <div id="table-view" class="table-scroll" tabindex="0" role="region" aria-label="Energy per hour, table" hidden>
+        <table class="hours-table num">
+          <caption>Energy and cost per hour today at $0.28 per kWh</caption>
+          <thead><tr><th scope="col">Hour</th><th scope="col">Energy</th><th scope="col">Cost</th></tr></thead>
+          <tbody id="hours-body"></tbody>
+          <tfoot><tr><th scope="row">Total so far</th><td id="foot-kwh"></td><td id="foot-cost"></td></tr></tfoot>
+        </table>
+      </div>
+    </section>
+
+    <div class="side">
+    <section class="card" aria-labelledby="presence-title">
+      <h2 id="presence-title">Who's home</h2>
+      <p class="subtle">3 of 4 household members share presence</p>
+      <ul class="people">
+        <li class="person"><span class="avatar" aria-hidden="true">MO</span><span>Mina Okafor</span><span class="pill pill-home has-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4.5l8 6.5v9H4z"/></svg>Home</span></li>
+        <li class="person"><span class="avatar" aria-hidden="true">JW</span><span>Jonas Weber</span><span class="pill pill-neutral has-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4.5h5.5v15H14M3.5 12h11M11 8.5l3.5 3.5-3.5 3.5"/></svg>Away</span></li>
+        <li class="person"><span class="avatar" aria-hidden="true">PR</span><span>Priya Raman</span><span class="pill pill-home has-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11 12 4.5l8 6.5v9H4z"/></svg>Home</span></li>
+      </ul>
+      <p class="privacy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 5 6v5.5c0 4.5 3 7.7 7 9 4-1.3 7-4.5 7-9V6z"/></svg><span>Only Home or Away is shown, never a place or a time. People opt in under Settings, Household.</span></p>
+    </section>
+
+    <section class="card" aria-labelledby="auto-title">
+      <h2 id="auto-title">Automations today</h2>
+      <ol class="auto-log num">
+        <li><time datetime="2026-10-28T19:05">19:05</time><span>Back door locked<small>Rule: lock 5 min after the door closes</small></span></li>
+        <li><time datetime="2026-10-28T18:12">18:12</time><span>Evening scene started<small>Schedule: daily at sunset</small></span></li>
+        <li><time datetime="2026-10-28T06:30">06:30</time><span>Morning scene started<small>Schedule: weekdays at 06:30</small></span></li>
+      </ol>
+    </section>
+    </div>
+  </div>
+</main>
+
+<!-- Unlocking is the one risky action on the panel, so it alone asks first; the safe choice has focus and the scope is restated (CMP-12, BTN-15, SCR-27, SCR-28) -->
+<dialog class="confirm" id="unlock-dialog" aria-labelledby="unlock-title" aria-describedby="unlock-desc">
+  <form method="dialog">
+    <span class="confirm-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 7.7-1.5"/></svg></span>
+    <h2 id="unlock-title"></h2>
+    <p id="unlock-desc"></p>
+    <div class="confirm-actions">
+      <button class="btn btn-secondary" type="submit" value="cancel" autofocus>Keep locked</button>
+      <button class="btn btn-primary" type="submit" value="confirm" id="unlock-confirm"></button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+  // Raw values only; every number is formatted at render time with one locale (ENG-07, COP-08).
+  const TARIFF = 0.28;     // $ per kWh, flat rate
+  const ROOM = 20.5;       // °C, living-room sensor
+  const LAMP_MAX_W = 18;
+  const watt = new Intl.NumberFormat("en-US");
+  const usd = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+  const kwh = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const kw1 = new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const pct = new Intl.NumberFormat("en-US", { style: "percent" });
+  const pct1 = new Intl.NumberFormat("en-US", { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1, signDisplay: "exceptZero" });
+  const signed = new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: "exceptZero" });
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const svg = (d, w = 1.75) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+
+  // One state object drives every tile, the power list, the scenes and the summary line (ENG-06).
+  const LIGHTS = { kitchen: ["Kitchen pendants", 24], dining: ["Dining light", 12], hall: ["Hall light", 8], porch: ["Porch light", 9] };
+  const OTHER = [
+    { name: "Oven", lower: "oven", note: "Kitchen · holding 200 °C", watts: 1620 },
+    { name: "Fridge-freezer", note: "Kitchen · compressor running", watts: 118, always: true },
+    { name: "TV and sound bar", lower: "TV and sound bar", note: "Living room", watts: 96 },
+  ];
+  const ALWAYS_ON = { name: "Always on", note: "Router, hub, chargers, standby", watts: 141, rest: true };
+  const DOORS = { front: "Front door", back: "Back door", garage: "Garage side door" };
+  const state = {
+    lamp: { on: true, level: 60 },
+    lights: { kitchen: true, dining: true, hall: true, porch: true },
+    ac: { on: true, mode: "heat", target: 22, min: 16, max: 30 },
+    doors: {
+      front: { locked: true, note: "since 18:47" },
+      back: { locked: true, note: "auto-locked 19:05" },
+      garage: { locked: true, note: "since 08:41" },
+    },
+    scene: "evening", picked: "evening", sceneNote: "Started 18:12 by schedule, at sunset",
+  };
+
+  // Scenes say exactly what they change; none of them can unlock a door (SCR-28).
+  const SCENES = {
+    morning: { name: "Morning", when: "Weekdays at 06:30", changes: ["Living-room lamp 80%", "Heat to 21 °C", "Kitchen and hall lights on", "Porch and dining lights off"],
+      set: { lamp: { on: true, level: 80 }, lights: { kitchen: true, dining: false, hall: true, porch: false }, ac: { on: true, mode: "heat", target: 21 } } },
+    away: { name: "Away", when: "When everyone sharing presence has left", changes: ["All lights off", "Air conditioner off", "All doors locked"],
+      set: { lamp: { on: false }, lights: { kitchen: false, dining: false, hall: false, porch: false }, ac: { on: false }, lockAll: true } },
+    evening: { name: "Evening", when: "Daily at sunset, 18:12 today", changes: ["Living-room lamp 60%", "Heat to 22 °C", "Kitchen, dining, hall and porch lights on"],
+      set: { lamp: { on: true, level: 60 }, lights: { kitchen: true, dining: true, hall: true, porch: true }, ac: { on: true, mode: "heat", target: 22 } } },
+    night: { name: "Night", when: "Daily at 23:00", changes: ["Lights off except the hall", "Heat to 19 °C", "All doors locked"],
+      set: { lamp: { on: false }, lights: { kitchen: false, dining: false, hall: true, porch: false }, ac: { on: true, mode: "heat", target: 19 }, lockAll: true } },
+  };
+
+  // Example only: a product reads watts from the meter and smart plugs. This simple model keeps the demo consistent.
+  function acModel() {
+    const { on, mode, target } = state.ac;
+    if (!on) return { word: "Off", note: `Off · target kept at ${target} °C`, watts: 0 };
+    const cooling = mode === "cool" || (mode === "auto" && target < ROOM);
+    const need = cooling ? ROOM - target : target - ROOM;
+    if (need <= 0) return { word: "Holding", note: `Room is already ${cooling ? "below" : "above"} ${target} °C · fan only`, watts: 35 };
+    const verb = cooling ? "Cooling" : "Heating";
+    return { word: verb, note: `${verb} to ${target} °C · about ${Math.max(5, Math.round((need * 20) / 5) * 5)} min`, watts: Math.min(1450, Math.round(300 + 320 * need)) };
+  }
+  const lampWatts = () => (state.lamp.on ? Math.max(1, Math.round((LAMP_MAX_W * state.lamp.level) / 100)) : 0);
+  function loads() {
+    const ac = acModel();
+    const lit = Object.keys(LIGHTS).filter((k) => state.lights[k]);
+    const count = lit.length + (state.lamp.on ? 1 : 0);
+    const rows = [
+      ...OTHER,
+      { name: "Air conditioner", note: "Living room · " + ac.word.toLowerCase(), watts: ac.watts },
+      { name: "Lights", note: `${count} on`, watts: lit.reduce((s, k) => s + LIGHTS[k][1], 0) + lampWatts() },
+    ].filter((r) => r.watts > 0).sort((a, b) => b.watts - a.watts);
+    return [...rows, ALWAYS_ON];
+  }
+  const devicesOn = () => Object.values(state.lights).filter(Boolean).length + (state.lamp.on ? 1 : 0) + (state.ac.on ? 1 : 0) + OTHER.filter((o) => !o.always).length;
+
+  // Power now: the total is the sum of the rows below it, and the cost uses the stated tariff (TYP-09, COP-10).
+  function renderPower() {
+    const rows = loads();
+    const total = rows.reduce((s, r) => s + r.watts, 0);
+    const max = Math.max(...rows.map((r) => r.watts));
+    $("power-total").replaceChildren(watt.format(total) + " ", el("span", "unit", "W"));
+    const cost = el("span", null, usd.format((total / 1000) * TARIFF) + " an hour");
+    $("power-cost").replaceChildren(cost, el("small", null, `at ${usd.format(TARIFF)} per kWh · the ${rows[0].lower || rows[0].name.toLowerCase()} is ${pct.format(rows[0].watts / total)} of the total`));
+    const high = total > 2200, low = total < 1400;
+    const arrow = high ? '<path d="M12 19V5M6 11l6-6 6 6"/>' : low ? '<path d="M12 5v14M6 13l6 6 6-6"/>' : '<path d="M5 12h14"/>';
+    const pill = el("span", "pill pill-neutral has-icon");
+    pill.innerHTML = svg(arrow, 2.5);
+    pill.append(high ? "Higher than usual" : low ? "Lower than usual" : "Usual");
+    $("power-usual").replaceChildren(pill, el("span", "num", `Wednesdays 19:00 to 20:00 usually draw ${kw1.format(1.4)} to ${kw1.format(2.2)} kW (last 8 weeks)`));
+    $("loads").innerHTML = rows.map((r) => `<li class="load${r.rest ? " is-rest" : ""}"><p class="load-name">${r.name}<small>${r.note}</small></p>
+      <span class="load-bar" aria-hidden="true"><i style="--v:${(r.watts / max) * 100}"></i></span><p class="load-w num">${watt.format(r.watts)} W</p></li>`).join("");
+    $("load-sum").textContent = watt.format(total) + " W";
+  }
+
+  // Lamp: switch and slider share one state; moving the slider turns the lamp on. Applied at once, as a low-risk change (FRM-22, FBK-21).
+  function renderLamp() {
+    const { on, level } = state.lamp;
+    $("lamp-tile").dataset.on = String(on);
+    $("lamp-switch").checked = on;
+    $("lamp-state").textContent = on ? `On · ${lampWatts()} W` : "Off";
+    const range = $("lamp-level");
+    range.value = level;
+    range.style.setProperty("--fill", ((level - 1) / 99) * 100 + "%");
+    range.setAttribute("aria-valuetext", `${level}%${on ? "" : ", lamp off"}`);
+    $("lamp-out").textContent = level + "%";
+  }
+  $("lamp-switch").addEventListener("change", (e) => { state.lamp.on = e.target.checked; render(); });
+  $("lamp-level").addEventListener("input", (e) => { state.lamp.level = +e.target.value; state.lamp.on = true; render(); });
+
+  // Air conditioner: 1 °C steps between 16 and 30; the state word, time to target and watts follow the model (COP-10, BTN-10).
+  function renderAC() {
+    const ac = acModel();
+    const { on, mode, target, min, max } = state.ac;
+    $("ac-tile").dataset.on = String(on);
+    $("ac-switch").checked = on;
+    $("ac-state").textContent = on ? `${ac.word} · ${watt.format(ac.watts)} W` : "Off";
+    $("ac-target").textContent = `${target} °C`;
+    document.querySelector(`input[name="ac-mode"][value="${mode}"]`).checked = true;
+    const stop = target <= min ? `Lowest setting is ${min} °C` : target >= max ? `Highest setting is ${max} °C` : "";
+    $("ac-note").textContent = stop || ac.note;
+    $("ac-down").setAttribute("aria-disabled", String(target <= min));
+    $("ac-up").setAttribute("aria-disabled", String(target >= max));
+  }
+  $("ac-switch").addEventListener("change", (e) => { state.ac.on = e.target.checked; render(); });
+  $("ac-down").addEventListener("click", () => { if (state.ac.target > state.ac.min) { state.ac.target -= 1; render(); } else renderAC(); });
+  $("ac-up").addEventListener("click", () => { if (state.ac.target < state.ac.max) { state.ac.target += 1; render(); } else renderAC(); });
+  $("ac-mode").addEventListener("change", (e) => { state.ac.mode = e.target.value; render(); });
+
+  // Locks: locking is immediate; unlocking asks first and waits for the lock to confirm before saying "Unlocked" (FBK-11).
+  const dialog = $("unlock-dialog");
+  let unlocking = null;
+  function renderDoors() {
+    const ids = Object.keys(DOORS);
+    const open = ids.filter((id) => !state.doors[id].locked);
+    $("locks-state").textContent = open.length ? `${open.length} of ${ids.length} unlocked` : `All ${ids.length} locked`;
+    $("doors").replaceChildren(...ids.map((id) => {
+      const d = state.doors[id];
+      const li = el("li", "door" + (d.locked ? "" : " is-unlocked"));
+      const note = el("p", "door-note num");
+      note.append(el("span", "pill " + (d.pending || d.locked ? "pill-neutral" : "pill-warning"), d.pending || (d.locked ? "Locked" : "Unlocked")), d.note);
+      const btn = el("button", "btn btn-secondary", d.locked ? "Unlock" : "Lock");
+      btn.type = "button";
+      btn.dataset.door = id;
+      btn.setAttribute("aria-label", `${d.locked ? "Unlock" : "Lock"} ${DOORS[id].toLowerCase()}`);
+      if (d.pending) btn.setAttribute("aria-disabled", "true");
+      li.append(el("p", "door-name", DOORS[id]), btn, note);
+      return li;
+    }));
+  }
+  function setLock(id, locked, note, message) {
+    const d = state.doors[id];
+    d.pending = locked ? "Locking…" : "Unlocking…";
+    render();
+    // Example only: send the command to the lock, and change the state when the lock reports back.
+    setTimeout(() => {
+      Object.assign(d, { locked, note, pending: null });
+      $("locks-status").textContent = message;
+      render();
+      document.querySelector(`[data-door="${id}"]`).focus();
+    }, 700);
+    document.querySelector(`[data-door="${id}"]`).focus(); // keep focus on the row while it waits
+  }
+  $("doors").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-door]");
+    if (!btn || btn.getAttribute("aria-disabled") === "true") return;
+    const id = btn.dataset.door, name = DOORS[id];
+    if (!state.doors[id].locked) { setLock(id, true, "by you at 19:42", `${name} locked.`); return; }
+    unlocking = id;
+    $("unlock-title").textContent = `Unlock the ${name.toLowerCase()}?`;
+    $("unlock-desc").innerHTML = `This unlocks the <strong>${name.toLowerCase()}</strong> at <strong>14 Alder Row</strong>. Anyone at the door can open it until it locks again automatically at <strong>19:47</strong>, in 5 minutes.`;
+    $("unlock-confirm").textContent = `Unlock ${name.toLowerCase()}`;
+    dialog.returnValue = "";
+    dialog.showModal();
+  });
+  dialog.addEventListener("close", () => {
+    const id = unlocking;
+    unlocking = null;
+    if (dialog.returnValue === "confirm") setLock(id, false, "locks again at 19:47", `${DOORS[id]} unlocked. It locks again at 19:47.`);
+    else document.querySelector(`[data-door="${id}"]`).focus();
+  });
+
+  // Scenes: picking a card only selects it; the button applies it, so arrowing through the radios changes nothing in the house (FRM-06, BTN-10).
+  const grid = $("scene-grid");
+  grid.innerHTML = Object.entries(SCENES).map(([id, s]) => `<div class="scene" data-scene="${id}">
+    <input type="radio" name="scene" id="scene-${id}" value="${id}"${id === state.picked ? " checked" : ""} aria-describedby="scene-${id}-meta scene-${id}-changes">
+    <label for="scene-${id}">${s.name}</label><p class="scene-meta" id="scene-${id}-meta">${s.when}</p>
+    <ul class="scene-changes" id="scene-${id}-changes">${s.changes.map((c) => `<li>${c}</li>`).join("")}</ul></div>`).join("");
+  function renderScenes() {
+    grid.querySelectorAll(".scene").forEach((card) => {
+      const id = card.dataset.scene;
+      card.querySelector(".now-pill")?.remove();
+      card.querySelector(".scene-meta").textContent = id === state.scene ? state.sceneNote : SCENES[id].when;
+      if (id === state.scene) card.append(el("span", "pill pill-accent now-pill", "On now"));
+    });
+    const same = state.picked === state.scene;
+    const btn = $("scene-apply");
+    btn.textContent = same ? `${SCENES[state.picked].name} is on` : `Switch to ${SCENES[state.picked].name}`;
+    btn.setAttribute("aria-disabled", String(same));
+  }
+  grid.addEventListener("change", (e) => {
+    state.picked = e.target.value;
+    $("scene-status").textContent = state.picked === state.scene ? "" : `${SCENES[state.picked].name} makes ${SCENES[state.picked].changes.length} changes when you switch.`;
+    renderScenes();
+  });
+  $("scene-apply").addEventListener("click", () => {
+    const s = SCENES[state.picked];
+    if (state.picked === state.scene) { $("scene-status").textContent = `${s.name} is already on. Pick another scene first.`; return; }
+    Object.assign(state.lamp, s.set.lamp);
+    Object.assign(state.lights, s.set.lights);
+    Object.assign(state.ac, s.set.ac);
+    if (s.set.lockAll) Object.values(state.doors).forEach((d) => { if (!d.locked) Object.assign(d, { locked: true, note: `by the ${s.name} scene` }); });
+    state.scene = state.picked;
+    state.sceneNote = "Started 19:42 by you";
+    const still = OTHER.filter((o) => !o.always).map((o) => `${o.lower} (${watt.format(o.watts)} W)`).join(" and ");
+    // Confirm the outcome in words, including what the scene does not control (FBK-03, COP-09)
+    $("scene-status").textContent = `${s.name} is on. Not part of scenes and still on: ${still}.`;
+    render();
+  });
+
+  function render() {
+    renderPower(); renderLamp(); renderAC(); renderDoors(); renderScenes();
+    const open = Object.values(state.doors).filter((d) => !d.locked).length;
+    $("summary").textContent = `Wednesday, October 28 · ${SCENES[state.scene].name} scene · ${devicesOn()} devices on · ${open ? `${open} ${open === 1 ? "door" : "doors"} unlocked` : "all doors locked"}`;
+  }
+
+  // Energy today: raw kWh per hour, 19:00 is partial (to 19:42). Costs are rounded per hour and the total is their sum (CMP-18, CMP-34).
+  const HOURS = [0.46, 0.41, 0.39, 0.37, 0.40, 0.52, 1.18, 1.42, 0.96, 0.34, 0.31, 0.29, 0.33, 0.30, 0.32, 0.37, 0.78, 1.12, 2.06, 1.71];
+  const PARTIAL = 19, YMAX = 2.5, LAST_WEEK = 12.86;
+  const cents = HOURS.map((v) => Math.round(v * TARIFF * 100));
+  const totalKwh = HOURS.reduce((s, v) => s + v, 0);
+  const totalCost = cents.reduce((s, c) => s + c, 0) / 100;
+  const peak = HOURS.indexOf(Math.max(...HOURS));
+  const hh = (h) => String(h).padStart(2, "0") + ":00";
+  const span = (h) => (h === PARTIAL ? `${hh(h)} to 19:42` : `${hh(h)} to ${hh(h + 1)}`);
+  $("energy-takeaway").textContent = `The peak was ${span(peak)}, ${kwh.format(HOURS[peak])} kWh, while the oven and heating ran.`;
+  const diff = totalKwh - LAST_WEEK;
+  $("kpis").innerHTML = `
+    <div><dt>So far today</dt><dd><span class="val num">${kwh.format(totalKwh)} <small>kWh</small></span>
+      <span class="sub num"><span class="delta delta-bad">${svg('<path d="M12 19V5M6 11l6-6 6 6"/>', 2)}${signed.format(diff)} kWh (${pct1.format(diff / LAST_WEEK)})</span></span><span class="sub">vs last Wednesday by 19:42</span></dd></div>
+    <div><dt>Cost so far</dt><dd><span class="val num">${usd.format(totalCost)}</span><span class="sub num">at ${usd.format(TARIFF)} per kWh, flat rate</span></dd></div>
+    <div><dt>Peak hour</dt><dd><span class="val num">${hh(peak)}</span><span class="sub num">${kwh.format(HOURS[peak])} kWh · ${usd.format(cents[peak] / 100)}</span></dd></div>`;
+  $("y-axis").replaceChildren(...[0, 0.5, 1, 1.5, 2, 2.5].map((v) => { const s = el("span", null, kw1.format(v)); s.style.setProperty("--p", (v / YMAX) * 100); return s; }));
+  $("x-axis").replaceChildren(...HOURS.map((_, h) => el("span", null, String(h).padStart(2, "0"))));
+  const plot = $("plot");
+  let sel = peak;
+  HOURS.forEach((v, h) => {
+    const b = el("button", "hour" + (h === PARTIAL ? " is-partial" : ""));
+    b.type = "button";
+    b.setAttribute("role", "radio");
+    b.setAttribute("aria-label", `${span(h)}${h === PARTIAL ? ", so far" : ""}: ${kwh.format(v)} kWh, ${usd.format(cents[h] / 100)}`);
+    const bar = el("span", "b");
+    bar.style.setProperty("--h", (v / YMAX) * 100);
+    b.append(el("span", "v num", kwh.format(v)), bar);
+    plot.append(b);
+  });
+  function selectHour(h, focus) {
+    sel = Math.max(0, Math.min(HOURS.length - 1, h));
+    plot.querySelectorAll(".hour").forEach((b, i) => { b.setAttribute("aria-checked", String(i === sel)); b.tabIndex = i === sel ? 0 : -1; });
+    if (focus) plot.children[sel].focus();
+    const tag = sel === peak ? " · peak hour" : sel === PARTIAL ? " · so far, hour still running" : "";
+    $("readout").innerHTML = `<b>${span(sel)}</b> · ${kwh.format(HOURS[sel])} kWh · ${usd.format(cents[sel] / 100)}${tag}`;
+  }
+  plot.addEventListener("click", (e) => { const b = e.target.closest(".hour"); if (b) selectHour([...plot.children].indexOf(b), false); });
+  plot.addEventListener("keydown", (e) => {
+    const to = { ArrowRight: sel + 1, ArrowDown: sel + 1, ArrowLeft: sel - 1, ArrowUp: sel - 1, Home: 0, End: HOURS.length - 1 }[e.key];
+    if (to == null) return;
+    e.preventDefault();
+    selectHour(to, true);
+  });
+  // Table alternative with the same rounding, and a total that equals its rows (CMP-19)
+  $("hours-body").innerHTML = HOURS.map((v, h) => `<tr><th scope="row">${span(h)}${h === PARTIAL ? " (so far)" : ""}</th><td>${kwh.format(v)} kWh</td><td>${usd.format(cents[h] / 100)}</td></tr>`).join("");
+  $("foot-kwh").textContent = kwh.format(totalKwh) + " kWh";
+  $("foot-cost").textContent = usd.format(totalCost);
+  $("energy-view").addEventListener("change", (e) => {
+    const table = e.target.value === "table";
+    $("chart-view").hidden = table;
+    $("table-view").hidden = !table;
+  });
+
+  render();
+  selectHour(peak, false);
+</script>
+</body>
+</html>
