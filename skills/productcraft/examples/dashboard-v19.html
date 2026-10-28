@@ -1,0 +1,731 @@
+<!doctype html>
+<!-- ProductCraft example: dashboard-v19 (wind farm energy losses, "Sora Wind", calm sky-gray theme with one copper accent). Original Sora Labs example, MIT License.
+     Fictional wind farm, turbines, readings and forecast for interface demonstration only; not operating or safety guidance.
+     Demonstrates: SCR-01, SCR-02, SCR-27, SCR-28, LAY-01, LAY-02, LAY-05, LAY-08, TYP-07, TYP-09, COL-01, COL-02, COL-06, COL-07, COL-10,
+     CMP-11, CMP-15, CMP-17, CMP-18, CMP-19, CMP-20, CMP-23, CMP-26, CMP-34, FRM-08, FRM-22, FBK-03, FBK-09, FBK-11, FBK-17,
+     FBK-18, NAV-03, BTN-01, BTN-10, COP-01, COP-08, COP-09, COP-10, ICO-10, ENG-05, ENG-07 -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="screenshot" content="width=1440">
+  <title>ProductCraft example: Wind farm energy losses dashboard</title>
+  <link rel="stylesheet" href="tokens.css">
+  <style>
+    /* Calm sky-gray base and one copper accent routed through the accent tokens (CMP-26, COL-02).
+       White on #b4461a is 5.5:1; ink #933813 on soft #fbede6 is 6.5:1; accent on the #edf1f5 page is 4.8:1;
+       text-2 #44536a on the page is 6.9:1; text-3 #566377 is 5.4:1 on the page and 5.6:1 on surface-2 (COL-01, TYP-07).
+       Status text on its tint: success 6.0:1, warning 5.8:1, danger 5.7:1, neutral 7.6:1 (SCR-02, COL-06) */
+    :root {
+      --bg: #edf1f5; --surface-2: #f2f5f8; --border: #d9e0e8;
+      --text: #16202c; --text-2: #44536a; --text-3: #566377;
+      --accent: #b4461a; --accent-hover: #933813; --accent-soft: #fbede6; --accent-ink: #933813; --focus: #b4461a;
+      --success: #17663f; --success-soft: #e3f2ea; --warning: #8a5000; --warning-soft: #fcf0d5;
+      --danger: #b3261e; --danger-soft: #fdeceb; --neutral-ink: #3d4a5c; --neutral-soft: #e8edf2;
+      /* Chart roles (CMP-18): produced #778da6 is 3.4:1 on white and sits 1.6:1 from the copper "lost" segment, with a 2px gap and labels;
+         meter fill #3f5d7a is 5.6:1 on its #e3e8ee track; reference line #2d3e52 is 10.9:1; window ink #2a4a66 on #dfeaf4 is 7.6:1 */
+      --c-prod: #778da6; --c-lost: var(--accent); --c-ink: #2d3e52; --c-meter: #3f5d7a; --c-track: #e3e8ee;
+      --c-grid: #e6ebf0; --c-window: #dfeaf4; --c-window-ink: #2a4a66; --scrim: rgba(22, 32, 44, 0.45);
+    }
+    body { font-size: var(--text-md); }
+    .card { box-shadow: none; border-radius: var(--radius-md); }
+
+    /* Top bar: product, the site this screen acts on, navigation, data freshness (SCR-27, FBK-17) */
+    .topbar { display: flex; align-items: center; gap: var(--space-5); height: 64px; padding: 0 var(--space-6); background: var(--surface); border-bottom: 1px solid var(--border); }
+    .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--text); font-weight: 700; } .brand:hover { text-decoration: none; }
+    .brand svg { width: 30px; height: 30px; } .brand .tile { fill: var(--accent); } .brand .glyph { fill: var(--on-accent); }
+    .scope { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); font-size: var(--text-sm); font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .scope:hover { background: var(--surface-2); } .scope .lbl { color: var(--text-2); font-weight: 500; } .scope svg { width: 16px; height: 16px; color: var(--text-3); }
+    .nav { display: flex; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+    .nav a { display: flex; align-items: center; min-height: 36px; padding: 0 var(--space-3); border-radius: var(--radius-sm); color: var(--text-2); font-size: var(--text-sm); font-weight: 600; }
+    .nav a:hover { background: var(--surface-2); color: var(--text); text-decoration: none; } .nav a[aria-current="page"] { background: var(--accent-soft); color: var(--accent-ink); }
+    .top-right { display: flex; align-items: center; gap: var(--space-4); margin-left: auto; }
+    .live { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--text-2); white-space: nowrap; }
+    .live b { color: var(--success); font-weight: 600; } .live svg { width: 16px; height: 16px; color: var(--success); }
+
+    /* 12-column page grid (LAY-08); the energy answer and the attention list share the first row (SCR-01, LAY-05) */
+    .page { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--space-5); max-width: 1440px; margin: 0 auto; padding: var(--space-6) var(--space-6) var(--space-5); }
+    .page > * { min-width: 0; }
+    .page-head { grid-column: 1 / -1; display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+    .page-head h1 { font-size: var(--text-2xl); line-height: 1.2; margin-bottom: var(--space-2); }
+    .answer { max-width: 72ch; color: var(--text-2); } .answer strong { color: var(--text); }
+    .head-tools { display: grid; justify-items: end; gap: var(--space-1); } .as-of { font-size: var(--text-xs); color: var(--text-2); }
+    .energy { grid-column: span 5; } .attention { grid-column: span 7; }
+    .fleet, .maint { grid-column: 1 / -1; } .curve { grid-column: span 7; } .wind { grid-column: span 5; }
+    .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-4); }
+    .card-head p, .sub { font-size: var(--text-sm); color: var(--text-2); }
+    h3 { font-size: var(--text-sm); color: var(--text-2); margin: var(--space-5) 0 var(--space-3); }
+
+    /* Lead figure: label, large value with unit, comparison (CMP-17, TYP-09) */
+    .lead-label { font-size: var(--text-sm); font-weight: 600; color: var(--text-2); }
+    .lead-value { font-size: 40px; font-weight: 700; line-height: 1.1; letter-spacing: -0.01em; }
+    .lead-value .u, .tile-power .u { font-size: var(--text-lg); font-weight: 600; color: var(--text-2); margin-left: 4px; }
+    .lead-foot { font-size: var(--text-sm); color: var(--text-2); margin-top: var(--space-1); } .lead-foot b { color: var(--accent-ink); }
+    /* Produced + lost = expected on one bar from zero (CMP-34) */
+    .split { display: flex; gap: 2px; height: 14px; margin: var(--space-4) 0 var(--space-2); }
+    .split span { border-radius: 3px; } .split .p { background: var(--c-prod); } .split .l { background: var(--c-lost); }
+    .split-key { display: flex; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; font-size: var(--text-xs); color: var(--text-2); } .split-key b { color: var(--text); }
+    .key { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 2px; vertical-align: -1px; }
+
+    /* Lost by cause: sorted bars, value and share printed beside each bar (CMP-18, CMP-34) */
+    .causes { display: grid; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+    .cause { display: grid; grid-template-columns: 128px minmax(0, 1fr) 76px 40px; gap: var(--space-3); align-items: center; font-size: var(--text-sm); }
+    .cause .bar { height: 10px; border-radius: 3px; background: var(--c-lost); min-width: 2px; } .cause .v { text-align: right; font-weight: 700; } .cause .s { text-align: right; color: var(--text-2); font-size: var(--text-xs); }
+    .cause-total { display: flex; justify-content: space-between; margin-top: var(--space-2); padding-top: var(--space-2); border-top: 1px solid var(--text); font-size: var(--text-sm); font-weight: 700; }
+    .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3); margin: var(--space-5) 0 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); background: var(--surface-2); }
+    .facts dt { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); } .facts dd { margin: 0; font-weight: 700; }
+
+    /* Daily columns, Oct 22-28: produced and lost stacked to the expected total from a zero baseline */
+    .days { position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-2); align-items: end; height: 140px; padding-top: 6px; border-bottom: 1px solid var(--text-3); }
+    .day { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; height: 100%; border-radius: 4px 4px 0 0; cursor: default; }
+    .day .lv { font-size: var(--text-xs); font-weight: 700; color: var(--accent-ink); } .day i { display: block; width: min(30px, 70%); }
+    .day .l { background: var(--c-lost); border-radius: 3px 3px 0 0; } .day .p { background: var(--c-prod); } .day[data-in="true"] { background: var(--accent-soft); } .day:focus-visible { outline-offset: 1px; }
+    .day-labels { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-2); margin-top: var(--space-1); font-size: var(--text-xs); color: var(--text-2); text-align: center; } .day-labels .on { color: var(--text); font-weight: 700; }
+    details { margin-top: var(--space-3); font-size: var(--text-sm); } summary { cursor: pointer; color: var(--accent-ink); font-weight: 600; width: fit-content; }
+    .data { width: 100%; margin-top: var(--space-2); border-collapse: collapse; font-size: var(--text-xs); }
+    .data th, .data td { padding: 6px var(--space-2); border-bottom: 1px solid var(--border); text-align: right; }
+    .data th:first-child, .data td:first-child { text-align: left; } .data thead th { color: var(--text-2); font-weight: 600; }
+    .scroll { max-height: 240px; overflow-y: auto; }
+
+    /* Shared tooltip: exact values on hover and keyboard focus, Escape closes (CMP-11) */
+    .tip { position: absolute; z-index: 2; width: max-content; max-width: 240px; padding: var(--space-2) var(--space-3); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: var(--shadow-lg); font-size: var(--text-xs); line-height: 1.45; pointer-events: none; }
+    .tip[hidden] { display: none; } .tip b { display: block; font-size: var(--text-sm); }
+
+    /* Attention list: sorted by energy lost, each with cause, since, evidence and the next step (FBK-18, CMP-20, SCR-28) */
+    .att { display: grid; margin: 0; padding: 0; list-style: none; }
+    .att-item { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: var(--space-3) var(--space-4); padding: var(--space-4) 0; }
+    .att-item + .att-item { border-top: 1px solid var(--border); }
+    .tid { display: grid; place-items: center; width: 44px; height: 44px; border-radius: var(--radius-sm); background: var(--surface-2); font-size: var(--text-sm); font-weight: 700; }
+    .is-stop .tid { background: var(--danger-soft); color: var(--danger); } .is-watch .tid { background: var(--warning-soft); color: var(--warning); }
+    .att-top { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; font-weight: 600; line-height: 1.35; }
+    .att-cause { font-size: var(--text-sm); color: var(--text-2); font-weight: 500; } .att-since { font-size: var(--text-xs); color: var(--text-3); margin-top: 2px; } .att-detail { font-size: var(--text-sm); color: var(--text-2); margin-top: var(--space-1); }
+    .auto { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--space-2); margin-top: var(--space-2); padding: var(--space-2) var(--space-3); border-radius: var(--radius-sm); background: var(--surface-2); font-size: var(--text-xs); color: var(--text-2); }
+    .auto svg { width: 16px; height: 16px; margin-top: 1px; color: var(--text-2); } .auto b { color: var(--text); }
+    .next { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--space-2); margin-top: var(--space-2); font-size: var(--text-sm); }
+    .next svg { width: 16px; height: 16px; margin-top: 3px; color: var(--accent-ink); }
+    .att-lost { text-align: right; white-space: nowrap; }
+    .att-lost .v { display: block; font-size: var(--text-xl); font-weight: 700; line-height: 1.2; } .att-lost small { font-size: var(--text-xs); color: var(--text-2); }
+    .att-foot { margin-top: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--border); font-size: var(--text-sm); color: var(--text-2); }
+
+    /* Status pills with an icon and a word (SCR-02, COL-07) */
+    .st { display: inline-flex; align-items: center; gap: 4px; padding: 0 var(--space-2) 0 6px; border-radius: var(--radius-pill); font-size: var(--text-xs); font-weight: 700; line-height: 22px; white-space: nowrap; }
+    .st svg { width: 13px; height: 13px; }
+    .st-run { background: var(--success-soft); color: var(--success); } .st-watch { background: var(--warning-soft); color: var(--warning); } .st-stop { background: var(--danger-soft); color: var(--danger); }
+
+    /* Switch: native checkbox with role="switch", knob position plus fill, off track outlined at 4.4:1 (FRM-22) */
+    .switch-row { display: flex; align-items: center; gap: var(--space-3); min-height: 44px; cursor: pointer; font-size: var(--text-sm); font-weight: 600; } .switch-row small { display: block; font-size: var(--text-xs); color: var(--text-2); font-weight: 500; }
+    .switch { appearance: none; flex: none; position: relative; width: 40px; height: 24px; margin: 0; border: 2px solid #6b7a8f; border-radius: var(--radius-pill); background: var(--surface); cursor: pointer; transition: background-color var(--dur-fast); }
+    .switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #6b7a8f; transition: transform var(--dur-fast) var(--ease-out); }
+    .switch:checked { background: var(--accent); border-color: var(--accent); } .switch:checked::after { background: var(--on-accent); transform: translateX(16px); }
+
+    /* Turbine grid: status word, power against rated, rotor speed, wind and availability (CMP-17, TYP-09) */
+    .tiles { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: var(--space-3); margin: 0; padding: 0; list-style: none; }
+    .tile { display: grid; gap: var(--space-2); align-content: start; padding: var(--space-3) var(--space-4) var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+    .tile.is-stop { border-color: #f0c4c0; background: #fffafa; } .tile.is-watch { border-color: #ecd59f; background: #fffdf7; }
+    .tile-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+    .tile h3 { margin: 0; font-size: var(--text-md); color: var(--text); } .tile-power { font-size: var(--text-xl); font-weight: 700; line-height: 1.2; } .tile-power .u { font-size: var(--text-sm); }
+    .meter { display: block; height: 6px; border-radius: var(--radius-pill); background: var(--c-track); overflow: hidden; } .meter span { display: block; height: 100%; background: var(--c-meter); }
+    .tile dl { display: grid; grid-template-columns: repeat(3, auto); justify-content: space-between; gap: var(--space-2); margin: 0; }
+    .tile dt { font-size: var(--text-xs); color: var(--text-2); } .tile dd { margin: 0; font-size: var(--text-sm); font-weight: 600; } .tile-note { font-size: var(--text-xs); color: var(--text-2); }
+    .tile.is-stop .tile-note, .tile.is-watch .tile-note { color: var(--text); font-weight: 600; }
+
+    /* SVG charts: grid, axes, reference and focusable hit areas (CMP-18) */
+    .chart { position: relative; height: 300px; } .chart svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    .chart text { font-size: 12px; fill: var(--text-2); } .chart .grid { stroke: var(--c-grid); } .chart .axis { stroke: var(--text-3); }
+    .chart .ref { fill: none; stroke: var(--c-ink); stroke-width: 2; stroke-linejoin: round; } .chart .rated { stroke: var(--text-3); stroke-dasharray: 4 4; }
+    .chart .dot { fill: var(--c-meter); fill-opacity: 0.32; } .chart .bin { fill: var(--accent); stroke: var(--surface); stroke-width: 2; } .chart .bin.on { stroke: var(--text); }
+    .chart .line { fill: none; stroke: var(--c-ink); stroke-width: 2; stroke-linejoin: round; } .chart .limit { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 6 4; }
+    .chart .limit-label { fill: var(--accent-ink); font-weight: 700; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+    .chart .win { fill: var(--c-window); } .chart .win-label { fill: var(--c-window-ink); font-weight: 700; }
+    .chart .job { fill: var(--accent-soft); stroke: var(--accent); } .chart .job-label { fill: var(--accent-ink); font-weight: 700; } .chart .cursor { stroke: var(--text-3); }
+    .chart .hit { fill: transparent; outline: none; } .chart .hit:focus-visible { stroke: var(--focus); stroke-width: 2; }
+    .chart-key { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); margin-top: var(--space-3); font-size: var(--text-xs); color: var(--text-2); }
+    .chart-key span { display: inline-flex; align-items: center; gap: var(--space-2); } .chart-key svg { width: 18px; height: 12px; }
+    .select { min-height: 36px; padding: 0 var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); font-size: var(--text-sm); font-weight: 600; }
+    .field-inline { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: 600; }
+
+    /* Wind direction as a table of bars from zero with exact shares, never a radial area chart (CMP-34) */
+    .now-wind { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-3); border-radius: var(--radius-sm); background: var(--surface-2); }
+    .now-wind svg { width: 56px; height: 56px; flex: none; } .now-wind .big { font-size: var(--text-lg); font-weight: 700; }
+    .compass .ring { fill: var(--surface); stroke: var(--text-3); } .compass text { font-size: 10px; font-weight: 700; fill: var(--text-2); } .compass .arrow { fill: var(--accent); }
+    .dir { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    .dir th, .dir td { padding: 7px 0; border-bottom: 1px solid var(--border); } .dir thead th { font-size: var(--text-xs); font-weight: 600; color: var(--text-2); text-align: left; }
+    .dir td + td, .dir th + th { padding-left: var(--space-3); } .dir .r { text-align: right; white-space: nowrap; }
+    .dir tbody th { text-align: left; font-weight: 600; white-space: nowrap; } .dir tbody th small { color: var(--text-3); font-weight: 500; font-size: var(--text-xs); }
+    .share { display: grid; grid-template-columns: minmax(0, 1fr) 48px; gap: var(--space-2); align-items: center; }
+    .share i { display: block; height: 10px; border-radius: 3px; background: var(--c-meter); } .share span { text-align: right; font-weight: 700; }
+    .foot { margin-top: var(--space-3); font-size: var(--text-xs); color: var(--text-2); }
+
+    /* Maintenance windows: work limit slider paired with a number field (FRM-08) */
+    .limit-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); background: var(--surface-2); }
+    .limit-row label { font-size: var(--text-sm); font-weight: 600; } .limit-row input[type="range"] { width: 220px; max-width: 100%; height: 44px; margin: 0; accent-color: var(--accent); } .limit-row .mm { font-size: var(--text-xs); color: var(--text-2); }
+    .limit-row input[type="number"] { width: 72px; min-height: 36px; padding: 0 var(--space-2); border: 1px solid #6b7a8f; border-radius: var(--radius-sm); font-size: 16px; text-align: right; }
+    .limit-row p { flex-basis: 100%; font-size: var(--text-xs); color: var(--text-2); }
+    .maint-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: var(--space-6); margin-top: var(--space-4); }
+    .maint .chart { height: 260px; } .wins { margin-top: var(--space-3); font-size: var(--text-sm); color: var(--text-2); }
+    .jobs { display: grid; margin: 0; padding: 0; list-style: none; }
+    .job { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: var(--space-2) var(--space-3); padding: var(--space-3) 0; }
+    .job + .job { border-top: 1px solid var(--border); }
+    .job-name { font-weight: 600; line-height: 1.35; } .job-meta { font-size: var(--text-xs); color: var(--text-3); }
+    .job-slot { font-size: var(--text-sm); margin-top: var(--space-1); } .job-loss { font-size: var(--text-sm); color: var(--text-2); } .job-loss b { color: var(--text); }
+    .job-act { grid-column: 2; display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+    .job-act .btn { min-height: 36px; font-size: var(--text-sm); } .btn[aria-disabled="true"] { cursor: default; }
+    .btn.is-booked { background: var(--success-soft); color: var(--success); border-color: transparent; opacity: 1; }
+    .none { font-size: var(--text-sm); color: var(--warning); font-weight: 600; }
+
+    /* Booking dialog restates site, turbine, time and loss before anything stops (SCR-27, ENG-05) */
+    .confirm { width: min(460px, calc(100% - 32px)); padding: 0; border: 0; border-radius: var(--radius-lg); background: var(--surface); color: var(--text); box-shadow: var(--shadow-lg); }
+    .confirm::backdrop { background: var(--scrim); } .confirm form { display: grid; gap: var(--space-4); padding: var(--space-5); } .confirm h2 { font-size: var(--text-lg); }
+    .scope-list { display: grid; gap: var(--space-2); margin: 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-sm); background: var(--surface-2); font-size: var(--text-sm); }
+    .scope-list div { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: var(--space-3); } .scope-list dt { color: var(--text-2); } .scope-list dd { margin: 0; font-weight: 600; }
+    .d-actions { display: flex; justify-content: flex-end; gap: var(--space-2); flex-wrap: wrap; }
+    .disclaimer { grid-column: 1 / -1; font-size: var(--text-xs); color: var(--text-2); text-align: center; }
+
+    @media (max-width: 1180px) {
+      .energy, .attention, .curve, .wind { grid-column: 1 / -1; }
+      .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .maint-grid { grid-template-columns: minmax(0, 1fr); }
+    }
+    @media (max-width: 900px) {
+      .nav, .live .long { display: none; }
+      .topbar { padding: 0 var(--space-4); gap: var(--space-3); }
+      .page { gap: var(--space-4); padding: var(--space-4); }
+      .card { padding: var(--space-4); }
+    }
+    @media (max-width: 600px) {
+      .scope .lbl, .live, .brand-name { display: none; }
+      .tile dl { grid-template-columns: minmax(0, 1fr); gap: 2px; } .tile dl div { display: flex; justify-content: space-between; gap: var(--space-2); }
+      .limit-row label { flex-basis: 100%; } .limit-row input[type="range"] { flex: 1; min-width: 150px; width: auto; }
+      .now-wind .big { font-size: var(--text-md); }
+      .page-head h1 { font-size: var(--text-xl); } .head-tools { justify-items: start; }
+      .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .cause { grid-template-columns: 96px minmax(0, 1fr) 72px; } .cause .s { display: none; }
+      .att-item { grid-template-columns: 40px minmax(0, 1fr); } .tid { width: 40px; height: 40px; }
+      .att-lost { grid-column: 2; grid-row: 1; justify-self: end; } .att-main { grid-column: 1 / -1; }
+      .chart { height: 260px; }
+      .d-actions .btn { flex: 1 1 100%; }
+    }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#" aria-label="Sora Wind home">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect class="tile" width="32" height="32" rx="8"/><g class="glyph"><path d="M15.3 14.6h1.4l.8 12.9h-3z"/><path d="M16 13c1.8-3.3 1.6-6.6 0-9.6-1 2.9-1.1 6.4 0 9.6z"/><path d="M16 13c1.8-3.3 1.6-6.6 0-9.6-1 2.9-1.1 6.4 0 9.6z" transform="rotate(120 16 13)"/><path d="M16 13c1.8-3.3 1.6-6.6 0-9.6-1 2.9-1.1 6.4 0 9.6z" transform="rotate(240 16 13)"/><circle cx="16" cy="13" r="1.7"/></g></svg>
+    <span class="brand-name">Sora Wind</span>
+  </a>
+  <!-- The site and fleet this screen acts on, spelled out in a switcher (SCR-27) -->
+  <button class="scope" type="button" aria-haspopup="listbox"><span class="lbl">Site</span> Harrow Ridge · 12 × 4.2 MW
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+  <nav aria-label="Main">
+    <ul class="nav">
+      <li><a href="#" aria-current="page">Energy</a></li>
+      <li><a href="#">Turbines</a></li>
+      <li><a href="#maint">Maintenance</a></li>
+      <li><a href="#">Alarms</a></li>
+      <li><a href="#">Reports</a></li>
+    </ul>
+  </nav>
+  <div class="top-right">
+    <p class="live"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg><b>SCADA connected</b><span class="long">· data to <time datetime="2026-10-28T14:20Z">14:20 UTC</time></span></p>
+    <span class="avatar" role="img" aria-label="Rhea Moss, site lead">RM</span>
+  </div>
+</header>
+
+<main class="page">
+  <div class="page-head">
+    <div>
+      <h1 id="title">Lost energy, Wed Oct 28</h1>
+      <p class="answer" id="answer"></p>
+    </div>
+    <div class="head-tools">
+      <div class="segmented" role="radiogroup" aria-label="Period for energy figures" id="period">
+        <button type="button" role="radio" aria-checked="true" tabindex="0" data-p="today">Today</button>
+        <button type="button" role="radio" aria-checked="false" tabindex="-1" data-p="week">Last 7 days</button>
+      </div>
+      <p class="as-of" id="as-of"></p>
+    </div>
+  </div>
+
+  <!-- Lead: lost energy against expected, the causes that add up to it, and the week by day (SCR-01, CMP-17, CMP-18) -->
+  <section class="card energy" aria-labelledby="energy-title">
+    <div class="card-head">
+      <div><h2 id="energy-title">Produced against expected</h2><p id="energy-range"></p></div>
+    </div>
+    <p class="lead-label">Lost energy</p>
+    <p class="lead-value num"><span id="lost"></span><span class="u">MWh</span></p>
+    <p class="lead-foot num" id="lost-foot"></p>
+    <div class="split" id="split" role="img"></div>
+    <p class="split-key num" id="split-key"></p>
+    <h3 id="causes-title">Lost by cause, largest first</h3>
+    <ul class="causes" id="causes" aria-labelledby="causes-title"></ul>
+    <p class="cause-total num"><span>Total lost</span><span id="cause-total"></span></p>
+    <dl class="facts num" id="facts"></dl>
+    <h3 id="days-title">By day, Oct 22 to 28</h3>
+    <div class="days" id="days" role="group" aria-labelledby="days-title" aria-describedby="days-hint"></div>
+    <div class="day-labels" id="day-labels" aria-hidden="true"></div>
+    <p class="visually-hidden" id="days-hint">Use the left and right arrow keys to read each day.</p>
+    <details><summary>Show days as a table</summary><table class="data num" id="days-table"><caption class="visually-hidden">Expected, produced and lost energy by day, MWh</caption><thead><tr><th scope="col">Day</th><th scope="col">Mean wind</th><th scope="col">Expected</th><th scope="col">Produced</th><th scope="col">Lost</th></tr></thead><tbody></tbody></table></details>
+  </section>
+
+  <!-- Turbines needing attention, sorted by energy lost in the period; automated decisions show their evidence (FBK-18, SCR-28) -->
+  <section class="card attention" aria-labelledby="att-title">
+    <div class="card-head">
+      <div><h2 id="att-title">Turbines needing attention</h2><p id="att-sub"></p></div>
+    </div>
+    <ol class="att" id="att"></ol>
+    <p class="att-foot num" id="att-foot"></p>
+  </section>
+
+  <!-- Every turbine now: status word with icon, power against the 4.2 MW rating, rpm, wind, availability; a switch filters to exceptions (CMP-17, COL-07, FRM-22) -->
+  <section class="card fleet" aria-labelledby="fleet-title">
+    <div class="card-head">
+      <div><h2 id="fleet-title">Turbines now</h2><p class="num" id="fleet-sub"></p></div>
+      <label class="switch-row"><input class="switch" type="checkbox" role="switch" id="only-att">Only turbines that need attention</label>
+    </div>
+    <ul class="tiles" id="tiles"></ul>
+  </section>
+
+  <!-- Power curve: dots and 1 m/s bin averages on shared axes against the reference line, bins readable by keyboard and as a table (CMP-18, CMP-34) -->
+  <section class="card curve" aria-labelledby="curve-title">
+    <div class="card-head">
+      <div><h2 id="curve-title">Power curve, last 7 days</h2><p id="curve-sub"></p></div>
+      <label class="field-inline">Turbine <select class="select" id="curve-pick"></select></label>
+    </div>
+    <div class="chart" id="curve" role="group" aria-label="Power curve by wind speed bin. Use the left and right arrow keys to read each bin.">
+      <svg id="curve-svg"></svg>
+      <div class="tip" id="curve-tip" hidden></div>
+    </div>
+    <p class="chart-key" aria-hidden="true">
+      <span><svg viewBox="0 0 18 12"><path d="M1 6h16" stroke="#2d3e52" stroke-width="2"/></svg>Reference curve</span>
+      <span><svg viewBox="0 0 18 12"><circle cx="9" cy="6" r="3" fill="#3f5d7a" fill-opacity="0.45"/></svg>10-minute average</span>
+      <span><svg viewBox="0 0 18 12"><circle cx="9" cy="6" r="4.5" fill="#b4461a"/></svg>Bin average, 1 m/s bins</span>
+    </p>
+    <p class="foot num" id="curve-foot"></p>
+    <details><summary>Show bins as a table</summary><table class="data num" id="curve-table"><caption class="visually-hidden">Actual against reference power by wind speed bin</caption><thead><tr><th scope="col">Wind bin</th><th scope="col">Averages</th><th scope="col">Actual MW</th><th scope="col">Reference MW</th><th scope="col">Difference</th></tr></thead><tbody></tbody></table></details>
+  </section>
+
+  <!-- Direction summary as bars from zero with exact shares; the compass is only a small indicator (CMP-34) -->
+  <section class="card wind" aria-labelledby="wind-title">
+    <div class="card-head"><div><h2 id="wind-title">Wind direction and speed</h2><p id="wind-sub"></p></div></div>
+    <div class="now-wind">
+      <svg class="compass" viewBox="0 0 56 56" aria-hidden="true" id="compass"></svg>
+      <p><span class="big num">From 238° WSW, 8.9 m/s</span><br><span class="sub">Site average at hub height, 14:20 UTC</span></p>
+    </div>
+    <table class="dir num" id="dir"><caption class="visually-hidden" id="dir-cap"></caption>
+      <thead><tr><th scope="col">From</th><th scope="col">Share of time</th><th scope="col" class="r">Mean speed</th></tr></thead><tbody></tbody></table>
+    <p class="foot num" id="wind-foot"></p>
+  </section>
+
+  <section class="card maint" id="maint" aria-labelledby="maint-title">
+    <div class="card-head"><div><h2 id="maint-title">Maintenance windows, next 72 hours</h2><p id="maint-sub"></p></div></div>
+    <!-- Slider and number field stay in sync; min and max are labeled (FRM-08) -->
+    <div class="limit-row">
+      <label for="limit">Work limit at hub height</label>
+      <span class="mm" aria-hidden="true">3.0</span>
+      <input type="range" id="limit" min="3" max="8" step="0.5" value="5" aria-describedby="limit-hint" aria-valuetext="5.0 metres per second">
+      <span class="mm" aria-hidden="true">8.0</span>
+      <span class="field-inline"><input type="number" id="limit-num" min="3" max="8" step="0.5" value="5.0" aria-label="Work limit, metres per second" aria-describedby="limit-hint"> m/s</span>
+      <p id="limit-hint">Stops are planned only in stretches of 3 h or more at or below this speed, at the slot that loses the least energy.</p>
+    </div>
+    <div class="maint-grid">
+      <div>
+        <div class="chart" id="fc" role="group" aria-label="Hub-height wind forecast by hour. Use the left and right arrow keys to read each hour.">
+          <svg id="fc-svg"></svg>
+          <div class="tip" id="fc-tip" hidden></div>
+        </div>
+        <p class="wins num" id="wins"></p>
+        <details><summary>Show hourly forecast as a table</summary><div class="scroll"><table class="data num" id="fc-table"><caption class="visually-hidden">Hub-height wind forecast by hour, UTC</caption><thead><tr><th scope="col">Hour (UTC)</th><th scope="col">Wind m/s</th><th scope="col">Expected MW per turbine</th></tr></thead><tbody></tbody></table></div></details>
+      </div>
+      <ul class="jobs" id="jobs" aria-label="Planned stops"></ul>
+    </div>
+  </section>
+
+  <p class="disclaimer">Fictional wind farm, turbines, readings and forecast for interface demonstration only. All times UTC.</p>
+</main>
+
+<!-- Confirmation restates the site, turbine, slot and expected loss; showModal() makes the page inert (SCR-27, ENG-05, COP-01) -->
+<dialog class="confirm" id="book" aria-labelledby="book-title" aria-describedby="book-desc">
+  <form method="dialog">
+    <h2 id="book-title"></h2>
+    <p class="sub" id="book-desc">The crew gets a work order and the turbine stops at the start of the slot.</p>
+    <dl class="scope-list num" id="book-scope"></dl>
+    <label class="switch-row"><input class="switch" type="checkbox" role="switch" id="notify" checked><span>Tell the grid operator<small>Available capacity drops by 4.2 MW during the stop</small></span></label>
+    <div class="d-actions">
+      <button class="btn btn-secondary" type="submit" value="cancel" id="book-cancel">Keep unbooked</button>
+      <button class="btn btn-primary" type="submit" value="book" id="book-ok"></button>
+    </div>
+  </form>
+</dialog>
+<p class="visually-hidden" role="status" id="status"></p>
+
+<script>
+  // Example only: replace these arrays with your SCADA, metering and forecast feeds. All numbers are fictional (ENG-07).
+  const NS = "http://www.w3.org/2000/svg";
+  const $ = (s) => document.querySelector(s);
+  const fmt = (n, d = 1) => new Intl.NumberFormat("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }).format(n);
+  const pctf = (n, d = 1) => new Intl.NumberFormat("en-US", { style: "percent", minimumFractionDigits: d, maximumFractionDigits: d }).format(n);
+  const signed = (n) => new Intl.NumberFormat("en-US", { style: "percent", minimumFractionDigits: 1, maximumFractionDigits: 1, signDisplay: "exceptZero" }).format(n).replace("-", "−");
+  const dayFmt = new Intl.DateTimeFormat("en-US", { weekday: "short", month: "short", day: "numeric", timeZone: "UTC" });
+  const hm = new Intl.DateTimeFormat("en-US", { hour: "2-digit", minute: "2-digit", hourCycle: "h23", timeZone: "UTC" });
+  const sum = (a) => a.reduce((s, x) => s + x, 0);
+  const r1 = (x) => Math.round(x * 10) / 10;
+  const NOW = Date.UTC(2026, 9, 28, 14, 20);
+  const HOURS = { today: 14 + 20 / 60, week: 6 * 24 + 14 + 20 / 60 };
+  const CAUSES = ["Curtailment", "Yaw misalignment", "Icing", "Downtime"];
+
+  // Lost MWh by cause [curtailment, yaw, icing, downtime] for today and for Oct 22-27; down = hours unavailable [today, Oct 22-27]
+  const T = [
+    { id: "T01", today: [0.8, 0, 0, 0], prior: [4.4, 0, 0, 0], down: [0, 0], ws: 9.1, mw: 2.36, rpm: 11.4, st: "run" },
+    { id: "T02", today: [0.9, 0, 1.2, 0], prior: [4.5, 0, 1.6, 0], down: [0.58, 0.8], ws: 9.4, mw: 2.61, rpm: 11.8, st: "run", note: "Ice stop cleared 06:45" },
+    { id: "T03", today: [0.9, 0, 0, 0], prior: [4.6, 0, 1.5, 0], down: [0, 0.75], ws: 9.6, mw: 2.70, rpm: 12.0, st: "run" },
+    { id: "T04", today: [0.8, 1.5, 0, 0], prior: [4.2, 9.4, 0, 0], down: [0, 0], ws: 9.2, mw: 2.31, rpm: 11.3, st: "watch", note: "Yaw offset 14°", tag: "yaw offset", yaw: 14 },
+    { id: "T05", today: [0.8, 0, 0, 0], prior: [4.3, 0, 0, 2.8], down: [0, 6], ws: 8.8, mw: 2.17, rpm: 11.0, st: "run" },
+    { id: "T06", today: [0.8, 0, 0, 0], prior: [4.4, 0, 0, 0], down: [0, 0], ws: 8.6, mw: 2.05, rpm: 10.8, st: "run" },
+    { id: "T07", today: [0.8, 0, 0, 1.3], prior: [4.3, 0, 0, 2.6], down: [0.67, 1.15], ws: 8.7, mw: 2.09, rpm: 10.9, st: "watch", note: "Gearbox oil 78 °C, limit 80 °C", tag: "oil temperature" },
+    { id: "T08", today: [0.8, 0, 0, 0], prior: [4.4, 0, 0, 0], down: [0, 0], ws: 8.4, mw: 1.93, rpm: 10.5, st: "run" },
+    { id: "T09", today: [0, 0, 0, 33.4], prior: [4.5, 0, 0, 5.7], down: [HOURS.today, 2.75], ws: 8.5, mw: 0, rpm: 0, st: "stop", note: "Converter fault", tag: "stopped" },
+    { id: "T10", today: [0.8, 0, 0, 0], prior: [4.1, 0, 0, 0], down: [0, 0], ws: 8.9, mw: 2.25, rpm: 11.1, st: "run" },
+    { id: "T11", today: [0.8, 0, 17.4, 0], prior: [4.4, 0, 11.6, 0], down: [8.63, 6.5], ws: 9.0, mw: 0, rpm: 0, st: "stop", note: "Ice on blades", tag: "stopped" },
+    { id: "T12", today: [0.8, 0, 0, 0], prior: [4.1, 0, 0, 0], down: [0, 0], ws: 8.3, mw: 1.84, rpm: 10.4, st: "run" }
+  ];
+  // Site totals per day; today's losses are summed from the turbines above so every view agrees
+  const days = [[22, 398.0, 8.2, [0, 1.6, 0, 0]], [23, 214.5, 6.1, [0, 1.0, 0, 2.8]], [24, 512.3, 9.4, [0, 1.9, 0, 0]], [25, 688.9, 11.2, [52.2, 1.4, 0, 0]],
+    [26, 455.2, 8.7, [0, 1.8, 3.1, 1.4]], [27, 431.8, 8.5, [0, 1.7, 11.6, 6.9]], [28, 401.6, 9.2, null]]
+    .map(([d, exp, wind, lost]) => ({ d: Date.UTC(2026, 9, d), exp, wind, lost: lost || [0, 1, 2, 3].map((k) => r1(sum(T.map((t) => t.today[k])))) }));
+  const lostOf = (t, p) => t.today.map((v, k) => r1(v + (p === "week" ? t.prior[k] : 0)));
+
+  // Reference power curve for a 4.2 MW turbine (MW by m/s), linear between points; cut-in 3 m/s, rated from 13 m/s
+  const REF = [[3, 0.05], [3.5, 0.11], [4, 0.19], [4.5, 0.29], [5, 0.41], [5.5, 0.55], [6, 0.72], [6.5, 0.92], [7, 1.14], [7.5, 1.39], [8, 1.67], [8.5, 1.98], [9, 2.31],
+    [9.5, 2.66], [10, 3.01], [10.5, 3.35], [11, 3.66], [11.5, 3.92], [12, 4.09], [12.5, 4.17], [13, 4.2], [25, 4.2]];
+  const ref = (v) => { if (v < 3 || v > 25) return 0; for (let i = 1; i < REF.length; i++) if (v <= REF[i][0]) { const [a, pa] = REF[i - 1], [b, pb] = REF[i]; return pa + ((pb - pa) * (v - a)) / (b - a); } return 4.2; };
+
+  // 10-minute averages for the last 7 days, generated with a fixed seed; stops and curtailed hours are left out
+  function rng(seed) { return () => { seed = (seed + 0x6d2b79f5) | 0; let t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  const curves = T.map((t, i) => {
+    const r = rng(9001 + i * 7919), gauss = () => Math.sqrt(-2 * Math.log(1 - r())) * Math.cos(2 * Math.PI * r());
+    const n = 950 - 72 - Math.round((t.down[0] + t.down[1]) * 6), yaw = Math.cos(((t.yaw || 0) * Math.PI) / 180);
+    const pts = Array.from({ length: n }, () => {
+      const v = Math.min(17.5, 9.8 * Math.pow(-Math.log(1 - r()), 1 / 2.2));
+      return [v, Math.max(0, Math.min(4.23, ref(v * yaw * (1 + 0.04 * gauss())) * (1 + 0.015 * gauss())))];
+    });
+    const bins = [];
+    for (let k = 3; k <= 16; k++) {
+      const inBin = pts.filter(([v]) => v >= k - 0.5 && v < k + 0.5);
+      if (inBin.length) bins.push({ k, n: inBin.length, v: sum(inBin.map((p) => p[0])) / inBin.length, p: sum(inBin.map((p) => p[1])) / inBin.length, ref: sum(inBin.map((p) => ref(p[0]))) / inBin.length });
+    }
+    const mid = pts.filter(([v]) => v >= 5.5 && v < 11.5);
+    return { pts, bins, n, gap: sum(mid.map((p) => p[1])) / sum(mid.map((p) => ref(p[0]))) - 1 };
+  });
+
+  // Hub-height wind forecast, hourly from Wed Oct 28 15:00 UTC (72 h)
+  const F0 = Date.UTC(2026, 9, 28, 15);
+  const fc = [8.7, 8.4, 8.0, 7.6, 7.1, 6.7, 6.2, 5.8, 5.4, 5.1, 4.8, 4.5, 4.2, 4.0, 3.8, 3.7, 3.6, 3.8, 4.1, 4.4, 4.8, 5.3, 5.9, 6.6, 7.2, 7.9, 8.5, 9.0, 9.6, 10.1, 10.5, 10.8, 11.0,
+    11.3, 11.6, 11.8, 12.0, 11.9, 11.6, 11.2, 10.9, 10.5, 10.2, 9.8, 9.5, 9.1, 8.8, 8.4, 8.1, 7.7, 7.3, 6.9, 6.4, 6.0, 5.6, 5.2, 4.9,
+    4.6, 4.3, 4.1, 3.9, 3.8, 4.0, 4.3, 4.6, 5.0, 5.5, 6.1, 6.8, 7.4, 8.0, 8.5];
+  const at = (i) => F0 + i * 3600000;
+  const jobs = [
+    { t: "T07", name: "Inspect gearbox oil cooler fan", h: 4, crew: "2 technicians" },
+    { t: "T04", name: "Recalibrate nacelle wind vane", h: 3, crew: "2 technicians" },
+    { t: "T12", name: "Annual service, due by Oct 30", h: 8, crew: "3 technicians" }
+  ];
+  // Wind by 8 compass sectors: count of 10-minute averages and mean speed (m/s)
+  const SECT = [["N", "North", 0], ["NE", "Northeast", 45], ["E", "East", 90], ["SE", "Southeast", 135], ["S", "South", 180], ["SW", "Southwest", 225], ["W", "West", 270], ["NW", "Northwest", 315]];
+  const wind = { today: { n: [1, 0, 0, 2, 6, 31, 37, 9], v: [6.0, 0, 0, 7.1, 8.4, 10.1, 9.1, 7.8] }, week: { n: [40, 29, 23, 48, 120, 302, 259, 129], v: [5.1, 4.6, 4.2, 6.0, 7.9, 10.3, 9.7, 7.4] } };
+
+  const icon = {
+    run: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg>',
+    watch: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 2.8 19.5h18.4z"/><path d="M12 10v4M12 17h.01"/></svg>',
+    stop: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12h7"/></svg>',
+    auto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2.5V6M15 2.5V6M9 18v3.5M15 18v3.5M2.5 9H6M2.5 15H6M18 9h3.5M18 15h3.5"/></svg>',
+    next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
+  };
+  const ST = { run: ["st-run", "Running"], watch: ["st-watch", "Watch"], stop: ["st-stop", "Stopped"] };
+  const pill = (s) => `<span class="st ${ST[s][0]}">${icon[s]}${ST[s][1]}</span>`;
+  const state = { p: "today", limit: 5, curve: 3, onlyAtt: false };
+
+  // Maintenance matching: windows of 3 h or more at or below the limit, then the least-loss slot for each job
+  function windows(limit) {
+    const out = []; let s = null;
+    fc.forEach((v, i) => { if (v <= limit + 1e-9) { if (s === null) s = i; } else if (s !== null) { out.push([s, i]); s = null; } });
+    if (s !== null) out.push([s, fc.length]);
+    return out.filter(([a, b]) => b - a >= 3);
+  }
+  const lossOver = (a, h) => sum(fc.slice(a, a + h).map(ref));
+  function match() {
+    const wins = windows(state.limit);
+    jobs.forEach((j) => {
+      if (j.booked) return;
+      let best = null;
+      wins.forEach(([a, b]) => { for (let s = a; s + j.h <= b; s++) { const l = lossOver(s, j.h); if (!best || l < best.loss - 1e-9) best = { s, loss: l }; } });
+      j.slot = best; j.now = lossOver(0, j.h);
+    });
+    return wins;
+  }
+  const span = (a, b) => `${dayFmt.format(at(a))}, ${hm.format(at(a))}–${dayFmt.format(at(a)) === dayFmt.format(at(b)) ? "" : dayFmt.format(at(b)) + ", "}${hm.format(at(b))}`;
+  const range = (s, h) => { const v = fc.slice(s, s + h); return `${fmt(Math.min(...v))}–${fmt(Math.max(...v))} m/s`; };
+  const slotText = (id) => { const j = jobs.find((x) => x.t === id); return j.slot ? `${j.booked ? "booked" : "best window"} ${span(j.slot.s, j.slot.s + j.h)}` : "no window fits the work limit"; };
+
+  const issues = [
+    { t: "T09", k: 3, st: "stop", title: "Converter fault", since: Date.UTC(2026, 9, 27, 21, 15),
+      detail: "A power-stage module failed its self-test; the turbine cannot restart on its own.", next: () => "Technician on site 15:30 to swap the module, about 5 h; restart expected near 20:30." },
+    { t: "T11", k: 2, st: "stop", title: "Ice on the blades", since: Date.UTC(2026, 9, 28, 5, 42), detail: "Second ice stop this week; the first ran Tue 03:10 to 09:40.",
+      auto: () => "<b>Stopped automatically by ice protection at 05:42.</b> Evidence: rotor vibration 38% above T10 and T12, nacelle air −1.5 °C, humidity 97%, 10-minute window 05:30–05:40. Restarting needs a person.",
+      next: () => "Visual blade check after 15:00, when the forecast passes +2.0 °C, then approve the restart." },
+    { t: "T04", k: 1, st: "watch", title: "Wind vane reads 14° off", since: Date.UTC(2026, 9, 19, 10, 0), sinceNote: " (vane replaced)",
+      auto: () => `<b>Flagged by the power-curve check on Oct 24.</b> Evidence: ${signed(curves[3].gap)} against the reference at 6–11 m/s over 7 days (${curves[3].n} ten-minute averages), while T03 is ${signed(curves[2].gap)} and T05 ${signed(curves[4].gap)}.`,
+      next: () => `Recalibrate the vane, 3 h stop: ${slotText("T04")}.` },
+    { t: "T07", k: 3, st: "watch", title: "Gearbox oil 78 °C, limit 80 °C", since: Date.UTC(2026, 9, 26, 16, 40),
+      detail: "Tripped 3 times at 80 °C since Monday; each restart waited 33 to 40 min for the oil to cool.", next: () => `Inspect the oil cooler fan, 4 h stop: ${slotText("T07")}.` }
+  ];
+
+  function renderEnergy() {
+    const p = state.p, week = p === "week", ds = week ? days : days.slice(-1);
+    const exp = r1(sum(ds.map((d) => d.exp))), lost = [0, 1, 2, 3].map((k) => r1(sum(ds.map((d) => d.lost[k])))), total = r1(sum(lost)), prod = r1(exp - total);
+    $("#title").textContent = week ? "Lost energy, Oct 22–28" : "Lost energy, Wed Oct 28";
+    $("#as-of").textContent = week ? "Oct 22 00:00 to Oct 28 14:20 UTC" : "00:00 to 14:20 UTC";
+    $("#energy-range").textContent = week ? "Last 7 days, to 14:20 UTC today" : "Today, 00:00 to 14:20 UTC";
+    $("#lost").textContent = fmt(total);
+    $("#lost-foot").innerHTML = `<b>${pctf(total / exp)}</b> of the ${fmt(exp)} MWh expected from the wind measured at each turbine`;
+    $("#split").innerHTML = `<span class="p" style="flex:${prod}"></span><span class="l" style="flex:${total}"></span>`;
+    $("#split").setAttribute("aria-label", `Produced ${fmt(prod)} MWh plus lost ${fmt(total)} MWh equals expected ${fmt(exp)} MWh`);
+    $("#split-key").innerHTML = `<span><i class="key" style="background:var(--c-prod)"></i>Produced <b>${fmt(prod)} MWh</b></span><span><i class="key" style="background:var(--c-lost)"></i>Lost <b>${fmt(total)} MWh</b></span><span>Expected <b>${fmt(exp)} MWh</b></span>`;
+    const order = [0, 1, 2, 3].sort((a, b) => lost[b] - lost[a]), max = lost[order[0]];
+    $("#causes").innerHTML = order.map((k) => `<li class="cause"><span>${CAUSES[k]}</span><span class="bar" style="width:${(lost[k] / max) * 100}%"></span><span class="v num">${fmt(lost[k])} MWh</span><span class="s num">${pctf(lost[k] / total, 0)}</span></li>`).join("");
+    $("#cause-total").textContent = `${fmt(total)} MWh`;
+    const hours = HOURS[p], avail = sum(T.map((t) => 1 - (t.down[0] + (week ? t.down[1] : 0)) / hours)) / T.length;
+    const w = wind[p], meanWind = sum(w.n.map((n, i) => n * w.v[i])) / sum(w.n);
+    $("#facts").innerHTML = `<div><dt>Availability</dt><dd>${pctf(avail)}</dd></div><div><dt>Mean wind</dt><dd>${fmt(meanWind)} m/s</dd></div><div><dt>Capacity factor</dt><dd>${pctf(prod / (50.4 * hours))}</dd></div>`;
+    // Day columns: one tab stop, arrow keys read each day (CMP-18)
+    const top = 700, box = $("#days");
+    box.innerHTML = days.map((d, i) => { const l = r1(sum(d.lost)); return `<div class="day" role="img" data-i="${i}" data-in="${!week && i === 6}" aria-label="${dayFmt.format(d.d)}${i === 6 ? " to 14:20" : ""}: expected ${fmt(d.exp)} MWh, produced ${fmt(r1(d.exp - l))}, lost ${fmt(l)}"><span class="lv num">${fmt(l)}</span><i class="l" style="height:${Math.max(2, (l / top) * 104)}px"></i><i class="p" style="height:${((d.exp - l) / top) * 104}px"></i></div>`; }).join("") + '<div class="tip" id="days-tip" hidden></div>';
+    $("#day-labels").innerHTML = days.map((d, i) => `<span class="${week || i === 6 ? "on" : ""}">${dayFmt.format(d.d).split(", ")[0]} ${i === 6 ? "today" : new Date(d.d).getUTCDate()}</span>`).join("");
+    const tip = $("#days-tip"), cols = [...box.querySelectorAll(".day")];
+    rove(cols, (i) => {
+      const d = days[i], l = r1(sum(d.lost)), parts = d.lost.map((v, k) => (v ? `${CAUSES[k]} ${fmt(v)} MWh` : "")).filter(Boolean).join(", ");
+      tip.innerHTML = `<span>${dayFmt.format(d.d)}${i === 6 ? " to 14:20" : ""} · ${fmt(d.wind)} m/s</span><b class="num">Lost ${fmt(l)} of ${fmt(d.exp)} MWh</b><span class="num">${parts || "No losses"}</span>`;
+      tip.hidden = false; tip.style.top = "0px";
+      const x = cols[i].offsetLeft + cols[i].offsetWidth / 2; tip.style.left = `${Math.max(0, Math.min(box.clientWidth - tip.offsetWidth, x - tip.offsetWidth / 2))}px`;
+    }, () => { tip.hidden = true; });
+    $("#days-table tbody").innerHTML = days.map((d, i) => { const l = r1(sum(d.lost)); return `<tr><th scope="row">${dayFmt.format(d.d)}${i === 6 ? " to 14:20" : ""}</th><td>${fmt(d.wind)} m/s</td><td>${fmt(d.exp)}</td><td>${fmt(r1(d.exp - l))}</td><td>${fmt(l)}</td></tr>`; }).join("");
+    return { total, exp, lost };
+  }
+
+  function renderAttention(sumUp) {
+    const p = state.p, word = p === "week" ? "in the last 7 days" : "today";
+    const rows = issues.map((x) => ({ ...x, v: lostOf(T.find((t) => t.id === x.t), p)[x.k] })).sort((a, b) => b.v - a.v);
+    $("#att-sub").textContent = `Sorted by energy lost ${word}; times UTC`;
+    $("#att").innerHTML = rows.map((x) => {
+      const h = (NOW - x.since) / 3600000, ago = h < 48 ? `${Math.round(h)} h` : `${Math.round(h / 24)} days`;
+      return `<li class="att-item is-${x.st}">
+        <span class="tid" aria-hidden="true">${x.t}</span>
+        <div class="att-main">
+          <p class="att-top"><span><span class="visually-hidden">Turbine </span>${x.t} · ${x.title}</span>${pill(x.st)}</p>
+          <p class="att-cause">Cause: ${CAUSES[x.k].toLowerCase()}</p>
+          <p class="att-since num">Since <time datetime="${new Date(x.since).toISOString()}">${dayFmt.format(x.since)}, ${hm.format(x.since)}</time>${x.sinceNote || ""} · ${ago}</p>
+          ${x.detail ? `<p class="att-detail">${x.detail}</p>` : ""}
+          ${x.auto ? `<p class="auto">${icon.auto}<span>${x.auto()}</span></p>` : ""}
+          <p class="next">${icon.next}<span><b>Next:</b> ${x.next()}</span></p>
+        </div>
+        <p class="att-lost num"><span class="v">${fmt(x.v)}</span><small>MWh lost ${p === "week" ? "in 7 days" : "today"}</small></p>
+      </li>`;
+    }).join("");
+    const listed = r1(sum(rows.map((x) => x.v))), curt = sumUp.lost[0], other = r1(sumUp.total - listed - curt);
+    const cleared = T.filter((t) => lostOf(t, p).some((v, k) => k > 0 && v > 0 && !issues.some((x) => x.t === t.id && x.k === k))).map((t) => t.id);
+    $("#att-foot").textContent = `These ${rows.length} issues account for ${fmt(listed)} of the ${fmt(sumUp.total)} MWh lost. The other ${fmt(r1(sumUp.total - listed))} MWh: grid curtailment ${fmt(curt)} MWh across the site${other > 0 ? `, and ${fmt(other)} MWh from stops that have cleared (${cleared.join(", ")})` : ""}.`;
+    const [a, b] = rows, share = (a.v + b.v) / sumUp.total;
+    $("#answer").innerHTML = `<strong>${fmt(sumUp.total)} MWh lost ${word}</strong>, ${pctf(sumUp.total / sumUp.exp)} of the ${fmt(sumUp.exp)} MWh expected. ${curt / sumUp.total >= 0.25 ? `Grid curtailment caused ${fmt(curt)} MWh. ` : ""}${a.t} (${a.title.toLowerCase()}) and ${b.t} (${b.title.toLowerCase()}) lost the most, ${pctf(share, 0)} of the total.`;
+  }
+
+  function renderTiles() {
+    const p = state.p, hours = HOURS[p], running = T.filter((t) => t.mw > 0), mw = sum(T.map((t) => t.mw));
+    $("#fleet-sub").textContent = `14:20 UTC · ${fmt(mw)} MW from ${running.length} of 12 turbines, ${pctf(mw / 50.4, 0)} of the 50.4 MW site · availability ${p === "week" ? "for the last 7 days" : "for today"}`;
+    const list = T.filter((t) => !state.onlyAtt || t.st !== "run");
+    $("#tiles").innerHTML = list.map((t) => `<li class="tile is-${t.st}">
+      <div class="tile-top"><h3>${t.id}</h3>${pill(t.st)}</div>
+      <p class="tile-power num">${fmt(t.mw, 2)}<span class="u">MW</span></p>
+      <span class="meter" role="img" aria-label="${fmt(t.mw, 2)} of 4.2 MW rated"><span style="width:${(t.mw / 4.2) * 100}%"></span></span>
+      <dl class="num"><div><dt>Rotor</dt><dd>${fmt(t.rpm)} rpm</dd></div><div><dt>Wind</dt><dd>${fmt(t.ws)} m/s</dd></div><div><dt>Avail.</dt><dd>${pctf(Math.max(0, 1 - (t.down[0] + (p === "week" ? t.down[1] : 0)) / hours))}</dd></div></dl>
+      <p class="tile-note">${t.note || "Producing normally"}</p></li>`).join("");
+  }
+
+  // Roving focus over chart marks: one tab stop; arrows, Home and End move; focus and hover show exact values; Escape hides (CMP-11, CMP-18)
+  function rove(marks, show, hide, start = marks.length - 1) {
+    const set = (i) => marks.forEach((m, j) => m.setAttribute("tabindex", j === i ? "0" : "-1"));
+    set(Math.max(0, start));
+    marks.forEach((m, i) => {
+      m.addEventListener("focus", () => { set(i); show(i); });
+      m.addEventListener("blur", hide);
+      m.addEventListener("pointerenter", () => show(i));
+      m.addEventListener("pointerleave", () => { const f = marks.indexOf(document.activeElement); f >= 0 ? show(f) : hide(); });
+      m.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") return hide();
+        const n = { ArrowRight: i + 1, ArrowDown: i + 1, ArrowLeft: i - 1, ArrowUp: i - 1, Home: 0, End: marks.length - 1 }[e.key];
+        if (n === undefined) return;
+        e.preventDefault(); marks[Math.max(0, Math.min(marks.length - 1, n))].focus();
+      });
+    });
+  }
+  function node(tag, attrs, parent, text) { const n = document.createElementNS(NS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (text != null) n.textContent = text; parent.append(n); return n; }
+  function placeTip(tip, box, x, y) { tip.hidden = false; tip.style.left = `${x + 14 + tip.offsetWidth > box.clientWidth ? x - 14 - tip.offsetWidth : x + 14}px`; tip.style.top = `${Math.max(0, y - 20)}px`; }
+
+  // Power curve: dots for each 10-minute average, reference line, accent markers for 1 m/s bin averages (CMP-18, CMP-34, ICO-10)
+  function renderCurve() {
+    const box = $("#curve"), svg = $("#curve-svg"), tip = $("#curve-tip"), c = curves[state.curve], t = T[state.curve];
+    const had = document.activeElement && box.contains(document.activeElement) ? +document.activeElement.dataset.i : -1;
+    const W = box.clientWidth, H = box.clientHeight, pad = { l: 40, r: 12, t: 22, b: 40 };
+    const x = (v) => pad.l + (v / 18) * (W - pad.l - pad.r), y = (p) => pad.t + (1 - p / 4.5) * (H - pad.t - pad.b);
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.replaceChildren();
+    const g = node("g", { "aria-hidden": "true" }, svg);
+    [0, 1, 2, 3, 4].forEach((p) => { node("line", { class: "grid", x1: pad.l, x2: W - pad.r, y1: y(p), y2: y(p) }, g); node("text", { x: pad.l - 8, y: y(p) + 4, "text-anchor": "end" }, g, p); });
+    node("text", { x: pad.l - 8, y: 10, "text-anchor": "end" }, g, "MW");
+    node("line", { class: "axis", x1: pad.l, x2: W - pad.r, y1: y(0), y2: y(0) }, g);
+    (W < 480 ? [0, 6, 12, 18] : [0, 3, 6, 9, 12, 15, 18]).forEach((v) => node("text", { x: x(v), y: y(0) + 18, "text-anchor": "middle" }, g, v));
+    node("text", { x: W - pad.r, y: H - 2, "text-anchor": "end" }, g, "Wind speed at hub height, m/s");
+    node("line", { class: "rated", x1: pad.l, x2: W - pad.r, y1: y(4.2), y2: y(4.2) }, g);
+    node("text", { x: pad.l + 6, y: y(4.2) - 6 }, g, "Rated 4.2 MW");
+    const dots = node("g", {}, g);
+    c.pts.forEach(([v, p]) => node("circle", { class: "dot", cx: x(v).toFixed(1), cy: y(p).toFixed(1), r: 2 }, dots));
+    node("polyline", { class: "ref", points: Array.from({ length: 73 }, (_, i) => i / 4).map((v) => `${x(v).toFixed(1)},${y(ref(v)).toFixed(1)}`).join(" ") }, g);
+    const marks = c.bins.map((b, i) => {
+      node("circle", { class: "bin", cx: x(b.v), cy: y(b.p), r: 5, "data-b": i }, g);
+      return node("rect", { class: "hit", x: x(b.k - 0.5), y: pad.t, width: x(1) - x(0), height: y(0) - pad.t, "data-i": i, role: "img",
+        "aria-label": `${b.k - 0.5} to ${b.k + 0.5} m/s: ${b.n} averages, actual ${fmt(b.p, 2)} MW, reference ${fmt(b.ref, 2)} MW, ${signed(b.p / b.ref - 1)}` }, svg);
+    });
+    rove(marks, (i) => {
+      const b = c.bins[i];
+      svg.querySelectorAll(".bin").forEach((m) => m.classList.toggle("on", +m.dataset.b === i));
+      tip.innerHTML = `<span class="num">${b.k - 0.5}–${b.k + 0.5} m/s · ${b.n} averages</span><b class="num">Actual ${fmt(b.p, 2)} MW</b><span class="num">Reference ${fmt(b.ref, 2)} MW · ${signed(b.p / b.ref - 1)}</span>`;
+      placeTip(tip, box, x(b.v), y(b.p));
+    }, () => { tip.hidden = true; svg.querySelectorAll(".bin.on").forEach((m) => m.classList.remove("on")); }, 6);
+    if (had >= 0 && marks[had]) marks[had].focus();
+    const low = c.gap < -0.02;
+    $("#curve-sub").textContent = low ? `${t.id} produced ${pctf(-c.gap)} less than its reference curve at 6–11 m/s, the signature of a yaw offset; above 13 m/s it still reaches rated power.`
+      : `${t.id} tracks its reference curve within ${pctf(Math.abs(c.gap))} at 6–11 m/s.`;
+    $("#curve-foot").textContent = `${c.n} of 950 ten-minute averages, Oct 22 to 14:20 today. Stops, ice and curtailed hours are left out.`;
+    $("#curve-table tbody").innerHTML = c.bins.map((b) => `<tr><th scope="row">${b.k - 0.5}–${b.k + 0.5} m/s</th><td>${b.n}</td><td>${fmt(b.p, 2)}</td><td>${fmt(b.ref, 2)}</td><td>${signed(b.p / b.ref - 1)}</td></tr>`).join("");
+  }
+
+  function renderWind() {
+    const w = wind[state.p], n = sum(w.n), max = Math.max(...w.n);
+    const share = (i) => w.n[i] / n, mean = sum(w.n.map((c, i) => c * w.v[i])) / n;
+    const [a, b] = [0, 1, 2, 3, 4, 5, 6, 7].sort((i, j) => w.n[j] - w.n[i]).slice(0, 2).sort((i, j) => i - j);
+    $("#wind-sub").textContent = `Mostly from the ${SECT[a][1].toLowerCase()} and ${SECT[b][1].toLowerCase()} ${state.p === "week" ? "this week" : "today"}: ${pctf(share(a) + share(b), 0)} of the time, at ${fmt(Math.min(w.v[a], w.v[b]))} to ${fmt(Math.max(w.v[a], w.v[b]))} m/s on average.`;
+    $("#dir-cap").textContent = `Share of time and mean speed by direction the wind came from, ${state.p === "week" ? "last 7 days" : "today"}`;
+    $("#dir tbody").innerHTML = SECT.map(([s, name, deg], i) => `<tr><th scope="row"><abbr title="${name}">${s}</abbr> <small>${deg}°</small></th>
+      <td><span class="share"><i style="width:${(w.n[i] / max) * 100}%"></i><span>${pctf(share(i))}</span></span></td>
+      <td class="r">${w.n[i] ? `${fmt(w.v[i])} m/s` : '<span aria-hidden="true">–</span><span class="visually-hidden">No data</span>'}</td></tr>`).join("");
+    $("#wind-foot").textContent = `${n} ten-minute averages at 110 m hub height, site mean ${fmt(mean)} m/s. Sectors are 45° wide, centred on the direction shown.`;
+  }
+
+  function renderMaint() {
+    const wins = match(), lim = state.limit, missing = jobs.filter((j) => !j.slot).length;
+    $("#maint-sub").textContent = jobs.every((j) => j.slot) ? `All ${jobs.length} planned stops fit low-wind windows: ${fmt(sum(jobs.map((j) => j.slot.loss)))} MWh expected loss, against ${fmt(sum(jobs.map((j) => j.now)))} MWh if each stopped now.`
+      : `${missing} of ${jobs.length} planned stops ${missing === 1 ? "has" : "have"} no window at or below ${fmt(lim)} m/s in the next 72 hours.`;
+    $("#wins").textContent = wins.length ? `Windows at or below ${fmt(lim)} m/s: ${wins.map(([a, b]) => `${span(a, b)} (${b - a} h)`).join("; ")}.` : `No stretch of 3 h or more at or below ${fmt(lim)} m/s in the next 72 hours. Raise the work limit or plan after Sat Oct 31.`;
+    $("#jobs").innerHTML = jobs.map((j, i) => `<li class="job"><span class="tid" aria-hidden="true">${j.t}</span>
+      <div><p class="job-name"><span class="visually-hidden">${j.t}: </span>${j.name}</p><p class="job-meta">${j.h} h stop · ${j.crew}</p>
+      ${j.slot ? `<p class="job-slot num"><b>${span(j.slot.s, j.slot.s + j.h)}</b> · ${range(j.slot.s, j.h)}</p><p class="job-loss num">Expected loss <b>${fmt(j.slot.loss)} MWh</b>, against ${fmt(j.now)} MWh if stopped now</p>`
+        : `<p class="none">No ${j.h}-hour window at or below ${fmt(lim)} m/s</p>`}</div>
+      <div class="job-act">${/* Pending stays neutral; "Booked" with a check only after the response (FBK-11, COL-10, COP-09) */ ""}${j.state === "booked" ? `<button class="btn is-booked" type="button" aria-disabled="true" data-job="${i}">${icon.run}Booked</button>`
+        : `<button class="btn ${i === 0 ? "btn-primary" : "btn-secondary"}" type="button" data-job="${i}" ${j.slot && j.state !== "pending" ? "" : 'aria-disabled="true"'}>${j.state === "pending" ? "Booking…" : `Book ${j.t} stop`}</button>`}</div></li>`).join("");
+    renderAttention(renderEnergy.last);
+    renderForecast(wins);
+    $("#fc-table tbody").innerHTML = fc.map((v, i) => `<tr><th scope="row">${dayFmt.format(at(i))}, ${hm.format(at(i))}</th><td>${fmt(v)}${v <= lim ? " (in limit)" : ""}</td><td>${fmt(ref(v), 2)}</td></tr>`).join("");
+  }
+
+  // Forecast: hourly line, work limit, shaded windows and the matched stops (CMP-18)
+  function renderForecast(wins = windows(state.limit)) {
+    const box = $("#fc"), svg = $("#fc-svg"), tip = $("#fc-tip");
+    const had = document.activeElement && box.contains(document.activeElement) ? +document.activeElement.dataset.i : -1;
+    const W = box.clientWidth, H = box.clientHeight, pad = { l: 34, r: 8, t: 22, b: 40 }, n = fc.length;
+    const x = (i) => pad.l + (i / n) * (W - pad.l - pad.r), y = (v) => pad.t + (1 - v / 14) * (H - pad.t - pad.b);
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.replaceChildren();
+    const g = node("g", { "aria-hidden": "true" }, svg);
+    wins.forEach(([a, b]) => { node("rect", { class: "win", x: x(a), y: pad.t, width: x(b) - x(a), height: y(0) - pad.t }, g);
+      if (x(b) - x(a) > 44) node("text", { class: "win-label", x: (x(a) + x(b)) / 2, y: y(0) - 6, "text-anchor": "middle" }, g, `${b - a} h`); });
+    [0, 4, 8, 12].forEach((v) => { node("line", { class: "grid", x1: pad.l, x2: W - pad.r, y1: y(v), y2: y(v) }, g); node("text", { x: pad.l - 6, y: y(v) + 4, "text-anchor": "end" }, g, v); });
+    node("text", { x: pad.l - 6, y: 10, "text-anchor": "end" }, g, "m/s");
+    node("line", { class: "axis", x1: pad.l, x2: W - pad.r, y1: y(0), y2: y(0) }, g);
+    fc.forEach((_, i) => { const hr = new Date(at(i)).getUTCHours(); if (hr === 0 || i === 0) { if (i) node("line", { class: "axis", x1: x(i), x2: x(i), y1: y(0), y2: y(0) + 6 }, g); node("text", { x: x(i) + (i ? 4 : 0), y: y(0) + 18 }, g, dayFmt.format(at(i)).split(",")[0]); }
+      else if (hr % 6 === 0 && W > 560 && i > 4) node("text", { x: x(i), y: y(0) + 18, "text-anchor": "middle" }, g, String(hr).padStart(2, "0")); });
+    node("line", { class: "limit", x1: pad.l, x2: W - pad.r, y1: y(state.limit), y2: y(state.limit) }, g);
+    node("line", { class: "limit", x1: W - pad.r - 150, x2: W - pad.r - 128, y1: 7, y2: 7 }, g); node("text", { class: "limit-label", x: W - pad.r, y: 11, "text-anchor": "end" }, g, `Work limit ${fmt(state.limit)} m/s`);
+    jobs.filter((j) => j.slot).forEach((j, r) => {
+      node("rect", { class: "job", x: x(j.slot.s), y: pad.t + 4 + r * 20, width: x(j.slot.s + j.h) - x(j.slot.s), height: 16, rx: 3 }, g);
+      node("text", { class: "job-label", x: x(j.slot.s + j.h) + 4, y: pad.t + 16 + r * 20 }, g, j.t);
+    });
+    node("polyline", { class: "line", points: fc.map((v, i) => `${(x(i) + x(i + 1)) / 2},${y(v)}`).join(" ") }, g);
+    node("text", { x: W - pad.r, y: H - 2, "text-anchor": "end" }, g, "Hour, UTC");
+    const cursor = node("line", { class: "cursor", x1: 0, x2: 0, y1: pad.t, y2: y(0), visibility: "hidden" }, g);
+    const marks = fc.map((v, i) => node("rect", { class: "hit", x: x(i), y: pad.t, width: x(1) - x(0), height: y(0) - pad.t, "data-i": i, role: "img",
+      "aria-label": `${dayFmt.format(at(i))}, ${hm.format(at(i))}: ${fmt(v)} m/s, ${v <= state.limit ? "within" : "above"} the work limit` }, svg));
+    rove(marks, (i) => {
+      const cx = (x(i) + x(i + 1)) / 2; cursor.setAttribute("x1", cx); cursor.setAttribute("x2", cx); cursor.setAttribute("visibility", "visible");
+      tip.innerHTML = `<span class="num">${dayFmt.format(at(i))}, ${hm.format(at(i))}</span><b class="num">${fmt(fc[i])} m/s</b><span>${fc[i] <= state.limit ? "Within" : "Above"} the work limit · ${fmt(ref(fc[i]), 2)} MW per turbine</span>`;
+      placeTip(tip, box, cx, y(fc[i]));
+    }, () => { tip.hidden = true; cursor.setAttribute("visibility", "hidden"); }, 0);
+    if (had >= 0 && marks[had]) marks[had].focus();
+  }
+
+  // Compass indicator: ticks generated in a loop, arrow drawn at the direction the wind comes from (ICO-10)
+  (function compass() {
+    const svg = $("#compass"), dir = 238;
+    node("circle", { class: "ring", cx: 28, cy: 28, r: 20 }, svg);
+    [["N", 28, 6], ["E", 51, 31], ["S", 28, 55], ["W", 5, 31]].forEach(([l, x, y]) => node("text", { x, y, "text-anchor": "middle" }, svg, l));
+    for (let i = 0; i < 8; i++) node("line", { x1: 28, y1: 9, x2: 28, y2: 12, stroke: "#566377", transform: `rotate(${i * 45} 28 28)` }, svg);
+    node("path", { class: "arrow", d: "M28 12l5 8h-3.3v24h-3.4V20H23z", transform: `rotate(${dir + 180} 28 28)` }, svg);
+  })();
+
+  // Booking: dialog restates site, turbine, slot and loss; the page behind is inert while it is open (SCR-27, ENG-05)
+  const dlg = $("#book"); let active = null;
+  $("#jobs").addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-job]"); if (!btn) return;
+    const j = jobs[+btn.dataset.job];
+    if (btn.getAttribute("aria-disabled") === "true") {
+      if (!j.slot) $("#status").textContent = `${j.t} has no window at or below ${fmt(state.limit)} m/s. Raise the work limit to find one.`;
+      return; // BTN-10: stays focusable and says why it cannot book
+    }
+    active = j;
+    $("#book-title").textContent = `Book a ${j.h}-hour stop of ${j.t}?`;
+    $("#book-scope").innerHTML = [["Site", "Harrow Ridge, 12 × 4.2 MW"], ["Turbine", `${j.t} · ${j.name}`], ["Stop", `${span(j.slot.s, j.slot.s + j.h)} UTC`],
+      ["Forecast", `${range(j.slot.s, j.h)} at hub height`], ["Expected loss", `${fmt(j.slot.loss)} MWh`], ["Crew", j.crew]].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join("");
+    $("#book-ok").textContent = `Book ${j.t} stop`;
+    dlg.returnValue = ""; dlg.showModal(); $("#book-cancel").focus();
+  });
+  // Example only: replace with a request to your work-order API and treat only response.ok as booked (FBK-11)
+  const requestBooking = (job, notify) => Promise.resolve({ ok: true, job, notify });
+  dlg.addEventListener("close", async () => {
+    const j = active; active = null;
+    if (!j || dlg.returnValue !== "book") { renderMaint(); focusJob(j); return; }
+    j.state = "pending"; j.booked = true; renderMaint(); focusJob(j);
+    const res = await requestBooking(j, $("#notify").checked);
+    j.state = res.ok ? "booked" : undefined; if (!res.ok) j.booked = false;
+    renderMaint(); focusJob(j);
+    $("#status").textContent = res.ok ? `${j.t} stop booked for ${span(j.slot.s, j.slot.s + j.h)} UTC. Work order sent${$("#notify").checked ? "; grid operator told" : ""}.` : `Couldn't book the ${j.t} stop. Try again.`;
+  });
+  const focusJob = (j) => { const b = j && $(`#jobs [data-job="${jobs.indexOf(j)}"]`); if (b) b.focus(); };
+
+  // Controls: period radiogroup with a roving tabindex (CMP-23), work-limit slider and number in sync (FRM-08), filter switch (FRM-22)
+  const radios = [...document.querySelectorAll("#period [role=radio]")];
+  const pick = (r) => { radios.forEach((x) => { x.setAttribute("aria-checked", String(x === r)); x.tabIndex = x === r ? 0 : -1; }); state.p = r.dataset.p; renderAll(); };
+  radios.forEach((r, i) => {
+    r.addEventListener("click", () => pick(r));
+    r.addEventListener("keydown", (e) => { const s = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key]; if (!s) return; e.preventDefault(); const n = radios[(i + s + radios.length) % radios.length]; n.focus(); pick(n); });
+  });
+  const setLimit = (v) => {
+    v = Math.min(8, Math.max(3, Math.round(+v * 2) / 2)); if (Number.isNaN(v) || v === state.limit) return;
+    state.limit = v; $("#limit").value = v; $("#limit").setAttribute("aria-valuetext", `${fmt(v)} metres per second`); renderMaint();
+  };
+  $("#limit").addEventListener("input", (e) => { setLimit(e.target.value); $("#limit-num").value = state.limit.toFixed(1); });
+  $("#limit-num").addEventListener("change", (e) => { setLimit(e.target.value); e.target.value = state.limit.toFixed(1); });
+  $("#only-att").addEventListener("change", (e) => { state.onlyAtt = e.target.checked; renderTiles(); });
+  $("#curve-pick").innerHTML = T.map((t, i) => `<option value="${i}" ${i === state.curve ? "selected" : ""}>${t.id}${t.tag ? ` · ${t.tag}` : ""}</option>`).join("");
+  $("#curve-pick").addEventListener("change", (e) => { state.curve = +e.target.value; renderCurve(); });
+
+  function renderAll() { renderEnergy.last = renderEnergy(); renderTiles(); renderWind(); renderMaint(); }
+  renderAll(); renderCurve();
+  new ResizeObserver(() => { renderCurve(); renderForecast(); }).observe($(".page"));
+</script>
+</body>
+</html>
