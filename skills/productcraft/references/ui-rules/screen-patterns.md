@@ -244,3 +244,24 @@ Dashboards, settings, search, onboarding and landing pages. Rule IDs use the `SC
 - **Do:** Show inline suggestions as muted ghost text that Tab accepts only while it is visible, dismissed by Escape or by continuing to type, without changing focus order.
 - **Avoid:** Overwriting user content on regenerate, or a spinner-only generation with no cancel.
 - **Avoid:** A modal accept or reject dialog for every suggestion.
+
+## SCR-27. Show which environment, account and scope a screen acts on
+
+**Why:** Operations, admin and finance screens look the same in production and staging and across accounts, and acting on the wrong one is a common cause of serious incidents.
+
+- **Do:** Keep the organization or account, the environment and the region or data scope in the top bar of every page, as a switcher whose current value is spelled out ("Production · eu-west-1").
+- **Do:** Make production unmistakable without relying on color alone: a labeled badge, a distinct top border and the word "Production" inside confirmation dialogs.
+- **Do:** Restate the scope in every destructive or bulk action ("Revoke 3 API keys in Production, Acme Corp?").
+- **Do:** Keep the scope and time range in the URL, and print them on exports, reports and shared links.
+- **Avoid:** A scope switcher hidden in a menu, or production and test data that look the same.
+
+## SCR-28. Show what automation decided, why, and what still needs a person
+
+**Why:** Automated detections and responses act on people's systems and money; operators can trust, correct or undo them only when they see the evidence and the limits of what was done.
+
+- **Do:** For each automated decision, show what was detected or done, the evidence (signals, rule or model, data window), when, and the scope it touched.
+- **Do:** Record automated actions in an audit trail that names the rule or playbook that acted, with Undo or rollback where the action allows it.
+- **Do:** Leave consequential or irreversible steps, such as blocking accounts, deleting data, moving money or changing production, to an explicit human approval with the evidence on the same screen.
+- **Do:** Show confidence only when it is calibrated, as a plain band or range with its basis ("High: 9 of the last 10 similar alerts were confirmed").
+- **Avoid:** Unexplained scores such as "AI confidence 97%", rates without a denominator, or counts of automated actions presented as outcomes.
+- **Note:** Label generated summaries and insights as generated, as in SCR-26.

@@ -313,3 +313,24 @@ Foundations, tokens, core components, radius, elevation and common component pat
 - **Do:** Provide a single-pointer alternative such as a "Move to…" menu or move buttons (WCAG 2.5.7), plus a keyboard mode: Space to lift, arrows to move, Space to drop, Escape to cancel.
 - **Avoid:** Moves that persist silently with no landing preview or undo, or a flat ghost that looks as if nothing was picked up.
 - **Avoid:** Drag as the only way to reorder or move items between groups.
+
+## CMP-34. Encode quantities by position or length, not area or radius
+
+**Why:** People compare positions and lengths accurately but misjudge areas, and a circle whose radius doubles covers four times the area, so radius-scaled circles exaggerate every difference.
+
+- **Do:** Compare values with bars from a zero baseline, dots on a shared axis or lines; sort bars by value unless the categories have a natural order such as months.
+- **Do:** When a circle must carry a value, such as bubbles on a map, scale its area rather than its radius and print the value beside it.
+- **Do:** Use a gauge or progress bar only for one value against a known target or range, and show the target.
+- **Avoid:** Nested or concentric circles, radial bars or 3D shapes for comparing totals such as yearly revenue.
+- **Avoid:** Dot-matrix or segmented bars whose dots cannot be counted and whose exact values are not available on focus or in a table.
+- **Note:** A pie or donut is acceptable for two to four parts of one whole when every part is labeled with its value.
+
+## CMP-35. Keep live event feeds readable while they update
+
+**Why:** A feed that inserts rows while someone reads or clicks moves the target under the pointer and floods screen readers.
+
+- **Do:** Hold new events while the user is scrolled away from the top or interacting with a row, and show a "12 new events" button that loads them.
+- **Do:** Give each operational event a severity word and icon, one line on what happened, the affected asset and an absolute timestamp with time zone, newest first, with relative time as a secondary label.
+- **Do:** Offer Pause and Resume, and show the connection state and last update time ("Live · updated 09:24:18 UTC").
+- **Do:** Announce only important events, batched, in a polite live region ("3 new critical events"), never every row.
+- **Avoid:** Auto-scrolling the list, re-sorting it while a row has focus, or severity shown by color alone.
