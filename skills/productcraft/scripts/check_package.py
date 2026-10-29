@@ -4,8 +4,8 @@ import argparse, json, re, pathlib, sys
 
 PATTERN_FIELDS = ('id', 'title', 'category', 'principle', 'rule', 'guardrail')
 UI_RULE_FIELDS = ('id', 'category', 'title', 'why', 'do', 'avoid')
-GUIDED_MODULES = ('engineering-workflow','engineering-practices','ui-distiller','code-security-review','credential-shield','launchguard','legal-ready','agent-safety','codebase-map','documents','builder-tools','stacks','cloud-infrastructure','data-engineering','ml-engineering','scientific-computing','life-sciences','research-writing','creative-media','integrations','blockchain-dev')
-TESTED_MODULES = ('engineering-workflow','engineering-practices','code-security-review','credential-shield','launchguard','legal-ready','agent-safety','codebase-map','documents','builder-tools','stacks','cloud-infrastructure','data-engineering','ml-engineering','scientific-computing','life-sciences','research-writing','creative-media','integrations','blockchain-dev')
+GUIDED_MODULES = ('engineering-workflow','engineering-practices','ui-distiller','code-security-review','credential-shield','launchguard','legal-ready','agent-safety','codebase-map','documents','builder-tools','stacks','cloud-infrastructure','data-engineering','ml-engineering','scientific-computing','life-sciences','research-writing','creative-media','integrations','blockchain-dev','search-visibility')
+TESTED_MODULES = ('engineering-workflow','engineering-practices','code-security-review','credential-shield','launchguard','legal-ready','agent-safety','codebase-map','documents','builder-tools','stacks','cloud-infrastructure','data-engineering','ml-engineering','scientific-computing','life-sciences','research-writing','creative-media','integrations','blockchain-dev','search-visibility')
 
 def check(root):
     root=pathlib.Path(root)

@@ -1,5 +1,15 @@
 # Changelog
 
+## ProductCraft 1.10.0 (2026-10-29)
+
+- New **Search visibility** module (SEO and AI answers), with a `GUIDE.md`, 20 references and an offline checker:
+  - **Technical:** a diagnose-before-changing workflow with an owner-approval list for `robots.txt`, `noindex`, canonical, redirect and migration changes. References cover crawl and index controls, rendering, facets and pagination, site migrations, `hreflang`, on-page elements, site structure and internal links, structured data and social cards with dated feature status, Search Console, analytics and log measurement, rank tracking and alerts, and links, authority and trust.
+  - **Content:** keyword and topic research with every metric labeled by source, results-page and competitor analysis, content gaps, search briefs and people-first writing, refresh and consolidation decisions, and an original E-E-A-T and helpful-content review checklist.
+  - **AI answers and entities:** a candid guide to AI answer engines that separates documented, reasonable and speculative claims and checks crawler controls against current provider docs; entity clarity and knowledge panels; programmatic pages gated by a unique-data test; and records for search projects that span sessions.
+  - **No manipulation:** link schemes, cloaking, doorway pages, fake review markup, scaled low-value pages and site reputation abuse are excluded.
+  - **Checker:** `seo_check.py` checks built pages, `robots.txt` and sitemaps offline, with 44 tests.
+- `SKILL.md` routes to the module and adds a safety override for search changes that can remove pages; the Next.js, front-end, Shopify, performance and other references link to it. The suites hold 798 tests.
+
 ## ProductCraft 1.9.0 (2026-10-28)
 
 - UI rulebook: 298 rules. Four new rules; existing IDs and text are unchanged.

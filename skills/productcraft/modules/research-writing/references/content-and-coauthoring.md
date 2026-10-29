@@ -80,7 +80,7 @@ Order feedback by impact: argument and structure, then evidence, then clarity an
 - Images: licensed or the user's own, with credits; alternative text written.
 - Disclosures the outlet or law requires: sponsorship, affiliate links, conflicts of interest, AI assistance where the publisher asks for it.
 - Claims about identifiable people or companies are sourced and fair; flag anything that could be defamatory for the user's review.
-- Search snippets: an accurate title and description; descriptive headings; no keyword stuffing.
+- Search snippets: an accurate title and description; descriptive headings; no keyword stuffing. Pages written to be found in search also follow `../../search-visibility/references/content-briefs-and-writing.md`.
 
 ## Checks (done when)
 

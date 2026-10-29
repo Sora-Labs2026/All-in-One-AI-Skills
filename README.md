@@ -10,7 +10,7 @@ Each skill in this repository is a folder of instructions, references, scripts a
 
 | Skill | Version | What it does |
 |---|---|---|
-| [**ProductCraft**](skills/productcraft/README.md) | 1.9.0 | One routed skill to build, harden and ship software, plus the data, science, research and media work around it: engineering workflow and practices with advanced testing and open-source readiness, UI design with a rulebook, pattern library and 170 reference screens, interaction, forms and data views, code security review with static analysis, supply-chain review and domain guides, pre-launch security and auth-abuse defense, agent safety, legal launch readiness, codebase mapping, office documents and animated GIFs, builder tools for skills, MCP servers and Playwright tests, language and framework guides, cloud infrastructure, data engineering, ML engineering, scientific computing, life sciences, research writing, creative media, API integrations and blockchain development. |
+| [**ProductCraft**](skills/productcraft/README.md) | 1.10.0 | One routed skill to build, harden and ship software, plus the data, science, research and media work around it: engineering workflow and practices with advanced testing and open-source readiness, UI design with a rulebook, pattern library and 170 reference screens, interaction, forms and data views, code security review with static analysis, supply-chain review and domain guides, pre-launch security and auth-abuse defense, agent safety, legal launch readiness, codebase mapping, office documents and animated GIFs, builder tools for skills, MCP servers and Playwright tests, language and framework guides, cloud infrastructure, data engineering, ML engineering, scientific computing, life sciences, research writing, creative media, search visibility, API integrations and blockchain development. |
 
 ## ProductCraft
 
@@ -42,6 +42,7 @@ ProductCraft helps an agent build, harden and ship software that shows the impor
 - **Creative media**: generative art, posters, infographics, themes, slides, programmatic video, image prompts and enhancement, EPUB and safe file organization
 - **Integrations**: Stripe, Plaid, Supabase, Google Workspace, Jira, Linear and other APIs, with OAuth, webhooks, idempotency and rate limits done right
 - **Blockchain development**: Move on Aptos and Solana RPC, testnet first, with no keys in the chat and no investment advice
+- **Search visibility**: technical SEO, site migrations, structured data and Search Console measurement, plus keyword research, people-first content, E-E-A-T review and AI answer engines, with no spam tactics and an offline checker for built pages
 - **UI rules**: a rulebook of screen-level rules with IDs (such as `BTN-02`) covering spacing, typography, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, common screens, motion, front-end engineering and brand identity
 - **Language choice**: for new projects, services or performance-critical components, asks once whether to use Rust and states the trade-offs (faster runtime, slower compiles, more AI tokens, no automatic page-load gain)
 - **Pattern library**: UI/UX patterns, each with a principle, an implementation rule and a guardrail

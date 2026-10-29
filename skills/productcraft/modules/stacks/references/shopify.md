@@ -15,6 +15,9 @@ Read this when you build or change a Shopify theme (Liquid, sections, blocks), a
 
 Headless moves performance, SEO, analytics, consent and accessibility from Shopify to you. Choose it for real requirements, not by default.
 
+
+Search practice for a headless storefront or a replatform (server-rendered content, canonicals, filtered collections, redirect maps): `../../search-visibility/GUIDE.md`.
+
 ## Platform changes to know (2024-2026; check current docs)
 
 - **API versions** are released quarterly (`2025-10`, `2026-01`, ...) and each is supported for at least 12 months. Pin the version in config, upgrade at least once a year, and watch deprecation notices in the Partner Dashboard and the `X-Shopify-API-Deprecated-Reason` header.

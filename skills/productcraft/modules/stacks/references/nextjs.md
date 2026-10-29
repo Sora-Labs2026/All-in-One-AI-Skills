@@ -114,6 +114,8 @@ export async function renameProject(_prev: unknown, formData: FormData) {
 ## Metadata, images, fonts and scripts
 
 - Use the `metadata` export or `generateMetadata` for titles, descriptions, canonical URLs and Open Graph; `sitemap.ts` and `robots.ts` generate those files.
+
+- What those values should contain, which changes need the owner's go-ahead, and an offline check of the built pages (`seo_check.py`): `../../search-visibility/GUIDE.md`.
 - `next/image` needs `width` and `height` (or `fill` with a sized parent) and a correct `sizes` for responsive images. Mark the LCP image for preloading (`priority`; check the prop name in the image docs for your major) and never lazy-load it. Restrict remote images with `images.remotePatterns`; an open optimizer can be abused to fetch anything.
 - `next/font` self-hosts fonts and removes layout shift from font swaps.
 - `next/script` with `strategy="afterInteractive"` or `"lazyOnload"` for third-party scripts.
