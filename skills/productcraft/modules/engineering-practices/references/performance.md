@@ -84,6 +84,8 @@ Field data from real users decides; lab tools explain causes and catch regressio
 - **General:** HTTP/2 or HTTP/3, compression, long-lived caching of hashed assets, WOFF2 fonts subset to the needed characters, audited third-party scripts loaded `async` or `defer` (or replaced with a lightweight placeholder until the user interacts), and no `unload` handlers so the back/forward cache works.
 - UI-level rules for loading states and honest progress are in `../../ui-rules.md` (`FBK` category).
 
+- How Core Web Vitals show up in Search Console and CrUX, and what they do and do not mean for search: `../../search-visibility/GUIDE.md`.
+
 ## Budgets and regression guards
 
 - **Set budgets from the current baseline plus a target,** for example: initial JavaScript at most 170 KB compressed on the main route, LCP image at most 150 KB, API p95 at most 300 ms on the reference dataset. The numbers belong to the project; pick them with the user.

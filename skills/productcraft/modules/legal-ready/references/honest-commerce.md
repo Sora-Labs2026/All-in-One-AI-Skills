@@ -60,6 +60,8 @@ General guidance, not legal advice; have a qualified lawyer review. Design guida
   - A `/reviews-policy` page explains how reviews are collected, verified and moderated.
   - `testimonials(person_name, quote, consent_ref, consent_at, material_connection, results_typical, typical_results_note, source)`. Quotes are approved by the person. Customer logos need written permission (`[[LEGAL: logo permission on file]]`). Counts ("2,000 teams") are computed from data or supplied by the owner with a source.
   - Structured rating data in page markup is generated from the real aggregate, never hard-coded.
+
+  - Search engines add their own rules for rating markup (genuine reviews visible on the page, no self-serving reviews of the business itself) and can withdraw rich results or take manual action: `../../search-visibility/references/structured-data-and-social-cards.md`.
   - Generated or demo testimonials are removed before launch or replaced with `[[LEGAL: real testimonial needed]]`.
 - **Verify:** every item in the scanner's `REVIEWS_TESTIMONIALS` list and every testimonial, logo and count on screen maps to a record with source and permission. A test computes the average from fixtures that include one-star reviews. Incentive labels render. No rating literal remains in markup.
 - **Common mistakes:** generated landing-page testimonials ("Sarah J., CEO") left in; stock photos with invented names; logo walls of companies that are not customers; incentives tied to five-star reviews; hiding one- and two-star reviews; a "verified" badge with no verification; asking only happy customers for public reviews, which skews the overall picture.

@@ -194,3 +194,5 @@ Add these to the workflow module's report and to `../../assets/review-template.m
 - `../ml-engineering/GUIDE.md`: model training, evaluation and comparison, ML pipelines and model registries, drift monitoring, and LLM features (RAG, prompts, evaluation suites); its `../ml-engineering/scripts/split_check.py` checks dataset splits for leakage.
 
 - `../cloud-infrastructure/GUIDE.md`: infrastructure as code, Kubernetes, containers, cloud cost and architecture, infrastructure pipelines, SLOs, incidents, monitoring stacks and chaos experiments, under a plan-and-diff-only rule.
+
+- `../search-visibility/GUIDE.md`: crawling, indexing, redirects and migrations, structured data and search measurement for public sites; `robots.txt`, `noindex`, canonical and URL changes there need the owner's go-ahead.

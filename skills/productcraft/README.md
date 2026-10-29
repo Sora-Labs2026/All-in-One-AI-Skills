@@ -1,10 +1,10 @@
 # ProductCraft
 
-**A Sora Labs Agent Skill** · version 1.9.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
+**A Sora Labs Agent Skill** · version 1.10.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
 
 ProductCraft is one installable skill that teaches a coding agent to build, harden and ship software that **shows the important thing first, behaves honestly, is proven by checks that actually ran, works on every device, and is secure and lawful where it matters**. It routes each task to only the modules that task needs: a bug fix reads the engineering workflow, a table change reads the table guidance, an auth change reads the auth-defense module, a destructive command triggers the agent-safety stop-check, and a launch reads the security and legal-readiness reviews.
 
-Beyond application code, it covers the work around it: language and framework guides, cloud infrastructure, databases and data engineering, machine learning and statistics, scientific computing, life sciences, research writing, creative media, third-party API integrations and blockchain development. Each is a module with its own guide, focused references and tested helper scripts, read only when a task needs it.
+Beyond application code, it covers the work around it: language and framework guides, cloud infrastructure, databases and data engineering, machine learning and statistics, scientific computing, life sciences, research writing, creative media, search visibility, third-party API integrations and blockchain development. Each is a module with its own guide, focused references and tested helper scripts, read only when a task needs it.
 
 It is a working skill for real codebases, not a theme pack, legal service or security certification. Its reference screens are code to learn from, not a component kit to paste. The agent changes your real codebase and reports what it actually tested.
 
@@ -39,6 +39,7 @@ It is a working skill for real codebases, not a theme pack, legal service or sec
 | **Creative media** | Generative art with seeded editions, posters and canvas designs, infographics, themes and brand application, reveal.js decks, programmatic video, prompting image and video models, image enhancement, EPUB books, file and invoice organization | `modules/creative-media/GUIDE.md` |
 | **Integrations** | Third-party APIs: OAuth and scopes, token storage, webhooks with signature checks and deduplication, idempotency, rate limits, pagination, sync and contract tests; Stripe, Plaid, Supabase, Google Workspace, Jira, Confluence, Linear, Outline and membership platforms | `modules/integrations/GUIDE.md` |
 | **Blockchain development** | Move on Aptos (language, objects and tokens, tests and the Move Prover, gas, CLI, TypeScript SDK, wallets, indexer) and Solana RPC; testnet first, no keys in chat, no investment advice | `modules/blockchain-dev/GUIDE.md` |
+| **Search visibility** | Being found in search and AI answers: crawl and index controls (`robots.txt`, `noindex`, sitemaps, canonicals, status codes and redirects), JavaScript rendering, faceted navigation and pagination, site migrations, `hreflang`, on-page elements, site structure and internal links, structured data with dated feature status, Open Graph cards, Search Console, analytics and log measurement, rank tracking, links, authority and trust; keyword and topic research, results-page and competitor analysis, people-first writing and refreshes, E-E-A-T review, AI answer engines, entity clarity, programmatic pages; no spam tactics; an offline checker for built pages, `robots.txt` and sitemaps | `modules/search-visibility/GUIDE.md` |
 | **UI rules** | A rulebook of screen-level rules with IDs (spacing, type, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, screens, motion, front-end engineering, brand identity) | `modules/ui-rules.md` |
 | **Language choice** | Offers Rust for new projects, services or performance-critical components, with honest trade-offs, and remembers the answer | `modules/language-choice.md` |
 | **Lean output** | Opt-in shorter answers that never shorten safety warnings, security findings, errors or legal caveats | `modules/lean-output.md` |
@@ -91,6 +92,11 @@ The pattern library covers foundations, feedback, forms, interaction, navigation
 | Generative art, posters, infographics, themes, reveal.js, programmatic video, image prompts and enhancement, EPUB, organizing files | Creative media |
 | Stripe, Plaid, Supabase, Google Workspace, Jira, Linear and other third-party APIs, OAuth and webhooks | Integrations |
 | Move on Aptos, Solana RPC, dApps and wallets | Blockchain development |
+| Pages missing from search, a search traffic drop, Search Console reports, `robots.txt`, sitemaps, canonicals, redirects, rendering | Search visibility (crawl, index and rendering references) |
+| A site migration, replatform, domain or URL-structure change, or a multilingual site | Search visibility (migrations, `hreflang`) |
+| Titles, meta descriptions, internal links, site structure, structured data, link previews | Search visibility (on-page, structure and structured-data references) |
+| Search reports, rank tracking, alerts, backlinks, authority, AI crawler policy, AI referral traffic | Search visibility (measurement, links and trust references) |
+| Keyword research, search intent, content gaps, writing or refreshing pages for search, E-E-A-T review, AI answer engines (GEO), entity clarity, programmatic pages | Search visibility (research, content and AI-answer references) |
 | A new project, service or performance-critical component with no language fixed | Language choice (asks once about Rust) |
 | A broad, ambiguous product task | Product design + interaction, then only what is relevant |
 
@@ -187,6 +193,9 @@ Use productcraft to draft the related-work section with citations you have verif
 
 Use productcraft to add Stripe checkout with verified webhooks and idempotent
 fulfilment.
+
+Use productcraft to find out why our product pages dropped out of Google after the
+redesign, using Search Console evidence, and fix what is broken.
 ```
 
 ### Optional persistent project rule
@@ -298,6 +307,7 @@ LaunchGuard ships a 20-control baseline in `modules/launchguard/references/secur
 | `modules/creative-media/scripts/organize_plan.py` | Plans file moves by type and date, or checks a rename list, with collisions resolved; never touches files; can emit apply and undo scripts that never overwrite |
 | `modules/integrations/scripts/integration_scan.py` | Finds risky integration code: unverified or re-serialized webhooks, plain digest comparisons, payments without idempotency keys, credentials in URLs, broad scopes, server secrets in client modules |
 | `modules/blockchain-dev/scripts/move_check.py` | Finds risky Move packages and dApp repositories: tracked key files, public functions returning refs or signers, exposed randomness, moving-branch dependencies |
+| `modules/search-visibility/scripts/seo_check.py` | Offline check of built HTML, `robots.txt` and XML sitemaps: titles and descriptions, `h1`, canonicals, `meta robots`, `hreflang` codes and return links, image `alt`, JSON-LD that parses with `@type` (retired features flagged), Open Graph and X cards, `robots.txt` syntax and RFC 9309 rule evaluation, sitemap syntax, limits and listed-URL status |
 | `assets/review-template.md` | Template for the agent's change report |
 
 Every script uses the Python 3 standard library only, is read-only toward the project it inspects and never touches the network.
@@ -319,7 +329,7 @@ python3 -m unittest discover -s tests -v
 for t in modules/*/tests; do python3 -m unittest discover -s "$t" -v; done
 ```
 
-The suites hold 754 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
+The suites hold 798 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
 
 ## Package layout
 
@@ -360,7 +370,8 @@ productcraft/
 │   ├── research-writing/        # literature, citations, papers, reviews, talks; BibTeX checker
 │   ├── creative-media/          # art, posters, video, images, EPUB, file organization; move planner
 │   ├── integrations/            # third-party APIs, OAuth, webhooks; integration scanner
-│   └── blockchain-dev/          # Move on Aptos and Solana; Move checker
+│   ├── blockchain-dev/          # Move on Aptos and Solana; Move checker
+│   └── search-visibility/       # SEO and AI answers: crawl, index, structure, markup, measurement, content; offline checker
 ├── examples/                    # reference screens: HTML pages, tokens.css, gallery.css, README index
 ├── references/
 │   ├── ui-rules/                # UI rulebook, one file per category

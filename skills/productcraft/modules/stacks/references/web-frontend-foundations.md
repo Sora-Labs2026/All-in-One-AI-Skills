@@ -10,6 +10,8 @@ Design and UX rules live in other modules. Link to them; do not restate them her
 - Responsive layout, accessibility, translation and RTL: `../../responsive-accessibility.md`
 - Types, `tsconfig`, parsing untrusted data: `../../engineering-practices/references/typescript.md`
 - Core Web Vitals, re-render profiling, budgets: `../../engineering-practices/references/performance.md`
+
+- Crawlability, indexing, metadata, structured data and link previews for public pages: `../../search-visibility/GUIDE.md`
 - Browser tests with Playwright: `../../builder-tools/references/playwright-web-testing.md`
 
 ## Start from the project

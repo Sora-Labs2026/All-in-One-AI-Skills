@@ -62,6 +62,8 @@ Use `../assets/handoff-template.md`. Keep it to about one screen, and link to ex
 - For an automated loop that restarts sessions, keep machine-readable state as well (for example a small JSON file with the current step, the last verified commit and pending approvals), and treat the repository plus that file as the source of truth. A restart is not a sign that the previous step finished.
 - When a plan changes, change it in the durable plan, not only in the conversation.
 
+- Search and content programs also need dated records of targets, shipped changes and observations, because their results arrive weeks after the work: `../../search-visibility/references/search-project-state.md`.
+
 ## Checks (done when)
 
 - [ ] A fresh agent could continue from the handoff alone, without the old conversation.
