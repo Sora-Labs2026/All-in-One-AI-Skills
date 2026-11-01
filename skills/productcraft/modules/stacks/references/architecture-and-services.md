@@ -2,6 +2,8 @@
 
 Read this when you design a new system or a major component, size it, choose a datastore, decide whether and where to split a monolith, or design how services talk and stay consistent. Neighboring topics live elsewhere: interface and event contracts in `../../engineering-practices/references/api-contracts.md`; timeouts, retries, circuit breakers and the transactional outbox in `../../engineering-practices/references/resilience.md`; telemetry in `../../engineering-practices/references/observability.md`; ADRs and design docs in `../../engineering-practices/references/docs-and-decisions.md`; replacing an existing system in `legacy-modernization.md`; GraphQL servers in `graphql.md`; server push and WebSockets in `realtime-websockets.md`.
 
+Boundaries inside one deployable unit (ports and adapters, use cases, transactions, and mapping domain errors to responses per framework) are in `hexagonal-architecture.md`.
+
 ## Start from requirements with numbers
 
 Architecture follows from a few quantified requirements. Ask for them, or state assumptions the user can correct; never invent business facts.

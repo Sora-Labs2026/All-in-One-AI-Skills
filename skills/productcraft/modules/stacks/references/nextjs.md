@@ -133,6 +133,16 @@ export async function renameProject(_prev: unknown, formData: FormData) {
 - `output: "export"` produces static files and drops server features (server actions, ISR, request-time rendering, image optimization by default).
 - Deploying a new build invalidates client bundles that open tabs still reference; Next.js hard-navigates on a missing chunk. Keep previous static assets available during rollout when using several instances.
 
+## Turbopack
+
+- Turbopack became stable for `next dev` in 15; 15.3 moved its options from `experimental.turbo` to the top-level `turbopack` key; 16 uses it by default for `next dev` and `next build`. `--webpack` opts out for either command.
+- Turbopack does not run webpack plugins or the `webpack()` function in `next.config`. In 16, `next build` stops with an error when a custom webpack configuration is present instead of ignoring it: migrate the configuration, or build with `--webpack` until you can.
+- Loaders that return JavaScript (for example an SVG-to-component loader) go under `turbopack.rules` (`"*.svg": { loaders: ["@svgr/webpack"], as: "*.js" }`); module replacements and browser fallbacks for Node.js built-ins go under `turbopack.resolveAlias`.
+- Sass imports that use webpack's `~` prefix for `node_modules` are not supported; import the package path directly.
+- Development caches compiled work on disk under `.next` (on by default for `next dev` from 16.1). Delete `.next` when you suspect a stale cache, not as a routine step.
+- `@next/bundle-analyzer` reads webpack builds. For Turbopack builds use the analyzer your version ships (the experimental `next experimental-analyze` from 16.1), or build once with `--webpack` to compare.
+- Before switching an existing project's bundler, compare the route table and bundle sizes of both builds and run the end-to-end suite against the Turbopack build.
+
 ## Testing
 
 - Client components: Vitest or Jest with React Testing Library.
@@ -166,6 +176,7 @@ Review-level traps (caching per-user data, CSRF on route handlers, image and red
 | Stale page after a mutation | No revalidation, or the client router cache | `revalidatePath`, `revalidateTag` or `updateTag`; `router.refresh()` for client-side refresh |
 | `window is not defined` | Browser API used during server render | Use it in an effect or a client-only dynamic import |
 | Works on Vercel, stale data when self-hosted on several instances | Per-instance cache | Shared `cacheHandler` |
+| `next build` fails after upgrading to 16, naming a webpack configuration | Custom `webpack()` config while Turbopack is the default | Move the needed options to `turbopack`, or build with `--webpack` for now |
 
 ## Done when
 

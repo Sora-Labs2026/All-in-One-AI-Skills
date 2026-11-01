@@ -103,6 +103,7 @@ async def fetch_all(client: httpx.AsyncClient, urls: list[str]) -> list[bytes]:
 - Property-based tests with Hypothesis fit parsers, serializers and calculations (`../../engineering-practices/references/advanced-testing.md`).
 - Async tests need the plugin the project uses (`pytest-asyncio` with its mode setting, or `anyio`'s pytest plugin). Do not add a second one.
 - Coverage (`pytest --cov=<package> --cov-branch`) shows untested branches; it is a map, not a target to game.
+- Fixture design and scopes, parametrization, async loop scopes, database isolation, parallel runs and flaky tests in depth: `python-testing.md`.
 
 ## Packaging and distribution
 

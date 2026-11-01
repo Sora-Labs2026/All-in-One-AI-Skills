@@ -128,6 +128,8 @@ export type Currency = (typeof CURRENCIES)[number];
 - Use generics only when a type parameter connects inputs to outputs; constrain them (`<T extends { id: string }>`). Elaborate conditional and mapped types belong in libraries with type tests, rather than in application code.
 - Return typed results for expected failures, for example `{ ok: true; value: Invoice } | { ok: false; error: "not_found" | "forbidden" }`, and keep exceptions for the unexpected.
 - In `catch`, the error is `unknown`: narrow with `instanceof Error` before reading `.message`, and keep the original as `cause` when rethrowing.
+- Write guards as type predicates (`value is Invoice`) or assertion functions (`asserts value is Invoice`) next to the runtime check, instead of casting at call sites.
+- Make functions that return promises `async`, so every failure arrives as a rejection; a plain function that returns a promise can also throw synchronously, and its callers then need two kinds of error handling.
 - Use `??` rather than `||` for defaults when `0`, `""` or `false` are valid values.
 
 ## Tests and type tests

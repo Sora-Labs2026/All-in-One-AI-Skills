@@ -2,6 +2,8 @@
 
 Read this before writing or changing PHP: Laravel or Symfony applications, packages, queues, tests. Security traps (loose comparison, file inclusion, unserialize, mass assignment, `APP_KEY`, Blade raw output) are in `../../code-security-review/references/language-pitfalls.md#php`. WordPress plugins, themes and WooCommerce are in `wordpress.md`.
 
+Laravel security hardening, authorization, uploads, testing with PHPUnit or Pest, pre-deploy verification and choosing packages are in `laravel-security-and-testing.md`.
+
 ## Orient first
 
 - **PHP version:** `require.php` in `composer.json` is the supported range; `config.platform.php` tells Composer which version to resolve dependencies for. Write for the lowest supported version. In 2026, 8.4 and 8.5 are actively supported, 8.2 and 8.3 receive security fixes only (8.2 until the end of 2026), and 8.1 reached end of life at the end of 2025; check php.net's supported-versions page.
@@ -44,6 +46,7 @@ composer audit
 - Form Requests for validation and authorization (`authorize()` with policies); controllers stay thin and call actions or services.
 - API Resources for output, so internal columns never reach responses. One error shape across the API (`../../engineering-practices/references/api-contracts.md`).
 - Authorize with policies and gates (`$this->authorize()`, `Gate::authorize()`, the `can` middleware); route middleware alone is not object-level authorization.
+- Nested routes use `Route::scopeBindings()` (or a custom binding key) so a child model resolves only within its parent; the parent still needs its own authorization check.
 
 **Configuration.**
 - Call `env()` only inside `config/*.php`. After `php artisan config:cache` (every production deploy should run it), `env()` returns null everywhere else. Application code reads `config('services.stripe.key')`.

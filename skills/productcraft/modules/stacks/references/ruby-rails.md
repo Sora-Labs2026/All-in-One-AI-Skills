@@ -62,6 +62,9 @@ bin/rails zeitwerk:check          # autoloading names match file paths
 - Strong parameters with explicit `permit` lists; scope lookups through the current user or account (`current_account.projects.find(params[:id])`) so authorization is part of the query. Use the project's authorization library (Pundit, Action Policy, CanCanCan) consistently.
 - Keep controllers to parsing, authorization, calling a model or service, and rendering.
 - **Hotwire** (Turbo and Stimulus): Turbo Frames replace one region per request, so match frame IDs between the page and the response; Turbo Streams broadcast changes; forms that fail validation must render with status 422 (`:unprocessable_entity`) for Turbo to display the errors. Stimulus controllers stay small and declarative.
+- Turbo Stream broadcasts reach every subscriber of a stream name. Subscribe with `turbo_stream_from` on records the viewer is authorized for (the helper signs the stream name), never on guessable strings or user input, and do not broadcast content that some subscribers may not see; render per-user content in the request instead.
+- Extract a service, form or query object when a controller or model carries several responsibilities, and name it after the business operation (`Invoices::Issue`). Start from plain Rails MVC; avoid concerns used by a single model, and avoid `default_scope` on core models, because it leaks into every query and association.
+- New apps choosing infrastructure: Rails 8's authentication generator covers session login and password reset, while Devise or another library fits OAuth, multi-factor authentication or lockable accounts; Solid Queue suits modest job volumes without Redis, while Sidekiq suits high throughput or an existing Redis. Do not switch an existing app's choice as a side effect.
 - API-only apps: serializers or Jbuilder views with explicit attributes, never `render json: @model` with all columns.
 
 ## Background jobs

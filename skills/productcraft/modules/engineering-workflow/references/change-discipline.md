@@ -46,6 +46,7 @@ Small does not mean partial. Before you finish:
 ## Keep the diff on-topic
 
 - **Match local conventions** even where you would choose differently: naming, quoting, error style (exceptions or result values), logging, file layout, test style.
+  To find those conventions systematically in a large or legacy codebase, settle conflicting styles with the user, and record or enforce them with tools, see `../../stacks/references/house-style-and-standards.md`.
 - **Format the way the project does.** If CI runs a formatter, run it on the files you changed (`npx prettier --write <files>`, `ruff format <files>`, `gofmt -w <files>`, `cargo fmt`). If the existing files are not formatted, don't reformat them wholesale; the real change disappears in the noise.
 - **No drive-by edits:** no renames, reordering, comment rewrites or "while I'm here" refactors in code you are not otherwise changing. Report adjacent problems or propose them as a separate change.
 - **Separate refactoring from behavior change:** two commits, or two pull requests for large refactors, so each can be reviewed and reverted alone.

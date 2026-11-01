@@ -105,6 +105,7 @@ export function ProfileForm({ name }: { name: string }) {
 - `useTransition` and `useDeferredValue` keep typing responsive while a heavy list re-renders. They do not make the work cheaper.
 - Virtualize long lists (TanStack Virtual, react-window). Split rarely used screens with `lazy()` and `Suspense`.
 - `<Activity mode="hidden">` (19.2) keeps a tab's state and can pre-render it; hidden trees still use memory.
+- Profiling workflow, re-render costs, virtualization trade-offs, bundle splitting and hydration cost in depth: `react-performance-and-testing.md`.
 
 ## Typing React (beyond `../../engineering-practices/references/typescript.md`)
 
@@ -121,6 +122,7 @@ export function ProfileForm({ name }: { name: string }) {
 - `act(...)` warnings mean an update happened after the test stopped waiting; await the resulting UI instead of wrapping more code in `act`.
 - `renderHook` tests custom hooks with logic; test simple hooks through the component that uses them.
 - Mock the network with MSW (`web-frontend-foundations.md`), not `fetch` by hand.
+- Query variants, fake timers with `user-event`, MSW patterns, provider isolation, real-browser component tests and React-specific build failures: `react-performance-and-testing.md`.
 
 ## Migrating class components
 
