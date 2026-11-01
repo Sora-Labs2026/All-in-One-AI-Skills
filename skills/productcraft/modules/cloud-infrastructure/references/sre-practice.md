@@ -4,6 +4,8 @@ Read this when you define or revise SLIs and SLOs, write an error budget policy,
 
 Objectives and policies are agreements between engineering and the product owner. The agent drafts them with real data and marks every number the owner has not confirmed.
 
+Before a launch, `production-readiness-review.md` checks that the objectives, alerts, runbooks, rollback and capacity evidence exist; `canary-analysis.md` covers watching a rollout against them.
+
 ## Choosing SLIs
 
 An SLI is the ratio of good events to valid events, measured as close to the user as possible.

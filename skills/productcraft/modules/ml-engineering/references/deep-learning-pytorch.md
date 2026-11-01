@@ -2,6 +2,8 @@
 
 Read this when you train or debug neural networks in PyTorch, organize training code with Lightning, scale to several GPUs, or need reproducible, comparable runs. Hugging Face models are in `transformers.md`; LLM fine-tuning in `fine-tuning.md`.
 
+Error messages, CUDA and installation problems, out-of-memory errors, NaNs, speed and plain training loops without Lightning are in `pytorch-debugging.md`.
+
 ## When Lightning, when plain PyTorch
 
 - **Plain PyTorch** for small experiments, unusual training loops (GAN-style alternation, RL, meta-learning) or when the project already has its own loop.

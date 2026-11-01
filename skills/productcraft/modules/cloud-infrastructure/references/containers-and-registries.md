@@ -4,6 +4,8 @@ Read this when you write or review a Dockerfile or Containerfile, build multi-ar
 
 Supply-chain review of base images and build inputs is in `../../code-security-review/references/supply-chain-review.md`; container basics for secrets are also in `../../code-security-review/references/secrets-and-dependencies.md`. Pushing an image is publishing: build and scan locally, and push only when the user asked for that release.
 
+Docker Compose for local development, dev containers and locked-down containers for testing installers are in `reproducible-dev-environments.md`; Compose and lightweight orchestrators on a few self-managed machines in `small-self-hosted-clusters.md`.
+
 ## A Dockerfile that is small, reproducible and safe
 
 ```dockerfile

@@ -43,6 +43,12 @@ MySQL 8.0 reached end of life in April 2026; 8.4 is the long-term support line a
 - Replicas can lag behind under long transactions and big batch updates; route read-your-writes to the source.
 - Group Replication and InnoDB Cluster give automatic failover; managed services wrap their own. Never trigger a failover or reset replication without the user.
 
+### Application-side details
+
+- **Upserts:** MySQL 8.0.19 and later refer to the inserted row with a row alias (`INSERT ... VALUES (?, ?) AS new ON DUPLICATE KEY UPDATE v = new.v`); `VALUES(col)` in that clause is deprecated in MySQL but is the supported form in MariaDB. Choose by engine, and use `VALUES(col)` for mixed fleets.
+- **Connection pools:** recycle pooled connections before the server's `wait_timeout` closes them (for example SQLAlchemy `pool_recycle` below `wait_timeout`, plus `pool_pre_ping=True`), or the first query after an idle period fails.
+- **Queues:** `SELECT ... FOR UPDATE SKIP LOCKED` (MySQL 8.0, MariaDB 10.6) claims queue rows without waiting on other workers; use it only for queue-like work.
+
 ## SQL Server
 
 ### Versions and compatibility level

@@ -2,7 +2,7 @@
 
 > ProductCraft module. Reach it through the router in `../../SKILL.md`; it is not a separate skill.
 
-**Purpose:** Get correct numbers out of data and keep them correct: SQL that returns the right rows and runs fast on PostgreSQL, MySQL and SQL Server; safe, read-only access to real databases; dataframes from pandas and Polars up to Dask and Spark; storage formats from CSV and Parquet to Zarr; exploratory analysis and data-quality checks; charts and publication figures; geospatial and graph data; MATLAB and Octave interop; Kaggle workflows; and public economic, filing and market-data APIs with their terms and limits. Each topic has one focused reference. Read only the ones the task touches.
+**Purpose:** Get correct numbers out of data and keep them correct: SQL that returns the right rows and runs fast on PostgreSQL, MySQL and SQL Server; safe, read-only access to real databases; dataframes from pandas and Polars up to Dask and Spark; storage formats from CSV and Parquet to Zarr; exploratory analysis and data-quality checks; charts and publication figures; ClickHouse, Redis and Prisma; scheduled collection of public data; content-hash caching and throughput tuning for pipelines; geospatial and graph data; MATLAB and Octave interop; Kaggle workflows; and public economic, filing and market-data APIs with their terms and limits. Each topic has one focused reference. Read only the ones the task touches.
 
 This module covers data work up to understanding, validating, transforming and visualizing data. Statistical modeling, machine learning and forecasting live in `../ml-engineering/GUIDE.md`. Schema design and migrations stay in `../engineering-practices/references/data-and-migrations.md`; charts inside a product's interface in `../data-and-product-surfaces.md`.
 
@@ -15,6 +15,7 @@ This module covers data work up to understanding, validating, transforming and v
 - Charts for analysis or reports, or figures for a paper, thesis or poster.
 - Locations, maps, rasters or coordinate systems; networks of entities; `.m` or `.mat` files; Kaggle datasets, notebooks or competitions.
 - Pulling official statistics (FRED, BLS, BEA, Census, Treasury, OFR, World Bank, IMF, OECD, Eurostat, ECB, Data Commons), SEC filings or market data.
+- ClickHouse tables and queries, Redis caches, locks and queues, or Prisma queries and migrations; a bot that collects public data on a schedule; expensive processing that should be cached by content; a backfill, load or sync that is too slow.
 - **Not for** model training, statistical inference or forecasting (`../ml-engineering/GUIDE.md`), schema migrations (`../engineering-practices/`), spreadsheets as deliverables (`../documents/GUIDE.md`), or dashboards and tables in a product UI (`../data-and-product-surfaces.md`).
 
 ## Ground rules
@@ -51,6 +52,12 @@ This module covers data work up to understanding, validating, transforming and v
 | Kaggle datasets, notebooks, competitions, submissions | `references/kaggle.md` | Token set by the user; rules summarized; metric reproduced locally; submission validated against the sample |
 | Official statistics APIs (FRED, BLS, BEA, Census, Treasury, OFR, World Bank, IMF, OECD, Eurostat, ECB, Data Commons) | `references/economic-statistics-apis.md` | Each series' units, adjustment, frequency and vintage recorded; limits respected; values checked against the agency |
 | SEC filings, XBRL facts, insider and 13F data; market prices, FX, crypto, indicators, backtests | `references/filings-and-market-data.md` | EDGAR fair-access rules followed; XBRL facts deduplicated and reconciled; vendor terms recorded; biases controlled |
+| ClickHouse tables, engines, sort keys, materialized views, ingestion, slow analytical queries | `references/clickhouse.md` | Version read; sort key matches the queries (`EXPLAIN indexes = 1`); inserts batched; replacing and aggregating engines deduplicated or merged at read time |
+| Redis or compatible stores: caches, sessions, locks, rate limits, Streams, memory, persistence | `references/redis.md` | TTLs and eviction policy fit the data; locks use tokens, and fencing where correctness matters; no blocking or destructive commands on shared servers |
+| Prisma schema, queries, transactions, raw SQL, migrations | `references/prisma-orm.md` | Version known; every generated `migration.sql` read and checked; `migrate deploy` for shared environments; no unsafe raw SQL |
+| A bot or job that collects public data on a schedule; scrapers, feeds, model enrichment of collected items | `references/scheduled-data-collection.md` | API or feed checked first; robots rules, terms and rate limits recorded; budgets and stop conditions enforced; no personal data without a lawful basis |
+| Caching expensive file or record processing by content hash | `references/content-hash-caching.md` | Key covers content, versions and configuration; atomic writes; tests prove invalidation and rename hits |
+| Backfills, loads, exports and syncs that are slow or falling behind | `references/data-throughput-tuning.md` | Bottleneck measured per stage; idempotent, resumable writes; accounting block reconciles |
 
 Several references often apply together. A question about a production table's trend typically needs `live-database-access`, `sql-query-tuning`, `eda-and-data-quality` and `plotting`, read in that order.
 
@@ -93,6 +100,10 @@ Use these when the reference is not needed; open the reference when a bullet rai
 - **Charts:** form from the question, units on axes, error bars defined, colorblind-safe palettes, saved file opened and checked.
 - **Geospatial:** print the CRS at every step; measure in projected or geodesic terms; count join matches; OSM attribution.
 - **External data:** precise series definitions, vintages, rate limits, caching, attribution, and no advice.
+- **ClickHouse:** sort key from the real filters; batched or asynchronous inserts; `FINAL` or `argMax` on replacing engines; materialized views see only new inserts.
+- **Redis:** TTL on every derived key; eviction policy per instance; delete the cache entry after the database commit; locks with tokens, and fencing for correctness; Streams, not pub/sub, for work queues.
+- **Prisma:** `migrate deploy` everywhere except local development; read generated SQL (renames become drop and add); no external calls inside interactive transactions.
+- **Collection jobs:** API or feed first, robots rules and terms, one request at a time per host, conditional requests, budgets and stop conditions.
 
 ## What to report
 

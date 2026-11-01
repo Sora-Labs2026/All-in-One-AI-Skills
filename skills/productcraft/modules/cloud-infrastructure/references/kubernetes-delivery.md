@@ -71,6 +71,8 @@ If a plain secret was ever committed, treat it as exposed: rotation first, then 
 
 Argo Rollouts and Flagger replace a Deployment's all-at-once rollout with canary or blue-green steps that check metrics (error rate, latency) and roll back automatically. Define the analysis from the service objective (`sre-practice.md`), test that a bad version is actually rolled back in staging, and keep the step weights and pause durations in Git. The rollout plan template in `../../engineering-practices/references/ci-and-release.md` applies.
 
+How to compare canary with stable, judge whether the canary saw enough traffic, encode the comparison as an analysis template and verify each deploy is in `canary-analysis.md`.
+
 ## Service mesh
 
 A mesh (Istio, Linkerd, or the mesh features of some CNIs) adds mutual TLS between workloads, traffic splitting and retries in configuration, and uniform request metrics. Adopt one for a concrete need (encryption and identity between services, canary traffic shifting, many services without consistent telemetry), not by default: it adds a control plane to upgrade, latency and resources per pod (sidecars, or a per-node proxy in Istio's ambient mode), and a new failure domain. Keep NetworkPolicies even with a mesh. Retries configured in the mesh count as a retry layer (`../../engineering-practices/references/resilience.md`): do not stack them on top of client retries. Installing or upgrading a mesh is cluster-wide; ask first.
