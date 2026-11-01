@@ -39,6 +39,7 @@ Agree an outline with the user: the thesis, each section's point and its evidenc
 - **Structure for scanning** on the web: short paragraphs, subheadings that make a point, lists for steps; full arguments still need paragraphs.
 - **Link sources** where claims are made; cite consistently in the style the outlet uses.
 - **End with what to do or think next,** not a summary of the summary.
+- **Cut filler in the line edit:** throat-clearing openers ("in today's fast-moving world"), hype adjectives ("revolutionary", "game-changing") standing in for evidence, bridge sentences that announce importance instead of showing it, and closing questions added only for engagement. Replace each with the fact, example or number it was hiding, or delete it.
 - Technical tutorials: test every command and code sample before publishing, state versions, and add a troubleshooting section for the errors you hit.
 
 ## Titles and openings without clickbait

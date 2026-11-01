@@ -11,6 +11,7 @@ A document a clinician reads is different from software that generates patient-s
 - **US:** decision-support software is outside device regulation only when it meets all four criteria in section 520(o)(1)(E) of the FD&C Act as explained in FDA's 2022 clinical decision support guidance: it does not process images, signals or patterns; it displays or analyzes medical information; it supports a health care professional's recommendation; and the professional can independently review the basis. Software that gives time-critical alerts or a single directive output usually fails these criteria.
 - **EU:** under MDR Rule 11, software that provides information used for diagnostic or therapeutic decisions is class IIa or higher.
 - Pointers for the quality system and software lifecycle are in `medical-device-quality.md`.
+- Building the software itself (engine, knowledge base, alerts, overrides, tests) is in `clinical-decision-support-software.md`.
 
 ## Evidence: name the system, never mix systems
 

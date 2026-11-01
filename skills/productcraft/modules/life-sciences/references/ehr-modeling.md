@@ -4,6 +4,8 @@ Read this when a task builds or evaluates models on EHR data (MIMIC-III, MIMIC-I
 
 **Guardrail.** A research model is not a clinical tool. Do not present predictions as advice for a patient, and say that deployment needs prospective validation, clinical governance and possibly device regulation (`medical-device-quality.md`, `clinical-decision-documents.md`). Never fabricate patient records.
 
+Evaluating a model for clinical use (subgroups, calibration, silent-mode runs, monitoring after release, reporting guidelines) is in `health-software-evaluation.md`.
+
 ## Data access and the agent
 
 - MIMIC and eICU on PhysioNet are credentialed: each user completes human-subjects training and signs a data use agreement. The terms forbid sharing the data and any attempt to re-identify. PhysioNet's guidance treats sending the data to online services, including hosted AI tools, as sharing unless the service is set up under the conditions it describes. Hospital extracts carry similar or stricter terms.

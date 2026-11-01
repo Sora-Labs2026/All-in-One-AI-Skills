@@ -59,6 +59,8 @@ A daily resting heart rate as a FHIR Observation (synthetic example):
 
 Validate resources against the target server's profiles (for example US Core) before sending; many servers reject resources that are valid FHIR but miss profile-required elements.
 
+Server APIs, SMART authorization, bulk export and HL7 v2 feeds are in `ehr-integration-fhir-hl7.md`.
+
 ## OAuth integrations
 
 - Request only the scopes the feature needs (steps and sleep do not need heart rate or location), explain each to the user, and handle partial grants.

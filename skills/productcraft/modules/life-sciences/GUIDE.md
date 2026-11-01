@@ -12,6 +12,7 @@
 - The user asks for a bioinformatics, genomics, transcriptomics, single-cell, phylogenetic, microbiome, proteomics, metabolomics, cheminformatics or drug-discovery analysis, or for code that performs one.
 - An application ingests, stores or serves such data and needs the library behavior right (coordinates, formats, licenses).
 - The input is a DICOM file or series, a whole-slide image, a physiological signal (ECG, PPG, EDA, EEG or EMG file, EDF or WFDB), a spike-sorting recording (SpikeGLX, Open Ephys, NWB), an EHR extract or a wearable export; or the user asks for a query of a public biological, chemical or clinical database, a clinical document draft, a medical-device quality document, a lab-robot protocol or an ELN integration.
+- The software exchanges data with an EHR (FHIR, SMART on FHIR, CDS Hooks, HL7 v2 feeds), implements clinical decision support, handles protected health information for a covered entity or business associate, or a health software release or health AI feature needs evaluation.
 - **Not for** general statistics or ML without a biological or chemical data type (`../ml-engineering/GUIDE.md`), simulation and molecular dynamics (`../scientific-computing/GUIDE.md`), or charts alone (`../data-engineering/GUIDE.md`).
 
 ## Ground rules
@@ -155,6 +156,15 @@ Read `references/bio-data-access.md` first for any database work (access route, 
 | Evidence summaries, graded recommendations, cohort analyses, decision pathways, individual treatment-plan drafts | `references/clinical-decision-documents.md` | Each recommendation has a verified citation and a grade in one named system; numbers trace to data or source; pathway branches tested; clinical choices left to the clinician |
 | ISO 13485 QMS, FDA QMSR, EU MDR, IEC 62304, ISO 14971, software as a medical device questions | `references/medical-device-quality.md` | Scope confirmed; gap table with evidence and owners; placeholders for company facts; no compliance or certification claims |
 
+### Health software
+
+| The task involves | Read | Minimum check before calling it done |
+|---|---|---|
+| Decision support software: drug, allergy and dose checks, clinical scores, alerts and overrides, knowledge-base versioning, CDS testing | `references/clinical-decision-support-software.md` | Regulatory question raised; every rule sourced and clinician-approved; missing input and engine failure visible, never a silent pass; golden cases and properties pass |
+| EHR integration: FHIR REST and profiles, SMART on FHIR, Bulk Data, CDS Hooks, HL7 v2 messages and MLLP, v2-to-FHIR mapping, patient matching | `references/ehr-integration-fhir-hl7.md` | Versions read from the CapabilityStatement or interface spec; minimum scopes; deduplication on control ID; resources validated; `hl7v2_check.py` clean of errors on sample feeds; sandboxes and synthetic data only |
+| HIPAA and PHI safeguards in software: applicability, Security Rule controls, minimum necessary, leak paths, audit logs, vendors and BAAs, breach readiness | `references/hipaa-engineering-controls.md` | Covered-entity and BAA status recorded; canary-record tests find no PHI in logs, traces, analytics or URLs; reads audited; no compliance or certification claims |
+| Release gates for clinical software; evaluating health AI and LLM features: subgroups, calibration, error taxonomy for generated text, silent mode, monitoring, reporting guidelines | `references/health-software-evaluation.md` | Acceptance rules set by the clinical safety owner before the run; clinician-labeled frozen test set; critical errors listed individually; rollback path before the feature influences care |
+
 ### Lab automation and lab data
 
 | The task involves | Read | Minimum check before calling it done |
@@ -200,9 +210,13 @@ python3 <productcraft>/modules/life-sciences/scripts/bio_id_check.py --type ense
 
 # DICOM headers after de-identification: identifiers, dates, free text, private tags, UIDs, burned-in and face flags; values hidden
 python3 <productcraft>/modules/life-sciences/scripts/dicom_phi_check.py --uid-root 2.25 --strict deid_out/
+
+# HL7 v2 feeds (synthetic or approved samples): MSH fields, delimiters, segment names, timestamps, OBX values, units and statuses, duplicate control IDs; values never printed
+python3 <productcraft>/modules/life-sciences/scripts/hl7v2_check.py --strict samples/*.hl7
 ```
 
-`<productcraft>` is the folder where the ProductCraft skill is installed. A clean result does not prove the build is right or the design is sound: `interval_check.py` only knows the sizes file it is given, and `counts_check.py` cannot see hidden batch structure. `bio_id_check.py` checks shape only: an identifier that passes may not exist or may be obsolete, and an HGVS expression that passes still needs validation against its reference sequence. A clean `dicom_phi_check.py` run is header evidence only: it does not inspect pixels, slide label images, embedded documents or file names, and its exit code 2 also covers "no DICOM files found". Tests: `python3 -B -m unittest discover -s <productcraft>/modules/life-sciences/tests -v`.
+`<productcraft>` is the folder where the ProductCraft skill is installed. A clean result does not prove the build is right or the design is sound: `interval_check.py` only knows the sizes file it is given, and `counts_check.py` cannot see hidden batch structure. `bio_id_check.py` checks shape only: an identifier that passes may not exist or may be obsolete, and an HGVS expression that passes still needs validation against its reference sequence. A clean `dicom_phi_check.py` run is header evidence only: it does not inspect pixels, slide label images, embedded documents or file names, and its exit code 2 also covers "no DICOM files found". A clean `hl7v2_check.py` run says the message structure is sound, not that codes, units, values or the site's interface specification are right; its exit code 2 also covers "no messages found".
+Tests: `python3 -B -m unittest discover -s <productcraft>/modules/life-sciences/tests -v`.
 
 ## What to report
 
@@ -213,6 +227,7 @@ Add these to the workflow module's report and `../../assets/review-template.md`:
 - Results with uncertainty (adjusted p-values, confidence intervals, support values, spread over seeds) and the controls that were checked.
 - Licenses of tools, weights, datasets and services used, and any data sent off the machine with the owner's permission.
 - For clinical work: the de-identification frame and checks run, the draft label and review status of documents, and the evidence system used for each recommendation. For lab hardware: the simulation result and the user's go-ahead.
+- For health software: the regulatory answer for decision support, the BAA status of every service that touches PHI, release-gate results with the hazard log, and `hl7v2_check.py` results on sample feeds.
 - The research-output caveat from rule 1, and everything left `NOT VERIFIED` with the reason.
 
 ## Working with other ProductCraft modules

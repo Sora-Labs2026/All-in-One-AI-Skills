@@ -175,3 +175,4 @@ Contracts hold value and cannot be patched in place once deployed, so treat find
 - **Tools:** Foundry `forge test` with fuzz and invariant tests, plus a Solidity static analyzer (for example Mythril) if one is installed. Pin an exact compiler version and build on OpenZeppelin Contracts instead of hand-written tokens and access control.
 
 Scoping a contract review, writing invariants, token integration, upgradeable contracts, Foundry fuzz, invariant and fork tests, and other chains: `smart-contracts.md`.
+Flash-loan scenarios, oracle design, AMM and lending math, and rounding direction: `defi-protocol-security.md`.

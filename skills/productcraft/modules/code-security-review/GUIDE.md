@@ -23,6 +23,7 @@
 - A scanner needs running or its SARIF output needs triage, a project rule (Semgrep, CodeQL) should be written, or a confirmed bug needs its siblings found.
 - CI workflows react to issues, comments or pull requests from outsiders, or run an AI agent; dependencies, their publishers or their install-time code need review; a security patch (yours, a pull request's or an AI-generated one) needs validation before it is called fixed.
 - LaunchGuard needs deeper evidence for gate 4 (critical logic) or gate 5 (attacker perspective).
+- The user is the researcher on a bug bounty or vulnerability disclosure program and wants targets, testing rules, duplicate checks or a report: [bug bounty practice](references/bug-bounty-practice.md). Live testing happens only on assets the program lists, under its rules.
 - The code needs domain knowledge: C or C++, Rust with `unsafe` or FFI, code that implements or wires cryptography, smart contracts, a mobile app or the backend rules it relies on (Firebase, Supabase), or the user wants detection rules for suspicious files (YARA, detection only). Phase 3 names the matching guide.
 - The code is a desktop app (Electron, Tauri) or a local server, helper or IPC endpoint; talks over gRPC, queues, inbound webhooks or WebSockets; lets one user spend shared capacity or the operator's money; keeps tenant data in caches, indexes, exports or backups, or promises deletion; or sits behind caches, authenticating proxies or federated sign-in. Phase 3 names the matching guide.
 
@@ -78,6 +79,7 @@ A full audit runs every phase in order. Diff and focused reviews run phases 3 to
 - For these surfaces, add the matching hunting guide: [desktop apps, local servers and IPC](references/desktop-and-local-ipc.md), [RPC, queues, webhooks and WebSockets](references/rpc-and-messaging.md), [resource exhaustion and availability](references/availability-and-resource-limits.md), [tenant isolation and the data lifecycle](references/tenant-isolation-and-data-lifecycle.md), [HTTP caching, proxies and identity binding](references/http-caching-and-identity-binding.md).
 - Scanners widen the search, never the verdict: run them and turn their SARIF into leads with [static analysis](references/static-analysis-rules.md) and `sarif_triage.py leads`. Check what the code does when settings are missing, and whether its own APIs invite misuse, with [insecure defaults and misuse-prone APIs](references/defaults-and-misuse-prone-apis.md). Before judging unfamiliar critical code, write [context notes](references/entry-points-and-context.md#5-context-notes-before-judging-unfamiliar-code).
 
+- DeFi protocols (AMMs, lending markets, vaults, oracles, governance): after smart contracts, add [DeFi protocol security](references/defi-protocol-security.md) for the single-transaction attacker, oracle sources, rounding direction and proofs on a fork.
 - **Done when** every cell is `PASS` with evidence, holds a candidate, or is `NOT_APPLICABLE` or `NOT_VERIFIED` with a reason.
 
 ### 4. Secrets, dependencies and CI
@@ -155,6 +157,8 @@ Add `--json-out <path>` to keep results (written with mode 0600). `workflows`, `
 - [Supply-chain review](references/supply-chain-review.md): install-time code, lockfile signals, dependency risk cards, update review, compromise response, release integrity.
 - [CI and agent workflows](references/ci-agent-workflows.md): events outsiders control, paths into scripts and agents, what an injected job reaches, safer designs, safe testing.
 - [Patch validation](references/patch-validation.md): base-versus-patched evidence, reach markers, root-cause variants, revert checks, extra checks for patches you did not write.
+- [DeFi protocol security](references/defi-protocol-security.md): flash-loan attacker model, AMM invariants, oracle sources and checks, read-only reentrancy, lending and liquidation, rounding direction, governance, MEV, fork proofs.
+- [Bug bounty practice](references/bug-bounty-practice.md): the researcher's side of a bounty or disclosure program: scope file, rules of engagement, classes that meet the bar, duplicate checks, report template, disclosure.
 - [Coverage tracking](references/coverage-tracking.md): the coverage record kept during an audit, per-check evidence, revisions and earlier runs, sub-agent assignments, gap reviews, budgets, and the full, scoped and partial claims `audit_record.py coverage` checks.
 - [Finding records](references/finding-record-rigor.md): invariant, root-cause key, impact level and severity reason, typed preconditions and the severity ceiling, traces, reproductions in the target's own interface, owner checks, and independent verification of final records.
 
