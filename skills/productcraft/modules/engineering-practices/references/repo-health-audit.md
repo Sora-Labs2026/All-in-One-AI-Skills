@@ -11,6 +11,7 @@ Neighbors: a security audit is `../../code-security-review/GUIDE.md` (this audit
 - **Orient with the map:** `../../codebase-map/scripts/map_codebase.py` gives entry points, routes, fan-in, cycles and files nothing imports. Then read the README, build and deploy configuration, dependency manifests, CI workflows and the test layout.
 - **Follow the main flows** from where data enters to where it is stored and where it leaves. Read every line of the paths that are expensive to get wrong: payments, permissions, writes and deletes, scheduled jobs, state shared between processes, parsers of outside input.
 - **Large codebases:** spend depth on those paths and on hotspots (big, widely imported, frequently changed files; the churn command is in the codebase-map guide), skim the rest, and keep a list of what you skipped.
+- **One slice of an inherited codebase:** when the user cares about one area (a module, a feature, a recurring incident), audit that slice and its direct callers first, roughly what fits in one session, instead of the whole repository. Establish what it does today (characterization tests; recovering the specification in `../../stacks/references/legacy-modernization.md`) and which decisions shaped it (the commits behind odd code, decisions with no ADR) before judging it.
 
 ## 2. Run what the project already checks
 
@@ -53,6 +54,7 @@ Write for someone who has never opened this code: everyday words, and a short de
 3. **Checks run:** each command and its result, including failures that predate the audit.
 4. **Not covered:** parts you skipped, and checks that could not run, as `NOT VERIFIED: <check> - <why> - confirm with <command>`.
 5. **Bottom line:** whether the code is in good shape, or which finding to start with.
+6. **Follow-up:** when the user takes fixes on, keep the numbered findings as a register (open, in progress, fixed with test `<name>`, won't fix with the reason) and, at the end, rerun the same checks over the same scope, so closure is shown rather than declared.
 
 A finding looks like this:
 

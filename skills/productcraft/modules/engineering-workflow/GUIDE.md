@@ -126,6 +126,8 @@ python3 <productcraft>/modules/engineering-workflow/scripts/diff_scope.py --git 
 
 `<productcraft>` is the folder where the ProductCraft skill is installed. Findings are prompts to look, not verdicts; tests and review decide. `--strict` exits 1 on any WARN for use in a local pre-commit check.
 
+`scripts/affected_checks.py` is a read-only companion for repositories that keep a module regression ledger: from the changed files (`--git <base>` or `--changed`) it lists the modules changed and their downstream consumers, the checks to run in dependency order, modules without a check and unverified edges. It never runs the checks; their exit codes are the evidence (`references/change-impact-and-regression.md`).
+
 ## Specialized references
 
 Beyond the per-phase references above, read these when the task calls for them:
@@ -134,6 +136,9 @@ Beyond the per-phase references above, read these when the task calls for them:
 - `references/complete-deliverables.md` — before handing over files or a patch, and whenever a long response tempts you to abbreviate: deliver whole code with no elision, and split long output at clean boundaries instead of compressing it.
 - `references/markdown-task-boards.md` — the work has several independent threads at different stages, or spans sessions, and a durable board reads better than a flat checklist.
 - `references/delegating-to-coding-agents.md` — the user wants a self-contained task handed to a hosted asynchronous coding agent: scope it, point it at a branch, and review the returned diff like any outside pull request.
+- `references/review-lenses.md` — a review needs depth in one dimension: silent failures, test gaps in a change, type design, comments, simplification, a UI control that "does nothing", or code written by an agent; also the false alarms to rule out before reporting.
+- `references/change-impact-and-regression.md` — a change crosses modules, data, interfaces, authentication or deployment: map the impact with evidence, pick the regression scope (affected-only runs or a module ledger with `scripts/affected_checks.py`), link requirements and fixed bugs to tests, and compare the final diff with the plan.
+- `references/prds-and-roadmaps.md` — the work is bigger than one change: a problem-first PRD with evidence and a falsifiable hypothesis, or a multi-PR construction plan with self-contained step briefs, dependencies, a plan review and a logged change protocol.
 
 
 ## What to report

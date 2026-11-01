@@ -13,6 +13,7 @@
 - The user asks for a health check or audit of a whole repository, package or service (a security audit goes to `../code-security-review/GUIDE.md`).
 - Example tests are not enough to trust the code (parsers, codecs, money or date arithmetic, data structures, state machines, a rewrite that must keep behavior), the user asks how strong the tests really are, or the code must match a specification, standard or contract.
 - A private repository is about to go public, a first public release or a license choice is coming, or branches, worktrees, issues and pull requests need cleaning up.
+- Native Windows desktop apps need GUI tests, an app needs an accessibility audit, or translation catalogs must be brought back in step with the source language.
 - **Not for** a copy edit, a style tweak or a change inside one function with no callers outside it. Those follow the Quick track of the workflow module.
 
 ## Ground rules
@@ -48,6 +49,9 @@
 | Stale branches and worktrees, issue and pull request backlogs, labels, issue forms, `CODEOWNERS` | `references/repository-hygiene.md` | Evidence for every branch deleted and issue closed; every write shown first and only approved ones executed |
 | Pausing, ending or handing over unfinished work; resuming someone else's | `references/session-handoff.md` | State file lets a fresh agent resume without the old conversation; claims re-verified on resume |
 | A health check or audit of a whole repository, package or service | `references/repo-health-audit.md` | Scope and assumed load stated; project checks run; every finding has a location, a failing case, the smallest fix and an evidence label; no code changed |
+| End-to-end GUI tests for a native Windows app (WPF, WinForms, WinUI, Win32, Qt) | `references/windows-desktop-e2e.md` | Stable AutomationIds set in the app; fresh process and data folder per test; no sleeps; CI in an interactive session with screenshots and logs; repeated runs pass |
+| An accessibility audit of a web or native app | `references/accessibility-audit.md` | Standard and scope written; automated scan on every state plus keyboard and screen-reader passes; each finding with success criterion, steps and fix; no conformance claim beyond what was tested |
+| Translation catalogs: missing, stale or broken translations, a new language, changed source copy | `references/i18n-catalog-sync.md` | `scripts/i18n_sync.py --strict` and the stack's native check clean; changed source strings reviewed; screens seen in a long-text language |
 
 Templates: `assets/adr-template.md` for decision records and `assets/handoff-template.md` for session state files.
 
@@ -137,6 +141,18 @@ Use these when the reference is not needed. Open the reference when a bullet rai
 - Map first, state the load you assume, run the project's own tests and linters, then read the costly paths (money, permissions, writes, jobs) in full.
 - Rank findings as Blocker, Should fix or Optional. Each needs a failing case, a location and the smallest fix. Change nothing until the user picks.
 
+### Windows desktop GUI tests
+- Give every control the tests touch a stable AutomationId in the app, start a fresh process with its own data folder per test, and wait for states, never for time.
+- Run in an interactive desktop session with pinned resolution and scaling, against test accounts only, and keep screenshots, logs and JUnit XML from every run.
+
+### Accessibility audits
+- Name the standard (WCAG 2.2 AA unless a law or contract says otherwise), scan every state of every flow in scope with axe or the platform audit, then do the keyboard, screen-reader and display passes by hand.
+- Report each barrier with its success criterion, location, steps with versions, effect and fix; an automated pass alone never supports a claim of conformance.
+
+### Translations
+- The source-language catalog is the reference: every key, placeholder, plural category of the target language and markup tag must match, and strings whose source changed get reviewed again.
+- Read each string where it is used before translating it; machine drafts stay marked until a fluent reviewer has read them in the product.
+
 ## Migration safety helper
 
 `scripts/migration_check.py` is a read-only, standard-library checker for SQL migration files. It never connects to a database, edits files or uses the network. It flags destructive drops and truncates, in-place renames and type changes, NOT NULL columns without defaults, table-rewriting defaults, index and constraint builds that lock writes, `CONCURRENTLY` inside a transaction, unbatched full-table updates and deletes, missing lock timeouts and up migrations without a down file. Rules specific to PostgreSQL or MySQL apply only with that `--dialect`.
@@ -160,6 +176,17 @@ python3 <productcraft>/modules/engineering-practices/scripts/oss_readiness.py --
 
 In a git checkout it inspects tracked files, because those are what gets published. `--strict` exits 1 while a WARN finding remains. It does not scan secret values, dependency licenses or workflow security; the report lists those as not checked.
 
+## Translation catalog helper
+
+`scripts/i18n_sync.py` is a read-only, standard-library check that target-language catalogs match the source catalog. It reads JSON (nested or flat, with i18next plural suffixes), ARB, gettext PO or POT and Android `strings.xml`, and reports missing, empty and stale keys, type mismatches, duplicate keys, placeholder and markup drift (ICU, `{{x}}`, `%{x}`, `%(x)s`, printf count and order), ICU plurals without `other`, fuzzy or untranslated PO entries and, with `--previous-source`, translations whose source text changed. It never edits files and never prints translated text.
+
+```bash
+python3 <productcraft>/modules/engineering-practices/scripts/i18n_sync.py locales/en.json locales/de.json locales/fr.json --strict
+python3 <productcraft>/modules/engineering-practices/scripts/i18n_sync.py locale/messages.pot locale/fr/LC_MESSAGES/django.po --json
+```
+
+`--strict` exits 1 while a WARN finding remains; exit 2 means unreadable or unparseable input. A clean result is structural only: translation quality and fit on screen need a fluent reviewer and a look at the running product.
+
 ## What to report
 
 Add these to the workflow module's report and to `../../assets/review-template.md`:
@@ -171,6 +198,7 @@ Add these to the workflow module's report and to `../../assets/review-template.m
 - Commands the user still has to run (migrations, deploys, flag changes), with their rollback.
 - For advanced testing and fuzzing: technique, scope, command and budget; failures with their shrunk inputs and classification; surviving mutants left open; fuzzing run time and executions.
 - For a public release: the `oss_readiness.py` summary, how each WARN was handled, and the decisions left to the owner (license, history route, visibility switch).
+- For an accessibility audit: the standard, the flows covered and the assistive-technology matrix with versions. For translations: the `i18n_sync.py` summary and the strings still waiting for fluent review.
 
 ## Working with other ProductCraft modules
 

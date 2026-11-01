@@ -39,6 +39,8 @@ For Standard and Deep work, run the suite once on the untouched tree (or the bas
 
 Write it in this form: `NOT VERIFIED: <check> - <why it couldn't run here> - confirm with <exact command>`. Typical reasons are missing credentials, external services, hardware, an unavailable platform or a job too long to run. A mock standing in for the real dependency doesn't turn the check into a verified one; say what the mock covered and what it didn't.
 
+**Target environment.** When the request needs the change working somewhere specific (staging, a device, a customer's tenant), report that separately from the local checks: the environment and the installed version, the check that ran there and its result, or `NOT PERFORMED` with the access it would need. Green local tests, a merge or a release do not show that the change works in that environment.
+
 ## Self-review checklist
 
 Read `git diff <base>...HEAD`, plus any untracked files you are adding, from top to bottom as if a colleague wrote it.

@@ -2,7 +2,7 @@
 
 Read this to check a web app in a real browser: start and stop its server, drive it with robust selectors, wait correctly, take screenshots, and fail on console and network errors. Examples use Playwright Test (JavaScript/TypeScript, version 1.56); a Python equivalent follows.
 
-Contents: choose the setup · start and stop the server · selectors · waiting · screenshots · console and network errors · simulating failures · signed-in tests · debugging and flakiness · Python · done when.
+Contents: choose the setup · start and stop the server · selectors · waiting · screenshots · console and network errors · simulating failures · signed-in tests · debugging and flakiness · Python · page objects · accessibility scan · CI · pre-release QA pass · done when.
 
 ## Choose the setup
 
@@ -201,6 +201,53 @@ def test_creates_account(page: Page):
 ```
 
 pytest-playwright does not start servers. Start one in a session fixture with `subprocess.Popen(cmd, start_new_session=True)`, poll its URL with `urllib.request` until it answers, and in the fixture's teardown stop the group with `os.killpg(proc.pid, signal.SIGTERM)` followed by `proc.wait(timeout=10)`.
+
+## Page objects for larger suites
+
+When many tests drive the same screen, wrap its locators and actions in a small class so a redesign changes one file. Keep assertions in the tests, locate by role and label, and wait for states rather than for the network to go idle.
+
+```javascript
+// tests/pages/search-page.js
+class SearchPage {
+  constructor(page) {
+    this.page = page;
+    this.query = page.getByRole('searchbox', { name: 'Search' });
+    this.results = page.getByRole('list', { name: 'Results' }).getByRole('listitem');
+  }
+  async goto() { await this.page.goto('/search'); }
+  async search(text) {
+    const done = this.page.waitForResponse((r) => r.url().includes('/api/search') && r.ok());
+    await this.query.fill(text);
+    await this.query.press('Enter');
+    await done;
+  }
+}
+module.exports = { SearchPage };
+```
+
+A page object that grows assertions, branching or test data turns into a second application; keep it thin.
+
+## Accessibility scan
+
+`@axe-core/playwright` runs axe inside the page: `const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze()`, then `expect(results.violations).toEqual([])`. Scan each state the test reaches (dialog open, error shown), not only the first load, and review `results.incomplete` by hand. A clean scan covers only part of WCAG; the keyboard and screen-reader passes are in `../../engineering-practices/references/accessibility-audit.md`.
+
+## In CI
+
+- Install only the browsers the projects use, with their system dependencies: `npx playwright install --with-deps chromium`.
+- Test the built app (`build` then `preview`, or a preview deployment URL in `baseURL`), not a dev server, when the job gates a release.
+- Split long suites with `--shard=1/4` across jobs, have each write the `blob` reporter, and combine them with `npx playwright merge-reports`.
+- Upload `playwright-report/` and `test-results/` with `if: always()`, and add a JUnit reporter if the CI shows test results.
+- Retries in CI hide nothing only if they are counted: Playwright marks a test that passed on retry as flaky; report those and fix them (`../../engineering-workflow/references/test-first.md`, flaky tests). `--only-changed=origin/main` (1.46 and later) runs the test files affected by changed files, for quick feedback, not as the merge gate.
+
+## A pre-release QA pass on a preview or staging build
+
+- **Read-only by default.** No checkout, payment, deletion or bulk change against production. Mutating journeys run only on a preview or staging build, with seeded test accounts and the user's explicit go-ahead. Redact tokens and personal data before saving any screenshot.
+- **Smoke:** key pages load at desktop and mobile widths with no console errors, page exceptions or failed same-origin requests (the error fixture above).
+- **Interactions:** navigation links resolve; forms show their success state with valid data and their error state with invalid data; sign-in, a protected page and sign-out work with a test account; the critical journeys complete.
+- **Visual:** compare the agreed pages and widths against stored baselines. With no baseline, the visual result is inconclusive, never a pass.
+- **Accessibility:** the axe scan above plus a keyboard pass of the main flow.
+- **Speed:** judge Core Web Vitals from real-user data where it exists; a single lab run on a test machine is a hint, not a result.
+- **Verdict:** ship, ship with listed fixes, do not ship, or inconclusive, with the reason for each finding and a list of what was not covered.
 
 ## Done when
 

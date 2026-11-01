@@ -17,6 +17,8 @@
 
 **Skip it** when the user named the exact file and symbol, the fix is within one file, the repository has fewer than about 30 source files (`git ls-files` and reading is cheaper), or you mapped it earlier in this session and nothing structural has changed since.
 
+When the deliverable is for people rather than for your own orientation (an onboarding guide, a starter agent-instructions file, a guided code tour, or an inventory of own, vendored, generated and committed build files), also read `references/onboarding-guides-and-tours.md`.
+
 ## Ground rules
 
 1. **Read-only.** The script only reads files and prints to stdout. If you save its output, put it in a temporary or scratch location, not the repository, unless the user asks for it to be committed. A committed map goes stale.
@@ -139,6 +141,7 @@ Exit status is 0 on success and 2 for a bad argument, a missing root or a focus 
 
 - `../engineering-workflow/GUIDE.md`: how the change itself is planned, made and verified. The map serves its "read before you write" step and its blast-radius check.
 - `../engineering-practices/GUIDE.md` and `../engineering-practices/references/large-refactors.md`: how to stage a refactor that the map helped you plan.
+- `../engineering-workflow/references/change-impact-and-regression.md`: turning the blast radius the map shows into a regression scope, and comparing the final diff with the planned impact.
 
 - `../stacks/GUIDE.md`: versions, package managers, tools and commands for each subproject (`../stacks/scripts/detect_stack.py` complements the map), and the idioms of the stack you are about to change.
 - `../launchguard/GUIDE.md`: the route and entry-point lists help LaunchGuard's inventory step (gate 0). They do not replace its authorization checks for each route.

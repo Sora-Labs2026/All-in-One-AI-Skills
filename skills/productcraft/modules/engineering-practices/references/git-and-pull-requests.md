@@ -16,6 +16,7 @@ These need the user's explicit permission every time: `git push --force` (use `-
 - Keep branches short-lived and focused on one change; prefer feature flags to long-running branches for unfinished work.
 - Follow the project's naming convention; if there is none, `<type>/<short-description>` (`fix/invoice-rounding`) is common and readable.
 - Keep up with the base branch: rebase your own unshared branch; on a shared branch, merge the base in instead of rewriting others' history.
+- **Branching model:** follow the project's. Trunk-based development (very short branches, unfinished work behind flags) and short feature branches merged into an always-deployable main suit continuous delivery; a model with release branches and a separate integration branch fits products that ship scheduled versions or maintain several at once. Do not introduce a heavier model than the release cadence needs.
 
 ## Commits
 
@@ -36,6 +37,7 @@ Fixes #482
 ```
 
 - If the project uses a commit convention (Conventional Commits prefixes such as `fix:` and `feat:`, a ticket prefix, sign-off lines), check `git log --oneline -20` and follow it. Add attribution or trailers only as the project or the user requires.
+- **Conventional Commits,** where the project uses them: `type(scope): subject` with types such as `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `build`, `ci` and `chore`, and a scope only if the history uses scopes. A breaking change gets `!` after the type or scope and a `BREAKING CHANGE:` footer telling consumers how to migrate. Release tools that read these messages turn `fix` into a patch, `feat` into a minor and a breaking change into a major version, so a wrong type ships a wrong version. Measure the history's habits (`git log --no-merges --format=%s -30`: subject length, scopes) instead of assuming them. A diff that needs two types is two commits.
 
 ## Hooks
 
@@ -86,6 +88,7 @@ Fixes #482
 - Anything with consumers carries a version. Libraries and APIs follow Semantic Versioning 2.0.0: MAJOR for incompatible changes, MINOR for compatible additions, PATCH for compatible fixes. If consumers could observe a behavior change, treat it as breaking.
 - Keep one source of truth for the version (the tag or the manifest, not both edited by hand) and let the release process derive the rest.
 - Mark releases with annotated tags (`git tag -a v1.4.0 -m "Release 1.4.0"`). Tags are created and pushed only with the user's permission, normally by the release pipeline.
+- **Release from an exact green commit.** Tag the default-branch commit whose required checks passed, from a clean tree whose `HEAD` equals the remote branch; a later merge needs its own green run first. Before tagging, confirm the version is unused in the tags, on the release page and in the package registry. Never move, recreate or reuse a published tag or version, and never publish different bytes under an existing version; ship a new patch instead. After publishing, read the release back from the registry (version, checksum or provenance) before announcing it.
 - Update the changelog in the same pull request as the change (see `docs-and-decisions.md`).
 
 ## Repository hygiene files
