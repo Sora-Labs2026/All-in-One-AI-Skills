@@ -76,6 +76,10 @@ A Deep plan with many dependent steps can be carried out by handing each step to
 8. **Progress on disk.** Keep the progress note from `clarify-and-plan.md` (step, start and end commits, status, open findings). After a context reset, rely on it and `git log`, and never redo a step whose commits already exist.
 9. **One review of the whole branch at the end,** by a fresh reviewer over `git diff <plan base>...HEAD`, briefed with `../assets/review-brief.md`. Problems that span steps are invisible in step-by-step reviews.
 
+## Larger fan-outs
+
+For work split across many agents (a task graph from a spec, planner, builder and reviewer roles, a merge queue, agents in terminal panes, batches of records), use `../../agent-engineering/references/multi-agent-orchestration.md`. Loops that run without a person on each step need the budgets, stop conditions and approval gates in `../../agent-engineering/references/autonomous-loops.md`.
+
 ## Fresh reviewer
 
 A read-only reviewer with a clean context is one of the most useful helpers: it sees the diff without your assumptions. Brief it with `../assets/review-brief.md` and the diff range. One reviewer per change; the reviewer reports findings and does not edit the code or start other reviewers.

@@ -60,6 +60,7 @@ Use `../assets/handoff-template.md`. Keep it to about one screen, and link to ex
 
 - Keep a progress checklist (in the handoff file or the tracking issue) and update it at each completed, verified step, with the commit SHA. A crash or a context reset then costs at most one step.
 - For an automated loop that restarts sessions, keep machine-readable state as well (for example a small JSON file with the current step, the last verified commit and pending approvals), and treat the repository plus that file as the source of truth. A restart is not a sign that the previous step finished.
+- Budgets, stop conditions, checkpoints and approval gates for such loops are in `../../agent-engineering/references/autonomous-loops.md`; memory that persists across sessions (with the user's consent, review and erasure) is in `../../agent-engineering/references/memory-and-learning.md`.
 - When a plan changes, change it in the durable plan, not only in the conversation.
 
 - Search and content programs also need dated records of targets, shipped changes and observations, because their results arrive weeks after the work: `../../search-visibility/references/search-project-state.md`.

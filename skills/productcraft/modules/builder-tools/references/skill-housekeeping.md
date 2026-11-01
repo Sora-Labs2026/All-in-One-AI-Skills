@@ -39,6 +39,8 @@ An update is a fresh import of a new version, reviewed as a diff against the one
 
 When removing a skill, also remove what it added elsewhere: hook entries, MCP server declarations, permission rules and any files it wrote outside its own folder. A skill folder deleted while its hook entry remains leaves a dangling command.
 
+To review all installed skills at once (overlap, staleness, verdicts, portability to other hosts), use `skill-inventory-and-portability.md`. To find orphaned hooks, shadowed permission entries and unused MCP servers left behind, use `workspace-config-audit.md`.
+
 ## Done when
 
 - A search confirmed no existing skill or one-line instruction already covers the job before a new skill was proposed.

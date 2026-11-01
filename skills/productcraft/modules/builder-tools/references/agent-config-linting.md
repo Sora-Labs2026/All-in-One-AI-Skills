@@ -31,12 +31,16 @@ A hook runs a shell command automatically on an agent event, with the user's per
 - **Paths are portable.** Use the host's project-directory variable rather than a machine-specific absolute path, and quote paths that may contain spaces.
 - **It fails safe.** A hook meant to block an unsafe action must deny when its own check errors, not fall open.
 
+Designing a new hook, porting one to another host or measuring its cost: `hook-design.md`. Ready-made patterns (gates, format and lint, config protection, stop checks): `quality-and-gate-hooks.md`.
+
 ## MCP server declarations (`.mcp.json`, settings)
 
 - **Transport and launch are valid:** the command and arguments resolve, or the URL is reachable for a remote server, in the shape the host expects.
 - **Pinned, not floating.** A server launched with a package runner and no version (`@latest`, a tag, no digest) can fetch new code on every start. Pin a version or digest.
 - **Least privilege.** Auto-approval of a server's tools, broad tool allow-lists, and write scopes for a read-only purpose are findings. A local (stdio) server runs as the user; a remote one receives whatever its tools are sent, and its tool names and descriptions become model input, so they can carry instructions.
 - **Secrets by reference.** Credentials come from the environment or a secret store, never written into the committed config.
+
+For a full static review of every declaration (exact, ranged or movable package references, image digests, literal secrets, plain-HTTP remotes, auto-approved tools, broad paths), run `../../agent-safety/scripts/audit_mcp_config.py` and follow `../../agent-safety/references/mcp-config-review.md`.
 
 Designing an MCP server's own tool surface is `mcp-server-design.md`; this is about the declaration that wires an existing server into the agent.
 

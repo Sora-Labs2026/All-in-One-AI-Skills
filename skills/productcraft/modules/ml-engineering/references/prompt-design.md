@@ -80,6 +80,7 @@ The security review of LLM features, including prompt injection, output handling
 - Count tokens with the provider's tokenizer or token-counting endpoint, not by characters.
 - Trim instructions and examples that evaluation shows do not help; keep the ones that do even if long.
 - Cache stable prefixes; batch non-interactive work through batch endpoints where offered; stream long responses to users.
+- Verify cache hits with the usage counters, report cost per completed task, and route between models or effort levels only on evaluation results: `../../agent-engineering/references/cost-caching-and-routing.md` and its `usage_cost.py` report.
 - Put per-user and per-request limits on tokens, tool calls and steps.
 
 ## Debugging a prompt

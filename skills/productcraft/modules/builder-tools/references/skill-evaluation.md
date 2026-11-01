@@ -2,6 +2,8 @@
 
 Read this before releasing a new skill, after changing one, or when someone asks whether a skill helps. A skill has to pass two separate tests: it is **loaded when it should be** (and not otherwise), and it **makes the result better** once loaded.
 
+A third question, whether the agent performs a skill's or rule's required steps in the required order, including when the prompt pushes against them, is answered with scenario runs and trace grading in `instruction-compliance-testing.md`.
+
 Contents: the test set · checks that discriminate · with and without runs · reading results · trigger tests · instruction read-through · iterating · what to record.
 
 ## The test set
