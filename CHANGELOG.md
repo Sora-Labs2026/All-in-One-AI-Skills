@@ -1,5 +1,19 @@
 # Changelog
 
+## ProductCraft 1.11.1 (2026-11-01)
+
+- New `modules/code-security-review/scripts/rls_check.py`: replays PostgreSQL and Supabase migrations offline and lists row-level security leads for exposed schemas. It covers:
+  - tables without RLS, or with it disabled later;
+  - always-true policies, which are high for writes;
+  - signed-in-only policies, and policies that trust `user_metadata`;
+  - views without `security_invoker`, and materialized views;
+  - `SECURITY DEFINER` functions that the API can call or that lack a fixed `search_path`;
+  - service-role keys in client-bundled environment variables, reported by name only.
+
+  The rules follow PostgreSQL's documented and tested behavior: policies default to `FOR ALL TO PUBLIC`; an update policy without `WITH CHECK` reuses `USING`; an insert policy without it admits nothing; a default view runs with its owner's rights. The script has 52 tests.
+- LaunchGuard control 4 corrects its trap line: the leak is an always-true `USING` or `WITH CHECK`, a signed-in-only policy, a view without `security_invoker` or a service-role key in user requests, not a missing `WITH CHECK`. Its verification step starts with `rls_check.py`.
+- The Supabase, PostgreSQL and vulnerability-class references point to the checker. The suites hold 1,266 tests.
+
 ## ProductCraft 1.11.0 (2026-11-01)
 
 - Three new modules, each with a `GUIDE.md`, focused references and a tested helper:

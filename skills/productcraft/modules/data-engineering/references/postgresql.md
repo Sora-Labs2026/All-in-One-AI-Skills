@@ -102,7 +102,7 @@ TimescaleDB is popular for time series; parts of it are under a source-available
 ## Security notes
 
 - Least-privilege roles: the application role owns nothing it does not need, cannot create objects in shared schemas, and reads only its tables. Since PostgreSQL 15, ordinary users can no longer create objects in the `public` schema by default; older databases still allow it unless revoked.
-- Row-level security (`ALTER TABLE ... ENABLE ROW LEVEL SECURITY` plus policies) enforces tenant isolation in the database; table owners and roles with `BYPASSRLS` skip it unless `FORCE ROW LEVEL SECURITY` is set.
+- Row-level security (`ALTER TABLE ... ENABLE ROW LEVEL SECURITY` plus policies) enforces tenant isolation in the database; table owners and roles with `BYPASSRLS` skip it unless `FORCE ROW LEVEL SECURITY` is set. `../../code-security-review/scripts/rls_check.py` lists tables without RLS and risky policies from the migrations.
 - Policy expressions run for every row they check. Wrap per-request function calls in a scalar subquery (`USING (tenant_id = (SELECT current_tenant_id()))`) so the planner evaluates them once per query instead of once per row, index the columns policies filter on, and compare plans with and without the policy.
 - Connect with TLS and verify the server (`sslmode=verify-full` with the CA certificate). Credentials stay out of code and chat (`live-database-access.md`).
 
