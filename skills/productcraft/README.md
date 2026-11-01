@@ -1,6 +1,6 @@
 # ProductCraft
 
-**A Sora Labs Agent Skill** · version 1.11.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
+**A Sora Labs Agent Skill** · version 1.11.1 · MIT License · part of [All-in-One AI Skills](../../README.md)
 
 ProductCraft is one installable skill that teaches a coding agent to build, harden and ship software that **shows the important thing first, behaves honestly, is proven by checks that actually ran, works on every device, and is secure and lawful where it matters**. It routes each task to only the modules that task needs: a bug fix reads the engineering workflow, a table change reads the table guidance, an auth change reads the auth-defense module, a destructive command triggers the agent-safety stop-check, and a launch reads the security and legal-readiness reviews.
 
@@ -302,6 +302,7 @@ LaunchGuard ships a 20-control baseline in `modules/launchguard/references/secur
 | `modules/code-security-review/scripts/supply_chain.py` | Maps which GitHub Actions workflows outsiders can trigger and where their text flows (AI agent prompts and environments, environment files, reusable-workflow and composite-action inputs, agent output in scripts); reads ten lockfile formats for install-time code, sources outside the registry, mixed registries and credentials in URLs |
 | `modules/code-security-review/scripts/sarif_triage.py` | Summarizes Semgrep, CodeQL and other SARIF with correctly resolved levels, lists results that are new against a baseline, and writes untriaged results as leads the findings validator accepts |
 | `modules/code-security-review/scripts/firebase_rules.py` | Reads Firestore, Storage and Realtime Database rules offline and flags open, test-mode, signed-in-only and unvalidated-write rules; never prints rule conditions |
+| `modules/code-security-review/scripts/rls_check.py` | Replays PostgreSQL migrations offline and lists row-level security leads: tables without RLS, always-true and signed-in-only policies, policies that trust `user_metadata`, views without `security_invoker`, materialized views, exposed or unpinned `SECURITY DEFINER` functions, and secrets in client-bundled environment variables (names only) |
 | `modules/code-security-review/scripts/har_summary.py` | Summarizes a captured HTTP session (HAR): request counts, hosts, methods, status classes and content types, plus a report of where credentials and tokens appear; never prints header, cookie, body or query values |
 | `modules/legal-ready/scripts/legal_scan.py` | Scans a project for legal-readiness signals: policy pages, consent mechanism, third-party trackers, images without alt text, pre-ticked consent, unsubscribe links, a data deletion route |
 | `modules/agent-safety/scripts/guard_command.py` | Classifies a shell command as allow, ask or deny with a reason and a safer alternative; usable as an opt-in pre-tool hook; also checks commands inside awk `system()` calls and GNU `parallel` templates |
@@ -349,7 +350,7 @@ python3 -m unittest discover -s tests -v
 for t in modules/*/tests; do python3 -m unittest discover -s "$t" -v; done
 ```
 
-The suites hold 1214 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
+The suites hold 1266 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
 
 ## Package layout
 

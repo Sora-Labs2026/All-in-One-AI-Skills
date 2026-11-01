@@ -41,8 +41,8 @@ Each control names its gate, the correct implementation, the common trap and how
 
 ### 4. Enable row-level security (Gates 2 and 4)
 - **Do:** enable RLS on every table and storage bucket reachable with client keys, with explicit select, insert, update and delete policies based on the authenticated user or tenant membership.
-- **Trap:** an always-true policy, a missing `WITH CHECK` on insert/update, or server code that uses the service-role key for user requests bypasses RLS entirely.
-- **Verify:** with the public key, query each table as user A, user B and anonymous. A sees and changes only A's rows.
+- **Trap:** an always-true policy (`USING (true)`, or `WITH CHECK (true)` on insert or update, which lets users write any values, including another user's id), a policy that only checks that the caller is signed in, a view without `security_invoker`, or server code that uses the service-role key for user requests. Any of these bypasses RLS. An update policy without `WITH CHECK` reuses its `USING` condition, so omitting it is not the leak.
+- **Verify:** run `../../code-security-review/scripts/rls_check.py --root .` on the migrations for leads, then, with the public key, query each table as user A, user B and anonymous. A sees and changes only A's rows.
 
 ### 5. Encrypt sensitive data (Gate 2)
 - **Do:** use TLS for every connection (browser, database, third-party APIs) and provider encryption at rest. Add field-level encryption with managed keys (KMS) for high-risk fields such as stored third-party OAuth tokens, government IDs or health data.

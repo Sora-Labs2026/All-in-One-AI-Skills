@@ -59,6 +59,8 @@ create index on public.memberships (user_id, org_id);
 - Helper functions marked `security definer` run with their owner's rights: keep them in a schema that is not exposed through the API, set `search_path = ''`, and qualify every name.
 - Views run with their creator's rights and skip RLS unless created `with (security_invoker = true)` (Postgres 15 and later).
 
+**Check the migrations** with `../../code-security-review/scripts/rls_check.py --root .` before testing: it lists tables without RLS, always-true and signed-in-only policies, policies that trust `user_metadata`, views without `security_invoker`, exposed `SECURITY DEFINER` functions, and service-role keys in client-bundled environment variables. Its leads tell you which tests to write; the tests prove the policies.
+
 **Test policies** with pgTAP through `supabase test db`, impersonating users inside a rolled-back transaction:
 
 ```sql
@@ -115,7 +117,7 @@ Cover the anonymous role, two users in two tenants, and every operation, includi
 
 ## Done when
 
-- [ ] Every exposed table has RLS and per-operation policies, with pgTAP or integration tests covering anonymous access, two users and two tenants.
+- [ ] Every exposed table has RLS and per-operation policies, with pgTAP or integration tests covering anonymous access, two users and two tenants; `rls_check.py` reports no high leads.
 - [ ] Secret keys appear only in server-only modules; server code authorizes with a verified identity.
 - [ ] Migrations are created with the CLI, checked with `migration_check.py`, and generated types match the schema in CI.
 - [ ] Storage buckets holding user files are private with path-scoped policies; Edge Functions either verify the JWT or a provider signature.
