@@ -49,6 +49,7 @@ The providers' well-architected frameworks group the same concerns into pillars:
 - Connect many networks through a hub (AWS Transit Gateway, Azure hub-and-spoke with Virtual WAN or a hub VNet, Google Cloud shared VPC or Network Connectivity Center) rather than a mesh of peerings.
 - Put public entry points behind a load balancer, with a CDN and web application firewall where abuse is plausible; terminate TLS with managed certificates.
 - Use private endpoints for managed services (S3, Key Vault, Cloud SQL) so traffic stays private and cheaper.
+- Hybrid links (site-to-site VPN, dedicated circuits) usually run BGP to an on-premises router. Plan non-overlapping ranges with the on-premises team, and diagnose the router side with `../../networking/references/bgp-diagnostics.md`.
 
 ## Data protection
 

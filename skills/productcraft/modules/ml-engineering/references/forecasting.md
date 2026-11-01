@@ -2,6 +2,8 @@
 
 Read this when you predict future values of one or many time series (demand, load, traffic, sensor readings, revenue), need prediction intervals, or are asked to try a pretrained forecasting model. Time-series classification, clustering and anomaly detection on whole series are in `time-series-ml.md`.
 
+Turning a demand forecast and its errors into safety stock, reorder points and item segmentation is in `../../business-ops/references/inventory-and-demand-planning.md`, with the offline calculator `../../business-ops/scripts/reorder_point.py`.
+
 ## Frame the problem first
 
 Write these down before choosing a model; most forecasting failures are framing failures.

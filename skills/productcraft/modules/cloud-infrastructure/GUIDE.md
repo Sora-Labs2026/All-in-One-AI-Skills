@@ -123,3 +123,4 @@ Add these to the workflow module's report and to `../../assets/review-template.m
 - `../code-security-review/references/supply-chain-review.md` and `../code-security-review/references/ci-agent-workflows.md`: deep review of build inputs, base images, third-party modules and charts, and CI workflows.
 - `../agent-safety/references/vetting-extensions.md`: before installing a cloud MCP server, deploy CLI, Helm plugin, Packer plugin or pipeline extension.
 - `../builder-tools/GUIDE.md`: designing MCP tools that agents hosted on cloud platforms will call.
+- `../networking/GUIDE.md`: routers, switches and firewalls outside the cloud, the on-premises end of hybrid links, BGP diagnostics, and home or small-office networks.
