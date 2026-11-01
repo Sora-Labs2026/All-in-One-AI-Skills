@@ -26,8 +26,8 @@ Google adds, changes and retires features often. Before recommending markup for 
 | Status | Features |
 |---|---|
 | Documented and in use (examples) | Article; Breadcrumb; Product snippets and merchant listings; Review snippets (within their limits); Organization (logo and details); Local business; Event; Job posting; Recipe; Video; Dataset; Discussion forum; Profile page; Q&A; Software app; Paywalled content markup |
-| Restricted | FAQ rich results: only well-known, authoritative government and health sites since August 2023. Breadcrumb trails: Google stopped displaying them in mobile results in early 2025 (desktop still shows them) |
-| Retired | HowTo rich results (2023); sitelinks search box, so `WebSite` `SearchAction` markup no longer does anything in Google (November 2024); in 2025 Google phased out Book actions, Course info, Claim review (fact check), Estimated salary, Learning video, Special announcement and Vehicle listing |
+| Restricted | Breadcrumb trails: Google stopped displaying them in mobile results in early 2025 (desktop still shows them) |
+| Retired | FAQ rich results for all sites (7 May 2026, after being limited to authoritative government and health sites from August 2023; Google says it still reads FAQ markup to understand a page); HowTo rich results (2023); sitelinks search box, so `WebSite` `SearchAction` markup no longer does anything in Google (November 2024); in 2025 Google phased out Book actions, Course info, Claim review (fact check), Estimated salary, Learning video, Special announcement and Vehicle listing |
 
 Retired markup is still valid schema.org and does no harm, but do not add it for a Google feature, and remove it if it is costly to maintain. Bing and other consumers have their own documentation.
 
@@ -91,6 +91,8 @@ Product with an offer, plus breadcrumbs:
 ```
 
 Merchant listings additionally use shipping and return details (`shippingDetails`, `hasMerchantReturnPolicy`, or the same settings in Merchant Center); read the current feature page for which properties are required. Products sold in variants (size, color) can be described with `ProductGroup`, `hasVariant` and `variesBy`, which Google has documented since 2024; give each variant URL that exists its own canonical and offer data. Add `aggregateRating` or `review` only when the page shows those real reviews.
+
+Category and product page practice, variant URL and canonical strategy, availability over a product's life (out of stock, pre-order, discontinued, seasonal), sale prices and merchant feeds are in `ecommerce-search.md`.
 
 **Embed it safely.** User-supplied text inside JSON-LD (product names, reviews) can break out of the `<script>` element if it contains `</script>`. Escape `<` when serializing:
 

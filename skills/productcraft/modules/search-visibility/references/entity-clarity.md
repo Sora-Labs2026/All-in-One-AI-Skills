@@ -133,6 +133,8 @@ Google states that local results rank mainly on relevance, distance and prominen
 
 The values come from the fact sheet; the phone number above is from the UK range reserved for drama and examples.
 
+Business profiles on each map platform, listing audits and duplicates, review requests and replies, multi-location and service-area pages, and local rank sampling are covered in depth in `local-search-and-map-listings.md`.
+
 ## How AI products describe the entity
 
 - Ask each product the questions a customer would ask ("What is Northwind Analytics?", "Who makes reporting software for small nonprofits?", "Northwind Analytics vs ..."), signed out, several times, and record date, product, answer and cited sources.

@@ -118,6 +118,8 @@ Check what the engine decided, not only what you declared: Search Console URL In
 - **IndexNow** (Bing, Yandex, Seznam, Naver and others; not Google as of 2026) notifies participating engines of changed URLs. It needs a key file hosted on the site. Submitting is a write to a third party: prepare the URL list, show it, and submit only with the owner's go-ahead. A generated request that was never sent is not a submission; report only responses you received.
 - **Removals** in Search Console hide a URL for about six months. The permanent fix (`noindex`, 404 or 410, or authentication) must be live before that runs out.
 
+- **Fetch size limits.** Since early 2026 Google documents that Googlebot reads only the first 2 MB of an HTML or other supported text file (64 MB for a PDF), down from 15 MB. The limit counts uncompressed bytes, and each CSS or JavaScript file is fetched separately under its own limit. Content and links past the cut are not indexed: keep the main content and important links early in the HTML, and move inline data blobs, base64 images and huge inline scripts out of the document.
+
 ## AI crawlers and answer engines: access
 
 The evidence on how AI answer engines choose sources is young. What is known is that they can only use pages their crawlers or fetchers can reach, and that each vendor documents its own user agents and controls. Names and behaviors change; read each vendor's current crawler documentation before writing rules, and record the date you checked.
@@ -130,8 +132,9 @@ The evidence on how AI answer engines choose sources is young. What is known is 
 
 - `Google-Extended` controls use of content for Google's models outside Search. It does not change crawling, indexing or appearance in Search, and it does not opt a site out of AI Overviews; only the Search controls above affect those.
 - CDNs and web application firewalls can block or challenge crawlers before `robots.txt` matters, and some now block AI crawlers by default. Check the CDN's bot settings and the server logs, not only the file.
-- User-agent strings are easy to fake. Verify important crawlers by reverse DNS or by the IP ranges the vendor publishes (`search-measurement.md`).
+- User-agent strings are easy to fake. Verify important crawlers by reverse DNS or by the IP ranges the vendor publishes (`search-measurement.md`). Google's crawler documentation moved to its own crawling site in November 2025, and its IP range files moved to `developers.google.com/crawling/ipranges/` in March 2026, with the old `/search/apis/ipranges/` paths being retired; update allowlists and verification scripts that fetch the old files.
 - What helps pages get used once crawlers can reach them is in `ai-answer-engines.md`.
+- Agents that browse and act for a person, how `robots.txt` and bot protection treat them, and pages they can use: `agentic-browsing.md`.
 - `robots.txt` signals intent; it is not a license or a contract. Rights reservations for text and data mining, and licensing terms, are legal matters for the owner and counsel (`../../legal-ready/GUIDE.md`).
 - Which bots to allow is a business, licensing and legal decision. Present the options (allow search and answers, allow search but not training, block all) with their consequences, and let the owner choose.
 - `llms.txt` is a 2024 proposal for a curated, Markdown index of a site for language models. No major engine has confirmed it affects crawling, ranking or citation. It is cheap to add, but treat it as optional, never as a control, and put nothing in it that is not on the site.

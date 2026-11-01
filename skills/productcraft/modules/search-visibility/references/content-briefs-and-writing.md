@@ -79,6 +79,10 @@ Comparison pages ("X vs Y", "X alternatives", "best tools for Z") serve people w
 - **Disclose** affiliate links, sponsorship and the publisher's own product in the comparison, close to the recommendation.
 - **Claims about named companies** must be accurate and fair; comparative advertising and review law apply (`../../legal-ready/references/honest-commerce.md`).
 - Listing "alternatives" means real, current options a buyer would consider, not a list padded with weak options to make one shine.
+- **Pick the form that fits the query:** "X vs Y" pages give a verdict per situation ("choose X if ..., Y if ..."), not one winner for everyone; "X alternatives" pages start from why people leave X, using public reviews, support questions or migration requests as evidence; "best tools for Z" pages state the criteria, how options were tested and how the order was decided. A switching guide (export, import, what does not carry over) often helps more than another comparison.
+- **Markup:** describe only what the page is about. No `aggregateRating` or `review` for competitors' products built from third-party review sites, and no rating markup that is not backed by reviews collected and shown on the page (`structured-data-and-social-cards.md`).
+- **Names, logos and law:** naming competitors to compare them truthfully is generally permitted, under comparative advertising rules (for example the EU Directive 2006/114/EC) and false-advertising law (for example the US Lanham Act). Use their names and logos only to identify them, never to suggest endorsement, and have claims checked for each market.
+- **Titles and freshness:** a year or "best" in the title only when the page was re-checked that year and the method is stated. Re-check when a compared product changes pricing, plans or major features, and change the "checked on" date only when the facts were re-checked.
 
 ```yaml
 # data/compare/acme-tracker.yaml : one file per product, reused by every page that mentions it

@@ -25,6 +25,7 @@ Every number in a search report needs four labels: the **source** (tool and prop
 - Use read-only API scopes: the Search Console API with `https://www.googleapis.com/auth/webmasters.readonly`; the GA4 Data API with `https://www.googleapis.com/auth/analytics.readonly`; Bing Webmaster Tools' API key or OAuth; a Google Cloud API key for CrUX and PageSpeed Insights. OAuth mechanics, token storage and scope tables are in `../../integrations/references/oauth-and-tokens.md`.
 - Keys and tokens are referenced by environment-variable name, set by the user through a guided script (`../../agent-safety/references/secrets.md`). Never paste them into the conversation, code or logs.
 - Ask the owner for the least access that works: a restricted (read-only) Search Console user, a viewer role in analytics.
+- What each first- and third-party source provides, connector setup, quotas, cost caps and a provenance record for every pull: `search-data-connectors.md`.
 - Quotas change; check them before bulk pulls. At the time of writing, a Search Analytics request returns at most 25,000 rows (page with `startRow`), the API does not return every row for very large sites, and URL Inspection API calls are limited per property per day (about 2,000). For complete row-level data on a large site, the owner can enable Search Console's bulk export to BigQuery, which has storage and query costs.
 
 ```python

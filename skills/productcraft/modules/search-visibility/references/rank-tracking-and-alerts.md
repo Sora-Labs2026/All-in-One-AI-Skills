@@ -60,6 +60,8 @@ Two kinds of alert catch most search problems. Use both.
 
 Run `scripts/seo_check.py` on every production build and fail the build on errors; snapshot `robots.txt` and the sitemap index after each deploy and diff them.
 
+`scripts/seo_drift.py` automates that snapshot and diff for built pages, `robots.txt` and sitemaps, with an accept file for approved changes; the practice, including live-site comparisons and triage, is in `seo-drift-monitoring.md`.
+
 **Anomalies: traffic outside its normal range.** Daily search data is noisy and weekly-seasonal, so compare like with like and use robust statistics instead of a fixed percentage:
 
 ```python
