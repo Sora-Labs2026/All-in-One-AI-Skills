@@ -29,7 +29,9 @@ Use after editing. This is a completion checklist, not a substitute for human te
 - [ ] Existing routes, API calls, state, permissions, i18n, analytics and real interactions still work.
 - [ ] Existing tests, lint, typecheck and build run as appropriate for the project; failures documented.
 - [ ] Before/after visual inspection done if a working browser/screenshot environment exists.
+- [ ] Every target viewport named in the brief has its own screenshot, kept with a one-line note of what it shows; a phone capture does not stand in for desktop, and source inspection alone does not pass this item.
 - [ ] Verify representative loading, empty, error, and populated states if practicable.
+- [ ] Partial data (some sources missing) and no-permission states show what is available, what is not, and a safe next step; a state you could not reach is reported as untested, not as not applicable.
 - [ ] Only files in relevant scope are changed; no unrelated changes overwritten.
 
 ## Design self-critique

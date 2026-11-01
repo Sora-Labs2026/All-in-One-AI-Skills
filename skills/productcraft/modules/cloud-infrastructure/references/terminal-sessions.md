@@ -82,7 +82,7 @@ def open_in_terminal_argv(prog_argv, cwd):
         return ["osascript", "-e", f'tell application "Terminal" to do script {applescript_string(command)}']
     raise RuntimeError("no supported terminal found; ask the user which one they use")
 
-plan = open_in_terminal_argv(["ssh", "-t", "build-01.example.internal"], "/home/me/project")
+plan = open_in_terminal_argv(["ssh", "-t", "build-01.example.internal"], "/srv/work/project")
 print(plan)   # show the plan first; launch with subprocess.Popen(plan, start_new_session=True) only when asked
 ```
 
@@ -106,7 +106,7 @@ print(plan)   # show the plan first; launch with subprocess.Popen(plan, start_ne
 ## Report
 
 ```text
-Repo:      /home/me/src/orders (branch fix/total-rounding, 2 files changed locally)
+Repo:      ~/src/orders (branch fix/total-rounding, 2 files changed locally)
 Evidence:  npm test -- src/total.test.ts failed: expected 10.01, received 10.009999
 Action:    round in minor units in src/total.ts
 State:     verified locally (npm test -- src/total.test.ts passes; full suite 412 passed); not committed

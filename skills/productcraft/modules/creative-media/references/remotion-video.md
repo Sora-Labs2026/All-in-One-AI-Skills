@@ -74,11 +74,15 @@ Rules that follow from the model:
 - **Fonts:** load them through Remotion's font packages (`@remotion/google-fonts/<Family>` or `@remotion/fonts` for local files) so rendering waits for them; an unloaded font renders a fallback face in the first frames.
 - **Async data:** fetch in `calculateMetadata` (which can also set duration, size and props) rather than inside components. Where a component must wait, wrap the wait in `delayRender()` / `continueRender()`; the default timeout is 30 seconds, and a forgotten `continueRender` fails the render with a timeout.
 - **Props:** declare a zod schema on the `<Composition>` so props are typed, editable in the Studio, and validated when passed with `--props=props.json`.
+- **Text that must fit a box** (titles from data, translated strings): measure it with `@remotion/layout-utils` (`measureText`, `fitText`, `fillTextBox`) only after the font has loaded, with exactly the font properties used for rendering, and cap the fitted size.
+- **Premount sequences** that load media (`<Sequence premountFor={fps}>`) so images and video are ready when the sequence starts instead of popping in.
+- Recent 4.0 releases also offer `<Video>` and `<Audio>` in `@remotion/media`; their trim props (`trimBefore`, `trimAfter`) count frames, not seconds. Use whichever media component the docs for your installed version recommend.
 
 ## Captions and audio
 
 - **Captions are required for speech** (WCAG 1.2.2) and expected on social video, which usually autoplays muted. Produce word timings by transcribing locally (Remotion's Whisper.cpp helper package, or whisper.cpp directly), correct names and terms by hand, then render captions in the composition and also export an `.srt` or `.vtt` file for players that support sidecar captions.
 - Caption style: at most two lines, about 42 characters per line, on screen long enough to read (roughly 15-20 characters per second) and never under about one second; high-contrast text on a solid or translucent box; placed clear of on-screen UI and faces.
+- `@remotion/captions` parses SRT files and groups timed words into short pages for word-by-word captions; highlight the word being spoken only with a color that keeps contrast on the caption box. Editing recorded footage around a composition: `video-editing.md`.
 - Information shown only visually (a number on a chart, text on a screen recording) is also spoken or described for audio-only listeners where it matters (audio description, WCAG 1.2.5).
 - **Audio:** fade music in and out with a volume callback (`volume={(f) => interpolate(f, [0, fps], [0, 0.6], { extrapolateRight: "clamp" })}`), duck it under speech, and use only music you have rights to for this use: synchronization rights in video, and platform audio libraries only on that platform.
 - **Loudness:** measure the final mix (`ffmpeg -i out.mp4 -af ebur128=peak=true -f null -`). Common targets: about -14 LUFS integrated for streaming and social platforms, -16 LUFS for podcasts, -23 LUFS for EBU R128 broadcast, with true peaks below -1 dBTP. Check the destination's current specification.

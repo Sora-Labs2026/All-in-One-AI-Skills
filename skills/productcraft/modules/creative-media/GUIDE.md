@@ -18,6 +18,16 @@
 - Improving images: upscaling, denoising, sharpening, tone and color, background removal, metadata stripping, export formats.
 - Markdown into an EPUB ebook.
 - Sorting a messy folder by type and date, renaming files consistently, finding duplicates; organizing invoices and receipts into named files and a ledger.
+- Math and technical explainer animation with Manim: equations, plotted functions, geometry, algorithm states.
+- Editing recorded footage: selects from a transcript, frame-accurate cuts, captions, audio levels, color, reframing, export, an editable timeline.
+- Making recordings searchable: transcripts, shots, on-screen text, keyword and semantic search, clips from results.
+- Matching a reference look: measuring color, tone and cut rhythm into a style pack and applying it consistently without copying the references.
+- Calling hosted models for images, video, speech, voices, music or sound effects inside a pipeline, with budgets, consent and labels.
+- A product demo video of a web interface, scripted and repeatable.
+- A presentation as a single HTML file without reveal.js, or a `.pptx` rebuilt for the web.
+- iOS app icons at every size and appearance, and icon assets inside an Apple-platform app.
+- Checking an animated character's motion state in Blender: facing, ground contact, foot sliding, scale.
+- Converting, extracting, OCRing, redacting, signing or filling documents through a hosted API.
 - **Not for** UI screens and components, office-file editing or PDF forms (documents), or GIF emoji and short loops (documents, animated media).
 
 ## Ground rules
@@ -43,7 +53,7 @@ for m in ("PIL", "cv2", "playwright", "fontTools", "matplotlib", "rembg"):
     except ImportError:
         print(f"{m:11} MISSING")
 EOF
-for c in node npx pandoc ffmpeg ffprobe magick exiftool rsvg-convert pdftoppm pdffonts java ocrmypdf realesrgan-ncnn-vulkan; do
+for c in node npx pandoc ffmpeg ffprobe magick exiftool rsvg-convert pdftoppm pdffonts java ocrmypdf tesseract realesrgan-ncnn-vulkan manim scenedetect blender; do
   printf '%-24s ' "$c"; command -v "$c" || echo MISSING
 done
 ```
@@ -65,9 +75,21 @@ Use what is installed. Ask before installing packages, browsers, models or syste
 | Markdown to EPUB | `references/ebooks-epub.md` | EPUBCheck has no errors; Ace report reviewed; opened in two readers |
 | Organize a folder, rename files, find duplicates | `references/file-organization.md` and `scripts/organize_plan.py` | Plan approved; nothing deleted or overwritten; counts match before and after; undo script saved |
 | Invoices and receipts into named files and a ledger | `references/invoices-and-receipts.md` and `scripts/organize_plan.py --from-csv` | Ledger matches files; totals per currency; ambiguous values flagged; spot checks done; nothing uploaded |
+| Math or technical explainer animation | `references/manim-explainers.md` | Storyboard written; pinned Manim version and seeded randomness; mathematics checked independently; captions; `ffprobe` on the deliverable |
+| Editing recorded footage: cuts, captions, levels, color, reframing, export | `references/video-editing.md` | Originals untouched; cuts frame-accurate; loudness measured; captions checked; export matches the destination; timeline validated |
+| Searching video and audio; clips from search results | `references/media-indexing-and-search.md` | Consent and retention recorded; records carry hash, time range and model version; quality measured on a saved query set |
+| Matching a reference look (grade and cut rhythm) | `references/reference-look-measurement.md` and `scripts/cut_rhythm.py` | References private and absent from the output; output re-measured against the pack metric by metric; shot lengths follow the distribution |
+| Hosted generation of images, video, speech, music or sound | `references/hosted-media-generation.md` after `references/generation-prompting.md` | Plan and cap approved; requests validated against the current schema; no double submissions; consents, licenses, provenance and labels recorded |
+| Product demo video of a web interface | `references/ui-demo-videos.md` | Rehearsal passes; demo data only; video trimmed and captioned; privacy pass done |
+| HTML slide deck without reveal.js; pptx rebuilt for the web | `references/html-slide-decks.md` | Runs offline; no slide overflows; keyboard and screen-reader checks; PDF matches the slides |
+| iOS app icons and in-app icon assets | `references/ios-app-icons.md` and `scripts/asset_catalog_check.py` | Checker clean; opaque 1024 store icon; viewed on a home screen in each appearance; licenses recorded |
+| Motion faults in an animated Blender scene | `references/blender-motion-inspection.md` | Read-only inspection of a copy with auto-run off; findings with frames, names, coordinates and tolerances; confirmed by renders |
+| Documents through a hosted processing API | `references/hosted-document-apis.md` | Owner approved the upload and data terms; each result verified with independent tools; remote copies deleted |
 | Office files, PDFs, document to Markdown, GIFs and short clips | `../documents/GUIDE.md` | That module's checks |
 
 Several often combine: a launch video needs `references/remotion-video.md`, `references/themes-and-brand-application.md` and maybe `references/generation-prompting.md`; a conference talk needs `references/revealjs-presentations.md`, the theme reference and `references/infographics.md` for its data slides.
+
+A product walkthrough usually chains `references/ui-demo-videos.md` (capture), `references/video-editing.md` (cut, captions, levels, export) and sometimes `references/hosted-media-generation.md` (narration); a series that must share one look adds `references/reference-look-measurement.md`; a lecture adds `references/manim-explainers.md` for its derivations.
 
 ## Workflow
 
@@ -130,6 +152,7 @@ For a product launch, merge this into the inventory described in `../legal-ready
 - `../legal-ready/GUIDE.md` for asset licenses, consent and claims in marketing material.
 - `../integrations/GUIDE.md` and `../agent-safety/GUIDE.md` for calling hosted generation APIs with keys handled safely.
 - `../cloud-infrastructure/GUIDE.md` before any cloud rendering resources are created.
+- `../ui-distiller/references/motion-engineering.md` for easing, springs and choreography shared by interfaces, slides and video; `../ui-distiller/references/translucent-materials.md` for glass surfaces and their contrast.
 - `../builder-tools/references/playwright-web-testing.md` for the headless browser used to render and check pages, posters and slides.
 - `../research-writing/GUIDE.md` for the content side of research posters, talks and paper pages: venue rules, verified citations and reporting standards.
 
@@ -145,6 +168,15 @@ python3 <productcraft>/modules/creative-media/scripts/organize_plan.py inbox --f
 
 `<productcraft>` is the folder where the ProductCraft skill is installed. Exit codes: 0 nothing needs review, 1 some items need review, 2 usage error. Tests: `python3 -B -m unittest discover -s <productcraft>/modules/creative-media/tests -v`.
 
+`scripts/cut_rhythm.py` is a read-only, standard-library, deterministic analyzer of cut rhythm. It reads detected shot boundaries (an FFmpeg `showinfo` log, a scene-list CSV or a plain list of times), reports the shot-length distribution (median, median absolute deviation, percentiles, cuts per minute, in frames and beats when given `--fps` and `--bpm`) and flags suspect very short shots; with `--plan SECONDS --seed N` it draws a reproducible plan of shot lengths from that distribution, snapped to frames or beats. Exit codes: 0 no warnings, 1 warnings, 2 usage error.
+
+`scripts/asset_catalog_check.py` is a read-only, standard-library checker for Xcode asset catalogs. It reads every app icon set and image set: valid Contents.json, referenced files present and no stray files, PNG pixel sizes against size and scale, square icons, no alpha channel in the default 1024 App Store icon, consistent image-set scales, and which dark and tinted appearances exist. Exit codes: 0 clean, 1 errors or warnings, 2 usage error.
+
+```bash
+python3 <productcraft>/modules/creative-media/scripts/cut_rhythm.py scenes.log --duration 62.4 --fps 25 --plan 30 --seed 7
+python3 <productcraft>/modules/creative-media/scripts/asset_catalog_check.py MyApp/Assets.xcassets
+```
+
 ## References
 
 - `references/generative-art.md`: read when making art with code: p5.js versions, seeded generators and streams, reproducibility across machines, editions and trait checks, export for print and plotters, performance, the viewer page.
@@ -158,3 +190,13 @@ python3 <productcraft>/modules/creative-media/scripts/organize_plan.py inbox --f
 - `references/ebooks-epub.md`: read when turning Markdown into EPUB: structure, metadata and identifiers, pandoc build, styling for readers, covers and fonts, accessibility metadata, EPUBCheck and Ace, Kindle and stores.
 - `references/file-organization.md`: read when organizing or renaming files: ground rules, scope, choosing a scheme, the planner, review, apply and undo, duplicates, portable names, photo dates.
 - `references/invoices-and-receipts.md`: read when filing invoices and receipts: e-invoice XML, text and OCR extraction, amount and date parsing, validation, naming, the ledger, privacy and retention.
+- `references/manim-explainers.md`: read when making a math or technical explainer: when Manim fits, setup and versions, storyboard, a complete scene, render flags, transform and updater pitfalls, style, narration, accessibility, checks.
+- `references/video-editing.md`: read when cutting recorded footage: ingest and proxies, a transcript-based paper edit, frame-accurate cuts, captions, cleaning and ducking audio, two-pass loudness, color, reframing, export settings, timeline handoff, rights.
+- `references/media-indexing-and-search.md`: read when making recordings searchable: consent and retention, transcripts, shots and keyframes, on-screen text, keyword and vector indexes, hybrid search, clips, measuring retrieval quality, live sources, hosted services.
+- `references/reference-look-measurement.md`: read when matching a reference look: measuring rather than copying, the style pack, color by luminance zone, robust tone statistics, cut rhythm, building a LUT, applying and verifying.
+- `references/hosted-media-generation.md`: read when calling hosted generation models: authorization and caps, model choice, schema checks, the job lifecycle without double billing, uploads, voices and consent, music licenses, provenance and labels.
+- `references/ui-demo-videos.md`: read when recording a product demo of a web app: demo environment, discover, rehearse, record with a visible cursor, pacing, captions from the step log, privacy.
+- `references/html-slide-decks.md`: read when building a single-file HTML deck: fixed canvas or fluid slides, a minimal accessible controller, builds, notes, fonts, pptx conversion, PDF export, overflow checks.
+- `references/ios-app-icons.md`: read when producing iOS app icons and in-app icons: single-size icons, dark and tinted appearances, layered icons, the full size set, symbols and vector assets, licenses, the catalog checker.
+- `references/blender-motion-inspection.md`: read when an animated Blender scene looks wrong: safe headless inspection, an extraction script, facing, contact, sliding, crossover, twist and scale checks, renders for compositing, the report.
+- `references/hosted-document-apis.md`: read when processing documents through a hosted API: local or hosted, data terms before upload, the request pattern, and verification of conversion, extraction, OCR, redaction, signatures and forms.

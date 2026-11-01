@@ -58,7 +58,7 @@ nix flake update                    # moves flake.lock: a dependency change, rev
 
 - Shell hooks run on every entry: keep them fast and idempotent (create a directory or virtual environment only if missing). Hooks are sourced into the user's shell, so a failing check must `return`, never `exit`, or it closes the terminal.
 - Put interactive helpers (aliases, functions) where the tool expects interactive configuration, not in the non-interactive hook.
-- Use paths relative to the project (`$PWD` in the hook or the tool's project variable), never `/home/alice/...`.
+- Use paths relative to the project (`$PWD` in the hook or the tool's project variable), never an absolute path that exists only on one person's machine, such as their home folder.
 - Local databases keep their data in an ignored project directory (`.dev/`), listen on `localhost` or a socket in that directory, and use development-only credentials.
 
 ## Secrets

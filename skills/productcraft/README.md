@@ -1,10 +1,10 @@
 # ProductCraft
 
-**A Sora Labs Agent Skill** · version 1.10.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
+**A Sora Labs Agent Skill** · version 1.11.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
 
 ProductCraft is one installable skill that teaches a coding agent to build, harden and ship software that **shows the important thing first, behaves honestly, is proven by checks that actually ran, works on every device, and is secure and lawful where it matters**. It routes each task to only the modules that task needs: a bug fix reads the engineering workflow, a table change reads the table guidance, an auth change reads the auth-defense module, a destructive command triggers the agent-safety stop-check, and a launch reads the security and legal-readiness reviews.
 
-Beyond application code, it covers the work around it: language and framework guides, cloud infrastructure, databases and data engineering, machine learning and statistics, scientific computing, life sciences, research writing, creative media, search visibility, third-party API integrations and blockchain development. Each is a module with its own guide, focused references and tested helper scripts, read only when a task needs it.
+Beyond application code, it covers the work around it: language and framework guides, cloud infrastructure, databases and data engineering, machine learning and statistics, scientific computing, life sciences, research writing, creative media, search visibility, third-party API integrations, blockchain development, AI agent engineering, networking and business operations. Each is a module with its own guide, focused references and tested helper scripts, read only when a task needs it.
 
 It is a working skill for real codebases, not a theme pack, legal service or security certification. Its reference screens are code to learn from, not a component kit to paste. The agent changes your real codebase and reports what it actually tested.
 
@@ -40,6 +40,9 @@ It is a working skill for real codebases, not a theme pack, legal service or sec
 | **Integrations** | Third-party APIs: OAuth and scopes, token storage, webhooks with signature checks and deduplication, idempotency, rate limits, pagination, sync and contract tests; Stripe, Plaid, Supabase, Google Workspace, Jira, Confluence, Linear, Outline and membership platforms | `modules/integrations/GUIDE.md` |
 | **Blockchain development** | Move on Aptos (language, objects and tokens, tests and the Move Prover, gas, CLI, TypeScript SDK, wallets, indexer) and Solana RPC; testnet first, no keys in chat, no investment advice | `modules/blockchain-dev/GUIDE.md` |
 | **Search visibility** | Being found in search and AI answers: crawl and index controls (`robots.txt`, `noindex`, sitemaps, canonicals, status codes and redirects), JavaScript rendering, faceted navigation and pagination, site migrations, `hreflang`, on-page elements, site structure and internal links, structured data with dated feature status, Open Graph cards, Search Console, analytics and log measurement, rank tracking, links, authority and trust; keyword and topic research, results-page and competitor analysis, people-first writing and refreshes, E-E-A-T review, AI answer engines, entity clarity, programmatic pages; no spam tactics; an offline checker for built pages, `robots.txt` and sitemaps | `modules/search-visibility/GUIDE.md` |
+| **Agent engineering** | Architecture audits and debugging of agent systems; harness construction; autonomous and scheduled loops with budgets, stop conditions, checkpoints and approval gates; agent evaluations, reviewer pairs and councils; context budgets and compaction; cost tracking, prompt caching and model routing; multi-agent orchestration; memory with consent; agents in shared channels; spending controls; a run-plan checker and a usage cost report | `modules/agent-engineering/GUIDE.md` |
+| **Networking** | Cisco IOS and IOS-XE configuration and hardening, network automation, BGP diagnostics, configuration validation and drift, interface health, layer-by-layer troubleshooting; home and small-office design, VLANs, firewall basics, Pi-hole and WireGuard; an offline IOS configuration linter | `modules/networking/GUIDE.md` |
+| **Business operations** | Supply chain (freight, customs and trade, energy, inventory, scheduling, quality and CAPA, returns), billing and reconciliation, investor materials, campaigns, brand voice, competitive analysis, publishing, email, product briefs, contract drafts and e-signature, translation of official documents; a safety-stock and reorder-point calculator. General information, not legal, tax, customs or investment advice | `modules/business-ops/GUIDE.md` |
 | **UI rules** | A rulebook of screen-level rules with IDs (spacing, type, color, dark mode, buttons, forms, navigation, touch, feedback, components, icons, copy, screens, motion, front-end engineering, brand identity) | `modules/ui-rules.md` |
 | **Language choice** | Offers Rust for new projects, services or performance-critical components, with honest trade-offs, and remembers the answer | `modules/language-choice.md` |
 | **Lean output** | Opt-in shorter answers that never shorten safety warnings, security findings, errors or legal caveats | `modules/lean-output.md` |
@@ -97,6 +100,9 @@ The pattern library covers foundations, feedback, forms, interaction, navigation
 | Titles, meta descriptions, internal links, site structure, structured data, link previews | Search visibility (on-page, structure and structured-data references) |
 | Search reports, rank tracking, alerts, backlinks, authority, AI crawler policy, AI referral traffic | Search visibility (measurement, links and trust references) |
 | Keyword research, search intent, content gaps, writing or refreshing pages for search, E-E-A-T review, AI answer engines (GEO), entity clarity, programmatic pages | Search visibility (research, content and AI-answer references) |
+| Building or operating AI agents, autonomous loops, agent evals, token and cost budgets, prompt caching, multi-agent orchestration, agent memory or spending | Agent engineering |
+| Routers, switches, firewalls, Cisco IOS, BGP, VLANs, network outages, homelab networks, Pi-hole, WireGuard | Networking (show first; changes only with approval and a rollback) |
+| Freight, customs, inventory, scheduling, quality, returns, billing, investor materials, campaigns, brand voice, contracts, official translations | Business operations (general information, not advice) |
 | A new project, service or performance-critical component with no language fixed | Language choice (asks once about Rust) |
 | A broad, ambiguous product task | Product design + interaction, then only what is relevant |
 
@@ -196,6 +202,12 @@ fulfilment.
 
 Use productcraft to find out why our product pages dropped out of Google after the
 redesign, using Search Console evidence, and fix what is broken.
+
+Use productcraft to add a budget, stop conditions and an approval gate to our
+nightly agent loop, and show me what it costs per run.
+
+Use productcraft to review this switch configuration for security problems before
+we apply it in the maintenance window.
 ```
 
 ### Optional persistent project rule
@@ -308,6 +320,14 @@ LaunchGuard ships a 20-control baseline in `modules/launchguard/references/secur
 | `modules/integrations/scripts/integration_scan.py` | Finds risky integration code: unverified or re-serialized webhooks, plain digest comparisons, payments without idempotency keys, credentials in URLs, broad scopes, server secrets in client modules |
 | `modules/blockchain-dev/scripts/move_check.py` | Finds risky Move packages and dApp repositories: tracked key files, public functions returning refs or signers, exposed randomness, moving-branch dependencies |
 | `modules/search-visibility/scripts/seo_check.py` | Offline check of built HTML, `robots.txt` and XML sitemaps: titles and descriptions, `h1`, canonicals, `meta robots`, `hreflang` codes and return links, image `alt`, JSON-LD that parses with `@type` (retired features flagged), Open Graph and X cards, `robots.txt` syntax and RFC 9309 rule evaluation, sitemap syntax, limits and listed-URL status |
+| `modules/agent-engineering/scripts/run_plan_check.py`, `usage_cost.py` | Checks agent loop plans for budgets, stop conditions, checkpoints, approval gates, payment caps and secrets; reports tokens, cost and cache use from usage logs and a dated price file |
+| `modules/networking/scripts/ios_config_lint.py` | Offline lint of saved IOS or IOS-XE configurations: Telnet, SSH version, clear-text and type 7 secrets, AAA, logging, NTP, SNMP communities, unused ports; never prints secret values |
+| `modules/business-ops/scripts/reorder_point.py` | Demand statistics, demand patterns, ABC and XYZ classes, safety stock and reorder points from a demand CSV |
+| `modules/code-security-review/scripts/audit_record.py` | Validates an audit coverage record against the findings and states the strongest claim it supports; checks stricter finding fields |
+| `modules/builder-tools/scripts/grade_trace.py`, `modules/agent-safety/scripts/audit_mcp_config.py` | Grades agent tool-call traces against a step spec; static review of MCP server declarations |
+| `modules/engineering-workflow/scripts/affected_checks.py`, `modules/engineering-practices/scripts/i18n_sync.py` | Lists the checks a change needs from a module ledger; checks translation catalogs against the source catalog |
+| `modules/search-visibility/scripts/seo_drift.py` | Snapshots the search-relevant state of a build and reports regressions between snapshots |
+| `modules/ml-engineering/scripts/bench_compare.py`, `modules/blockchain-dev/scripts/evm_check.py`, `modules/life-sciences/scripts/hl7v2_check.py` | Compares two timing samples; Keccak-256 beside SHA3-256, selectors, event topics, EIP-55 checksums and exact unit conversion; HL7 v2 message checks that never print field values |
 | `assets/review-template.md` | Template for the agent's change report |
 
 Every script uses the Python 3 standard library only, is read-only toward the project it inspects and never touches the network.
@@ -329,7 +349,7 @@ python3 -m unittest discover -s tests -v
 for t in modules/*/tests; do python3 -m unittest discover -s "$t" -v; done
 ```
 
-The suites hold 798 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
+The suites hold 1214 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
 
 ## Package layout
 
@@ -371,7 +391,10 @@ productcraft/
 │   ├── creative-media/          # art, posters, video, images, EPUB, file organization; move planner
 │   ├── integrations/            # third-party APIs, OAuth, webhooks; integration scanner
 │   ├── blockchain-dev/          # Move on Aptos and Solana; Move checker
-│   └── search-visibility/       # SEO and AI answers: crawl, index, structure, markup, measurement, content; offline checker
+│   ├── search-visibility/       # SEO and AI answers: crawl, index, structure, markup, measurement, content; checker and drift diff
+│   ├── agent-engineering/       # harnesses, loops, evals, cost, orchestration, memory; run-plan check and cost report
+│   ├── networking/              # Cisco IOS, automation, BGP, troubleshooting, homelab; IOS config linter
+│   └── business-ops/            # supply chain, billing, investors, marketing, contracts; reorder-point calculator
 ├── examples/                    # reference screens: HTML pages, tokens.css, gallery.css, README index
 ├── references/
 │   ├── ui-rules/                # UI rulebook, one file per category

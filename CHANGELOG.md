@@ -1,5 +1,23 @@
 # Changelog
 
+## ProductCraft 1.11.0 (2026-11-01)
+
+- Three new modules, each with a `GUIDE.md`, focused references and a tested helper:
+  - **Agent engineering:** architecture audits, harness construction, loops with budgets, stop conditions, checkpoints and approval gates, agent evaluations, reviewer pairs and councils, context and cost, multi-agent orchestration, memory with consent, shared channels and spending controls. `run_plan_check.py` and `usage_cost.py`.
+  - **Networking:** Cisco IOS, network automation, BGP diagnostics, configuration validation and drift, interface health, troubleshooting method, and homelab design, VLANs, firewalls, Pi-hole and WireGuard. Show first, and change only with approval and a rollback. `ios_config_lint.py`.
+  - **Business operations:** freight, customs and trade, energy, inventory, scheduling, quality and CAPA, returns, billing, investors, brand and campaigns, publishing, email, product briefs, contracts and official translations, as general information with clear advice boundaries. `reorder_point.py`.
+- Deeper existing modules:
+  - **Stacks:** Quarkus, JVM persistence, Kotlin on the server, Android and Kotlin Multiplatform, Swift concurrency, SwiftUI testing, the on-device Apple language model, F#, Perl, Windows installers for Python apps, low-latency systems, build failures, React performance and testing, Vite and Bun, Laravel and Django security, Python testing, hexagonal architecture and house style.
+  - **Code security review:** audit coverage tracking and stricter finding records (`audit_record.py`); desktop apps and local IPC, RPC and messaging, availability limits, tenant isolation and data lifecycle, HTTP caching and identity binding; bug bounty practice within scope; DeFi protocol security.
+  - **Search visibility:** local search and map listings, e-commerce, images, SEO drift monitoring (`seo_drift.py`), search experience, planning, agentic browsing and data connectors. Facts updated with dates: FAQ rich results retired (May 2026), the 2 MB Googlebot fetch limit, the new crawler IP range location, the back-button-hijacking spam policy and the Content API for Shopping sunset.
+  - **Builder tools and agent safety:** instruction-compliance testing (`grade_trace.py`), rules from corrections, skill inventory and portability, hook design, quality and gate hooks, workspace config audits, harness hardening and MCP config review (`audit_mcp_config.py`).
+  - **Workflow and practices:** review lenses, change impact and regression selection (`affected_checks.py`), PRDs and roadmaps, Windows desktop E2E, accessibility audits, translation catalog sync (`i18n_sync.py`), and onboarding guides and code tours.
+  - **Data, cloud and ML:** ClickHouse, Redis, Prisma, scheduled data collection under scraping rules, caching and throughput, canary analysis, production readiness, reproducible environments, small self-hosted clusters, safe terminal sessions, adding ML to a product, error analysis, PyTorch debugging, ranking pipelines and benchmarking (`bench_compare.py`).
+  - **Life sciences, blockchain and research:** clinical decision support software, FHIR and HL7 v2 integration (`hl7v2_check.py`), HIPAA engineering controls, health software evaluation, EVM units and hashing (`evm_check.py`), trading-agent security, prediction-market signals without advice, open-source investigation of claims and organizations (never private individuals), and NLP for low-resource languages.
+  - **Design and media:** motion engineering, design-system construction, interface polish, legible translucent materials and dashboard building in UI Distiller (`token_inventory.py`, `glass_contrast.py`); Manim explainers, video editing, media indexing, measuring a reference look, hosted media generation with labeling, UI demo videos, HTML slide decks, iOS app icons, Blender motion inspection and hosted document APIs in Creative media (`cut_rhythm.py`, `asset_catalog_check.py`).
+- Excluded as unsound, vendor-only or harmful: lead scraping and people profiling, automated social outreach, persona gimmicks and single-vendor wrappers.
+- 25 guided modules; the suites hold 1214 tests.
+
 ## ProductCraft 1.10.0 (2026-10-29)
 
 - New **Search visibility** module (SEO and AI answers), with a `GUIDE.md`, 20 references and an offline checker:
