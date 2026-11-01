@@ -2,6 +2,8 @@
 
 Read this when a team building a medical device or software as a medical device (SaMD) needs quality management system (QMS) documents, a gap analysis against ISO 13485, preparation for a certification or regulatory audit, a software lifecycle under IEC 62304, a risk management file under ISO 14971, or a first answer to "is our software a medical device?". Clinical documents are in `clinical-documentation.md` and `clinical-decision-documents.md`.
 
+The day-to-day mechanics of nonconformance handling, root-cause analysis, CAPA effectiveness checks, control charts, sampling and supplier quality are in `../../business-ops/references/quality-and-capa.md`; this file covers what device regulation adds.
+
 **Guardrail.** General guidance for building documents and software, not regulatory or legal advice. The manufacturer's management owns, approves and signs the QMS; a regulatory affairs professional or notified body decides questions of classification and conformity. Never describe a product or company as "compliant", "certified" or "cleared" unless a certificate or clearance exists, and never invent the company's facts (`../../legal-ready/GUIDE.md` has the same rule for legal claims).
 
 ## Where the rules stand (check dates; these move)

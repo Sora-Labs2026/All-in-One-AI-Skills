@@ -2,6 +2,8 @@
 
 Read this before changing a prompt, model, retrieval setting or tool in an LLM-powered feature, and whenever someone claims such a change "works better". It covers evaluation sets, retrieval and answer metrics, LLM-as-judge, harness hygiene, variance and regression testing. Evaluating Agent Skills themselves is in `../../builder-tools/references/skill-evaluation.md`.
 
+Evaluating multi-step agents (coding agents, harness and loop changes, task suites with environments, pass@k and pass^k, cost per successful task) is in `../../agent-engineering/references/agent-evals.md`; independent reviewer and generator-evaluator patterns are in `../../agent-engineering/references/verification-patterns.md`.
+
 ## The evaluation set is the product spec
 
 - **Source cases from reality:** production logs (de-identified), support tickets, user research, and domain experts. Add synthetic cases only to fill gaps, and keep them labeled as synthetic.

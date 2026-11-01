@@ -31,6 +31,8 @@ Read this when you build or improve a feature that ranks items for a user: produ
 
 Production systems usually have stages: **candidate generation** (cheap, high recall, several sources) then **ranking** (expensive, precise) then **business rules and diversity** (filters, deduplication, freshness, fairness of exposure).
 
+The serving code around these stages (sources, hydration, filters, scorer chains with weighted per-action predictions, selection, asynchronous impression logging) is laid out in `ranking-pipeline-architecture.md`.
+
 ## Data and splits
 
 - Implicit feedback (views, clicks, purchases) is positive-only and biased by what was shown. Non-interaction is not dislike. Log impressions so you know what the user saw and skipped.

@@ -88,6 +88,7 @@ A topic is a set of query groups a reader would expect one site to cover togethe
 - Check what you can add that the current results lack: data, testing, tools, examples, expert explanation.
 - Plan the internal links as part of the topic, using descriptive anchors (link structure and crawl depth: `site-structure-and-internal-links.md`).
 - Publish the hub and the strongest supporting pages first. Add more only when a sub-need has its own demand or a reader would miss it.
+- Cluster plans kept as data and checked against a crawl, architecture by business model, and the roadmap that schedules topics: `search-planning-and-architecture.md`.
 
 ## One need, one page: the target map
 

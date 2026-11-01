@@ -51,6 +51,7 @@ Updates and deletes leave dead row versions. Autovacuum reclaims them for reuse 
 - A DDL statement waiting for an `ACCESS EXCLUSIVE` lock blocks every later query on that table, even plain reads. Always set `lock_timeout` before DDL on live tables (see the migration reference).
 - `pg_cancel_backend(pid)` cancels a query; `pg_terminate_backend(pid)` ends the session and rolls back its transaction. Both affect someone else's work: confirm with the user first.
 - Deadlocks are reported in the server log with both statements. Fix by taking locks in a consistent order, keeping transactions short, and retrying the losing transaction in application code.
+- Job queues in a table: claim rows with `SELECT ... ORDER BY ... LIMIT n FOR UPDATE SKIP LOCKED` inside a short transaction, so workers skip rows another worker holds instead of queueing behind it. Use it only for queue-like work; it deliberately returns an incomplete view of the table.
 
 ## jsonb
 
@@ -102,6 +103,7 @@ TimescaleDB is popular for time series; parts of it are under a source-available
 
 - Least-privilege roles: the application role owns nothing it does not need, cannot create objects in shared schemas, and reads only its tables. Since PostgreSQL 15, ordinary users can no longer create objects in the `public` schema by default; older databases still allow it unless revoked.
 - Row-level security (`ALTER TABLE ... ENABLE ROW LEVEL SECURITY` plus policies) enforces tenant isolation in the database; table owners and roles with `BYPASSRLS` skip it unless `FORCE ROW LEVEL SECURITY` is set.
+- Policy expressions run for every row they check. Wrap per-request function calls in a scalar subquery (`USING (tenant_id = (SELECT current_tenant_id()))`) so the planner evaluates them once per query instead of once per row, index the columns policies filter on, and compare plans with and without the policy.
 - Connect with TLS and verify the server (`sslmode=verify-full` with the CA certificate). Credentials stay out of code and chat (`live-database-access.md`).
 
 ## Checks (done when)

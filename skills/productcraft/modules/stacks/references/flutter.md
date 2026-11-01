@@ -115,6 +115,17 @@ class OrdersNotifier extends AsyncNotifier<List<Order>> {
 - WebViews (`webview_flutter`): restrict navigation to your origins and do not expose JavaScript channels to untrusted pages.
 - Validate deep-link and notification parameters.
 
+## Review checklist
+
+- `analysis_options.yaml` turns on `strict-casts`, `strict-inference` and `strict-raw-types` (under `analyzer: language:`) so implicit `dynamic` cannot slip in, plus the `unawaited_futures` and `discarded_futures` lints so a forgotten `await` is visible. Every `// ignore:` carries a reason.
+- Uncaught errors reach the crash reporter: `FlutterError.onError` for framework errors and `PlatformDispatcher.instance.onError` for asynchronous ones; release builds set `ErrorWidget.builder` instead of showing the red error screen. Raw exception text never reaches users.
+- `on FormatException catch (e)` style handlers instead of bare `catch (e)`; `Error` subclasses (bugs such as `StateError` and `RangeError`) are not caught and ignored.
+- No `BuildContext` stored in state managers, singletons or static fields; no `.listen()` calls or subscriptions created inside `build()`.
+- `MediaQuery.sizeOf(context)` and the other specific accessors instead of `MediaQuery.of(context)`, which rebuilds on every media change (keyboard, insets).
+- Async state is a sealed type or `AsyncValue`, not combinations of `isLoading`, `hasError` and nullable data.
+- Monorepos: pub workspaces (Dart 3.6 and later; `workspace:` in the root `pubspec.yaml`, `resolution: workspace` in members) share one lockfile, and packages import each other's public `lib/` API, never another package's `src/` (the `implementation_imports` lint).
+- New packages: check the publisher, recent maintenance, platform support and license on pub.dev; `dependency_overrides` only as a temporary, commented workaround. Build failures and their fixes: `build-failures.md`.
+
 ## Common breakages
 
 | Message or symptom | Cause | Fix |

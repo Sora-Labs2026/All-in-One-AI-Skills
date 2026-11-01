@@ -120,6 +120,7 @@ A diff review reports findings in the changed code and in old code the change ne
 - **With sub-agents,** give each one a distinct partition and the threat model, never the same slice twice. Merge their candidates by root cause.
 - **Iterate.** After the confirmed issues are fixed, review the same scope again; with the known bugs out of the way, attention lands on new ones.
 - **Say what was not reached.** Cells you did not get to are `NOT_VERIFIED` with "not reviewed in this pass". Never present a partial pass as full coverage.
+- **Track it as you go.** With sub-agents, several sessions or a fixed budget, run the audit from a coverage record: one writer, assignments by cell, a structured result per cell, gap reviews by someone who examined no cells, and budget set aside for proving candidates before hunting. [Coverage tracking](coverage-tracking.md) has the format; `audit_record.py coverage` checks it.
 
 ## Phase 5. Prove or discard
 

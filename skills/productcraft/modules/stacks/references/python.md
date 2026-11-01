@@ -103,12 +103,14 @@ async def fetch_all(client: httpx.AsyncClient, urls: list[str]) -> list[bytes]:
 - Property-based tests with Hypothesis fit parsers, serializers and calculations (`../../engineering-practices/references/advanced-testing.md`).
 - Async tests need the plugin the project uses (`pytest-asyncio` with its mode setting, or `anyio`'s pytest plugin). Do not add a second one.
 - Coverage (`pytest --cov=<package> --cov-branch`) shows untested branches; it is a map, not a target to game.
+- Fixture design and scopes, parametrization, async loop scopes, database isolation, parallel runs and flaky tests in depth: `python-testing.md`.
 
 ## Packaging and distribution
 
 - Libraries: metadata in `[project]` (PEP 621), a `src/` layout so tests import the installed package, a `py.typed` marker for typed packages, dependency ranges rather than pins. Build with `python -m build` or `uv build`; check with `twine check dist/*`.
 - Applications: pin the full dependency tree with the project's lock tool; install from the lock in CI and containers.
 - Console commands go in `[project.scripts]`, not hand-written wrapper scripts. Command-line design is in `cli-tools.md`.
+- Desktop or command-line apps for Windows users without Python (PyInstaller or Nuitka, Inno Setup, code signing, clean-machine tests): `python-windows-installer.md`.
 - Never publish to PyPI or TestPyPI without explicit permission.
 
 ## Done when

@@ -45,6 +45,7 @@ On-page work rarely fixes a page that is not crawled or indexed. Check indexing 
 - Performance: set `width` and `height` (or `aspect-ratio`), serve responsive sizes with `srcset` and `sizes`, use modern formats, and never lazy-load the image that is the Largest Contentful Paint element (`../../engineering-practices/references/performance.md`).
 - Image sitemaps or `<image:image>` entries help when images load from a CDN or another host. Image licensing metadata (IPTC fields or `ImageObject` license properties) can show a license badge in image results.
 - Product and recipe images also feed structured data; use the same URLs (`structured-data-and-social-cards.md`).
+- Formats, delivery and stable image URLs, lazy loading, image sitemaps, alt text for thousands of images, photo metadata and labels for AI-generated images: `image-search.md`.
 
 ## Links
 

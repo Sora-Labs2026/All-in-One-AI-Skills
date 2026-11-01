@@ -6,12 +6,16 @@
 
 **Boundaries.** Reviewing a contract for exploitable bugs is `../code-security-review/references/smart-contracts.md` (with the Solidity basics in `../code-security-review/references/language-pitfalls.md#solidity-basics` and contract entry points in `../code-security-review/references/entry-points-and-context.md`); this module is the build side and links there rather than repeating it. Provider API habits (keys, rate limits, webhooks, pagination) are in `../integrations/GUIDE.md`. Wallet-connect and transaction UI states follow `../interaction-feedback.md`.
 
+**EVM client code and trading agents.** Off-chain code for Ethereum and other EVM chains (amounts and decimals, Keccak hashing, selectors and event topics, addresses, typed-data signing) and agents that hold trading or wallet authority have their own references below. Solidity contract review stays in code security review, including `../code-security-review/references/defi-protocol-security.md` for protocol economics.
+
 ## When to activate
 
 - Writing or changing Move modules, `Move.toml`, Move unit tests or specifications; publishing or upgrading a package on localnet, devnet or testnet.
 - Choosing between resources, objects, Fungible Assets, Digital Assets or the legacy coin and token standards.
 - Building a dApp that connects wallets, builds and submits transactions, calls view functions or queries the indexer.
 - Using Solana RPC: sending and confirming transactions, priority fees, account queries, subscriptions, provider webhooks and digital-asset queries.
+- Writing off-chain code for Ethereum or another EVM chain: token amounts and decimals, prices, Keccak hashes, function selectors and event topics, address checksums, ABI encoding, signed messages.
+- Building or reviewing an agent that can place orders, sign transactions, grant token approvals or move funds.
 - **Not for** price predictions, token picks, trading strategies or any investment question (see guardrail 3), and not for auditing someone else's deployed contract (code security review).
 
 ## Guardrails
@@ -62,6 +66,8 @@ These choices are expensive or impossible to change after deployment, and severa
 | TypeScript SDK, building, simulating, signing and submitting transactions, view functions, fee payers, wallet adapter, sign-in messages | `references/aptos-sdk-and-wallets.md` | Transactions simulated before signing; success checked on the committed transaction; amounts as `bigint`; network mismatch handled |
 | Indexer GraphQL queries, indexer lag, custom processors, third-party chain-data APIs | `references/aptos-indexer.md` | Queries paginated with a stable order; lag checked against the ledger; reads that gate writes use the fullnode |
 | Solana RPC, commitment, blockhash expiry, sending and confirming, priority fees, account queries, subscriptions, provider webhooks, digital-asset queries | `references/solana-rpc-and-webhooks.md` | Send-and-confirm loop respects block-height expiry; compute budget set from simulation; webhooks deduplicated and reconciled |
+| EVM client code: amounts and decimals, Keccak-256 versus SHA3, selectors and topics, ABI encoding and storage slots, EIP-55 addresses, EIP-191 and EIP-712 signing, chain IDs | `references/evm-units-and-hashing.md` | No float math on amounts; decimals read per chain and address; hash helper passes the empty-input Keccak vector; `evm_check.py scan` has no high leads |
+| Agents with trading or wallet authority: planner, policy engine, executor and signer; allowlists, caps, slippage, approvals; simulation and reconciliation; circuit breakers; injection through market and chain data | `references/agent-trading-security.md` | Keys and limits outside the model; every send simulated and reconciled; adversarial cases end in rejection or a halt on a fork or sandbox; owner approved live limits in writing |
 
 ## Essentials
 
@@ -80,6 +86,12 @@ Use these when a reference is not needed.
 - A transaction expires when the block height passes its blockhash's `lastValidBlockHeight`; rebroadcast the same signed transaction until then, and only re-sign after expiry.
 - Set compute-unit limit and price from a simulation instead of guessing.
 - Lamports and token amounts are integers; use `bigint`.
+
+### EVM
+- Amounts are integers in base units end to end; convert with `parseUnits` and `formatUnits` only at the edges, and send them as strings in JSON.
+- Read `decimals()` per chain ID and token address, never per symbol.
+- Ethereum hashes with Keccak-256; Node's `sha3-256` and Python's `hashlib.sha3_256` are a different function.
+- Check the provider's `eth_chainId` against the configuration before sending, and simulate before signing.
 
 ## Failure signatures
 
@@ -108,11 +120,14 @@ python3 <productcraft>/modules/blockchain-dev/scripts/move_check.py --list-rules
 
 Exit code 0 means no lead at or above `--fail-on` (default `medium`), 1 means at least one, 2 means a usage error. Leads are not findings: read the code, write the test, then report. It is not a security audit. Tests: `python3 -B -m unittest discover -s modules/blockchain-dev/tests -v`.
 
+`scripts/evm_check.py` is the offline companion for EVM client code, also standard-library only and read-only. `hash` prints Keccak-256 and FIPS SHA3-256 side by side and names which one produced a given digest; `selector` and `topic` canonicalize signatures and hash them; `checksum` validates EIP-55 addresses; `units` converts between display amounts and base units exactly and refuses to round; `scan --root .` lists leads in JavaScript, TypeScript and Python (FIPS SHA3 used where Keccak is needed, float conversions and float scale factors on amounts, hard-coded decimals) without printing file contents. Exit codes: 0 success, 1 invalid checksum, refused conversion or a lead at or above `--fail-on`, 2 usage error. Details in `references/evm-units-and-hashing.md`.
+
 ## What to report
 
 - Network used for every step, CLI, compiler, framework and SDK versions, and the package or object address on the test network.
 - Tests run with pass counts and coverage, prover results (including which functions are not specified), gas numbers for changed paths.
 - `move_check.py` summary and how each lead was resolved.
+- For EVM client code: `evm_check.py scan` summary and the selectors, topics or checksums verified with it. For trading agents: the policy checks, simulations and adversarial tests that ran, and the limits the owner approved.
 - Upgrade policy, who holds each capability, and the steps only the user can take (funding, mainnet publishing, audit, multisig setup).
 - Plainly stated limits: no audit performed, properties not proven, behavior not tested on mainnet.
 
@@ -124,3 +139,6 @@ Exit code 0 means no lead at or above `--fail-on` (default `medium`), 1 means at
 - `../agent-safety/GUIDE.md`: secrets by name, refusing to handle key material, the stop-check before irreversible commands.
 - `../engineering-practices/references/advanced-testing.md`: property-based and invariant testing ideas that carry over to Move tests.
 - `../interaction-feedback.md`: honest pending, confirmed and failed states for transactions in the UI.
+- `../code-security-review/references/defi-protocol-security.md`: AMM, oracle, lending and rounding review for protocols that price, swap or lend.
+- `../agent-engineering/references/spending-controls.md`: caps, allowlists, approvals and key custody for any agent that spends money.
+- `../research-writing/references/prediction-market-signals.md`: market prices as research signals, never as triggers for trades.

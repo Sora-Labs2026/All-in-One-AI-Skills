@@ -117,6 +117,8 @@ Use a few precise terms. Ten adjectives in a row ("cinematic, epic, stunning, 8k
 ## Hosted and local models
 
 **Hosted APIs** usually run as jobs: submit, poll, download.
+
+Pipelines that call hosted models (budgets and dry runs, schema checks, the job ledger, speech and cloned voices, music and sound effects) are covered in `hosted-media-generation.md`; the points below are the minimum.
 - Keep API keys in the environment or a secret store, never in the chat, code or logs (`../../agent-safety/GUIDE.md`); integration patterns are in `../../integrations/GUIDE.md`.
 - Poll with increasing intervals and a total timeout. On a client timeout, check the job's status before submitting again: a blind retry is billed twice.
 - Download results promptly and store them with the log; result links often expire.

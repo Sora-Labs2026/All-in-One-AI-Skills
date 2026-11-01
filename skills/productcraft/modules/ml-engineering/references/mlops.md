@@ -48,7 +48,7 @@ with mlflow.start_run(run_name="hgb-v3") as run:
 - Each step is a function of explicit inputs to explicit outputs, idempotent and re-runnable: rerunning with the same inputs gives the same outputs and does not duplicate side effects.
 - Typical steps: ingest snapshot, validate data, build features, split, train, evaluate against gates, register, (optionally) deploy to shadow.
 - Orchestrators: Airflow, Prefect, Dagster, Kubeflow Pipelines, Argo Workflows, or a managed equivalent in the cloud you already use. Pick the one the organization already runs; the differences matter less than having one.
-- Cache expensive steps by content hash of their inputs.
+- Cache expensive steps by content hash of their inputs, with code, library and configuration versions in the key (`../../data-engineering/references/content-hash-caching.md`).
 - Fail loudly: a data validation failure stops the pipeline and alerts; it does not train on bad data.
 
 ## Data validation

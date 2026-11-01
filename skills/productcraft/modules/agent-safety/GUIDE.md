@@ -13,6 +13,9 @@ This module protects the user from the agent. Securing the application being bui
 - When the task touches secrets: `.env` files, keys, tokens, credential stores or CI secrets.
 - When the user asks for a command guard, a pre-tool hook or a safer agent setup.
 - When the user wants the agent sandboxed (devcontainer, container or VM), plans to run it with broad auto-approval or unattended, or the task means building or running code nobody has vetted: `references/isolation.md`.
+- When the user is building an agent system rather than running one session: an autonomous loop or scheduled agent, an agent that posts in shared channels, keeps memory or spends money. Design it with `../agent-engineering/GUIDE.md` (budgets, approval gates, spending controls); this module still governs each risky command and each extension the agent installs.
+- When setting up an agent for a person or team, before it reads outside content (issues, email, web pages, attachments) while holding credentials, before unattended runs, or when building the runtime that executes model decisions: `references/harness-hardening.md` (repository trust, identities, approval boundaries, memory, logging, kill paths, minimum bar).
+- Before approving a new or changed MCP server declaration (`.mcp.json`, editor or agent settings): `references/mcp-config-review.md` and `scripts/audit_mcp_config.py`.
 
 Do **not** ask permission for ordinary in-project work: editing files, builds, tests, installs from the project's lockfile, and reversible git operations such as commit, branch, stash or rebase. Asking about everything teaches people to approve without reading.
 
@@ -51,6 +54,7 @@ Run these steps whenever a command falls into a class in the next section.
 | Stopping processes or the machine | `kill PID`, `pkill`, `killall`, `kill -9 -1`, `shutdown`, `reboot` | Ask for a single process; deny for all processes and power commands | Stop only a PID this session started; find it with `lsof -i :PORT` or `ps -p PID -o pid,command` |
 | Cloud and infrastructure deletion | `terraform destroy`, `kubectl delete`, `aws ... delete-*`, `gcloud ... delete`, `gh repo delete` | Ask; deny when a production target is named | Plan or dry run, snapshot, confirm account and context |
 | Publishing and deploying | `npm publish`, `docker push`, `terraform apply`, `vercel --prod` | Ask | Only when the user asked for this release or deploy |
+| Network device changes | `configure terminal` on a live router or switch, `copy running-config startup-config`, `reload`, `clear ip bgp`, automation that pushes configuration, applying gateway, firewall, DNS or VPN settings | Ask; deny on a device the user has not named | Read-only `show` commands first; lint and diff in a lab or dry run; rollback armed and console access ready (`../networking/GUIDE.md`) |
 | Secrets | `cat .env`, `env`, `echo $TOKEN`, reading `~/.ssh` keys, uploading `.env` | Ask for `.env`-style files; deny for private keys, credential stores and uploads | Names and presence only; see `references/secrets.md` |
 | Agent, shell and startup configuration | Writing `.claude/settings*.json`, `~/.bashrc`, `authorized_keys`, git hooks, crontab, launch agents | Ask; `crontab -r` is denied | Show the exact change first |
 | Disk devices | `dd of=/dev/...`, `mkfs`, `wipefs`, partition editors | Deny | The user does this by hand |
@@ -92,6 +96,8 @@ Installing an extension gives someone else's text and code the agent's permissio
 
 Never install, enable or approve an extension, or edit agent settings to load one, without the user's explicit OK after they have seen the verdict.
 
+For MCP server entries, also classify what each launch command will fetch and check for literal secrets, auto-approved tools and broad paths: `python3 <productcraft>/modules/agent-safety/scripts/audit_mcp_config.py PATH` (details in `references/mcp-config-review.md`). It never starts a server.
+
 ## Optional command guard (opt-in)
 
 `scripts/guard_command.py` reads a proposed shell command and answers `ALLOW`, `ASK` or `DENY` with a rule ID, a reason and a safer alternative. It never runs the command.
@@ -111,8 +117,9 @@ Limits, stated plainly: the guard only sees the command text. It cannot see insi
 |---|---|
 | `scripts/guard_command.py` | Classifies one shell command (argument, stdin text, or a hook JSON payload) as allow, ask or deny. Exit codes 0, 1, 2; hook mode prints Claude Code `hookSpecificOutput` JSON |
 | `scripts/scan_skill.py` | Read-only static scan of an extension folder: override instructions, hidden text, remote code, credential paths, data-capture endpoints, install scripts, hooks, broad permissions, persistence, unpinned sources, secrets, binaries, escaping symlinks. Advisory |
+| `scripts/audit_mcp_config.py` | Read-only review of MCP declarations: classifies each launch reference as pinned, range, movable tag, image tag or digest, local program or remote URL, and flags literal secrets (by name and length only), credentials in URLs, plain-HTTP remotes, auto-approved tools, broad paths, host-level container flags and enable-all settings. Exit codes 0, 1, 2 with `--fail-on` |
 
-Both use the Python 3 standard library only, never touch the network and never execute the code they inspect. Tests: `python3 -m unittest discover -s modules/agent-safety/tests -v`.
+All three use the Python 3 standard library only, never touch the network and never execute the code they inspect. Tests: `python3 -m unittest discover -s modules/agent-safety/tests -v`.
 
 ## Done when
 

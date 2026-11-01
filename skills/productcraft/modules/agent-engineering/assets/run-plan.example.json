@@ -1,0 +1,65 @@
+{
+  "name": "nightly-test-repair",
+  "owner": "platform team (repository owner approves merges)",
+  "goal": {
+    "done_when": [
+      "`pytest -q` exits 0 on the run branch",
+      "`ruff check .` exits 0",
+      "a change list is written to .agent-run/report.md"
+    ],
+    "must_not": [
+      "delete, skip or weaken any test or assertion",
+      "edit files outside src/ and tests/",
+      "change CI configuration, the test runner settings or coverage thresholds",
+      "guess at a fix whose intent is unclear; list it in the report instead"
+    ],
+    "judge": "ci"
+  },
+  "budget": {
+    "max_wall_clock_minutes": 90,
+    "max_iterations": 8,
+    "max_tokens": 3000000,
+    "max_cost": 15,
+    "currency": "USD"
+  },
+  "stop": {
+    "no_progress_checkpoints": 2,
+    "max_same_failure": 2,
+    "stop_file": ".agent-run/STOP"
+  },
+  "checkpoints": {
+    "state_file": ".agent-run/state.json",
+    "commit_each_step": true
+  },
+  "actions": [
+    "edit_files",
+    "run_tests",
+    "commit_to_run_branch",
+    "push_run_branch",
+    "open_draft_pull_request"
+  ],
+  "approvals": {
+    "required_for": ["merge_pull_request", "deploy", "send_message"],
+    "not_required": [
+      {
+        "action": "push_run_branch",
+        "reason": "owner decision 2026-10-30: the run may push its own agent/nightly-* branch, never a shared branch"
+      }
+    ],
+    "approver": "repository owner",
+    "on_timeout": "stop"
+  },
+  "permissions": {
+    "mode": "allowlist",
+    "allowed_tools": ["read", "edit", "bash:pytest", "bash:ruff", "bash:git status", "bash:git diff", "bash:git commit"],
+    "bypass": false,
+    "network": "package-registry-only",
+    "credentials": "env:CI_BOT_TOKEN"
+  },
+  "isolation": "container",
+  "schedule": {
+    "cron": "17 2 * * *",
+    "overlap": "skip"
+  },
+  "report_to": "the repository's agent-runs issue"
+}

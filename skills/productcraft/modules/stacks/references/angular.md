@@ -22,6 +22,8 @@ Experimental and developer-preview APIs can change between minors. Use them only
 - Signal-based APIs: `input()`, `input.required()`, `output()`, `model()` for two-way binding, `viewChild()` and `contentChildren()` for queries.
 - Built-in control flow in templates. `@for` needs `track item.id` (a stable id); tracking by `$index` causes the same row-state bugs as index keys elsewhere.
 - Keep components presentational where possible: inputs in, outputs out, data access in services.
+- Bind to the host element with the `host` property of `@Component` (`host: { "[class.active]": "active()", "(keydown)": "onKey($event)" }`) instead of `@HostBinding` and `@HostListener` in new code; read static host attributes with `inject(new HostAttributeToken("type"))`.
+- Nested `@for` blocks have no `$parent`; alias the outer index (`@for (row of rows; track row.id; let r = $index)`).
 
 ```ts
 @Component({
@@ -46,6 +48,7 @@ export class InvoiceRow {
 
 - **Signals for state:** `signal()` holds it, `computed()` derives it, `linkedSignal()` is a writable value that resets when its source changes (a selection that resets when the list changes).
 - **`effect()` only to push state out to non-signal APIs** (localStorage, a chart library, logging). Propagating state from one signal to another inside an effect causes glitches and loops; use `computed` or `linkedSignal`. `untracked()` reads a signal without subscribing.
+- DOM work after rendering (measuring, driving a chart library) goes in `afterRenderEffect` or `afterNextRender`, with reads and writes in their own phases (`earlyRead`, `write`, `read`) to avoid layout thrashing; both run only in the browser.
 - **RxJS for event streams and async coordination:** debouncing input, cancelling stale requests, websockets, retries, combining streams. Convert at the edges with `toSignal()` and `toObservable()`.
 - Pick the flattening operator by what should happen to the previous inner request:
 
@@ -80,6 +83,7 @@ export class CustomerSearch {
 - Configure HTTP once: `provideHttpClient(withFetch(), withInterceptors([authInterceptor, errorInterceptor]))`. Functional interceptors add credentials, map errors and log; they never swallow errors silently.
 - Services own API calls and expose observables or signals. Components do not build URLs.
 - `resource()` and `httpResource()` turn requests into signals with loading and error state; check their status in your version before relying on them.
+- Both APIs changed options while experimental (`request` became `params` in 20). Pass the provided `abortSignal` to `fetch` so a superseded request is cancelled, and use them for reads, not mutations.
 - With SSR, the HTTP transfer cache (`provideClientHydration(withHttpTransferCacheOptions(...))`) reuses server responses during hydration. Requests carrying authorization headers are excluded by default; keep it that way for per-user data.
 
 ## State
@@ -89,11 +93,20 @@ export class CustomerSearch {
 - Classic NgRx Store (actions, reducers, effects, selectors, entity adapter) suits large apps that benefit from an event log and devtools time travel. Reducers stay pure, effects handle side effects, and components select narrow slices.
 - Do not mirror server data into a store when a request-level cache would do.
 
+## Dependency injection
+
+- `inject()` works only in an injection context: field initializers and constructors of classes Angular creates, provider factories, and functional guards, resolvers and interceptors. In a callback or event handler it throws; inject into a field instead, or wrap the call in `runInInjectionContext(injector, ...)`. Helpers that call `inject()` start with `assertInInjectionContext(fn)` for a clear error.
+- There are two injector trees: environment injectors (`providedIn: "root"`, `bootstrapApplication` providers, route `providers`) and element injectors (`providers` on components and directives). Resolution walks the element tree first, then the environment tree.
+- `providers` on a component reach its view and its projected content; `viewProviders` reach only its own view, which keeps a service private from content passed in by consumers.
+- `inject()` options: `{ optional: true }` returns `null` instead of throwing; `{ self: true }`, `{ skipSelf: true }` and `{ host: true }` limit where Angular looks.
+- Use an `InjectionToken` (with a factory where there is a sensible default) for configuration and other non-class values.
+
 ## Routing
 
 - `provideRouter(routes, withComponentInputBinding())` binds route params to component inputs.
 - Lazy-load with `loadComponent` and `loadChildren`; choose a preloading strategy deliberately.
 - Functional guards (`CanActivateFn`, `CanMatchFn`) are UX; the API authorizes.
+- `canMatch` also keeps a lazy chunk from loading for users who fail it, but chunks are public files: nothing secret belongs in client code.
 - Resolvers block navigation until data arrives. Prefer loading states inside the component unless the page is useless without the data.
 
 ## Forms
@@ -118,12 +131,18 @@ export class CustomerSearch {
 - `NgOptimizedImage` (`ngSrc`, `priority` on the LCP image) for images.
 - Profile with Angular DevTools before optimizing (`../../engineering-practices/references/performance.md`).
 
+## Animations and headless components
+
+- From 20.2, `animate.enter` and `animate.leave` in templates apply CSS classes as elements enter and leave, and Angular waits for the leave animation before removing the element; an `(animate.leave)` handler must call `event.animationComplete()` when it finishes. `@angular/animations` is deprecated from 20.2: keep it where it exists and migrate animations when you touch them. Respect `prefers-reduced-motion`.
+- Angular Aria (`@angular/aria`, developer preview in 21) provides headless, accessible behavior for patterns such as listbox, combobox, menu, tabs, tree and grid. Prefer it, the CDK or the project's component library over hand-written ARIA widgets, and check its status in your version before adopting it.
+
 ## Testing
 
 - TestBed with standalone imports; `provideHttpClient()` plus `provideHttpClientTesting()` and `HttpTestingController` to assert requests; `httpTesting.verify()` in `afterEach`.
 - Component harnesses from `@angular/cdk/testing` for Material and your own reusable components.
 - `await fixture.whenStable()` instead of `fakeAsync` in zoneless tests; set signal inputs with `fixture.componentRef.setInput()`.
 - Marble tests (`TestScheduler`) for non-trivial RxJS pipelines.
+- Test routing with `RouterTestingHarness` and the real route configuration (`provideRouter(routes)`), not a mocked `Router`; `await harness.navigateByUrl(url, Component)` returns the activated component.
 - Karma is deprecated. New projects use Vitest (21); existing projects migrate deliberately. End-to-end tests use Playwright (`../../builder-tools/references/playwright-web-testing.md`).
 
 ## Security hooks

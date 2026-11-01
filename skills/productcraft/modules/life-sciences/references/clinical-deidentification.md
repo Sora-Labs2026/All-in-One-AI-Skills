@@ -61,6 +61,7 @@ Tools: pydicom with explicit rules (`ds.walk`, `ds.remove_private_tags()`), the 
 
 - Run code where the data already lives. Print schemas, counts and aggregate statistics, not rows, values or images, into the conversation.
 - Do not send identifiable data to a hosted model, API or web service unless the user confirms the organization allows it (a business associate agreement under HIPAA, a processor agreement under GDPR, and the dataset's own use terms).
+- Safeguards for systems that keep identifiable data (access control, audit logging, leak paths such as logs and analytics, vendors and BAAs) are in `hipaa-engineering-controls.md`.
 - Never create realistic-looking fake patients to stand in for real ones in reports. For tests, use generators such as Synthea for EHR, `neurokit2` simulators for signals, or programmatically built phantoms, and mark the output synthetic.
 
 ## The bundled header checker

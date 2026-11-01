@@ -41,6 +41,7 @@ Run these locally or in staging. Load tests and profilers against production or 
 - **Microbenchmarks** (`pytest-benchmark`, `vitest bench`, Go `testing.B`, JMH) only for code the profile already showed is hot. They mislead easily: warm up, avoid dead-code elimination, use realistic inputs.
 
 - **Numerical, parallel and HPC code** (scaling studies, thread oversubscription, MPI and GPU profilers, Slurm job accounting, memory estimates for large arrays): `../../scientific-computing/references/hpc-and-profiling.md`.
+- **Tail latency and data freshness as requirements** (p99 and p99.9 targets, coordinated omission, per-hop budgets, hedged requests, garbage-collector and operating-system tuning, stale-data guardrails): `../../stacks/references/low-latency-systems.md`.
 
 ## Backend practices
 

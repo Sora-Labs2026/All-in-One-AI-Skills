@@ -4,6 +4,8 @@ Reference for the `code-security-review` module. Read [Solidity basics in langua
 
 The safety rules from that section apply throughout. Work on local chains and forks only (Foundry's Anvil, Hardhat Network). Never sign or broadcast a transaction to a live network, never handle real private keys or seed phrases, use the local chain's well-known test accounts, and treat RPC URLs as secrets because they usually embed an API key. Recommend an independent audit before value-bearing contracts are deployed or upgraded.
 
+Protocol economics (the flash-loan attacker, AMM invariants, oracle sources, lending and liquidation, rounding direction, governance and MEV, exploit proofs on a fork) are in [DeFi protocol security](defi-protocol-security.md). Off-chain amount, decimal and Keccak hashing bugs are in `../../blockchain-dev/references/evm-units-and-hashing.md`.
+
 **Contents:** [Scope](#scope) · [Invariants first](#invariants-first) · [Classes beyond the basics](#classes-beyond-the-basics) · [Token integration](#token-integration) · [Upgradeable contracts](#upgradeable-contracts) · [Testing with Foundry](#testing-with-foundry) · [Other chains](#other-chains) · [Ready for an external audit](#ready-for-an-external-audit)
 
 ## Scope

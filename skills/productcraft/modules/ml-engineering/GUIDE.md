@@ -2,7 +2,7 @@
 
 > ProductCraft module. Reach it through the router in `../../SKILL.md`; it is not a separate skill.
 
-**Purpose:** Build models and LLM features whose reported quality survives contact with production. This module covers classical ML with scikit-learn and gradient boosting, explainability, dimensionality reduction, survival analysis, forecasting and time-series ML, graph neural networks, deep learning with PyTorch, Lightning and Hugging Face Transformers, fine-tuning, reinforcement learning, statistical inference and Bayesian modeling, ML pipelines and MLOps, recommendation systems, cautious LLM-driven hypothesis generation, and LLM application engineering (RAG, prompts inside products, and their evaluation). Every topic ends in evidence: held-out scores with spread, compared against baselines.
+**Purpose:** Build models and LLM features whose reported quality survives contact with production. This module covers classical ML with scikit-learn and gradient boosting, explainability, dimensionality reduction, survival analysis, forecasting and time-series ML, graph neural networks, deep learning with PyTorch, Lightning and Hugging Face Transformers, fine-tuning, reinforcement learning, statistical inference and Bayesian modeling, ML pipelines and MLOps, adding ML to products and organizations, error analysis and review of ML changes, PyTorch debugging, recommendation systems and ranking pipelines, benchmarking methodology, cautious LLM-driven hypothesis generation, and LLM application engineering (RAG, prompts inside products, and their evaluation). Every topic ends in evidence: held-out scores with spread, compared against baselines.
 
 **How the work is done** (done-when checks, planning, test-first, debugging, verification) lives in `../engineering-workflow/GUIDE.md`. Exploratory analysis, data wrangling and plotting live in `../data-engineering/GUIDE.md`. Writing Agent Skills and their prompts lives in `../builder-tools/GUIDE.md`; this module covers prompts inside applications.
 
@@ -12,6 +12,7 @@
 - Statistical questions: test selection, A/B tests, p-values, effect sizes, power, regression interpretation, Bayesian models.
 - Time-to-event, forecasting, time-series classification, graph learning, embeddings and 2-D maps of data, recommendations, RL environments and agents.
 - Building or changing a RAG pipeline, an LLM-powered product feature, its prompts, tool schemas or evaluation suite; fine-tuning a language model.
+- Deciding whether to use a model at all, or planning the first model in a product or organization; choosing what to try next from a model's errors; reviewing an ML pull request; a PyTorch script crashes, runs out of memory or produces NaNs; building a feed or ranking pipeline; deciding whether a change made something faster.
 - **Not for** pure data cleaning, SQL, dashboards or charts (`../data-engineering/GUIDE.md`), scientific simulation and numerical methods (`../scientific-computing/GUIDE.md`), domain models for biology, chemistry or medicine (`../life-sciences/GUIDE.md`), or the security review of an LLM feature (`../code-security-review/GUIDE.md`).
 
 ## Ground rules
@@ -59,6 +60,11 @@
 | RAG pipelines: ingestion, chunking, embeddings, hybrid search, reranking, access control | `references/rag-systems.md` | Recall@k and answer quality against a BM25 baseline; access filters server-side and tested |
 | Evaluating LLM features, RAG answers, judges, regression suites | `references/llm-evaluation.md` | Versioned dev and held-out sets; calibrated judges; paired, repeated comparisons |
 | Prompts, tool schemas and structured outputs inside an application | `references/prompt-design.md` | Untrusted input delimited; outputs validated in code; prompt versioned with evaluation results |
+| Whether to use a model; the first ML feature in a product or organization; integrating a model with a fallback | `references/adding-ml-to-a-product.md` | Rule baseline measured; prediction and data contracts agreed; seam with flag, timeout and fallback; shadow before traffic |
+| What to try next; metrics and thresholds from error costs; error analysis; experiment logs; reviewing ML pull requests | `references/ml-error-analysis-and-review.md` | Errors sampled, tagged and counted; threshold from costs on validation; review covers leakage, serving parity and rollback |
+| PyTorch errors, CUDA and installation problems, out-of-memory, NaNs, slow training; plain training loops | `references/pytorch-debugging.md` | Environment recorded; minimal fix proven on a tiny and a real run; stop and report after three failed attempts |
+| Serving pipelines for feeds, recommendations, notifications or re-ranking | `references/ranking-pipeline-architecture.md` | Filters before scoring; named scores and versioned weights; asynchronous impression logging; per-stage trace |
+| Benchmarks: is it faster, timing comparisons, load tests, performance gates in CI | `references/benchmarking-methodology.md` | Same machine, interleaved runs, warm-up dropped; `scripts/bench_compare.py` interval and threshold decide |
 
 Several often apply together: a churn model touches `classical-ml`, `evaluation-and-leakage`, `explainability` and `mlops`; a support assistant touches `rag-systems`, `prompt-design` and `llm-evaluation`.
 
@@ -78,6 +84,7 @@ Use these when the reference is not needed; open it when a bullet raises a quest
 - Forecasting: seasonal naive and ETS as baselines; foundation models are backtested like any other model.
 - Graphs: graph features plus boosting and label propagation before a GNN.
 - RL: a heuristic baseline and 5+ seeds; time limits are truncations, not terminations.
+- In products: a rule baseline that doubles as the fallback; errors tagged and counted before adding model capacity; thresholds from error costs.
 
 ### Statistics
 - Welch's t-test by default; effect sizes with confidence intervals always; exact p-values.
@@ -92,7 +99,7 @@ Use these when the reference is not needed; open it when a bullet raises a quest
 
 ## Helper scripts
 
-All three are Python 3 standard library only, read only their inputs, never use the network, and print deterministic output. Exit codes: 0 success, 1 a check or threshold failed, 2 bad input. Each has `--help` and `--json`.
+All four are Python 3 standard library only, read only their inputs, never use the network, and print deterministic output. Exit codes: 0 success, 1 a check or threshold failed, 2 bad input. Each has `--help` and `--json`.
 
 ```bash
 # Leakage check across splits: id, group and time overlap, duplicate rows, label copies, class balance
@@ -107,6 +114,10 @@ python3 <productcraft>/modules/ml-engineering/scripts/compare_scores.py adjust -
 
 # Ranking metrics for retrieval and recommendations: hit, precision, recall, MRR, nDCG, MAP at k; coverage; CIs
 python3 <productcraft>/modules/ml-engineering/scripts/rank_metrics.py run.jsonl --k 5,10 --ci --min recall@10=0.8
+
+# Benchmark timings, two independent samples: ratio of geometric means with CI, Mann-Whitney U, bootstrap of medians
+python3 <productcraft>/modules/ml-engineering/scripts/bench_compare.py base.txt new.txt --drop-first 3 --threshold 2 --fail-on-regression
+python3 <productcraft>/modules/ml-engineering/scripts/bench_compare.py bench.json bench.json --select-a 0 --select-b 1   # hyperfine export
 ```
 
 `<productcraft>` is the folder where the ProductCraft skill is installed. A clean `split_check.py` result does not prove the absence of leakage: it cannot see features computed with future data or preprocessing fitted on all rows. Tests: `python3 -B -m unittest discover -s <productcraft>/modules/ml-engineering/tests -v`.

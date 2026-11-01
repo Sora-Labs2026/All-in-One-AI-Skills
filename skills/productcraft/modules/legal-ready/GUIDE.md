@@ -108,6 +108,7 @@ It cannot see a hosted CMS, an email provider's dashboard, server-side tag conta
 
 - **Accessibility (13-15):** follow [`../responsive-accessibility.md`](../responsive-accessibility.md) and the UI rules (`COL-01`, `COL-07`, `ICO-04`, `ICO-09`, `NAV-02`, `CMP-12`, `BTN-02`, `ENG-01`, `ENG-05`). This module adds only the legal framing and evidence.
 - **Dark patterns and conversion (9-12):** [`../ethical-persuasion.md`](../ethical-persuasion.md) is the design guidance; this module adds the legal angle, the checks and the records to keep.
+- **Marketing and business operations (3, 11, 12, 18):** campaigns, investor and other outreach, social publishing, returns handling and contract drafts are run with [`../business-ops/GUIDE.md`](../business-ops/GUIDE.md); this module supplies the rules on refunds, claims, reviews, consent and unsubscribe those workflows check against.
 - **Forms (6, 7, 17):** field conventions are in [`../forms-conversion.md`](../forms-conversion.md) and the `FRM` rules (`FRM-04`, `FRM-12`, `FRM-27`).
 - **Security (7, 8, 20):** [`../launchguard/`](../launchguard/GUIDE.md) owns the data-flow review (Gate 2), authorization on deletion and export endpoints, encryption, response trimming and dependency scanning. Run its scoped controls for the endpoints you add here; do not duplicate them.
 - Report with `../../assets/review-template.md` conventions plus this module's report template.

@@ -137,6 +137,8 @@ Even redacted findings point at weak spots. Check whether `security/` is ignored
 
 Optional fields: `cwe`, `baseline_control` (LaunchGuard control number), `line`, `owner`, `variants` (other locations with the same root cause), `chain` (IDs of linked findings), `cvss_vector`.
 
+Stricter fields for findings that drive a decision (`invariant`, `root_cause_key`, `impact_level`, `severity_reason`, typed `preconditions`, `access_class`, `trace`, `reproduction`, `owner_check`) and the check that each severity stays within the rating rules are in [finding records](finding-record-rigor.md). `audit_record.py rigor` validates them; `code_audit.py findings` accepts them unchanged.
+
 ### Report structure
 
 ```markdown

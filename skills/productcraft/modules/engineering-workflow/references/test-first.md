@@ -18,6 +18,9 @@ Keep the loop fast by running the single test you are working on, then the surro
 | Gradle | `./gradlew test --tests 'TaxTest.zeroRate'` | `./gradlew test` |
 | .NET | `dotnet test --filter "FullyQualifiedName~TaxTests.ZeroRate"` | `dotnet test` |
 | RSpec | `bundle exec rspec spec/tax_spec.rb:42` | `bundle exec rspec` |
+| Bun (built-in runner) | `bun test src/tax.test.ts -t "zero rate"` | `bun test` |
+
+`bun test` runs Bun's own test runner; `bun run test` runs the `test` script in `package.json`, which may start Jest or Vitest. Check which one the project expects before the red step, or the failure you see may be the wrong runner.
 
 ## Red, green, refactor in practice
 

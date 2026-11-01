@@ -50,6 +50,8 @@ How the work is done (tracks, done-when checks, test-first, debugging, review) l
 | `shopify.app.toml`; or `layout/theme.liquid` with `config/settings_schema.json` | Shopify app; Shopify theme | `api_version` in the app TOML | JavaScript lockfile |
 | `*.mjml` files, `mjml` in `package.json` | MJML email templates | `mjml` version | JavaScript lockfile |
 | `ProjectSettings/ProjectVersion.txt`, `*.uproject`, `project.godot` | Unity, Unreal Engine, Godot | Editor or engine version in those files | `Packages/packages-lock.json` (Unity) |
+| `*.fsproj`, `paket.dependencies` | F# on .NET | `TargetFramework`, `LangVersion`, `global.json` | `packages.lock.json`, `paket.lock` |
+| `cpanfile`, `Makefile.PL`, `Build.PL`, `dist.ini`, `lib/**/*.pm`, `t/*.t` | Perl | `use v5.xx`, `requires 'perl'`, `MIN_PERL_VERSION` | `cpanfile.snapshot` |
 | `.tool-versions`, `mise.toml`, `.nvmrc`, `.devcontainer/`, `Dockerfile` `FROM`, CI matrices | Any | Versions the team actually runs | |
 
 When sources disagree (for example `.python-version` says 3.12 and CI tests 3.10 to 3.13), the CI matrix and the declared minimum win for what code may use; ask if it matters.
@@ -78,6 +80,8 @@ Look in this order and stop at the first that answers: CI workflow files (what m
 | WordPress | `npm run build` (`@wordpress/scripts`) | `vendor/bin/phpunit`; `wp-scripts test-unit-js` | `vendor/bin/phpcs --standard=WordPress` | same | PHPStan if configured | `composer audit`, `npm audit` |
 | Shopify theme | (none) | Playwright against a development theme if present | `shopify theme check` | Prettier with the Liquid plugin if configured | (none) | (none) |
 | Unity, Godot | Unity `-batchmode -quit -executeMethod <BuildMethod>`; Godot `--headless --export-release <preset>` | Unity `-batchmode -runTests -testPlatform EditMode`; GUT or gdUnit4 | analyzers if configured | `dotnet format` for C# if configured | compiler | (manual) |
+| JavaScript and TypeScript on Bun | the build script, or `bun build` for servers and CLIs | `bun test` or the test script | the lint script | `prettier --check .` if configured | `tsc --noEmit` | `bun audit` in recent versions |
+| Perl | (none) | `prove -lr t` | `perlcritic` if configured | `perltidy` if configured | (none) | (manual) |
 
 A tool the project does not configure is not added; run what exists and list the gap in the report. Documentation tools (Sphinx or MkDocs with doctests, Go `Example` tests, rustdoc doctests, Javadoc, Dokka, .NET XML docs, DocC, YARD) and OpenAPI generators follow the same rule; `../engineering-practices/references/docs-and-decisions.md` covers what to write.
 
@@ -118,6 +122,14 @@ Then write the thinnest slice, compile or type-check it at once, and let the com
 | PHP, Laravel and Symfony | `references/php-laravel.md` | Modern PHP, Composer, Eloquent, queues, configuration caching, Octane, Pest and PHPUnit, Doctrine and Messenger |
 | Ruby and Rails | `references/ruby-rails.md` | Active Record, migrations, callbacks, background jobs, Hotwire, RSpec and Minitest, Rails upgrades |
 | Swift | `references/swift.md` | Swift Package Manager and Xcode projects, Swift 6 concurrency, ARC, protocols and generics, Swift Testing, SwiftUI state, server-side Swift |
+| Quarkus | `references/quarkus.md` | Quarkus 3 services: build-time model and bean discovery, CDI scopes, Quarkus REST threading, Panache, configuration and profiles, Dev Services, `@QuarkusTest`, OIDC and JWT security, native executables, `quarkus update` |
+| JVM persistence | `references/jvm-persistence.md` | JPA and Hibernate beyond the basics (persistence context, lazy loading errors, collection mappings, ID generation and batching, locking, keyset pagination, HikariCP), and MyBatis mappers and dynamic SQL |
+| Kotlin on the server | `references/kotlin-server.md` | Ktor 3 servers and clients, authentication, limits and errors, coroutine structure on the server, the Exposed SQL library, Kotest, MockK and Kover |
+| F# | `references/fsharp.md` | F# on .NET: compile order, domain modeling with unions and records, `Result` composition, `task` versus `async`, C# interop and nulls, serialization, xUnit, Expecto, Unquote and FsCheck |
+| Perl | `references/perl.md` | Modern Perl by version, Carton and `local::lib`, idioms, encodings, shell, `open`, SQL and taint-mode security, Test2 and `prove` |
+| Python testing | `references/python-testing.md` | pytest configuration, fixture scopes and factories, parametrization, mocking, async loop scopes, database isolation, parallel runs, flaky tests |
+| Django operations and security | `references/django-celery-and-security.md` | Celery configuration, task design, periodic tasks and task tests; production settings hardening; startup, migration and static-files errors |
+| Laravel security and testing | `references/laravel-security-and-testing.md` | Production configuration, authentication and Sanctum, policies and scoped bindings, mass assignment, uploads, PHPUnit or Pest tests, pre-deploy verification, choosing packages |
 
 ### Systems, platforms and tools
 
@@ -126,6 +138,9 @@ Then write the thinnest slice, compile or type-check it at once, and let the com
 | Embedded firmware | `references/embedded.md` | Microcontrollers, interrupts, RTOS tasks, memory budgets, bus protocols, power, watchdogs, host and hardware-in-the-loop tests |
 | Salesforce | `references/salesforce.md` | Apex, triggers, governor limits, SOQL, asynchronous Apex, Lightning Web Components, integrations, `sf` CLI deployments |
 | Command-line tools | `references/cli-tools.md` | Designing or changing a CLI in any language: arguments, output streams, exit codes, configuration, signals, tests, distribution |
+| Build failures | `references/build-failures.md` | A build, dependency resolution, code generation or packaging step fails: Maven and Gradle, Spring and Quarkus startup, Android and Kotlin Multiplatform, Xcode and SwiftPM, Flutter, Go, Rust, CMake, .NET |
+| Python apps as Windows installers | `references/python-windows-installer.md` | Freezing with PyInstaller or Nuitka, size and startup, Inno Setup (or MSI and MSIX), licensing, code signing and SmartScreen, clean-machine tests |
+| Low-latency systems | `references/low-latency-systems.md` | Tail-latency (p99, p99.9) or data-freshness targets: measurement without coordinated omission, per-hop budgets, hedging, queues and backpressure, runtime and operating-system tuning, stale-data guardrails |
 
 ### Architecture and modernization
 
@@ -133,6 +148,8 @@ Then write the thinnest slice, compile or type-check it at once, and let the com
 |---|---|---|
 | System design and services | `references/architecture-and-services.md` | Designing a system, sizing it, choosing a datastore, drawing service boundaries, sagas, multi-tenancy, deciding whether to split a monolith |
 | Legacy modernization | `references/legacy-modernization.md` | Assessing an old system, recovering its specification from code, characterization and golden-master tests, shadow traffic, data cutover, runtime and framework upgrades |
+| Ports and adapters | `references/hexagonal-architecture.md` | Separating business rules from frameworks and vendors inside one deployable, sharing a use case across entry points, mapping domain errors to responses in a given framework |
+| House style and coding standards | `references/house-style-and-standards.md` | Writing in an unfamiliar or legacy codebase, recording a project's conventions, enforcing standards with formatters, linters, architecture tests and ratchets |
 
 ## Front-end, web and mobile
 
@@ -156,6 +173,12 @@ Read `references/web-frontend-foundations.md` first for any browser front end; t
 | WordPress and WooCommerce | `references/wordpress.md` | Plugins and hooks, blocks and themes, REST routes, capabilities, nonces and escaping, query performance, object cache and WP-Cron, HPOS and block checkout, licensing |
 | Shopify | `references/shopify.md` | Themes and Liquid, theme app extensions, Admin API apps, cost-based limits, webhooks, checkout extensions and Functions, headless storefronts, API version upgrades |
 | Game development | `references/game-development.md` | Engine choice, fixed-step loop, frame budgets and profiling, Unity, Unreal and Godot specifics, multiplayer authority and prediction, save data, builds |
+| React performance and testing | `references/react-performance-and-testing.md` | A slow React screen (load, input, scrolling, hydration), React component tests with Testing Library and MSW, React build or runtime errors |
+| Vite and Bun | `references/vite-and-bun.md` | Vite configuration, plugins, dev server, dependency pre-bundling, library mode and Vitest; Bun as runtime, package manager, test runner or bundler |
+| Android and Kotlin Multiplatform | `references/android.md` | Native Android with Jetpack Compose: layers and modules, Flow-based UI state, Compose stability and side effects, Room, WorkManager, requirements by target API, R8; Kotlin Multiplatform and Compose Multiplatform |
+| Swift concurrency | `references/swift-concurrency.md` | Swift 6 language mode and 6.2 isolation settings, data-race diagnostics and their fixes, `@concurrent`, actors for caches and persistence |
+| SwiftUI and testable Swift | `references/swiftui-and-testing.md` | Observation-based models, view identity, navigation, previews, protocol-based dependency injection, Swift Testing |
+| Apple on-device language model | `references/apple-foundation-models.md` | Features built on the `FoundationModels` framework (iOS 26 and later): availability, sessions, context window, `@Generable` output, tools, guardrails, evaluation |
 
 ## Stack detector
 

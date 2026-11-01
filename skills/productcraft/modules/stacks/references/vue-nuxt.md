@@ -24,6 +24,7 @@ Read `vue`, `nuxt`, `pinia` and `vue-router` in the lockfile before relying on a
 - `watch` a specific source when you need the old value, lazy execution or async side effects; `watchEffect` when you want every dependency tracked automatically. Deep watching a large object is expensive; watch a getter of the field you need.
 - Large data you replace rather than mutate (API results, chart data) belongs in `shallowRef`. Wrap class instances and third-party objects (map, editor, chart instances) with `markRaw` so Vue does not proxy them.
 - The DOM is updated asynchronously; `await nextTick()` before reading layout after a state change.
+- `watchEffect` tracks only what it reads before its first `await`. Read every dependency synchronously at the top, or use `watch` with explicit sources.
 
 ## Components
 
@@ -33,6 +34,7 @@ Read `vue`, `nuxt`, `pinia` and `vue-router` in the lockfile before relying on a
 - `provide`/`inject` with an `InjectionKey<T>` for typed dependency passing; provide a `readonly()` view plus explicit update functions rather than letting consumers mutate shared state.
 - Template refs: `useTemplateRef<HTMLInputElement>("input")` (3.5+); the value is `null` until mounted.
 - Keys in `v-for` are stable ids from the data. Never use `v-if` and `v-for` on the same element; filter in a computed.
+- `v-model` on a computed needs both `get` and `set`; a getter-only computed drops the input. A component that forwards attributes with `v-bind="$attrs"` declares `defineOptions({ inheritAttrs: false })`, or the attributes land on both its root and the target.
 
 ## Composables
 
@@ -69,6 +71,8 @@ export function useSearch(query: MaybeRefOrGetter<string>) {
 
 For most server data, prefer a query library (TanStack Vue Query, Pinia Colada) or Nuxt's `useFetch` over hand-written composables like this one.
 
+With TanStack Vue Query, put the ref or getter itself in the query key (`["invoice", id]`), not `id.value`; an unwrapped value freezes the key and the query stops refetching when the id changes.
+
 ## Pinia
 
 - Prefer setup stores (`defineStore("cart", () => { ... })`): refs are state, computeds are getters, functions are actions. Return every piece of state, or SSR hydration and devtools miss it.
@@ -94,6 +98,14 @@ For most server data, prefer a query library (TanStack Vue Query, Pinia Colada) 
 - `<ClientOnly>` wraps components that need the browser; prefer rendering a placeholder of the same size to avoid layout shift.
 - Typecheck with `nuxi typecheck` (it runs `vue-tsc`).
 - Evaluate modules before adding them: maintenance, Nuxt major compatibility, and what they inject into every page.
+- **Rendering per route:** `routeRules` in `nuxt.config.ts` sets prerendering, `swr` or `isr` caching (ISR only where the host supports it), client-only rendering (`ssr: false`), headers and redirects per path pattern. Personalized routes never get a shared cache rule.
+- **Lazy hydration** (Nuxt 3.16 and later): `Lazy`-prefixed components accept `hydrate-on-visible`, `hydrate-on-idle` or `hydrate-on-interaction`; passing them new props hydrates them at once. Put lazy components that are not needed at first paint behind `v-if`, so their chunk is not downloaded either.
+- **Payload size:** `pick` or `transform` in `useFetch` and `useAsyncData` trims what is serialized into the page; it does not make the request cheaper. Keys may be getters (`` () => `article:${route.params.slug}` ``) so they follow the route.
+- **Run-once initialization** on the server (not again during hydration) belongs in `callOnce`, not in a `useAsyncData` handler with side effects.
+- **Cookies on server-side calls:** `$fetch` during server rendering does not forward the visitor's cookies. Use `useRequestFetch()` (or pass `useRequestHeaders(["cookie"])`) for calls that need the session, and relay a backend's `Set-Cookie` explicitly.
+- **Server routes that fetch URLs** run with the server's network access. Never build a server-side `$fetch` target from user input; allowlist hosts and paths (server-side request forgery).
+- `app.config.ts` is public, fixed at build time and reactive: theme tokens and feature flags only, never secrets. Server routes report errors with `createError` and a status; check whether your h3 version names the fields `statusCode` and `statusMessage` or `status` and `statusText`.
+- Use Nuxt's own `useRoute()`, and do not render server markup from the URL fragment (`route.hash`, or a `fullPath` that includes it): the fragment never reaches the server, so the markup cannot match after hydration.
 
 ## JavaScript-only projects with JSDoc
 
@@ -110,6 +122,7 @@ Teams that do not use TypeScript syntax can still get type checking:
 - Stub stores with `createTestingPinia()` from `@pinia/testing` (actions are stubbed unless `stubActions: false`).
 - Test composables with logic as plain functions; when they use lifecycle hooks, mount a tiny host component or use `effectScope`.
 - Nuxt: `@nuxt/test-utils` with the Nuxt Vitest environment and `mountSuspended` for components that use Nuxt composables; Playwright for full flows.
+- In Nuxt tests, `mockNuxtImport` replaces an auto-imported composable (once per import per file, with `vi.hoisted` for shared state), and `registerEndpoint` stubs a server route or a backend endpoint the app calls.
 
 ## Performance
 
@@ -123,12 +136,33 @@ Teams that do not use TypeScript syntax can still get type checking:
 - `v-html` is an HTML sink: only sanitized content (`web-frontend-foundations.md`).
 - Never compile templates from user input; ship the runtime-only build.
 - Secrets only in server `runtimeConfig` or server-side environment variables; `VITE_` and `NUXT_PUBLIC_` values are public.
+- Never resolve a component from a user-supplied string with `:is`, and never bind user input to `:style` as a raw string; map both through an allowlist.
 
 ## Upgrading
 
 - **Vue 2 to 3:** use the migration build (`@vue/compat`) to run the app with deprecation warnings, fix them module by module, replace Vuex with Pinia and filters with functions, then remove the compat build. Third-party Vue 2 component libraries are usually the blocker; check replacements first.
 - **Nuxt 3 to 4:** on the latest Nuxt 3, set `future: { compatibilityVersion: 4 }` and fix what breaks before switching; then `npx nuxi upgrade`. Review data-fetching code for key collisions and `null` checks that should now test `undefined`.
 - Follow `../../engineering-practices/references/large-refactors.md` for both.
+
+## Migrating a UI to Vue
+
+**From another framework or server-rendered pages,** move route by route, not file by file:
+
+- Keep URLs, API contracts and design tokens unchanged so old and new screens can run side by side. Mount Vue into one route or region (`createApp(Billing).mount("#billing")`), or send whole paths to the new app at the proxy.
+- Pin each screen's behavior first with end-to-end tests that do not care which framework renders it, and port component tests to the Testing Library variant for Vue so queries stay the same.
+- Map concepts, not syntax:
+
+| From | Vue 3 |
+|---|---|
+| Component state (`useState`, class fields) | `ref` |
+| Derived values (`useMemo`, getters) | `computed` |
+| Effects and lifecycle hooks | `watch`, `watchEffect`, `onMounted`, `onUnmounted` |
+| Context, dependency injection | `provide` and `inject` with typed keys |
+| Custom hooks, mixins, small services | Composables |
+| Redux, NgRx or another global store | Pinia for client state; a query cache for server data |
+| Two-way bound inputs | `v-model`, `defineModel` |
+
+**From design files or screenshots,** inventory the screens and their states (list, detail, form, loading, empty, error) and group the states of one screen into one page component. Use the component library the project already has (Element Plus, Vant, Vuetify, PrimeVue or another) consistently, extract a shared component only when a region repeats, and take colors, spacing and type from the project's tokens rather than measured pixels. Images do not show labels, focus order, keyboard behavior or error text; add them deliberately (`../../responsive-accessibility.md`). If a code generator or an outside model service does the first pass, pin its version, keep its keys out of the repository, review every generated file like any contribution, and do not send designs that contain customer data or unreleased work to an outside service without the owner's permission.
 
 ## Common breakages
 

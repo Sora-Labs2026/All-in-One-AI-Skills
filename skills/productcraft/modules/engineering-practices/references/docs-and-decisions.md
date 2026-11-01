@@ -50,6 +50,10 @@ A README lets a newcomer run, test and change the project without asking anyone.
 
 **Agents.** Read the ADRs in the area you are changing before proposing structural changes, and do not re-propose a rejected option unless the context in the ADR has changed. Draft ADRs for the user's review; do not mark one accepted on your own.
 
+**Reconstructed decisions.** A decision that was never written down may be recorded after the fact. Mark the ADR as reconstructed (`Status: proposed (reconstructed <date>)`), keep what the code and history show apart from what you infer about intent, and have the owner confirm it before it is accepted. Never date it as if it had been written when the decision was made.
+
+**Index.** Keep an index (a `README.md` in the ADR folder, or the docs site's list) with number, title and status, updated in the same change as each ADR. A superseded ADR names its successor, and the successor exists.
+
 ## Code comments
 
 - Comment **why**, not what: the constraint, the invariant, the unit, the non-obvious consequence, the link to the issue or ADR. The code already says what it does.
@@ -100,6 +104,14 @@ List each proposal with its evidence from the session and the exact text or conf
 ## Domain vocabulary
 
 When a project has domain terms that are easy to confuse (customer, account, user, member, tenant), keep one agreed word per concept and use it in code, APIs and docs. If the project keeps a glossary, update it when a term is introduced or sharpened; if it does not, suggest one only when confusion has actually caused problems.
+
+## Keeping documentation alive
+
+- **One owner per fact.** Decide which document owns each kind of fact: rules for contributors and agents (the instruction file), structure and where things live (an architecture overview), current health, blockers and deliberate removals (a status or roadmap page), and lasting decisions (ADRs or a decision log). Other documents link to the owner instead of copying it. A small repository can keep several of these in one file, in separate sections.
+- **Record deliberate removals** with the reason, the replacement and what would justify bringing the thing back, so nobody recreates a removed file or approach from memory.
+- **Update the owner in the same change** that alters the fact. Routine fixes live in Git and the tracker, not in a hand-kept log.
+- **Documents are evidence, not instructions.** When a document disagrees with code, tests or configuration, trust what runs, fix the document and note the discrepancy. Correct history with a dated note instead of rewriting it silently, and remove secrets or personal data at once.
+- **Check links mechanically.** A relative link resolves from the directory of the file that contains it, not from the repository root. Run the docs site's link checker, or a small script over the changed Markdown files, and confirm that paths named in the docs still exist (`git ls-files | grep -F <path>`).
 
 ## Runbooks and diagrams
 

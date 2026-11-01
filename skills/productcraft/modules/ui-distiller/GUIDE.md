@@ -68,6 +68,14 @@ Follow [references/design-rules.md](references/design-rules.md). When the projec
 - Maintain sufficient whitespace, but optimize information density for the task. Remove *empty bloat*, not useful breathing room.
 - Write concise, specific microcopy: verbs for actions; real labels and units for values; one short explanation when users need it. Don't erase persistent form labels or replace them with placeholder-only fields.
 
+Deeper references for specific work, read only when the task needs them:
+
+- Motion beyond a single transition (choosing the tool, tokens, springs, choreography, View Transitions and FLIP, a React animation library, drag, performance, reduced motion): [references/motion-engineering.md](references/motion-engineering.md).
+- Creating or auditing a design system (inventory, consolidation, token files, core components, preview page, lint and ratchet): [references/design-system-construction.md](references/design-system-construction.md).
+- A screen that works but feels unfinished (layout shifts, wrapping, optical alignment, states, touch and scroll details): [references/interface-polish.md](references/interface-polish.md).
+- Translucent "glass" surfaces on the web or Apple platforms, kept legible: [references/translucent-materials.md](references/translucent-materials.md).
+- Building a dashboard from questions to verified panels: [references/dashboard-building.md](references/dashboard-building.md).
+
 ### 5. Implement the redesign in the real project
 
 - Edit actual components, styles, layouts, text, responsive behavior, and shared tokens as needed. Use existing stack, components, routing, state management, theme and i18n conventions.
@@ -90,6 +98,7 @@ Read [references/quality-gate.md](references/quality-gate.md). Check, where tool
 6. **Responsive test:** Check narrow mobile, medium/tablet, and desktop if possible; also long text, mixed content, overflow, keyboard focus, loading, empty, and error states.
 7. **Engineering test:** Run existing appropriate formatter, lint, typecheck, test, and build commands. Report any failures honestly; do not misrepresent an unrun check.
 8. **Taste test:** Run the self-critique pass in [references/taste.md](references/taste.md) and, where a browser exists, its measurement snippet before and after.
+9. **Polish test:** For a screen that works but feels unfinished, run the pass in [references/interface-polish.md](references/interface-polish.md), including its layout-shift observer and `scripts/token_inventory.py`.
 
 If browser/screenshot tooling exists, compare before and after and refine the biggest remaining hierarchy or spacing flaw. If no browser exists, do not claim to have visually inspected the result.
 
@@ -108,6 +117,7 @@ When tradeoffs arise, prefer in this order:
 ## Special cases
 
 - **Dashboards:** Lead with actionable exceptions, real operational status, or the user's primary decision. Don't presume four equal KPI cards are useful. Retain necessary comparisons, units, baselines, and drill-downs.
+  Building one end to end (questions, panel specifications, data states, dashboards as code, verification): [references/dashboard-building.md](references/dashboard-building.md).
 - **Landing pages:** Lead with a plain product promise, relevant evidence, and the primary call to action. Reduce formulaic sales prose and repetitive feature cards. Preserve important caveats/pricing/trust cues.
 - **Tables and dense workspaces:** Keep density and scannability; don't convert sortable tables into towering cards. Make meaningful filters and batch actions discoverable.
 - **Forms:** Reduce framing, not guidance needed for correct input. Keep explicit labels, validation, help where necessary, progress, and confirmation.
@@ -128,3 +138,12 @@ After making edits, give a concise result, not a verbose self-congratulation:
 - **Taste:** defaults removed or kept with reasons, and the one distinctive move the screen makes.
 
 Do not call the redesign "perfect", "best", or "production ready" without evidence. The measure is user usefulness, not aesthetic confidence.
+
+## Scripts
+
+Both are standard-library Python, read-only and deterministic, with `--help`, `--json` and exit codes 0 (nothing to review or target met), 1 (findings or target missed) and 2 (usage error).
+
+- `scripts/token_inventory.py <src>`: counts raw colors (with near-duplicate clusters in OKLab), font sizes, off-scale spacing, radii, shadows, durations and z-index values in style sources, flags `transition: all` and `will-change: all`, and with `--baseline` fails when any count grew. Used by [references/design-system-construction.md](references/design-system-construction.md) and [references/interface-polish.md](references/interface-polish.md).
+- `scripts/glass_contrast.py --text <hex> --tint <hex> --alpha <a>` (or `--solve`): worst-case WCAG contrast of text on a translucent surface over any backdrop or listed backdrops, and the smallest tint opacity that keeps the target. Used by [references/translucent-materials.md](references/translucent-materials.md).
+
+Tests: `python3 -B -m unittest discover -s <productcraft>/modules/ui-distiller/tests -v`.

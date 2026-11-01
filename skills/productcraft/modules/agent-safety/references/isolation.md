@@ -99,3 +99,5 @@ Report every change to these files explicitly; they belong to risk class 11 in `
 - The mounted project can still be deleted or corrupted. The stop-check, commits and backups still apply inside the sandbox.
 - Named volumes keep agent history and settings between sessions. Removing them (`docker volume rm`) deletes data: ask first.
 - Isolation does not make a session safe to run against production. No production credentials go in, whatever the setup.
+
+Isolation is one layer. The rest of the minimum bar for agent setups (separate identities, approval boundaries, untrusted-content handling, memory, logging, budgets and process-group kill paths for unattended runs) is in `harness-hardening.md`.

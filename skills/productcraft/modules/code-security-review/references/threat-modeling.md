@@ -141,6 +141,7 @@ Turn the model into the work list for hunting. One cell is one entry surface, on
 - Group many similar routes into one surface when they share the same handler code and checks; split them when their checks differ.
 - Add a class to a surface only when the surface does what that class needs: builds queries, touches files, renders HTML, fetches URLs. A route that never touches the filesystem gets no path traversal cell.
 - Only cells with recorded evidence count as covered. A general remark that an area "looks fine" covers nothing.
+- During a full or multi-session audit, keep the matrix current in a coverage record, with each check's evidence, the revision it applies to and a fresh reviewer's gap review: [coverage tracking](coverage-tracking.md).
 
 ## Template for `security/threat-model.md`
 

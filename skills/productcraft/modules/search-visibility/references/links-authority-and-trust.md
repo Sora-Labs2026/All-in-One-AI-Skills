@@ -50,7 +50,7 @@ The disavow tool asks Google to ignore links to your site. Google's guidance is 
 
 ## Spam policies to recognize in an audit
 
-Google's spam policies were last broadly expanded in March 2024. Flag these when you see them, and never implement them:
+Google's spam policies were broadly expanded in March 2024, and back button hijacking was added in April 2026. Flag these when you see them, and never implement them:
 
 | Policy | How it shows up in an audit |
 |---|---|
@@ -65,6 +65,7 @@ Google's spam policies were last broadly expanded in March 2024. Flag these when
 | Scraped content | Copied or lightly modified content from other sites |
 | User-generated spam | Spam comments, forum posts or profiles left unmoderated |
 | Misleading functionality, malicious behavior | Fake tools or downloads, unwanted software, deceptive ads |
+| Back button hijacking (malicious practices, enforced from 15 June 2026) | Scripts that trap the Back button or send visitors to pages they never visited, often added by an ad platform or a third-party library rather than the site's own code; check every script that touches the History API |
 | Fake or incentivized reviews and ratings markup that does not reflect real reviews | Rating stars without visible, genuine reviews (`structured-data-and-social-cards.md`) |
 
 Programmatic page sets are acceptable only when every page carries unique, useful data a searcher would want; `programmatic-pages.md` shows how to tell the difference, and covers publishing on other sites.

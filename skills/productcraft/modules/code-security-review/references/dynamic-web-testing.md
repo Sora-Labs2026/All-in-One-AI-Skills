@@ -10,6 +10,7 @@ Content discovery and fuzzing are active testing. Under [LaunchGuard safe operat
 
 - **What** may be tested: exact hostnames, IP ranges, paths and parameters that are in scope, and what is out of scope.
 - **Where:** a staging or test environment that mirrors production, never production itself and never a system you do not own or are not authorized to test. Third-party services, shared infrastructure and other tenants are out unless the owner of each has authorized it.
+- **Bug bounty and disclosure programs** are the one case where production assets can be in scope: the program's published scope and rules are the written authorization, they bind exactly as written, and they add their own rate and data rules ([bug bounty practice](bug-bounty-practice.md)).
 - **When and how hard:** a window, and a rate ceiling the owner accepts.
 - **Who to contact** if something breaks, and the agreement to stop on their word.
 

@@ -57,6 +57,7 @@ for art in ET.fromstring(xml).iter("PubmedArticle"):
 **Query syntax that changes results:**
 
 - Field tags: `[ti]` title, `[tiab]` title and abstract, `[au]` author, `[mh]` MeSH heading (includes narrower terms), `[majr]` major MeSH topic, `[pt]` publication type, `[dp]` publication date, `[la]` language.
+- MeSH subheadings attach before the tag: `diabetes mellitus, type 2/drug therapy[mh]`. `[sh]` searches a subheading on its own, and `[nm]` searches substance names from the supplementary concept records.
 - PubMed rewrites untagged terms through automatic term mapping. Read `querytranslation` in the `esearch` response (or "Search details" on the website) to see what actually ran.
 - MeSH indexing lags weeks to months behind publication and some records are never indexed. Pair every MeSH term with free-text `[tiab]` synonyms or the newest papers disappear.
 - `humans[mh]` and similar filters remove records that are not yet indexed; apply them knowingly.

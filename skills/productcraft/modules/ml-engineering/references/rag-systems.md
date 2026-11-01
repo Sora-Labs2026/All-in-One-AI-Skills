@@ -75,6 +75,8 @@ Do not add raw cosine similarities to raw BM25 scores; they are on different sca
 
 **Reranking.** A cross-encoder reranker (open cross-encoder models such as the BGE rerankers, or a hosted rerank API) scores each (question, chunk) pair jointly and usually gives the largest quality gain after hybrid search. Rerank 50 to 100 candidates, keep the top 5 to 10. Measure the latency it adds.
 
+Check that the reranker earns its place: on the evaluation set its order should differ from the fused order on a meaningful share of questions and raise recall or answer quality at the cut-off you keep. A reranker that rarely reorders anything only adds latency and cost.
+
 **Query transformation** (use when evaluation shows the need):
 - Rewrite conversational follow-ups into standalone questions using the chat history.
 - Decompose multi-part questions into sub-queries.

@@ -16,6 +16,7 @@ This module covers the content and its evidence. File formats belong elsewhere: 
 - "Play devil's advocate", "what could go wrong", "red-team this plan", "what if...", "how would different stakeholders see this".
 - Diagrams for documents, a talk, a poster, formatting for a venue, an arXiv upload, a project page for a paper.
 - Articles, newsletters, status updates, announcements, incident notes, meeting notes or transcript analysis; market sizing or competitor research; family history; turning material into a learning plan; web research and extracting article text or transcripts.
+- Verifying a claim, image, video, organization, product or public event from open sources; using prediction-market prices as an information signal; text processing, search or NLP for a low-resource language or a non-Latin script such as Bengali.
 - **Not for** office file mechanics (`../documents/GUIDE.md`), engineering design docs and ADRs (`../engineering-practices/references/docs-and-decisions.md`), data pipelines and plots (`../data-engineering/GUIDE.md`), statistical modeling (`../ml-engineering/GUIDE.md`), security threat models of code (`../code-security-review/GUIDE.md`) or marketing copy for a product UI (`../ethical-persuasion.md`).
 
 ## Ground rules
@@ -26,7 +27,7 @@ This module covers the content and its evidence. File formats belong elsewhere: 
 4. **Respect rights and rules.** Copyright and licenses on text, figures and data; site terms and `robots.txt`; API rate limits and licenses; no paywall or login circumvention; publishing agreements before posting papers.
 5. **Authorship stays with the people.** The user's scientific ideas, results and decisions are theirs. Check venue and funder policies on AI assistance and disclosure; some funders and most journals restrict AI use in proposals, manuscripts and reviews.
 6. **Confidential material stays confidential.** Manuscripts and proposals under review, internal documents, meeting recordings and family records are processed only as the user is entitled to; ask when a policy might forbid it.
-7. **Privacy of people.** No profiles of colleagues from meeting data, no publication of living persons' details or DNA results without consent, inventor and author data aggregated, not profiled.
+7. **Privacy of people.** No profiles of colleagues from meeting data, no publication of living persons' details or DNA results without consent, inventor and author data aggregated, not profiled. Open-source investigation covers claims, organizations, products and events, never the location, identity or private life of private individuals.
 8. **General guidance, not professional advice.** Patent, legal, medical and investment questions get research support plus a clear pointer to a qualified professional; never present analysis as such advice.
 9. **Keys by name, costs agreed.** API keys live in environment variables the user sets (`../agent-safety/references/secrets.md`); paid search, research-agent or image services run only after the user agrees to the cost.
 10. **The user decides.** Stress tests, panels, reviews and evaluations end with options and evidence, not with the agent taking the decision.
@@ -59,6 +60,9 @@ This module covers the content and its evidence. File formats belong elsewhere: 
 | Family history and genealogy | `references/genealogy-research.md` | Plan before searching; full citations; evidence analyzed and conflicts resolved; privacy respected |
 | Turning material into practice; questions over the user's documents | `references/learning-plans.md` | Observable goal with baseline; one-week first cycle; answers cite passages |
 | Web research, deep-research tools, article text, transcripts | `references/web-research-and-extraction.md` | Every claim checked on its page; costs agreed; robots and terms respected; provenance saved |
+| Verifying claims, images, video, organizations, products, public events and infrastructure from open sources | `references/open-source-investigation.md` | Scope gate applied (no private individuals); originals preserved with hashes; location and time verified separately; independent origins counted; confidence on a defined scale |
+| Prediction-market prices as research signals, dashboards or alerts; risk review of workflows that read venue data | `references/prediction-market-signals.md` | Resolution criteria quoted; readings timestamped with spread and depth; graded against independent sources; no advice; read-only |
+| Text processing, search and NLP for a low-resource language or non-Latin script (worked example Bengali): Unicode normalization, graphemes, tokenization, corpora, evaluation | `references/low-resource-language-nlp.md` | Raw and normalized text kept; one normalization function everywhere; segmentation tested on the runtime; native-written test sets and native-speaker review |
 
 Several references often apply together. A review article typically needs `literature-search-and-review`, the API references, `appraising-evidence`, `scientific-writing`, `citations-and-reference-managers` and `study-checklists-and-registration`, in that order.
 
@@ -100,6 +104,7 @@ Use these when the reference is not needed; open it when a bullet raises a quest
 - **Stress tests:** steelman, three to five concrete challenges, no invented probabilities, end with changes and a verdict.
 - **Presenting:** one message, claim titles, text readable at distance, render and look at every page.
 - **Everyday writing:** the first line answers the reader; every number links to its source; owners and dates on actions.
+- **Investigations:** claims and organizations, never private people; preserve and hash originals; establish place and time separately; count origins, not copies.
 
 ## What to report
 

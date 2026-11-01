@@ -85,11 +85,19 @@ async def read_order(order_id: UUID, session: SessionDep, user: UserDep) -> Orde
 - `BackgroundTasks` run in the same process after the response is sent. They are lost if the process restarts and they share the worker's resources. Use them only for small, best-effort work such as a cache warm-up.
 - Anything that must happen (emails, payments, exports) goes to a real queue (Celery, arq, RQ, Dramatiq) with idempotent tasks and retries.
 
+## Authentication building blocks
+
+- `OAuth2PasswordBearer` only extracts a bearer token; your dependency must verify it: signature against a pinned list of algorithms, expiry, issuer and audience. Use PyJWT (`jwt.decode(token, key, algorithms=["RS256"], audience=..., issuer=...)`) or the identity provider's SDK; `python-jose`, used in older tutorials, has had long gaps in maintenance.
+- Hash passwords with Argon2 or bcrypt through a maintained library: `pwdlib` with Argon2 (what the FastAPI tutorial now uses) or `argon2-cffi` directly. `passlib` is unmaintained and breaks with recent `bcrypt` and Python releases.
+- `Base.metadata.create_all()` in a lifespan is for demos; real schemas come from Alembic migrations.
+- Since FastAPI 0.115, query parameters, headers and cookies can be declared as one Pydantic model (`filters: Annotated[InvoiceFilters, Query()]`), which keeps a list endpoint's filters validated in one place; forbid extra fields there too.
+
 ## Testing
 
 - `TestClient` (sync, based on httpx) is the simplest. Use it as a context manager (`with TestClient(app) as client:`) so the lifespan runs.
 - For async tests use `httpx.AsyncClient(transport=ASGITransport(app=app), base_url="http://test")`; that transport does not run the lifespan, so start it with a helper such as `asgi-lifespan`'s `LifespanManager` or create the resources in fixtures.
 - Database isolation: run each test inside a transaction that is rolled back, or use a fresh schema per test session against a real database in a container. SQLite does not behave like PostgreSQL for locking, JSON or constraints.
+- An in-memory SQLite URL gives every new connection its own empty database. If a quick test setup uses it anyway, share one connection (`poolclass=StaticPool`, `connect_args={"check_same_thread": False}`), and keep the PostgreSQL-specific tests on PostgreSQL. Fixture patterns for transactional isolation are in `python-testing.md`.
 - Use the async test plugin the project already has (`pytest-asyncio` or AnyIO's plugin), with its configured mode.
 - Assert status, body and headers; include one test per permission rule (owner, other user, anonymous).
 

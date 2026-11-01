@@ -63,6 +63,7 @@ Read this before writing or changing Kotlin: server code with Spring or Ktor, li
 - Ktor 3 (October 2024) changed I/O internals to kotlinx-io; check the major version before copying examples.
 - Test with `testApplication { }` and its client; no real port needed.
 - Blocking database libraries (Exposed with JDBC, plain JDBC) run inside `withContext(Dispatchers.IO)` or the library's suspended transaction helper.
+- Authentication, clients, limits, error mapping and server-side coroutine structure in depth, plus Exposed: `kotlin-server.md`.
 
 ## Testing
 
@@ -75,6 +76,7 @@ Read this before writing or changing Kotlin: server code with Spring or Ktor, li
 
 - Kotlin Multiplatform: shared code in `commonMain` uses only multiplatform libraries (kotlinx.serialization, kotlinx.datetime, the Ktor client, SQLDelight); platform specifics go behind `expect`/`actual` declarations or interfaces injected from each platform. Run each target's tests (`./gradlew allTests` or the per-target tasks).
 - Android with Jetpack Compose: state lives in a `ViewModel` exposed as `StateFlow`, collected with `collectAsStateWithLifecycle()`; composables receive state and callbacks (state hoisting) and stay free of side effects except through `LaunchedEffect` and friends. Run `./gradlew lint` and the unit tests; instrumented tests need an emulator or device the user provides. App-store releases are the user's step. Concerns every mobile app shares (configuration, offline sync, deep links, push, store releases) are in `mobile-cross-platform.md`.
+- Android architecture and modules, Flow-based UI state and one-off events, Compose stability and side effects, Room and WorkManager, requirements by target API, R8, Kotlin Multiplatform and Compose Multiplatform: `android.md`.
 
 ## Done when
 

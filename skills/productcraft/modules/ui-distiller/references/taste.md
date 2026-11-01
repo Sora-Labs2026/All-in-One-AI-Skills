@@ -128,6 +128,7 @@ Each entry: what to look for, the principle it breaks, what to do instead, and w
 **22. Glass over a busy background:** blurred translucent cards over photos, video, text or moving gradients.
 - Principle: the text's contrast depends on whatever passes behind it (`COL-12`), and stacked blurs cost rendering time.
 - Instead: an opaque surface, or glass only on floating chrome over calm imagery with a contrast floor and fallback (`STY-05`).
+- When glass stays: [translucent-materials.md](translucent-materials.md) computes the worst-case contrast and lists the fallbacks.
 
 **23. Stacked separators:** border, shadow and tint on the same element; a hairline between every row and section.
 - Instead: one separation method per level (`LAY-07`); dividers only at real boundaries. Data tables may keep row lines.
@@ -172,6 +173,7 @@ Each entry: what to look for, the principle it breaks, what to do instead, and w
 **34. Decorative motion by default:** the same fade-and-rise on every section, a hover lift on every card, bounce easing on everyday controls, loops that mean nothing, content invisible until a reveal fires, a preloader on a page that has already loaded, typewriter or scrambled headlines.
 - Principle: motion should explain a change or answer an action (`MOT-02`, `MOT-17`); repeated decoration costs attention on every visit.
 - Instead: one orchestrated moment at most (a load sequence or one reveal), feedback motion on interaction, content visible without scripts (`MOT-06`), honest loading (`FBK-19`), a reduced-motion path (`MOT-04`).
+- Implementing the motion that remains: [motion-engineering.md](motion-engineering.md).
 
 ### App screens
 

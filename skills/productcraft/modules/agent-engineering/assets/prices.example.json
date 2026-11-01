@@ -1,0 +1,11 @@
+{
+  "as_of": "2026-10-01",
+  "source": "ILLUSTRATIVE NUMBERS ONLY: copy the current rates from the provider's pricing page and update as_of",
+  "currency": "USD",
+  "unit_tokens": 1000000,
+  "models": {
+    "example-large-model": {"input": 5.0, "output": 25.0, "cache_write": 6.25, "cache_read": 0.5},
+    "example-small-model": {"input": 1.0, "output": 5.0, "cache_write": 1.25, "cache_read": 0.1},
+    "example-family-*": {"input": 2.0, "output": 10.0}
+  }
+}

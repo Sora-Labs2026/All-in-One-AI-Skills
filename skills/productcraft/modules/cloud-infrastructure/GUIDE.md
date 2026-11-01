@@ -2,7 +2,7 @@
 
 > ProductCraft module. Reach it through the router in `../../SKILL.md`; it is not a separate skill.
 
-**Purpose:** Write, review and operate infrastructure as code and cloud platforms without surprising anyone: Terraform and OpenTofu (style, modules, state, refactoring, tests, imports, Stacks, provider development), the AWS CDK and serverless event-driven design on AWS, Azure Verified Modules, machine images, Kubernetes, container images and registries, GPU and serverless compute platforms, static-site hosting, infrastructure pipelines and Azure DevOps, cloud cost and architecture, and the reliability practice around them (SLOs, incidents, monitoring stacks, chaos experiments). Each topic has one focused reference. Read only the ones the task touches.
+**Purpose:** Write, review and operate infrastructure as code and cloud platforms without surprising anyone: Terraform and OpenTofu (style, modules, state, refactoring, tests, imports, Stacks, provider development), the AWS CDK and serverless event-driven design on AWS, Azure Verified Modules, machine images, Kubernetes, container images and registries, GPU and serverless compute platforms, static-site hosting, infrastructure pipelines and Azure DevOps, cloud cost and architecture, the reliability practice around them (SLOs, incidents, monitoring stacks, chaos experiments, canary analysis, production readiness reviews), small self-hosted clusters, reproducible developer environments, and safe terminal sessions. Each topic has one focused reference. Read only the ones the task touches.
 
 **The hard rule: plan and diff only.** The agent reads, writes code, validates, plans, diffs and explains. It does not apply, deploy, destroy, import into state, change IAM, push images or approve runs unless the user gives an explicit go-ahead for that exact command on that exact target.
 
@@ -13,6 +13,7 @@ How a change is done (done-when checks, small diffs, verification, review) lives
 - The change touches `*.tf`, `*.tftest.hcl`, `*.tfquery.hcl`, `*.tfcomponent.hcl`, `*.tfdeploy.hcl`, `cdk.json`, Packer templates (`*.pkr.hcl`), Kubernetes manifests, Helm charts, Kustomize overlays, Dockerfiles, registry settings, `azure-pipelines.yml`, or CI jobs that plan or deploy infrastructure.
 - The user asks to provision, import, refactor, test or review cloud resources; build an image; deploy a site, a model endpoint or a service; reduce a cloud bill; design an architecture or a disaster recovery plan; define SLOs; write alerts; run a game day; or work with Azure DevOps boards, repos and pipelines.
 - A provider plugin is being written or its acceptance tests (`TestAcc*`) need running.
+- A release is rolling out or has just landed and needs watching; someone asks whether a service is ready for production; services run on a few self-managed machines; a project needs a reproducible development environment (`flake.nix`, `devcontainer.json`, a Compose file for local services); a program must be opened in a terminal window for the user, or commands run with exact reporting of what happened.
 - **Not for** application code that merely runs in the cloud (use the engineering workflow), a security audit (`../code-security-review/GUIDE.md`) or a launch review (`../launchguard/GUIDE.md`). Those modules call back here for infrastructure specifics.
 
 ## Ground rules
@@ -38,6 +39,7 @@ How a change is done (done-when checks, small diffs, verification, review) lives
 | Cloud CLIs | `describe-*`, `list-*`, `get-*`, `show`, cost queries (mind per-request charges) | Anything that creates, modifies, deletes, tags, shares or grants |
 | Packer, images, registries | `init`, `fmt`, `validate`, local `docker build`, scans | `packer build`, `docker push`, tag moves, lifecycle policies, deletions |
 | Azure DevOps | `az boards`, `repos`, `pipelines` list and show, WIQL queries | Work item and PR writes, runs, approvals, policies, variable groups |
+| Docker and Compose on own machines | `ps`, `logs`, `inspect`, `compose config`, `stats --no-stream` | `compose up`, `down`, `restart`, `pull`, `volume rm`, `system prune`, firewall changes, opening terminal windows for the user |
 
 ## The plan-and-diff loop
 
@@ -87,6 +89,11 @@ To apply:      <exact command>   Rollback: <how>
 | SLIs and SLOs, error budgets, incidents, postmortems, toil, capacity | `references/sre-practice.md` | Objectives agreed by the owner; incident actions approved one by one |
 | Prometheus, Alertmanager, Grafana, OpenTelemetry Collector, CloudWatch alarms | `references/monitoring-stack.md` | promtool, amtool and Collector validation ran; alerts carry runbooks |
 | Fault injection, chaos experiments, game days | `references/chaos-engineering.md` | Written hypothesis and abort plan; approved environment; faults removed afterwards |
+| Watching canaries and progressive rollouts; verifying a deploy | `references/canary-analysis.md` | Per-version signals compared over the same window; evidence large enough; smoke checks passed; advance or rollback decided by the user |
+| "Is this ready for production?"; operational readiness before a launch | `references/production-readiness-review.md` | Every area has evidence or a reason; blockers and accepted risks named; LaunchGuard run for security |
+| Nix development shells, dev containers, Compose for local services, sandboxed installer tests | `references/reproducible-dev-environments.md` | One command enters the environment; definition and lock committed; CI uses it; no secrets in committed files |
+| Services on a few self-managed machines: Compose, Swarm or lightweight Kubernetes, reverse proxy and TLS, backups | `references/small-self-hosted-clusters.md` | Only the proxy publishes ports, checked from outside; deploys by digest with rollback; restore tested |
+| Running commands and reporting their state; opening programs in terminal windows; interactive and long-running sessions | `references/terminal-sessions.md` | State words true and proven; argument arrays, no shell strings; windows opened only on request |
 
 Several references often apply together. A new service on Kubernetes typically needs `containers-and-registries`, `kubernetes-workloads`, `kubernetes-delivery` and `monitoring-stack`; a new AWS event pipeline needs `aws-serverless-eda`, `aws-cdk` or the Terraform references, `cloud-cost` and `iac-pipelines`.
 
@@ -123,3 +130,4 @@ Add these to the workflow module's report and to `../../assets/review-template.m
 - `../code-security-review/references/supply-chain-review.md` and `../code-security-review/references/ci-agent-workflows.md`: deep review of build inputs, base images, third-party modules and charts, and CI workflows.
 - `../agent-safety/references/vetting-extensions.md`: before installing a cloud MCP server, deploy CLI, Helm plugin, Packer plugin or pipeline extension.
 - `../builder-tools/GUIDE.md`: designing MCP tools that agents hosted on cloud platforms will call.
+- `../networking/GUIDE.md`: routers, switches and firewalls outside the cloud, the on-premises end of hybrid links, BGP diagnostics, and home or small-office networks.

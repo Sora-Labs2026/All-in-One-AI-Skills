@@ -68,6 +68,7 @@ Count intervals, not calendar years (2020 to 2025 is five). Distinguish historic
 - **Comparison table** on the attributes customers use to choose (price and pricing model, key capabilities, target segment, integrations, support, compliance), each cell with a source and date. Archive the pages you cite.
 - **Positioning:** where competitors cluster and where there is room; back it with customer evidence, not only a 2 by 2 chart.
 - Facts about named companies must be sourced and fair.
+- Scoping the set into tiers, scoring against rubrics written before scoring, and turning the comparison into a decision-led report: `../../business-ops/references/competitive-analysis.md`.
 
 ## Frameworks: use only what changes the conclusion
 

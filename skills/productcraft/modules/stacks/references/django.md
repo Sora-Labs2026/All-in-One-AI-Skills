@@ -2,6 +2,8 @@
 
 Read this when the project has `manage.py` and a settings module: models, queries, migrations, views, DRF APIs, admin, background tasks. General Python practice is in `python.md`; Django security settings and traps are in `../../code-security-review/references/language-pitfalls.md#django`; migration safety in general is in `../../engineering-practices/references/data-and-migrations.md`.
 
+Production settings hardening, Celery in depth (configuration, periodic tasks, monitoring, task tests) and fixes for common startup, migration and static-files errors are in `django-celery-and-security.md`; pytest practice is in `python-testing.md`.
+
 ## Orient first
 
 - **Version:** read Django's version from the lock file. 4.2 and 5.2 are long-term-support releases; 6.0 (December 2025) needs Python 3.12 or later. Check the release notes of the installed version before using an API you remember from another one.
@@ -36,6 +38,7 @@ python manage.py sqlmigrate <app> <number>   # the SQL a migration will run
 - Pin query counts in tests with `self.assertNumQueries(n)` (or `django_assert_num_queries` in pytest-django) on list endpoints, so a later change cannot reintroduce N+1 silently.
 - Fetch less: `only()`/`defer()` for wide rows, `values()`/`values_list(flat=True)` when you do not need model instances, `exists()` instead of `count() > 0`, `iterator(chunk_size=...)` for large scans.
 - **Atomic updates without races:** `Product.objects.filter(pk=pk).update(stock=F("stock") - 1)` instead of read, modify, `save()`. For read-then-decide logic, lock the row inside a transaction: `select_for_update()`. Work queues can use `select_for_update(skip_locked=True)`.
+- `instance.save()` writes every column, so two requests that change different fields of the same row overwrite each other's changes. Use `save(update_fields=[...])` when a change touches a few fields.
 - **Invariants belong in the database:** `UniqueConstraint` (including conditional ones), `CheckConstraint`, `NOT NULL`, foreign keys. Model validation (`full_clean`) does not run on `save()`, and `get_or_create`/`update_or_create` only stay race-free when a unique constraint backs the lookup.
 - **Bulk operations skip model logic:** `bulk_create`, `bulk_update`, `QuerySet.update()` and `QuerySet.delete()` do not call `save()`, do not send `pre_save`/`post_save` signals, and `update()` does not touch `auto_now` fields. Use them deliberately and set such fields yourself.
 - Index what you filter, order and join on (`Meta.indexes`, `db_index=True`); confirm with `QuerySet.explain()` on a copy of realistic data, never against production.

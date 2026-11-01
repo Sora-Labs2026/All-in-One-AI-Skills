@@ -86,6 +86,7 @@ Then rule out the alternatives: the failure already happens at the base (a pre-e
 
 - Severity uses the scale in `verification-and-review.md` (blocker, should fix, optional). Every finding has a location at the reviewed head, a concrete case, its effect, the smallest fix and an evidence label: demonstrated or reasoned.
 - No finding without a concrete case, no style preferences unless the project's conventions are broken, and no padding to look thorough. A clean change gets a short review that says so.
+- Before reporting, rule out the common false alarms listed at the end of `review-lenses.md` (handled one frame up, validated by callers, guarded in scope, intentional fire-and-forget). For depth in one dimension, such as silent failures, test gaps, types, comments, simplification, UI handlers or agent-written code, run the matching lens there.
 - End with what you checked and what you did not (`NOT VERIFIED: <check> - <why>`), then a verdict: ready, ready once the blockers are fixed, or not ready, with one sentence of reasoning.
 
 ## 10. Posting, only when asked

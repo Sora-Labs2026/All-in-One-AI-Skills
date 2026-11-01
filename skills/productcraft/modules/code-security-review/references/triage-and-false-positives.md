@@ -2,6 +2,8 @@
 
 Use this for anything that arrives as a claim rather than as your own trace: scanner leads (`security/sast-leads.json`), bug bounty and email reports, advisories against a dependency, findings from another agent or a previous audit, and a teammate's "I think this is exploitable". Phase 5 in [audit phases](audit-phases.md#phase-5-prove-or-discard) holds the core method (claim card, five questions, drop rules, outcomes); this file adds screening for outside reports, deeper checks per bug class, bias checks and batch handling.
 
+Writing a report as the researcher, for someone else's program, is the other side of this exchange: [bug bounty practice](bug-bounty-practice.md).
+
 ## 1. Restate the claim before judging it
 
 Fill in the claim card from audit phases in your own words: who triggers it, what they send, which check should have stopped it, what they end up with, and where in the code. Many reports fall apart here, because restated precisely the claim does not hang together, or it describes behavior without any harm. For an outside report, ask the reporter for the missing piece instead of inventing it.

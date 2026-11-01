@@ -47,6 +47,7 @@ Feature availability changes. Check Google's current search gallery before promi
 - **Specificity:** do the results answer the exact query, or broader topics? Broad results for a specific query can mean an underserved need.
 - **Mixed intent:** two clusters of page types (for example how-to guides and product pages) mean the engine is hedging. Pick the cluster you can serve best and say which you are targeting.
 - **Mismatch:** if your planned page type does not appear at all, either change the plan or have a clear reason to expect the engine to show something new.
+- **What to do about it:** deciding on a mismatch, deriving the jobs a page must do from evidence, and checking the first screen against the intent are in `search-experience.md`.
 
 ## What the top results have in common, and what they lack
 

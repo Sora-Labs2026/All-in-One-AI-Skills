@@ -131,3 +131,4 @@ Add these to the workflow module's report and to `../../assets/review-template.m
 - `../code-security-review/references/mobile-apps.md`: Supabase and Firebase rules reached directly from apps.
 - `../legal-ready/GUIDE.md`: privacy notices, processors and data deletion for data you pull from providers.
 - `../blockchain-dev/GUIDE.md`: chain RPC providers, indexers and wallet integrations.
+- `../business-ops/GUIDE.md`: operating these accounts for business work: customer billing cases and reconciliation, mailbox and message operations, transactional email practice, scheduled social publishing and the X API, keeping public and internal trackers in step.

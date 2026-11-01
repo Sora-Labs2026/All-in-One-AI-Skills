@@ -18,6 +18,8 @@ Ask, and write down the answers:
 
 - **Scan every commit, not only the current tree.** Use `../../code-security-review/scripts/code_audit.py history` (offline, never prints values) or Gitleaks if installed; procedures are in `../../code-security-review/references/secrets-and-dependencies.md`. Then run this module's `scripts/oss_readiness.py`, which lists tracked files with secret-like names, sensitive names that only exist in history, internal hostnames, private registries and the commit email domains that will be exposed.
 - **Look beyond credentials.** Internal hostnames and IP ranges, customer and employee names, internal ticket and chat links, personal data in fixtures and test recordings, production data samples, internal-only comments, vendored code under incompatible licenses, and generated files that embed paths or usernames.
+- **Files no text scan reads.** Secret scanners skip images, PDFs, office documents, archives, fonts and databases. List the binary files git tracks (`comm -23 <(git ls-files | sort) <(git grep -I -l '' | sort)`), have a person open each one, and strip metadata such as photo locations and document authors. Source maps (`*.map`) and unminified bundles also expose original paths and code.
+- **Prepare in a separate staging copy** (a fresh clone or an export in another directory), never by editing the private repository in place, and keep a short record of what was removed, replaced by a placeholder or moved into configuration. With the fresh-start route, fold every later fix into the single initial commit before publishing (amend it, then confirm `git rev-list --count HEAD` prints 1): a cleanup committed on top still publishes the secret in the commit below it.
 - **Rotate first.** Any real credential found anywhere in history is treated as exposed: it is rotated or revoked by its owner, whatever happens to the history afterwards.
 - **Decide how history ships.** Publishing the full history publishes everything ever committed, plus every commit author's email address. The options, for the owner to choose:
   - **Fresh start** (the most reliable when anything sensitive was ever committed): create a new repository from a clean copy of the current tree with a single initial commit, and keep the old one private and archived.
@@ -64,6 +66,7 @@ The test that matters: an outsider clones into an empty directory or container w
 - No private registries, internal mirrors or credentials needed to install (`oss_readiness.py` reports non-public registry hosts in lockfiles and package-manager configuration).
 - No dependencies on paths outside the repository, absolute local paths, or private submodules.
 - An example environment file with variable names and placeholder values only; the app starts or fails with a clear message without real secrets.
+- Every environment variable the code reads appears in that example file, and nothing in it is unused: compare the names found by `git grep -nE 'process\.env\.|os\.environ|os\.getenv|ENV\['` (or the stack's equivalent) with the file.
 - Tests that need internal services are skipped with a clear reason, or use local stand-ins.
 
 ## 6. CI and repository settings before the switch
