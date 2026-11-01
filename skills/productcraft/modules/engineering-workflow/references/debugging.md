@@ -71,6 +71,7 @@ Stop editing code when three fix attempts have failed, or when each fix exposes 
 - **Performance regressions:** measure before changing anything, with a profiler or timings on a fixed input; techniques are in `../../engineering-practices/GUIDE.md`.
 - **Production problems:** do not debug against production systems or real user data without permission. Reproduce locally with sanitized data.
 - **Fails only in CI:** compare CI and local versions, environment, caches, OS, locale and time zone, file-system case sensitivity and parallelism. Run the failing step locally in the same container image if the project provides one.
+- **Build, dependency-resolution or code-generation failures:** the recurring errors per ecosystem (Maven and Gradle, Android and Kotlin Multiplatform, Xcode and SwiftPM, Flutter, Go, Rust, CMake, .NET) and their usual fixes are in `../../stacks/references/build-failures.md`.
 - **Suspected regression from one specific change:** run the same reproduction at the change's base and head commits in two worktrees before blaming it, and rule out a pre-existing or merely exposed bug (`reviewing-changes.md`, step 8).
 
 ## Many failing tests at once

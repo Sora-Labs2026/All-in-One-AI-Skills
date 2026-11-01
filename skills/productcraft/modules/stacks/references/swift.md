@@ -35,6 +35,7 @@ swiftlint lint --strict <changed files>       # if configured
 - **Structured concurrency:** `async let` for a fixed number of parallel calls, `withThrowingTaskGroup` for a dynamic number; child tasks are cancelled when the parent fails. `Task { }` inherits the current actor; `Task.detached` does not, and is rarely needed.
 - **Cancellation is cooperative:** long loops call `try Task.checkCancellation()`; keep a handle to unstructured tasks and cancel them when their owner goes away. SwiftUI's `.task { }` modifier cancels automatically when the view disappears.
 - Fix concurrency warnings by modeling ownership (move state into an actor, make a type `Sendable`, mark main-actor code), not by adding `@preconcurrency`, `nonisolated(unsafe)` or `@unchecked Sendable` everywhere. Each such escape needs a comment explaining why it is safe.
+- Language modes and Swift 6.2 isolation settings, diagnostics with their fixes, `@concurrent`, and actor design for caches and persistence: `swift-concurrency.md`.
 
 ## Memory
 
@@ -58,6 +59,7 @@ swiftlint lint --strict <changed files>       # if configured
 - Give list rows stable identities (`Identifiable` with a real ID, not array indices), or rows animate and keep state incorrectly.
 - Keep business logic in models or services that unit tests can drive without the UI.
 - Previews use sample data and in-memory services; never live credentials.
+- Observation pitfalls, view identity, navigation, previews, and protocol-based dependency injection with Swift Testing: `swiftui-and-testing.md`. Features built on Apple's on-device language model: `apple-foundation-models.md`.
 
 ## Testing
 

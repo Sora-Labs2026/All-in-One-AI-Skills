@@ -2,6 +2,8 @@
 
 Read this before writing or changing C# on .NET: ASP.NET Core APIs, workers, libraries, EF Core data access, tests, Blazor. Security traps (deserialization, raw SQL, authorization attributes, antiforgery) are in `../../code-security-review/references/language-pitfalls.md#c-and-net`.
 
+F# on the same platform (compile order, domain modeling, `task` and `async`, interop, FsCheck and other test tools) is in `fsharp.md`; everything below applies to it as well.
+
 ## Orient first
 
 - **Target framework:** `<TargetFramework>` in each `.csproj` (`net8.0`, `net9.0`, `net10.0`; `net4x` means .NET Framework, a different runtime with different APIs). `global.json` pins the SDK and its `rollForward` policy; use the SDK it names.

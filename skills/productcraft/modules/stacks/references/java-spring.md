@@ -2,6 +2,8 @@
 
 Read this before writing or changing Java, especially Spring Boot services: configuration, web layer, transactions, JPA and Hibernate, tests, build files. Kotlin on the same stack is in `kotlin.md`; Spring Security and other Java security traps are in `../../code-security-review/references/language-pitfalls.md#java-and-spring`.
 
+Quarkus services are in `quarkus.md`. Deeper persistence problems (the persistence context, lazy loading errors, collection mappings, ID generation and batching, locking, keyset pagination, connection-pool settings) and MyBatis are in `jvm-persistence.md`. Build errors and their usual fixes: `build-failures.md`.
+
 ## Orient first
 
 - **Build tool:** always the wrapper (`./mvnw`, `./gradlew`) so the version matches CI. Gradle projects may use a version catalog (`gradle/libs.versions.toml`) and convention plugins in `buildSrc/` or `build-logic/`; add dependencies there, not ad hoc.
@@ -41,6 +43,8 @@ Read this before writing or changing Java, especially Spring Boot services: conf
 - **Errors:** a `@RestControllerAdvice` that maps domain exceptions to `ProblemDetail` (RFC 9457); enable `spring.mvc.problemdetails.enabled` for framework errors. Never return stack traces.
 - **Web layer:** request records with Jakarta Bean Validation (`@Valid @RequestBody CreateOrder body`), response records mapped from entities. Never bind requests to or return JPA entities.
 - **HTTP clients:** `RestClient` (6.1+) for blocking code, `WebClient` in reactive code; `RestTemplate` is in maintenance. Configure connect and read timeouts explicitly; the defaults can wait indefinitely.
+- **Other proxy-based annotations** (`@Async`, `@Cacheable`, `@Retryable`) share the limits of `@Transactional` below: self-invocation and private methods bypass them. `@Async` needs `@EnableAsync`; Boot's auto-configured executor has an unbounded queue by default, so set `spring.task.execution.pool.queue-capacity` (or use virtual threads), and handle failures through the returned `CompletableFuture` or an `AsyncUncaughtExceptionHandler`, or they are lost.
+- **Client addresses behind a proxy:** set `server.forward-headers-strategy` and the trusted proxies before using `request.getRemoteAddr()` for rate limits or audit; never parse `X-Forwarded-For` by hand. A per-client limiter map without eviction grows without bound; use a cache with expiry or limit at the gateway.
 
 ## Transactions
 
@@ -68,6 +72,7 @@ Read this before writing or changing Java, especially Spring Boot services: conf
 - **Schema:** Flyway or Liquibase owns it; `spring.jpa.hibernate.ddl-auto` is `validate` or `none` outside throwaway local setups. Migration safety: `../../engineering-practices/references/data-and-migrations.md`.
 - Cascades: `CascadeType.REMOVE` and `orphanRemoval` delete data; add them only on true parent-child aggregates.
 - See the SQL: `spring.jpa.show-sql` only locally; better, a datasource proxy or Hibernate statistics in tests to assert query counts.
+- `LazyInitializationException`, `MultipleBagFetchException`, unexpected `UPDATE`s or `SELECT`-before-`INSERT`, optimistic-lock retries, deep pagination and pool exhaustion: `jvm-persistence.md`.
 
 ## Concurrency: virtual threads or reactive
 
