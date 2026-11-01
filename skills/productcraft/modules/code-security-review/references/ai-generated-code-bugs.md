@@ -120,6 +120,7 @@ Severity is a starting point. Rate the real finding by exposure, impact and expl
 - **Impact:** forged or replayed events grant subscriptions, mark orders paid or trigger privileged actions.
 - **Fix:** verify with the provider SDK over the raw bytes, compare in constant time, reject stale timestamps, store processed event IDs under a unique constraint, and fetch critical objects from the provider API where its documentation recommends it (LaunchGuard gate 4 payment rules).
 - **Done when:** tests show unsigned, wrongly signed, replayed and duplicate events are each rejected or ignored with no side effect.
+- **Deeper:** multi-tenant receivers, cloud push subscriptions (SNS, Pub/Sub), queue consumers and event ordering are in [RPC and messaging](rpc-and-messaging.md#inbound-webhooks-and-push-subscriptions).
 
 ### AIG-08 Trusting client prices, quantities and discounts
 *A04:2021 · CWE-602, CWE-472*
