@@ -2,3 +2,5 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .DS_Store
+# local plugin eval output
+evals/results/

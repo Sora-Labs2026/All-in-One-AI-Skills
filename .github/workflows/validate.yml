@@ -31,3 +31,7 @@ jobs:
           done
       - name: dist/ bundle is up to date
         run: python3 scripts/build_dist.py --check
+      - name: Eval suite is well-formed
+        run: python3 scripts/check_evals.py
+      - name: Repository script tests
+        run: python3 -m unittest discover -s scripts/tests -v
