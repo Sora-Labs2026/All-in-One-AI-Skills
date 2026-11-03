@@ -1,6 +1,6 @@
 # ProductCraft
 
-**A Sora Labs Agent Skill** · version 1.11.1 · MIT License · part of [All-in-One AI Skills](../../README.md)
+**A Sora Labs Agent Skill** · version 1.12.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
 
 ProductCraft is one installable skill that teaches a coding agent to build, harden and ship software that **shows the important thing first, behaves honestly, is proven by checks that actually ran, works on every device, and is secure and lawful where it matters**. It routes each task to only the modules that task needs: a bug fix reads the engineering workflow, a table change reads the table guidance, an auth change reads the auth-defense module, a destructive command triggers the agent-safety stop-check, and a launch reads the security and legal-readiness reviews.
 
@@ -36,7 +36,7 @@ It is a working skill for real codebases, not a theme pack, legal service or sec
 | **Scientific computing** | Solvers, time integration and stability, discretization and meshes, verification and convergence studies, parameter studies with provenance, Slurm and profiling, SymPy, Astropy, quantum computing (Qiskit, Cirq, PennyLane, QuTiP), molecular dynamics, fluids, discrete-event simulation, materials and multi-objective optimization | `modules/scientific-computing/GUIDE.md` |
 | **Life sciences** | Sequences, reads and variants, genomic intervals, single-cell and bulk expression, phylogenetics and microbiome, proteins and docking, cheminformatics, mass spectrometry, metabolic models; public biological, chemical and clinical databases with their licenses; DICOM and pathology images, de-identification, physiological signals, EHR models, clinical document drafts, medical-device quality systems, lab automation and lab data platforms. Research output, never medical advice | `modules/life-sciences/GUIDE.md` |
 | **Research writing** | Literature search and systematic reviews, scholarly APIs, verified citations and BibTeX, source appraisal, hypotheses, scientific papers and reporting checklists, peer review, grants, stress tests for plans (devil's advocate, pre-mortem, red team, what-if), diagrams, posters, talks, paper pages, reports, newsletters, meeting notes, market and web research | `modules/research-writing/GUIDE.md` |
-| **Creative media** | Generative art with seeded editions, posters and canvas designs, infographics, themes and brand application, reveal.js decks, programmatic video, prompting image and video models, image enhancement, EPUB books, file and invoice organization | `modules/creative-media/GUIDE.md` |
+| **Creative media** | Generative art with seeded editions, posters and canvas designs, infographics, themes and brand application, reveal.js decks, programmatic video, directed motion graphics and loops rendered from code (deterministic frames, numeric briefs, frame-level review), prompting image and video models, image enhancement, EPUB books, file and invoice organization | `modules/creative-media/GUIDE.md` |
 | **Integrations** | Third-party APIs: OAuth and scopes, token storage, webhooks with signature checks and deduplication, idempotency, rate limits, pagination, sync and contract tests; Stripe, Plaid, Supabase, Google Workspace, Jira, Confluence, Linear, Outline and membership platforms | `modules/integrations/GUIDE.md` |
 | **Blockchain development** | Move on Aptos (language, objects and tokens, tests and the Move Prover, gas, CLI, TypeScript SDK, wallets, indexer) and Solana RPC; testnet first, no keys in chat, no investment advice | `modules/blockchain-dev/GUIDE.md` |
 | **Search visibility** | Being found in search and AI answers: crawl and index controls (`robots.txt`, `noindex`, sitemaps, canonicals, status codes and redirects), JavaScript rendering, faceted navigation and pagination, site migrations, `hreflang`, on-page elements, site structure and internal links, structured data with dated feature status, Open Graph cards, Search Console, analytics and log measurement, rank tracking, links, authority and trust; keyword and topic research, results-page and competitor analysis, people-first writing and refreshes, E-E-A-T review, AI answer engines, entity clarity, programmatic pages; no spam tactics; an offline checker for built pages, `robots.txt` and sitemaps | `modules/search-visibility/GUIDE.md` |
@@ -93,6 +93,7 @@ The pattern library covers foundations, feedback, forms, interaction, navigation
 | Genomics, single-cell, cheminformatics, biomedical databases, medical imaging, clinical documents, lab automation | Life sciences |
 | Literature reviews, citations, scientific writing, peer review, grants, stress-testing a plan, posters and talks, reports and research | Research writing |
 | Generative art, posters, infographics, themes, reveal.js, programmatic video, image prompts and enhancement, EPUB, organizing files | Creative media |
+| Motion graphics, kinetic type, animated loops or 3D shots made in code (GSAP, Three.js, Remotion, Blender) | Creative media (directed motion reference, render-contract lint, timing calculator) |
 | Stripe, Plaid, Supabase, Google Workspace, Jira, Linear and other third-party APIs, OAuth and webhooks | Integrations |
 | Move on Aptos, Solana RPC, dApps and wallets | Blockchain development |
 | Pages missing from search, a search traffic drop, Search Console reports, `robots.txt`, sitemaps, canonicals, redirects, rendering | Search visibility (crawl, index and rendering references) |
@@ -317,6 +318,7 @@ LaunchGuard ships a 20-control baseline in `modules/launchguard/references/secur
 | `modules/scientific-computing/scripts/resource_check.py`, `convergence_order.py` | Usable cores, memory, disk and GPU signs without running other programs; observed order of convergence, Richardson extrapolation and grid convergence index |
 | `modules/life-sciences/scripts/interval_check.py`, `counts_check.py`, `bio_id_check.py`, `dicom_phi_check.py` | Interval files and coordinate conversion; count matrices and sample sheets before differential expression; identifier shapes across 47 types; identifying data left in DICOM headers, values hidden |
 | `modules/research-writing/scripts/bib_check.py` | Offline BibTeX check: duplicate keys and DOIs, missing fields per entry type, malformed DOIs and years, unbalanced braces, cited versus defined keys |
+| `modules/creative-media/scripts/motion_contract_check.py`, `motion_timing.py` | Lint animation code for wall-clock time, unseeded randomness, timers, unseekable timelines, unloaded fonts and a missing frame hook; turn milliseconds, beats, loops, GIF delays and reading holds into whole frames |
 | `modules/creative-media/scripts/organize_plan.py` | Plans file moves by type and date, or checks a rename list, with collisions resolved; never touches files; can emit apply and undo scripts that never overwrite |
 | `modules/integrations/scripts/integration_scan.py` | Finds risky integration code: unverified or re-serialized webhooks, plain digest comparisons, payments without idempotency keys, credentials in URLs, broad scopes, server secrets in client modules |
 | `modules/blockchain-dev/scripts/move_check.py` | Finds risky Move packages and dApp repositories: tracked key files, public functions returning refs or signers, exposed randomness, moving-branch dependencies |
@@ -350,7 +352,7 @@ python3 -m unittest discover -s tests -v
 for t in modules/*/tests; do python3 -m unittest discover -s "$t" -v; done
 ```
 
-The suites hold 1266 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
+The suites hold 1296 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
 
 ## Package layout
 
@@ -389,7 +391,7 @@ productcraft/
 │   ├── scientific-computing/    # numerical methods, HPC, scientific libraries; resource and convergence checks
 │   ├── life-sciences/           # bio and chem analysis, databases, clinical, lab; interval, counts, ID, DICOM checks
 │   ├── research-writing/        # literature, citations, papers, reviews, talks; BibTeX checker
-│   ├── creative-media/          # art, posters, video, images, EPUB, file organization; move planner
+│   ├── creative-media/          # art, posters, video, motion graphics, images, EPUB, file organization; move planner, motion lint
 │   ├── integrations/            # third-party APIs, OAuth, webhooks; integration scanner
 │   ├── blockchain-dev/          # Move on Aptos and Solana; Move checker
 │   ├── search-visibility/       # SEO and AI answers: crawl, index, structure, markup, measurement, content; checker and drift diff
