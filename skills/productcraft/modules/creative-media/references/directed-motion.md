@@ -117,7 +117,7 @@ Position and scale may overshoot. Opacity and color must never overshoot: clamp 
 | Small feedback | 100-200 ms |
 | General moves | 200-500 ms |
 | Hero reveals | 600-900 ms |
-| Exits | About half to two-thirds of the matching entrance |
+| Exits | 40-50% shorter than the matching entrance, so 50-60% of its length (Material 3 pairs a 400 ms emphasized entrance with a 200 ms exit) |
 
 **Stagger**
 
@@ -148,10 +148,10 @@ Start the next element when the previous one is 30-50% complete.
 
 ## 4. The production loop
 
-1. Write the brief (section 2).
+1. Write the brief (section 2). Run the agent at a medium reasoning-effort setting; raise it only when a named problem needs deeper reasoning, because higher settings cost more time and money without improving routine shots.
 2. Build the first version against the render contract.
 3. **Prove determinism.** Render one mid-shot frame twice and compare the hashes. They must match.
-4. Render the key frames as stills, plus a **contact sheet** of 12-24 evenly spaced frames on one image:
+4. Render the key frames as stills, plus a **contact sheet**: 12-24 frames on one image. Space them evenly by default; once the shots are known, use each shot's key frames or beats instead:
    ```bash
    ffmpeg -i draft.mp4 -vf "select='not(mod(n\,15))',scale=480:-1,tile=6x4" -frames:v 1 -update 1 sheet.png
    ```
@@ -179,10 +179,10 @@ Playwright's clock API (`page.clock.install()`, then `pauseAt` and `runFor`) can
 
 **Motion blur** for 3D or fast moves (subframe averaging):
 
-- Render k subframes within each frame's shutter interval and average them, either in the renderer or with FFmpeg's `tmix=frames=k`.
-- A 180-degree shutter averages subframes across half of each frame interval.
+- A 180-degree shutter exposes half of each frame interval. Render k subframes spread across that half and average them; start with k = 4 and raise it only when fast motion still strobes. `motion_timing.py blur` prints the subframe times.
+- Average in linear light: convert sRGB to linear, average, convert back. Averaging gamma-encoded pixels (FFmpeg's plain `tmix`) darkens bright edges, so blend inside the renderer, or convert to a linear format before `tmix`.
 
-**Remotion** uses `useCurrentFrame()` and its own renderer; see [remotion-video.md](remotion-video.md). **HTML-to-video frameworks** built for agents do the same seek-and-capture loop for plain HTML. Check their license and that their animations are seekable.
+**Remotion** uses `useCurrentFrame()` and its own renderer; see [remotion-video.md](remotion-video.md). **HyperFrames** (Apache-2.0) does the same seek-and-capture loop for plain HTML: write HTML, CSS and JavaScript with timing attributes and seekable animations (GSAP, CSS, Three.js), and it renders a deterministic MP4 through headless Chrome and FFmpeg. Check the current license file and that every animation is seekable.
 
 **Three.js:**
 
@@ -202,7 +202,7 @@ Playwright's clock API (`page.clock.install()`, then `pauseAt` and `runFor`) can
 
 **Sync:**
 
-- Place each sound on its visual event or up to one frame after it, never before.
+- Land each hit exactly one frame after its visual event. Never place a sound before its picture.
 - Audio that leads the picture is noticed sooner than audio that lags (ITU-R BT.1359).
 - Measure the decoded audio against frame numbers, not the timeline in an editor.
 
@@ -234,7 +234,16 @@ ffmpeg -framerate 30 -i frames/%05d.png -c:v libx264 -pix_fmt yuv420p -crf 18 -p
 - Build a palette with `palettegen` and apply it with `paletteuse`.
 - GIF delays are whole hundredths of a second, and browsers raise delays under 2 hundredths to about 10. So 50, 25 and 20 fps time exactly, and 30 fps does not.
 - `motion_timing.py gif` spreads the remainder across frames so the loop stays on the beat.
-- Respect each platform's size, length, frame-rate and aspect limits, and check them in its current documentation.
+- Respect each platform's size, length, frame-rate and aspect limits.
+
+**Example: posting to X** (limits as published in 2026; check the current help and API docs before the final export):
+
+| Format | Limits |
+|---|---|
+| MP4 | Up to 140 s and 512 MB on a standard account (longer on paid tiers); aspect 1:3 to 3:1; up to 60 fps; recommended 1280×720, 720×1280 or 720×720 |
+| GIF | Up to 15 MB on the web, 350 frames and 1280×1080; width × height × frames at most 300 million |
+
+Useful canvases are 1080×1080, 1920×1080 and 1080×1920. Check a GIF before export with `motion_timing.py gif` and the pixel budget (width × height × frames).
 
 ## 7. Tools by role
 
@@ -245,16 +254,16 @@ These tools are free for individuals and small teams. Read each license, because
 | UI motion, kinetic type, timelines | GSAP | Free under its own no-charge license (since April 2025), not an open-source license. The terms forbid use in no-code visual animation builders that compete with its owner. Read the current text before shipping a builder tool |
 | 3D in the browser | Three.js | MIT |
 | Video composed in React | Remotion | Source-available: free for individuals and very small companies; larger companies need a company license (see [remotion-video.md](remotion-video.md)) |
-| Plain HTML rendered to video | An HTML-to-video renderer built on headless Chrome and FFmpeg | Check the license file (several are Apache-2.0) and that every animation is seekable |
+| Plain HTML rendered to video | HyperFrames (headless Chrome and FFmpeg, with a CLI) | Apache-2.0. Check that every animation is seekable |
 | 3D models, rigs, renders | Blender | GPL for the program; your renders and files are yours |
-| Agent control of a Blender scene | A Blender MCP bridge | It runs Python inside Blender, which is code execution. Review it, keep it local and never open untrusted `.blend` files with auto-run on. See [../../agent-safety/GUIDE.md](../../agent-safety/GUIDE.md) |
+| Agent control of a Blender scene | The community Blender MCP server, which creates and edits objects and materials, runs Python and captures the viewport | Check its license. It runs Python inside Blender, which is code execution. Review it, keep it local and never open untrusted `.blend` files with auto-run on. See [../../agent-safety/GUIDE.md](../../agent-safety/GUIDE.md) |
 | Agent sees its own render | Chrome DevTools MCP, or Playwright | Apache-2.0. Use it for screenshots, console errors and performance traces of the page |
 | Encode, inspect, deliver | FFmpeg | LGPL or GPL depending on the build. Encoder licensing matters only if you redistribute FFmpeg itself |
 | Voice-over | An open text-to-speech model such as Chatterbox | MIT, and its outputs carry an imperceptible watermark. Clone a voice only with the speaker's documented consent |
 | Captions | faster-whisper | MIT. Proofread names and terms; captions are part of accessibility |
 | Generated images or video | ComfyUI | GPL-3.0. Custom nodes are third-party code, so vet them like any dependency. Follow [generation-prompting.md](generation-prompting.md) |
 | Reference clips and audio | yt-dlp | Unlicense. Download only what you have the right to use, under the site's terms. References stay private and never appear in the output (see [reference-look-measurement.md](reference-look-measurement.md)) |
-| Design critique of frames | ProductCraft's own taste pass and quality gate | See [../../ui-distiller/references/taste.md](../../ui-distiller/references/taste.md) and [../../ui-distiller/references/quality-gate.md](../../ui-distiller/references/quality-gate.md) |
+| Design critique of frames | ProductCraft's own taste pass and quality gate; an external design-audit plugin only after vetting it ([../../agent-safety/references/vetting-extensions.md](../../agent-safety/references/vetting-extensions.md)) | See [../../ui-distiller/references/taste.md](../../ui-distiller/references/taste.md) and [../../ui-distiller/references/quality-gate.md](../../ui-distiller/references/quality-gate.md) |
 
 Ask before installing any of these, and pin versions in the project.
 
@@ -269,7 +278,7 @@ Ask before installing any of these, and pin versions in the project.
 | Text is hard to read | Moving background, or a short hold | Measure contrast on the hold frames; lengthen the hold; add a scrim |
 | Two renders differ | Wall-clock time, unseeded randomness or timers | Run `motion_contract_check.py`; hash the same frame twice |
 | A late font swap | Fonts not loaded before frame 0 | Wait for `document.fonts.ready` and a ready flag |
-| Sound out of sync | Timing set in an editor timeline | Measure the decoded audio against frame numbers; place hits on the frame or one frame after |
+| Sound out of sync | Timing set in an editor timeline | Measure the decoded audio against frame numbers; land each hit one frame after its picture |
 | GIF loop drifts off the beat | 30 fps cannot be timed in hundredths | Use 25 or 50 fps, or the spread delays from `motion_timing.py gif` |
 
 ## Done when
@@ -279,6 +288,6 @@ Ask before installing any of these, and pin versions in the project.
 - [ ] A contact sheet and the key stills were viewed at full size. The notes name frames, and each note was fixed and re-checked.
 - [ ] Holds meet the reading time; text contrast is at least 4.5:1 on the hold frames; there are no more than three flashes per second; captions exist for any speech.
 - [ ] The loop seam is invisible (frames 0 to N-1, whole cycles), when the piece loops.
-- [ ] Sound lands on its frame or one after, and loudness and true peak are measured for the target platform.
+- [ ] Each hit lands one frame after its picture, and loudness and true peak are measured for the target platform.
 - [ ] `ffprobe` confirms the size, frame rate, frame count, duration, codec and pixel format. GIF delays add up to the intended loop length.
 - [ ] Credits list every font, model, voice, sound and tool whose license needs it ([../GUIDE.md](../GUIDE.md), "Credits and provenance").

@@ -176,7 +176,7 @@ python3 <productcraft>/modules/creative-media/scripts/organize_plan.py inbox --f
 
 `scripts/motion_contract_check.py` is a read-only, standard-library lint for animation code (HTML, JS, TS, CSS). It flags what makes rendered frames differ from run to run or impossible to seek: wall-clock reads and unseeded randomness (errors); timers, delta clocks, autoplaying media and CSS transitions; GSAP timelines never paused or seeked; web fonts with no ready wait; and a missing way to freeze an exact frame. Silence a deliberate line with a `motion-ok` comment. Exit codes: 0 clean, 1 findings, 2 usage error.
 
-`scripts/motion_timing.py` turns direction into whole frames: milliseconds to frames, a beat grid computed from absolute time (with a drift warning), loop length and whether each cycle fits it, GIF delays in hundredths that add up to the exact loop, and minimum reading holds. Exit codes: 0 ok, 1 warnings, 2 usage error.
+`scripts/motion_timing.py` turns direction into whole frames: milliseconds to frames, a beat grid computed from absolute time (with a drift warning), loop length and whether each cycle fits it, GIF delays in hundredths that add up to the exact loop, motion-blur subframe times for a given shutter angle, and minimum reading holds. Exit codes: 0 ok, 1 warnings, 2 usage error.
 
 ```bash
 python3 <productcraft>/modules/creative-media/scripts/motion_contract_check.py motion/ --json

@@ -15,6 +15,10 @@ Subcommands:
                                            exact loop length; warns about delays browsers clamp
   hold   --words W [--fps F] [--base 0.5] [--per-word 0.3]
                                            minimum reading hold for on-screen text
+  blur   --fps F [--subframes 4] [--shutter 180] [--frame 0]
+                                           subframe times for motion blur: k samples spread evenly over
+                                           the open-shutter part of each frame (180 degrees = half a frame);
+                                           average them in linear light
 
 Add --json for machine-readable output. Exit codes: 0 ok, 1 a warning (drift,
 a cycle that does not fit, clamped GIF delays), 2 usage error.
@@ -152,6 +156,23 @@ def cmd_hold(a):
     return data, [], lines
 
 
+def cmd_blur(a):
+    fps = to_fraction(a.fps)
+    open_part = to_fraction(a.shutter) / 360            # share of the frame interval the shutter is open
+    k = a.subframes
+    offsets = [open_part * (Fraction(2 * i + 1, 2 * k)) for i in range(k)]   # centre of each slice
+    times = [(a.frame + o) / fps for o in offsets]
+    warnings = []
+    if k < 2:
+        warnings.append("one subframe gives no blur; use 4 or more")
+    lines = [f"frame {a.frame} at {a.fps:g} fps, {a.shutter:g}-degree shutter ({float(open_part) * 100:.0f}% of the frame open), "
+             f"{k} subframes:"]
+    lines += [f"  subframe {i}: t = {float(tm):.6f} s (frame + {float(o):.4f})" for i, (tm, o) in enumerate(zip(times, offsets))]
+    lines.append("render each, convert to linear light, average, convert back to sRGB")
+    return {"fps": a.fps, "frame": a.frame, "shutter_degrees": a.shutter, "subframes": k,
+            "offsets_frames": [float(o) for o in offsets], "times_s": [float(x) for x in times]}, warnings, lines
+
+
 def positive(x):
     v = float(x)
     if v <= 0:
@@ -177,6 +198,9 @@ def main(argv=None):
     p = sub.add_parser("hold"); p.add_argument("--words", type=int, required=True)
     p.add_argument("--fps", type=positive); p.add_argument("--base", type=float, default=0.5)
     p.add_argument("--per-word", type=float, default=0.3)
+    p = sub.add_parser("blur"); p.add_argument("--fps", type=positive, required=True)
+    p.add_argument("--subframes", type=int, default=4); p.add_argument("--shutter", type=float, default=180)
+    p.add_argument("--frame", type=int, default=0)
     for sp in sub.choices.values():
         sp.add_argument("--json", action="store_true", help="print JSON")
     try:
@@ -192,7 +216,10 @@ def main(argv=None):
     if a.cmd == "hold" and a.words < 0:
         print("--words must be 0 or more", file=sys.stderr)
         return 2
-    data, warnings, lines = {"frames": cmd_frames, "beats": cmd_beats, "loop": cmd_loop,
+    if a.cmd == "blur" and (a.subframes < 1 or not 0 < a.shutter <= 360 or a.frame < 0):
+        print("--subframes must be at least 1, --shutter between 0 and 360, --frame 0 or more", file=sys.stderr)
+        return 2
+    data, warnings, lines = {"blur": cmd_blur, "frames": cmd_frames, "beats": cmd_beats, "loop": cmd_loop,
                              "gif": cmd_gif, "hold": cmd_hold}[a.cmd](a)
     if a.json:
         print(json.dumps({"version": VERSION, "command": a.cmd, **data, "warnings": warnings}, indent=2))

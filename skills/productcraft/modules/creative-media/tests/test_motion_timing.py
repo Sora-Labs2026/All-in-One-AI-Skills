@@ -96,6 +96,23 @@ class GifTests(unittest.TestCase):
         self.assertEqual(mt.compress([3, 3, 4, 3]), "3x2 4 3")
 
 
+class BlurTests(unittest.TestCase):
+    def test_default_four_subframes_over_half_a_frame(self):
+        code, data = run_json("blur", "--fps", "25")
+        self.assertEqual(code, 0)
+        self.assertEqual(data["offsets_frames"], [0.0625, 0.1875, 0.3125, 0.4375])
+        self.assertAlmostEqual(data["times_s"][3], 0.4375 / 25)
+
+    def test_frame_offset_and_full_shutter(self):
+        _, data = run_json("blur", "--fps", "30", "--frame", "10", "--subframes", "2", "--shutter", "360")
+        self.assertEqual(data["offsets_frames"], [0.25, 0.75])
+        self.assertAlmostEqual(data["times_s"][0], 10.25 / 30)
+
+    def test_single_subframe_warns_and_bad_shutter_fails(self):
+        self.assertEqual(run("blur", "--fps", "30", "--subframes", "1")[0], 1)
+        self.assertEqual(run("blur", "--fps", "30", "--shutter", "400")[0], 2)
+
+
 class HoldAndUsageTests(unittest.TestCase):
     def test_hold(self):
         code, data = run_json("hold", "--words", "9", "--fps", "30")

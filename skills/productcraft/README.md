@@ -1,6 +1,6 @@
 # ProductCraft
 
-**A Sora Labs Agent Skill** · version 1.12.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
+**A Sora Labs Agent Skill** · version 1.12.1 · MIT License · part of [All-in-One AI Skills](../../README.md)
 
 ProductCraft is one installable skill that teaches a coding agent to build, harden and ship software that **shows the important thing first, behaves honestly, is proven by checks that actually ran, works on every device, and is secure and lawful where it matters**. It routes each task to only the modules that task needs: a bug fix reads the engineering workflow, a table change reads the table guidance, an auth change reads the auth-defense module, a destructive command triggers the agent-safety stop-check, and a launch reads the security and legal-readiness reviews.
 
@@ -318,7 +318,7 @@ LaunchGuard ships a 20-control baseline in `modules/launchguard/references/secur
 | `modules/scientific-computing/scripts/resource_check.py`, `convergence_order.py` | Usable cores, memory, disk and GPU signs without running other programs; observed order of convergence, Richardson extrapolation and grid convergence index |
 | `modules/life-sciences/scripts/interval_check.py`, `counts_check.py`, `bio_id_check.py`, `dicom_phi_check.py` | Interval files and coordinate conversion; count matrices and sample sheets before differential expression; identifier shapes across 47 types; identifying data left in DICOM headers, values hidden |
 | `modules/research-writing/scripts/bib_check.py` | Offline BibTeX check: duplicate keys and DOIs, missing fields per entry type, malformed DOIs and years, unbalanced braces, cited versus defined keys |
-| `modules/creative-media/scripts/motion_contract_check.py`, `motion_timing.py` | Lint animation code for wall-clock time, unseeded randomness, timers, unseekable timelines, unloaded fonts and a missing frame hook; turn milliseconds, beats, loops, GIF delays and reading holds into whole frames |
+| `modules/creative-media/scripts/motion_contract_check.py`, `motion_timing.py` | Lint animation code for wall-clock time, unseeded randomness, timers, unseekable timelines, unloaded fonts and a missing frame hook; turn milliseconds, beats, loops, GIF delays, motion-blur subframes and reading holds into whole frames |
 | `modules/creative-media/scripts/organize_plan.py` | Plans file moves by type and date, or checks a rename list, with collisions resolved; never touches files; can emit apply and undo scripts that never overwrite |
 | `modules/integrations/scripts/integration_scan.py` | Finds risky integration code: unverified or re-serialized webhooks, plain digest comparisons, payments without idempotency keys, credentials in URLs, broad scopes, server secrets in client modules |
 | `modules/blockchain-dev/scripts/move_check.py` | Finds risky Move packages and dApp repositories: tracked key files, public functions returning refs or signers, exposed randomness, moving-branch dependencies |
@@ -352,7 +352,7 @@ python3 -m unittest discover -s tests -v
 for t in modules/*/tests; do python3 -m unittest discover -s "$t" -v; done
 ```
 
-The suites hold 1296 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
+The suites hold 1299 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
 
 ## Package layout
 

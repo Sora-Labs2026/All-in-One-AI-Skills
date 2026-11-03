@@ -4,7 +4,7 @@ description: Sora Labs all-in-one skill: one router over task-specific modules f
 license: MIT
 metadata:
   author: Sora Labs
-  version: "1.12.0"
+  version: "1.12.1"
 ---
 
 # ProductCraft: one skill, purpose-built modules
