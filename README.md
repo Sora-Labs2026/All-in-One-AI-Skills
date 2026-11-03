@@ -10,7 +10,7 @@ Each skill in this repository is a folder of instructions, references, scripts a
 
 | Skill | Version | What it does |
 |---|---|---|
-| [**ProductCraft**](skills/productcraft/README.md) | 1.11.1 | One routed skill to build, harden and ship software, plus the data, science, research and media work around it: engineering workflow and practices with advanced testing and open-source readiness, UI design with a rulebook, pattern library and 170 reference screens, interaction, forms and data views, code security review with static analysis, supply-chain review and domain guides, pre-launch security and auth-abuse defense, agent safety, legal launch readiness, codebase mapping, office documents and animated GIFs, builder tools for skills, MCP servers and Playwright tests, language and framework guides, cloud infrastructure, data engineering, ML engineering, scientific computing, life sciences, research writing, creative media, search visibility, API integrations, blockchain development, AI agent engineering, networking and business operations. |
+| [**ProductCraft**](skills/productcraft/README.md) | 1.12.0 | One routed skill to build, harden and ship software, plus the data, science, research and media work around it: engineering workflow and practices with advanced testing and open-source readiness, UI design with a rulebook, pattern library and 170 reference screens, interaction, forms and data views, code security review with static analysis, supply-chain review and domain guides, pre-launch security and auth-abuse defense, agent safety, legal launch readiness, codebase mapping, office documents and animated GIFs, builder tools for skills, MCP servers and Playwright tests, language and framework guides, cloud infrastructure, data engineering, ML engineering, scientific computing, life sciences, research writing, creative media, search visibility, API integrations, blockchain development, AI agent engineering, networking and business operations. |
 
 ## ProductCraft
 
@@ -39,7 +39,7 @@ ProductCraft helps an agent build, harden and ship software that shows the impor
 - **Scientific computing**: numerical methods with verification and convergence studies, HPC jobs and scientific and quantum-computing libraries
 - **Life sciences**: genomics, single-cell, cheminformatics, public biomedical databases, medical imaging, clinical document drafts, medical-device quality and lab automation, as research output and never medical advice
 - **Research writing**: literature reviews, verified citations, scientific papers, peer review, grants, plan stress tests, posters, talks and everyday writing
-- **Creative media**: generative art, posters, infographics, themes, slides, programmatic video, image prompts and enhancement, EPUB and safe file organization
+- **Creative media**: generative art, posters, infographics, themes, slides, programmatic video, directed motion graphics rendered frame by frame, image prompts and enhancement, EPUB and safe file organization
 - **Integrations**: Stripe, Plaid, Supabase, Google Workspace, Jira, Linear and other APIs, with OAuth, webhooks, idempotency and rate limits done right
 - **Blockchain development**: Move on Aptos and Solana RPC, testnet first, with no keys in the chat and no investment advice
 - **Search visibility**: technical SEO, site migrations, structured data and Search Console measurement, plus keyword research, people-first content, E-E-A-T review and AI answer engines, with no spam tactics and an offline checker for built pages

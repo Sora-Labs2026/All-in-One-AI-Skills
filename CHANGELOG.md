@@ -1,5 +1,19 @@
 # Changelog
 
+## ProductCraft 1.12.0 (2026-11-03)
+
+- New `modules/creative-media/references/directed-motion.md` for studio-quality animation made in code:
+  - **Render contract:** every frame is a pure function of time, with seeded randomness, seekable timelines, fonts loaded before frame 0, a frame hook, and loops rendered from frame 0 to N-1.
+  - **Directed brief:** goal, output, time, look, motion, shots, a banned list that grows after each review, and QA frames, plus the one-hero rule.
+  - **Default numbers:** easing, spring damping ratios, durations, stagger, reading holds, beat grid, parallax and per-frame accessibility.
+  - **Review loop:** proof of determinism, contact sheets, onion skins and notes that name a frame and a cause.
+  - **Delivery:** rendering with Playwright and FFmpeg, motion blur, sound placed on or after its frame, loudness targets, perfect loops, MP4 and GIF delivery.
+  - **Tools by role:** each with its license caveats.
+  - **Failures and fixes.**
+- New `motion_contract_check.py`, a lint for wall-clock time, unseeded randomness, timers, delta clocks, autoplay, CSS transitions, unseeked GSAP, missing font waits and a missing frame hook.
+- New `motion_timing.py`, which turns milliseconds, beats, loops, GIF delays and reading holds into whole frames.
+- The two scripts add 33 tests, and the suites hold 1296 tests.
+
 ## ProductCraft 1.11.1 (2026-11-01)
 
 - New `modules/code-security-review/scripts/rls_check.py`: replays PostgreSQL and Supabase migrations offline and lists row-level security leads for exposed schemas. It covers:

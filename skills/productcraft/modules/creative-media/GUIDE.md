@@ -18,6 +18,7 @@
 - Improving images: upscaling, denoising, sharpening, tone and color, background removal, metadata stripping, export formats.
 - Markdown into an EPUB ebook.
 - Sorting a messy folder by type and date, renaming files consistently, finding duplicates; organizing invoices and receipts into named files and a ledger.
+- Motion graphics, kinetic type, logo or product animations, perfect loops and 3D shots made in code (HTML with GSAP, Three.js, Remotion, Blender) and rendered frame by frame to MP4 or GIF.
 - Math and technical explainer animation with Manim: equations, plotted functions, geometry, algorithm states.
 - Editing recorded footage: selects from a transcript, frame-accurate cuts, captions, audio levels, color, reframing, export, an editable timeline.
 - Making recordings searchable: transcripts, shots, on-screen text, keyword and semantic search, clips from results.
@@ -75,6 +76,7 @@ Use what is installed. Ask before installing packages, browsers, models or syste
 | Markdown to EPUB | `references/ebooks-epub.md` | EPUBCheck has no errors; Ace report reviewed; opened in two readers |
 | Organize a folder, rename files, find duplicates | `references/file-organization.md` and `scripts/organize_plan.py` | Plan approved; nothing deleted or overwritten; counts match before and after; undo script saved |
 | Invoices and receipts into named files and a ledger | `references/invoices-and-receipts.md` and `scripts/organize_plan.py --from-csv` | Ledger matches files; totals per currency; ambiguous values flagged; spot checks done; nothing uploaded |
+| Motion graphics, kinetic type, loops or 3D shots rendered from code | `references/directed-motion.md`, `scripts/motion_contract_check.py` and `scripts/motion_timing.py` | Brief filled with numbers; lint clean and one frame hashed identically twice; contact sheet viewed and notes name frames; holds, contrast and flash limits met; `ffprobe` and loudness checked |
 | Math or technical explainer animation | `references/manim-explainers.md` | Storyboard written; pinned Manim version and seeded randomness; mathematics checked independently; captions; `ffprobe` on the deliverable |
 | Editing recorded footage: cuts, captions, levels, color, reframing, export | `references/video-editing.md` | Originals untouched; cuts frame-accurate; loudness measured; captions checked; export matches the destination; timeline validated |
 | Searching video and audio; clips from search results | `references/media-indexing-and-search.md` | Consent and retention recorded; records carry hash, time range and model version; quality measured on a saved query set |
@@ -172,7 +174,14 @@ python3 <productcraft>/modules/creative-media/scripts/organize_plan.py inbox --f
 
 `scripts/asset_catalog_check.py` is a read-only, standard-library checker for Xcode asset catalogs. It reads every app icon set and image set: valid Contents.json, referenced files present and no stray files, PNG pixel sizes against size and scale, square icons, no alpha channel in the default 1024 App Store icon, consistent image-set scales, and which dark and tinted appearances exist. Exit codes: 0 clean, 1 errors or warnings, 2 usage error.
 
+`scripts/motion_contract_check.py` is a read-only, standard-library lint for animation code (HTML, JS, TS, CSS). It flags what makes rendered frames differ from run to run or impossible to seek: wall-clock reads and unseeded randomness (errors); timers, delta clocks, autoplaying media and CSS transitions; GSAP timelines never paused or seeked; web fonts with no ready wait; and a missing way to freeze an exact frame. Silence a deliberate line with a `motion-ok` comment. Exit codes: 0 clean, 1 findings, 2 usage error.
+
+`scripts/motion_timing.py` turns direction into whole frames: milliseconds to frames, a beat grid computed from absolute time (with a drift warning), loop length and whether each cycle fits it, GIF delays in hundredths that add up to the exact loop, and minimum reading holds. Exit codes: 0 ok, 1 warnings, 2 usage error.
+
 ```bash
+python3 <productcraft>/modules/creative-media/scripts/motion_contract_check.py motion/ --json
+python3 <productcraft>/modules/creative-media/scripts/motion_timing.py beats --fps 30 --bpm 128 --bars 8
+python3 <productcraft>/modules/creative-media/scripts/motion_timing.py gif --fps 30 --frames 90
 python3 <productcraft>/modules/creative-media/scripts/cut_rhythm.py scenes.log --duration 62.4 --fps 25 --plan 30 --seed 7
 python3 <productcraft>/modules/creative-media/scripts/asset_catalog_check.py MyApp/Assets.xcassets
 ```
@@ -190,6 +199,7 @@ python3 <productcraft>/modules/creative-media/scripts/asset_catalog_check.py MyA
 - `references/ebooks-epub.md`: read when turning Markdown into EPUB: structure, metadata and identifiers, pandoc build, styling for readers, covers and fonts, accessibility metadata, EPUBCheck and Ace, Kindle and stores.
 - `references/file-organization.md`: read when organizing or renaming files: ground rules, scope, choosing a scheme, the planner, review, apply and undo, duplicates, portable names, photo dates.
 - `references/invoices-and-receipts.md`: read when filing invoices and receipts: e-invoice XML, text and OCR extraction, amount and date parsing, validation, naming, the ledger, privacy and retention.
+- `references/directed-motion.md`: read when animating from code to studio quality: the render contract (every frame a pure function of time), a numeric brief with a banned list, default easing, spring, duration, stagger, hold and beat numbers, the frame-level review loop with contact sheets, rendering with a browser and FFmpeg, sound sync and loudness, perfect loops, MP4 and GIF delivery, tools by role with their licenses, failures and fixes.
 - `references/manim-explainers.md`: read when making a math or technical explainer: when Manim fits, setup and versions, storyboard, a complete scene, render flags, transform and updater pitfalls, style, narration, accessibility, checks.
 - `references/video-editing.md`: read when cutting recorded footage: ingest and proxies, a transcript-based paper edit, frame-accurate cuts, captions, cleaning and ducking audio, two-pass loudness, color, reframing, export settings, timeline handoff, rights.
 - `references/media-indexing-and-search.md`: read when making recordings searchable: consent and retention, transcripts, shots and keyframes, on-screen text, keyword and vector indexes, hybrid search, clips, measuring retrieval quality, live sources, hosted services.
