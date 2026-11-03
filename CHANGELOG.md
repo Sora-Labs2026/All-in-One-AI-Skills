@@ -1,5 +1,16 @@
 # Changelog
 
+## ProductCraft 1.12.1 (2026-11-03)
+
+- `directed-motion.md` tightened:
+  - **Timing:** exits are 40-50% shorter than entrances; each sound hit lands exactly one frame after its picture.
+  - **Motion blur:** 4 subframes across a 180-degree shutter by default, averaged in linear light.
+  - **Contact sheets:** evenly spaced by default, key frames once the shots are known.
+  - **Effort:** a medium reasoning-effort default for the agent, raised only for a named problem.
+  - **Tools:** HyperFrames (Apache-2.0) and the community Blender MCP server named in the tools table; external design-audit plugins only after vetting.
+  - **Posting limits:** dated MP4 and GIF limits for X.
+- `motion_timing.py blur` prints subframe times for a shutter angle. 3 new tests; the suites hold 1299.
+
 ## ProductCraft 1.12.0 (2026-11-03)
 
 - New `modules/creative-media/references/directed-motion.md` for studio-quality animation made in code:
