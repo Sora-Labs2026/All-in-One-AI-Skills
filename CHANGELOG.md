@@ -1,5 +1,14 @@
 # Changelog
 
+## ProductCraft 1.12.2 (2026-11-09)
+
+- New `modules/ui-distiller/references/generic-tells-and-fixes.md`:
+  - **Tells:** twenty generic-UI tells with a fix for each, including decorative pills, italic accents, the fashionable serif, dividers and bordered boxes everywhere, fake-code eyebrows, section numbering, squircles, monospace and caps overuse, gradient backgrounds and periods in headlines.
+  - **Fixes:** fifteen that lift any screen, including the real product, one call to action, one accent, concentric radii, balanced headline wrapping, optical alignment, tabular numerals, loading states and feedback motion.
+  - **Makeovers:** a sign-in screen, a one-time-code screen (one input with `autocomplete="one-time-code"`, auto-submit, grouped digits) and an AI assistant chat (visible steps that really ran, origin-aware references, no layout shift, brushing and linking, confirm-then-undo actions).
+  - **Motion:** twenty interface motion numbers (durations, stagger, press scale, transform origin, no bounce on everyday UI, direct tracking while held, masks, rubber banding, shared elements).
+- New `modules/ui-distiller/scripts/tell_scan.py` finds the tells that show in code. 11 new tests; the suites hold 1310.
+
 ## ProductCraft 1.12.1 (2026-11-03)
 
 - `directed-motion.md` tightened:

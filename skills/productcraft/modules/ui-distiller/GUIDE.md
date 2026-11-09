@@ -72,6 +72,7 @@ Deeper references for specific work, read only when the task needs them:
 
 - Motion beyond a single transition (choosing the tool, tokens, springs, choreography, View Transitions and FLIP, a React animation library, drag, performance, reduced motion): [references/motion-engineering.md](references/motion-engineering.md).
 - Creating or auditing a design system (inventory, consolidation, token files, core components, preview page, lint and ratchet): [references/design-system-construction.md](references/design-system-construction.md).
+- A screen that looks generated (pills, gradients, eyebrows, periods in headlines, boxed everything), sign-in, one-time-code and AI chat makeovers, and interface motion numbers: [references/generic-tells-and-fixes.md](references/generic-tells-and-fixes.md), with `scripts/tell_scan.py`.
 - A screen that works but feels unfinished (layout shifts, wrapping, optical alignment, states, touch and scroll details): [references/interface-polish.md](references/interface-polish.md).
 - Translucent "glass" surfaces on the web or Apple platforms, kept legible: [references/translucent-materials.md](references/translucent-materials.md).
 - Building a dashboard from questions to verified panels: [references/dashboard-building.md](references/dashboard-building.md).
@@ -144,6 +145,7 @@ Do not call the redesign "perfect", "best", or "production ready" without eviden
 Both are standard-library Python, read-only and deterministic, with `--help`, `--json` and exit codes 0 (nothing to review or target met), 1 (findings or target missed) and 2 (usage error).
 
 - `scripts/token_inventory.py <src>`: counts raw colors (with near-duplicate clusters in OKLab), font sizes, off-scale spacing, radii, shadows, durations and z-index values in style sources, flags `transition: all` and `will-change: all`, and with `--baseline` fails when any count grew. Used by [references/design-system-construction.md](references/design-system-construction.md) and [references/interface-polish.md](references/interface-polish.md).
+- `scripts/tell_scan.py <src>`: finds generic-UI tells that show in code: gradient fills, headings ending in periods or holding emoji, uppercase overuse, fake-code eyebrows, numbered sections, "AI-powered" labels, animations from scale 0, overshooting easing, slow interface durations, and one-time-code inputs split into single-character boxes or missing `autocomplete="one-time-code"`. Used by [references/generic-tells-and-fixes.md](references/generic-tells-and-fixes.md).
 - `scripts/glass_contrast.py --text <hex> --tint <hex> --alpha <a>` (or `--solve`): worst-case WCAG contrast of text on a translucent surface over any backdrop or listed backdrops, and the smallest tint opacity that keeps the target. Used by [references/translucent-materials.md](references/translucent-materials.md).
 
 Tests: `python3 -B -m unittest discover -s <productcraft>/modules/ui-distiller/tests -v`.
