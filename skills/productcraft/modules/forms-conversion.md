@@ -19,6 +19,7 @@ Related patterns in `../references/pattern-library.md`: 9, 24, 26-28, 30, 33, 35
 
 - The provider side of checkout (Checkout Sessions or the Payment Element, fulfillment webhooks, test mode and test cards) is in `integrations/references/payments-stripe.md`; connect-your-bank flows backed by Plaid are in `integrations/references/bank-data-plaid.md`.
 - Ethical conversion: reduce unnecessary fields, state price/recurrence and restrictions, provide a clear path to cancel. Do not hide default add-ons, insert fake urgency, or trick users into consent. Read `ethical-persuasion.md`.
+- Multi-step forms, layered spam defense, calculators, quizzes, configurators, lead magnets, upgrade prompts and booking flows: `ui-distiller/references/conversion-surfaces.md`. Onboarding wizards and in-product tours: `ui-distiller/references/guided-product-surfaces.md`.
 
 ## Verification
 

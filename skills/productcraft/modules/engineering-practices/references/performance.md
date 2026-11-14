@@ -38,6 +38,8 @@ Run these locally or in staging. Load tests and profilers against production or 
 - **Database plans in depth:** reading plans, designing indexes and engine-specific tuning for PostgreSQL, MySQL and SQL Server are in `../../data-engineering/references/sql-query-tuning.md`, `../../data-engineering/references/postgresql.md` and `../../data-engineering/references/mysql-and-sql-server.md`.
 - **Frontend lab:** `npx lighthouse http://localhost:3000 --output=json --output-path=./lighthouse.json`, browser DevTools Performance panel with CPU throttling (4x to 6x) to approximate mid-range phones, the bundler's analyzer or `npx source-map-explorer 'dist/assets/*.js'`.
 - **Frontend field data:** the `web-vitals` library (`onLCP`, `onINP`, `onCLS`, and its attribution build for causes) reporting to your analytics endpoint, plus the Chrome UX Report for public sites.
+
+- **Animation-heavy pages** (offscreen loops, marquees, canvas and WebGL, slowdowns over long sessions): `../../ui-distiller/references/animation-runtime-audit.md`.
 - **Microbenchmarks** (`pytest-benchmark`, `vitest bench`, Go `testing.B`, JMH) only for code the profile already showed is hot. They mislead easily: warm up, avoid dead-code elimination, use realistic inputs.
 
 - **Numerical, parallel and HPC code** (scaling studies, thread oversubscription, MPI and GPU profilers, Slurm job accounting, memory estimates for large arrays): `../../scientific-computing/references/hpc-and-profiling.md`.

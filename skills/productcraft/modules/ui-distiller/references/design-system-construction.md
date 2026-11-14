@@ -2,6 +2,9 @@
 
 Read this when a product needs a design system it does not have, when one must be extracted from an existing codebase, or when an interface "looks off" and you need evidence of inconsistency before a redesign. The rules for foundations, token tiers, core components and documentation are `CMP-01` to `CMP-04` in `../../../references/ui-rules/components.md`; this file is the procedure, the file formats and the enforcement that keep a system alive.
 
+
+Once the system exists, keep it running with [design-system-operations.md](design-system-operations.md) (a generated foundation, multi-platform builds, design-tool sync, versioning, deprecation and migration) and [component-specs-and-design-qa.md](component-specs-and-design-qa.md) (component specifications, states harness, QA gates and design review).
+
 ## Scope it to the product
 
 Build the smallest system that serves the product in front of you:

@@ -77,6 +77,8 @@ Use what is installed. Ask before installing packages, browsers, models or syste
 | Organize a folder, rename files, find duplicates | `references/file-organization.md` and `scripts/organize_plan.py` | Plan approved; nothing deleted or overwritten; counts match before and after; undo script saved |
 | Invoices and receipts into named files and a ledger | `references/invoices-and-receipts.md` and `scripts/organize_plan.py --from-csv` | Ledger matches files; totals per currency; ambiguous values flagged; spot checks done; nothing uploaded |
 | Motion graphics, kinetic type, loops or 3D shots rendered from code | `references/directed-motion.md`, `scripts/motion_contract_check.py` and `scripts/motion_timing.py` | Brief filled with numbers; lint clean and one frame hashed identically twice; contact sheet viewed and notes name frames; holds, contrast and flash limits met; `ffprobe` and loudness checked |
+
+| Live graphics on a web page: shader backgrounds, section particles, globes, a 3D hero object, cursor-reactive image effects, animated metal borders, physics toys, preset or no-code scene embeds | `references/webgl-backgrounds-and-3d.md` | Starts only when visible and welcome, disposes on teardown; static poster complete without WebGL and under reduced motion; colors from tokens; text contrast measured at the worst frame; throttled profile within budget |
 | Math or technical explainer animation | `references/manim-explainers.md` | Storyboard written; pinned Manim version and seeded randomness; mathematics checked independently; captions; `ffprobe` on the deliverable |
 | Editing recorded footage: cuts, captions, levels, color, reframing, export | `references/video-editing.md` | Originals untouched; cuts frame-accurate; loudness measured; captions checked; export matches the destination; timeline validated |
 | Searching video and audio; clips from search results | `references/media-indexing-and-search.md` | Consent and retention recorded; records carry hash, time range and model version; quality measured on a saved query set |
@@ -87,6 +89,11 @@ Use what is installed. Ask before installing packages, browsers, models or syste
 | iOS app icons and in-app icon assets | `references/ios-app-icons.md` and `scripts/asset_catalog_check.py` | Checker clean; opaque 1024 store icon; viewed on a home screen in each appearance; licenses recorded |
 | Motion faults in an animated Blender scene | `references/blender-motion-inspection.md` | Read-only inspection of a copy with auto-run off; findings with frames, names, coordinates and tolerances; confirmed by renders |
 | Documents through a hosted processing API | `references/hosted-document-apis.md` | Owner approved the upload and data terms; each result verified with independent tools; remote copies deleted |
+
+| Logo, wordmark, favicon set, identity boards, partner and customer logo rows | `references/logos-and-marks.md` | Compact mark passes 16 px, one-color and silhouette tests; clean vector files; generated sketches redrawn with a creation record; third-party logos used with permission |
+| Social images, profile headers, link cards, display ads, email headers, print banners | `references/banners-and-social-graphics.md` | Current platform sizes looked up and dated; copy as live text; worst-case contrast behind text measured; animated versions within flash limits |
+| Icon family choice, duotone icons, stock photos, crops and ratios, image pipeline | `references/icon-sets-and-stock-imagery.md` | One icon style per surface; license record per photo; local responsive images with dimensions; alt text |
+| Building UI from a screenshot or mockup; generating design comps before coding | `references/image-to-code.md` | Written spec from measured values; tokens with passing pairs; all states and widths built; side-by-side comparison reviewed; no reference assets shipped |
 | Office files, PDFs, document to Markdown, GIFs and short clips | `../documents/GUIDE.md` | That module's checks |
 
 Several often combine: a launch video needs `references/remotion-video.md`, `references/themes-and-brand-application.md` and maybe `references/generation-prompting.md`; a conference talk needs `references/revealjs-presentations.md`, the theme reference and `references/infographics.md` for its data slides.
@@ -189,6 +196,8 @@ python3 <productcraft>/modules/creative-media/scripts/asset_catalog_check.py MyA
 ## References
 
 - `references/generative-art.md`: read when making art with code: p5.js versions, seeded generators and streams, reproducibility across machines, editions and trait checks, export for print and plotters, performance, the viewer page.
+
+- `references/webgl-backgrounds-and-3d.md`: read when a web page needs a live graphic layer: choosing the renderer, the mount-and-dispose contract, a full-screen shader skeleton, recipes for light beams, corner emitters, atmospheric folds, perspective grids, shader dither, section particles, particle globes, geographic globes, 3D hero objects, cursor-reactive image effects, metal borders, physics toys and scene embeds, then accessibility and performance budgets.
 - `references/posters-and-canvas.md`: read when making a poster, cover, card or canvas piece: brief, tool choice, grid and hierarchy, type and licenses, HTML-to-PDF rendering, print bleed and color, layout checks.
 - `references/infographics.md`: read when facts or numbers become one graphic: takeaway headline, sourced data file, choosing the form, honest encodings, sizes for the display, color-vision-safe palettes, building with code.
 - `references/themes-and-brand-application.md`: read when one look must span slides, documents, sheets, pages and charts: theme spec as data, where each format keeps its theme, fonts across machines, brands that are not yours.
@@ -210,3 +219,8 @@ python3 <productcraft>/modules/creative-media/scripts/asset_catalog_check.py MyA
 - `references/ios-app-icons.md`: read when producing iOS app icons and in-app icons: single-size icons, dark and tinted appearances, layered icons, the full size set, symbols and vector assets, licenses, the catalog checker.
 - `references/blender-motion-inspection.md`: read when an animated Blender scene looks wrong: safe headless inspection, an extraction script, facing, contact, sliding, crossover, twist and scale checks, renders for compositing, the report.
 - `references/hosted-document-apis.md`: read when processing documents through a hosted API: local or hosted, data terms before upload, the request pattern, and verification of conversion, extraction, OCR, redaction, signatures and forms.
+
+- `references/logos-and-marks.md`: read when designing or producing a logo: structures, type registers, symbol approaches, small-size and one-color tests, clean SVG, favicon and touch icons, the delivery matrix, AI tools in logo work and rights, identity boards and reference distance, other companies' logos on a page.
+- `references/banners-and-social-graphics.md`: read when making fixed-size graphics for social platforms, ads, email or print: common formats, safe zones, hierarchy, art directions, HTML build and exact export, a contrast sampler, animated and print banners.
+- `references/icon-sets-and-stock-imagery.md`: read when choosing icons or photos: icon styles and sizes, duotone layers that theme and survive forced colors, photo ratios and crops, licenses and releases, processing, responsive serving, alt text.
+- `references/image-to-code.md`: read when the input is an image and the output is UI: reading a reference as a spec, sampling colors, measuring type, tokens, building every state, side-by-side verification, generating web and mobile comps first.

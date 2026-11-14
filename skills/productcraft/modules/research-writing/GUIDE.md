@@ -17,6 +17,8 @@ This module covers the content and its evidence. File formats belong elsewhere: 
 - Diagrams for documents, a talk, a poster, formatting for a venue, an arXiv upload, a project page for a paper.
 - Articles, newsletters, status updates, announcements, incident notes, meeting notes or transcript analysis; market sizing or competitor research; family history; turning material into a learning plan; web research and extracting article text or transcripts.
 - Verifying a claim, image, video, organization, product or public event from open sources; using prediction-market prices as an information signal; text processing, search or NLP for a low-resource language or a non-Latin script such as Bengali.
+
+- User research and usability testing: planning interviews, recruiting, synthesizing findings, running task-based tests; writing or reviewing interface copy.
 - **Not for** office file mechanics (`../documents/GUIDE.md`), engineering design docs and ADRs (`../engineering-practices/references/docs-and-decisions.md`), data pipelines and plots (`../data-engineering/GUIDE.md`), statistical modeling (`../ml-engineering/GUIDE.md`), security threat models of code (`../code-security-review/GUIDE.md`) or marketing copy for a product UI (`../ethical-persuasion.md`).
 
 ## Ground rules
@@ -57,6 +59,10 @@ This module covers the content and its evidence. File formats belong elsewhere: 
 | Articles, newsletters, explainers; co-authoring a document section by section | `references/content-and-coauthoring.md` | Research log with primary sources; outline agreed; voice kept; cold-reader test for co-authored documents |
 | Status updates, newsletters, FAQs, announcements, incident notes, meeting notes and transcripts | `references/internal-comms-and-meetings.md` | First line answers the reader; numbers sourced; actions owned; meeting analysis consented and evidence-based |
 | Market sizing, competitors, industry analysis | `references/market-research.md` | Two sizing methods reconciled with sensitivity; every figure sourced and dated; no investment advice |
+
+| User research: interviews, contextual inquiry, diary studies, card sorts, synthesis, prototype fidelity, journey maps | `references/ux-research.md` | Question tied to a decision; consent and storage recorded; insights with evidence counts and implications; no simulated participants as evidence |
+| Usability tests, moderated or unmoderated; task scripts; success rates and SUS; severity | `references/usability-testing.md` | Goal-based tasks with success criteria; pilot run; counts with small-sample caution; issues rated with evidence, owners and a re-test |
+| Interface copy: buttons, errors, empty states, confirmations, notifications; copy reviews | `references/ux-writing.md` | Ten-item checklist passed; errors say what happened and how to fix it; complete message strings for translation; redline table |
 | Family history and genealogy | `references/genealogy-research.md` | Plan before searching; full citations; evidence analyzed and conflicts resolved; privacy respected |
 | Turning material into practice; questions over the user's documents | `references/learning-plans.md` | Observable goal with baseline; one-week first cycle; answers cite passages |
 | Web research, deep-research tools, article text, transcripts | `references/web-research-and-extraction.md` | Every claim checked on its page; costs agreed; robots and terms respected; provenance saved |

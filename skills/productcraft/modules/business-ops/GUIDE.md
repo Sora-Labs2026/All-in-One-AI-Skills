@@ -59,6 +59,9 @@
 | Customer billing cases, revenue figures, pricing claims versus code, reconciliation | `references/billing-operations.md` | Case classified with evidence; live actions approved; figures defined and timestamped; differences explained |
 | Pitch decks, models, memos, applications, investor updates and emails | `references/investor-materials-and-outreach.md` | One dated fact sheet; projections labelled; promotion route confirmed; drafts only |
 | Brand purpose, positioning, audience, voice profile from samples | `references/brand-discovery-and-voice.md` | Statements trace to owners and customers; voice profile cites samples and was tested |
+
+| Strategic territories, naming, mood directions, brand story, aesthetic families, the creative brief | `references/brand-ideation-and-briefs.md` | Options compared with evidence and rejection lines; name finalists with test tables and clearance left to counsel; brief with measurable outcomes and a named approver |
+| Voice and tone system, brand guidelines or brand book, asset checks and library, category experience audit | `references/brand-guidelines-and-audits.md` | Rules marked fixed, flexible or forbidden with examples and measured contrast; one source for guide and tokens; audit patterns need three sites and observable evidence |
 | Competitor set, comparison matrix, white space, competitive report | `references/competitive-analysis.md` | Set scoped against the company's positioning; rubrics before scoring; sources dated; no blended total |
 | Campaign plans, landing pages, email sequences, ads, video scripts, repurposing content | `references/campaigns-and-content.md` | Positioning agreed first; claims register; review gate passed; lawful audience; nothing published |
 | Cross-posting, scheduling and publishing posts, monitoring delivery, the X API | `references/social-publishing-and-x-api.md` | Every item approved in final form; idempotent publishing; narrow scopes; no automated outreach |
