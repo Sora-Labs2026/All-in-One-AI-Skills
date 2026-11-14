@@ -1,6 +1,6 @@
 # ProductCraft
 
-**A Sora Labs Agent Skill** · version 1.12.2 · MIT License · part of [All-in-One AI Skills](../../README.md)
+**A Sora Labs Agent Skill** · version 1.13.0 · MIT License · part of [All-in-One AI Skills](../../README.md)
 
 ProductCraft is one installable skill that teaches a coding agent to build, harden and ship software that **shows the important thing first, behaves honestly, is proven by checks that actually ran, works on every device, and is secure and lawful where it matters**. It routes each task to only the modules that task needs: a bug fix reads the engineering workflow, a table change reads the table guidance, an auth change reads the auth-defense module, a destructive command triggers the agent-safety stop-check, and a launch reads the security and legal-readiness reviews.
 
@@ -14,7 +14,7 @@ It is a working skill for real codebases, not a theme pack, legal service or sec
 |---|---|---|
 | **Engineering workflow** | Any non-trivial code change: Quick/Standard/Deep tracks, done-when checks, planning, test-first, root-cause debugging, small diffs, verification, review of your own and others' changes, finishing a branch | `modules/engineering-workflow/GUIDE.md` |
 | **Engineering practices** | API contracts, data and safe migrations, resilience, performance, observability, CI/CD and releases, dependencies, docs, design docs and ADRs, large refactors, TypeScript, git and PRs, session handoff, whole-repository health audits, advanced testing (property-based, mutation, fuzzing, differential), spec compliance and unit checks, open-source release readiness, repository hygiene | `modules/engineering-practices/GUIDE.md` |
-| **UI Distiller** | New screens, redesigns, cleaning up cluttered or "AI-looking" frontends, with taste detectors, a list of generic tells and their fixes, sign-in, code-entry and AI chat makeovers, interface motion numbers, a tell scanner and a catalog of visual directions with contrast-checked palettes | `modules/ui-distiller/GUIDE.md` |
+| **UI Distiller** | New screens, redesigns, cleaning up cluttered or "AI-looking" frontends, with taste detectors, a list of generic tells and their fixes, sign-in, code-entry and AI chat makeovers, interface motion numbers, a tell scanner, delight patterns and playful moments, 65 aesthetic recipes covering 92 named styles, landing pages and conversion surfaces, scroll, CSS and WebGL effects with checkers, design-system operations and component QA, and a catalog of visual directions with contrast-checked palettes | `modules/ui-distiller/GUIDE.md` |
 | **Product design** | Information hierarchy, tokens, spacing, density, Keep/Promote/Compress/Demote/Remove audits | `modules/product-design.md` |
 | **Interaction & feedback** | Buttons, switches, sliders, drag and drop, modals, toasts, motion, optimistic vs. verified state | `modules/interaction-feedback.md` |
 | **Forms & conversion** | Signup, OTP, passwords, search, uploads, checkout and payment UI | `modules/forms-conversion.md` |
@@ -64,6 +64,8 @@ The pattern library covers foundations, feedback, forms, interaction, navigation
 | APIs, schemas and migrations, performance, observability, CI/CD, dependencies, large refactors | The matching engineering-practices topic |
 | A health check or audit of a whole repository | Engineering practices (repository health audit) |
 | A new UI, a redesign, or decluttering | UI Distiller + product design + UI rules |
+| Micro-interactions, celebrations, easter eggs, a named aesthetic, a landing page, a calculator or quiz, scroll and WebGL effects | UI Distiller (delight, aesthetics, landing and effects references) |
+| A brand brief, logo, banners, icon set, design-system governance, UX research, usability tests or UX writing | Business operations, creative media, UI Distiller and research writing |
 | Spacing, type, color, dark mode, buttons, form fields, navigation, icons, microcopy | The matching UI rules categories |
 | Controls, motion, toasts, modals | Interaction & feedback |
 | Forms, signup, OTP, checkout, search | Forms & conversion |
@@ -352,7 +354,7 @@ python3 -m unittest discover -s tests -v
 for t in modules/*/tests; do python3 -m unittest discover -s "$t" -v; done
 ```
 
-The suites hold 1310 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
+The suites hold 1348 tests in total. They validate the package and its helper scripts, not the security or design of any particular application.
 
 ## Package layout
 

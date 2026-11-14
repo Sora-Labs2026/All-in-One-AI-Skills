@@ -21,6 +21,9 @@ Animate only to explain a change (what appeared, where it went, what caused it) 
 
 Use the platform first. Add a library only when it removes real code (exit animations, layout projection, gesture physics), not for a fade.
 
+
+Scroll-specific patterns (triggered entrances, split-text reveals, progress rails, pinned and scrubbed stages, story pages, smoothed scrolling with GSAP and ScrollTrigger, looping strips) are in [scroll-and-reveal-effects.md](scroll-and-reveal-effects.md). Canvas, shader and 3D layers are in `../../creative-media/references/webgl-backgrounds-and-3d.md`.
+
 ## Tokens: one source for CSS and script
 
 Name tokens by role, define them once, and read them everywhere (`MOT-03`, `CMP-02`).
@@ -151,6 +154,9 @@ Examples assume Motion 12 (2025), imported from `motion/react`. Older code impor
 - **Test on a touch device,** not only with a mouse: thresholds, scroll conflicts and inertia differ.
 
 ## Performance: measure, do not assume
+
+
+Pausing offscreen loops, releasing resources on teardown and long-session leaks are covered in [animation-runtime-audit.md](animation-runtime-audit.md).
 
 - Animate `transform` and `opacity` (`MOT-01`). Confirm in the browser rather than trusting the code: in Chromium DevTools record the Performance panel with CPU throttling (4x or 6x) and look for Layout, Recalculate Style and Paint inside animation frames; turn on Paint flashing and Layer borders in the Rendering drawer; check the Layers panel for layer count and memory. Firefox and Safari have equivalent profilers.
 - In the field, observe long animation frames (`PerformanceObserver` with type `long-animation-frame`, Chromium 123+) and Interaction to Next Paint; motion that delays the next paint after input is a regression even if it looks smooth.

@@ -18,6 +18,15 @@ Read this when asked to audit a web or native app for accessibility, before a re
 - **Platforms and assistive technology.** Write the matrix down before testing (step 4) so results are comparable later.
 - **Done when:** the flow list, states, standard and test matrix are written and the owner agreed to them.
 
+
+### Auditing a design or a component before it ships
+
+The same criteria apply to designs and component libraries, earlier and cheaper:
+
+- **Designs and prototypes:** check every text and fill pair against its threshold from the token values (4.5:1 text, 3:1 large text, control boundaries and focus indicators); confirm a designed focus state exists for every interactive element, that targets are at least 24 by 24 CSS pixels, that no meaning relies on color alone, and that error, empty and loading states are drawn. Annotate headings, landmarks, reading order and accessible names on the design so engineers do not guess.
+- **Components:** test each one in every state (default, hover, focus visible, pressed, disabled, loading, invalid, selected) in light and dark, on a states page (`../../ui-distiller/references/component-specs-and-design-qa.md`). Measure contrast on the rendered page from computed colors composited over the real background, including hover and focus, not only from token pairs: opacity, overlays and theme-flipping tokens change the result. Icon-only controls are held to 3:1 non-text contrast and need an accessible name.
+- **Severity for design-stage findings** follows the same scale; a missing focus state or a failing action color in the design system is a Blocker for every screen that will use it.
+
 ## 2. Automated scan
 
 Fast, repeatable and good at the mechanical criteria (missing names and labels, contrast, invalid ARIA, missing document language). Run it on every state you reach, not only on page load: open the dialog, trigger the error, then scan.

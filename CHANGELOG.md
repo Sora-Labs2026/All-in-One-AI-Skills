@@ -1,5 +1,27 @@
 # Changelog
 
+## ProductCraft 1.13.0 (2026-11-14)
+
+- **Delight:**
+  - `ui-distiller/references/delight-details.md` covers seventeen families of in-product delight: press and hold, morphs and shared elements, sheets, physics, icon and number motion, skeuomorphic objects, sensors and tilt, status-area surfaces, cursor-aware effects, celebrations, deletion metaphors, launch and onboarding, empty, offline and error states, and data made tangible. It includes build numbers, a haptics table and frequency budgets.
+  - `playful-moments.md` sets the rules for easter eggs, hidden games, seasonal modes, 404 pages, year-in-review and campaign sites.
+- **Aesthetics:** `aesthetic-recipes.md` and `aesthetic-recipes-2.md` hold 65 original recipes, with palette roles measured for contrast, OFL type, shape, depth, motion, fit and failure modes. Other looks point to the existing style catalog.
+- **Pages and surfaces:**
+  - `landing-pages.md` gives page plans by business type, hero, proof, pricing, copy, a motion budget and redesign audits.
+  - `conversion-surfaces.md` covers calculators, comparisons, quizzes, configurators, multi-step forms, lead magnets, upgrades, booking and decks.
+  - `guided-product-surfaces.md` covers onboarding, tours, chatbot flows and AI-working indicators.
+- **Effects:** `scroll-and-reveal-effects.md`, `css-craft-techniques.md` and `creative-media/references/webgl-backgrounds-and-3d.md`.
+- **Brand, systems and research:**
+  - Brand ideation, briefs, guidelines and audits.
+  - Logos, banners, icon sets and stock imagery, and image to code.
+  - Design-system operations, component specs and design QA, and animation runtime audits.
+  - UX research, usability testing and UX writing.
+  - Design capture workflows and reference-originality audits.
+- **New checkers:**
+  - `ui-distiller/scripts/landing_check.py` and `effect_guard.py`.
+  - `builder-tools/scripts/reference_overlap.py`.
+  - 38 new tests; the suites hold 1348.
+
 ## ProductCraft 1.12.2 (2026-11-09)
 
 - New `modules/ui-distiller/references/generic-tells-and-fixes.md`:

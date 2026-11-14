@@ -23,6 +23,8 @@ Represent asynchronous controls as `idle -> pending -> success | recoverable-err
 
 Favor fast, subtle entrance/exit only when it explains continuity, location or cause. Interruptible, device-appropriate, reduced-motion-safe. Avoid blur-heavy animation and unnecessary icon wiggles. Fitts law matters more than fanciness: make targets discoverable and close to the task. Avoid arbitrary forced delays and 'typing…' animation that pretends a human is present.
 
+When a product deliberately adds delight (celebrations, physical metaphors, playful icons, easter eggs), keep it inside the frequency budget and wear-out schedule in `ui-distiller/references/delight-details.md`, and keep play out of critical paths as set out in `ui-distiller/references/playful-moments.md`.
+
 ## Tests
 
 Click/tap/keyboard, very slow response, error, refresh, stale state, duplicate presses, low-power/reduced-motion, screen reader announcements, context closing, mobile pointer absence, and failure rollback.

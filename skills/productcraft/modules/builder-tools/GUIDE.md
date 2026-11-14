@@ -42,6 +42,9 @@ Agents as systems (harness loops, tool results and permissions, autonomous loops
 | Implement and test an MCP server | `references/mcp-server-build-and-test.md` | unit tests through an in-process client; Inspector |
 | Browser tests, screenshots, console errors | `references/playwright-web-testing.md` | `npx playwright test` or a standalone check |
 
+| Full-page captures of lazy or scroll-animated pages, polished browser recordings, reference capture bundles, build specifications from a reference video or HTML | `references/design-capture-workflows.md` | stitched settled viewports; `ffprobe` on recordings; manifest checks |
+| Check a site against its references for copied text, assets, numbers, images or motion | `references/reference-originality-audit.md` | `scripts/reference_overlap.py --site <dir> --reference <dir>` |
+
 | Lint agent configuration (instruction files, hooks, MCP, plugins) | `references/agent-config-linting.md` | correctness pass here; safety verdict via `../agent-safety/GUIDE.md` |
 | Find, import or update a skill safely | `references/skill-housekeeping.md` | fetch without running; vet with `../agent-safety/`; `scripts/lint_skill.py` |
 | Audit installed skills; keep a skill portable across agent hosts | `references/skill-inventory-and-portability.md` | inventory with digests; verdicts with reasons; `scripts/lint_skill.py` |
@@ -152,5 +155,9 @@ For any track, report: files created or changed; commands run and their results 
 - `references/hook-design.md`: when a hook is the right tool, the host contract (matchers, exit codes, JSON decisions, stop loops), hooks as small programs, fail-open versus fail-closed, latency, hook safety, payload tests.
 - `references/quality-and-gate-hooks.md`: fact-forcing gates before edits, write-time format and lint, protecting check configuration and ratchets, declarative rule hooks, completion checks at stop.
 - `references/workspace-config-audit.md`: inventory of instruction files, skills, hooks, permissions, MCP servers, scheduled jobs and caches with live-state labels and proof; problems per channel; keep, merge, cut or fix next; reversible cleanup with a log.
+
+- `references/design-capture-workflows.md`: stitched full-page screenshots for lazy and scroll-animated pages, choreographed browser recordings with cursor and camera keyframes, dated reference capture bundles with duplicate checks, and build specifications from a reference video or HTML.
+- `references/reference-originality-audit.md`: reference register, inventory of what ships and its history, category-by-category comparison, red flags with two evidence locations and severities, fixes that replace rather than disguise, the report.
+- `scripts/reference_overlap.py`: read-only, offline overlap finder between a site and its references: exact files by SHA-256, reused names, shared runs of words in visible text, shared distinctive numbers. Exit 0 no leads, 1 leads, 2 usage error.
 - `scripts/grade_trace.py`: grades stream-JSON or JSONL tool-call traces against a step spec (tool, field and output patterns, `after`, `before`, forbidden calls); per-step evidence, compliance per trace, summary across runs. Read-only, standard library.
 - `scripts/lint_skill.py`: read-only skill linter. Tests: `python3 -m unittest discover -s <productcraft>/modules/builder-tools/tests -v`.

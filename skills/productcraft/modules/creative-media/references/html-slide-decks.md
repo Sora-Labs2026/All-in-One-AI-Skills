@@ -105,6 +105,7 @@ Do not mix them in one deck.
 - On a 1920 × 1080 canvas, body text of 36-40 px is the floor and titles around 64-96 px (`revealjs-presentations.md` explains the point conversion). When content does not fit, split the slide; never shrink type below the floor.
 - Code: about 12 lines at a readable size, with the line under discussion highlighted.
 - Charts built from data with code (`infographics.md`), each with a one-line takeaway as its title.
+- For a persuasive deck (fundraising, a sales pitch, a product demo, a leadership update), choose the narrative arc first: `../../ui-distiller/references/conversion-surfaces.md`, "Persuasive decks".
 
 ## Choosing a look
 

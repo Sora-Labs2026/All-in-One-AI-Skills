@@ -9,8 +9,10 @@ Variable rewards, loss aversion, scarcity, reciprocity, fake loading, phantom ty
 - Genuine social proof: authentic reviews, legitimate counts, transparent sample sizes, clear review provenance and consent. Do not fabricate stars, viewers, sales or clinic availability.
 - Helpful defaults: preselect the path that is best for most users only when clearly editable and not more costly or invasive without meaningful consent. For sensitive choices, explicitly ask.
 - Motivation: progress that measures real work, celebrated milestones, reminders that are easy to control, meaningful rewards tied to actual actions. Avoid compulsive randomized reward loops.
+- Celebrations and playful rewards (confetti, achievements, scratch-to-reveal, unlockable icons, easter eggs): fire only on real outcomes, decide any reward before it is revealed, never sell randomized rewards, and never animate Upgrade or Allow louder than the alternative. Patterns and guards: `ui-distiller/references/delight-details.md` and `ui-distiller/references/playful-moments.md`.
 - Reduce friction: remove duplicate steps and fields, use autofill, permit easy cancellation/refunds as applicable, offer contextual support and strong error recovery.
 - Reciprocity: create real value before asking for a commitment; don't imply a user owes the app something or generate false social pressure.
+- Interactive tools: give the result the visitor came for (a calculation, a quiz outcome, a comparison) freely and immediately; ask for an email only in exchange for additional value such as a saved scenario or a report. Worked patterns: `ui-distiller/references/conversion-surfaces.md`.
 
 ## Patterns to detect and remove
 

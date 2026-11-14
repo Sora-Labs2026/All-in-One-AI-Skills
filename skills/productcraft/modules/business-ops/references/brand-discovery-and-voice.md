@@ -2,6 +2,9 @@
 
 Read this when the task is defining or repositioning a brand (purpose, positioning, audience, personality, voice, story), writing a brandbook to brief designers and writers, or capturing a written voice from real samples so drafts sound like the author. Applying a visual identity to slides, documents and pages is `../../creative-media/references/themes-and-brand-application.md`; brand rules for UI are in `../../ui-rules.md` (brand identity category); competitor scoping is `competitive-analysis.md`; keeping an author's voice in long-form writing is `../../research-writing/references/content-and-coauthoring.md`.
 
+
+Next steps after discovery: territories, names, mood directions and the creative brief are in `brand-ideation-and-briefs.md`; a voice and tone system for teams, the guidelines document, asset checks and a category experience audit are in `brand-guidelines-and-audits.md`; logos and marks are `../../creative-media/references/logos-and-marks.md`.
+
 ## Ground rules
 
 - **The brand's substance comes from the people who run it and from customers**, never from the agent. Elicit, paraphrase back, and let them choose the wording.

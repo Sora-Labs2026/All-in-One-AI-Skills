@@ -4,6 +4,8 @@ Read this when a project has no visual language yet, when the user asks for a di
 
 These are starting points, not themes to paste. The project's brand, tokens and request win (`../GUIDE.md`, step 4). When a brand exists, keep its colors and faces and borrow only what it lacks: proportions, type scale, shape and motion character. Use one direction per product (`STY-01`); a marketing site may be louder than the app behind it while sharing palette and type. For single treatments such as glass or glows, see `STY-` rules in `../../../references/ui-rules/style-options.md`. To keep any direction from sliding into defaults, run the detectors in [taste.md](taste.md).
 
+When the brief names a specific aesthetic rather than a broad direction ("dark glass with a beam of light", "warm paper onboarding", "exploded wireframe diagram"), go to [aesthetic-recipes.md](aesthetic-recipes.md): 25 compact recipes with measured palettes, a shared frame kit and the rules that stop it from becoming a generated look.
+
 ## Choosing a direction
 
 Answer three questions from the product, not from preference:
@@ -27,6 +29,8 @@ Answer three questions from the product, not from preference:
 | A handful of large physical controls | Soft tactile (with its safeguards) | Soft tactile for whole apps |
 
 Write one line in the report on why the direction fits this audience and task. If two directions fit, pick the quieter one for anything used daily.
+
+When the request names a look that none of these directions covers (claymorphism, risograph, bento, an arcade genre, an agent-first workspace and so on), start from the matching compact recipe in [aesthetic-recipes-2.md](aesthetic-recipes-2.md) and apply it with the same token, contrast, font and motion rules as this file.
 
 ## Applying a direction
 
