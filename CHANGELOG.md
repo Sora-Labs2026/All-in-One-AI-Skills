@@ -1,5 +1,14 @@
 # Changelog
 
+## ProductCraft 1.13.1 (2026-11-16)
+
+- New `modules/engineering-workflow/references/session-brief.md`: a four-part brief for every coding-agent session.
+  - **The parts:** role, context, rules and output, each with weak and strong examples.
+  - **The rules:** why "plan before code" and "ask, don't assume" prevent most rework, and why the output should be a reviewable diff, not a rewrite.
+  - **Upkeep:** keep the brief in `CLAUDE.md` or `AGENTS.md` rather than in memory, and watch for signs the brief needs work.
+- New `assets/session-brief.template.md` to copy into a repository.
+- The router row for agent work now includes the session brief.
+
 ## ProductCraft 1.13.0 (2026-11-14)
 
 - **Delight:**
