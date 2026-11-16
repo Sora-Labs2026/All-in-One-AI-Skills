@@ -36,6 +36,7 @@ Use it for data that is derived, short-lived or cheap to rebuild: caches, sessio
 
 - **Cache-aside, delete on write:** read the cache, on a miss load from the database and set with a TTL; on a write, commit to the database first, then delete the key. Deleting is safer than writing the new value into the cache, which can race with a reader that loaded the old value. A short TTL bounds the damage of the remaining race.
 - **Jitter TTLs** so keys written together do not expire together.
+- **Beyond one key:** many writers, derived copies, CDNs, regions and the slow-reader race are in `../../engineering-practices/references/cache-invalidation.md`.
 - **Stampede protection:** when a hot key expires, let one caller rebuild it while the rest serve the stale value.
 
 ```python

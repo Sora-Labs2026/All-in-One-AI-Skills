@@ -1,5 +1,15 @@
 # Changelog
 
+## ProductCraft 1.13.2 (2026-11-16)
+
+- New `modules/engineering-practices/references/cache-invalidation.md`, a playbook for keeping cached data fresh. It covers:
+  - **Fundamentals:** a staleness budget and blast radius per cache, and when to use expiry time versus delete on change (use both, with the TTL as a backstop).
+  - **Correct deletes:** commit before deleting, delete rather than overwrite, close the slow-reader race (short TTL, delayed second delete, versioned compare-and-set, leases), and retry failed deletes durably.
+  - **Invalidating from the data:** a transactional outbox or change data capture, plus versioned keys, tags and content-addressed keys.
+  - **Other layers:** CDNs, browsers, regions and replicas, in-process caches and clients.
+  - **Money and verification:** read prices and stock from the source of truth when charging, plus tests and staleness monitoring.
+- Linked from the performance and Redis references and the Engineering Practices guide.
+
 ## ProductCraft 1.13.1 (2026-11-16)
 
 - New `modules/engineering-workflow/references/session-brief.md`: a four-part brief for every coding-agent session.
