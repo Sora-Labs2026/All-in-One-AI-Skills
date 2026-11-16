@@ -35,6 +35,7 @@
 | Tables, columns, indexes, constraints, migrations, backfills | `references/data-and-migrations.md` | Every step works with both the old and new app version; `scripts/migration_check.py` run on new migration files; down path or forward-only reason written |
 | Calls to databases, services, queues or third-party APIs; error handling | `references/resilience.md` | Every outbound call has a timeout; retries only on transient errors with backoff and jitter; failure path tested |
 | Slowness, load, caching, query plans, bundle size, Core Web Vitals | `references/performance.md` | Baseline and after numbers from the same method; change kept only if it beats the noise |
+| Stale data after an update, designing how a cache stays fresh, CDN purges, cache races | `references/cache-invalidation.md` | Staleness budget per key; commit then delete; durable retries; outbox or change stream; versions or tags; read-after-write and race tests |
 | Logs, metrics, traces, alerts, dashboards, runbooks | `references/observability.md` | Structured events with a request or trace ID; no secrets or personal data; alerts are symptom-based with a runbook |
 | CI workflows, build speed, deploys, feature flags, rollout, rollback | `references/ci-and-release.md` | Pipeline green with no weakened gate; rollout and rollback plan written; flags have an owner and removal date |
 | Adding, upgrading, auditing or removing packages | `references/dependencies.md` | Need justified; lockfile committed and diff reviewed; changelog read for upgrades; audit result recorded |

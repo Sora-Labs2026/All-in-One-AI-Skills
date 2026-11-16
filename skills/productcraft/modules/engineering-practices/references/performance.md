@@ -60,7 +60,7 @@ Cache only what is expensive to produce, read far more often than it changes, an
 
 - **Pick the layer deliberately:** HTTP caching (browser or CDN), a shared cache (for example Redis or Memcached), or in-process memoization. Each layer adds a staleness window and something to invalidate.
 - **The key includes every input that changes the result:** tenant, user or role, locale, feature flags, query parameters, API version. A key that omits the viewer serves one user's data to another, which is a security incident, not a performance bug.
-- **Choose one invalidation strategy** (time-based TTL, explicit invalidation on write, or versioned keys) and write down the acceptable staleness. Add random jitter to TTLs so entries do not all expire together.
+- **Choose one invalidation strategy** (time-based TTL, explicit invalidation on write, or versioned keys) and write down the acceptable staleness. The full playbook (commit-then-delete, the slow-reader race, outbox and change streams, versions and tags, CDN, regions and clients, prices at checkout, tests) is [cache-invalidation.md](cache-invalidation.md). Add random jitter to TTLs so entries do not all expire together.
 - **Protect hot keys from stampedes** when they expire: let one request recompute while others wait for it or receive the stale value (request coalescing, a short lock, or `stale-while-revalidate`).
 - Cache "not found" results with a shorter TTL; never cache errors as if they were answers.
 - Bound memory with a size limit and an eviction policy, and measure the hit rate; a cache with a low hit rate is overhead.
