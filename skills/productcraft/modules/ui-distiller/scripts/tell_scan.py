@@ -19,17 +19,22 @@ product has a written reason. See references/generic-tells-and-fixes.md.
   SPLIT-OTP         four or more maxlength="1" inputs in one file (breaks paste
                     and screen readers; use one input with autocomplete="one-time-code")
   OTP-AUTOCOMPLETE  a code input without autocomplete="one-time-code"
+  VIEWPORT-100VH    100vh or h-screen without a dynamic-viewport (dvh, svh, lvh) value beside it
+  GREY-GRADIENT     a gradient between hex colors 90 degrees or more apart in hue, interpolated
+                    in sRGB (no `in oklch` / `in oklab`), which turns grey in the middle
+See also references/precision-details.md.
 
 Usage: tell_scan.py PATH [PATH ...] [--json] [--max-ms 500] [--caps-max 3]
 Exit codes: 0 nothing to review, 1 findings, 2 usage error (no readable input).
 """
 import argparse
+import colorsys
 import json
 import pathlib
 import re
 import sys
 
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 EXTS = {".html", ".htm", ".css", ".scss", ".sass", ".less", ".jsx", ".tsx", ".js", ".ts", ".vue", ".svelte", ".astro", ".mdx"}
 SKIP_DIRS = {"node_modules", "dist", "build", "out", ".git", ".next", "coverage", "vendor"}
 
@@ -52,7 +57,30 @@ BEZIER = re.compile(r"cubic-bezier\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*,\s*([-\d.]+)
 DURATION = re.compile(r"(?:transition|animation)(?:-duration)?\s*:[^;{}]*?(\d+(?:\.\d+)?)(ms|s)\b|\bduration-(\d{3,4})\b")
 CAPS = re.compile(r"text-transform\s*:\s*uppercase|(?<![\w-])uppercase(?![\w-])")
 ONE_CHAR = re.compile(r"<input\b[^>]*\bmax[lL]ength\s*=\s*[\"'{]?\s*1\b", re.I)
+VH100 = re.compile(r"(?<![\w.])100vh\b|(?<![\w-])(?:min-|max-)?h-screen(?![\w-])")
+DYN_VH = re.compile(r"\b\d+(?:\.\d+)?[dsl]vh\b|(?<![\w-])(?:min-|max-)?h-(?:dvh|svh|lvh)(?![\w-])")
+GRADIENT = re.compile(r"(?:linear|radial|conic)-gradient\s*\(([^;{}]*)")
+HEX = re.compile(r"#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b")
+PERCEPTUAL = re.compile(r"\bin\s+ok(?:lch|lab)\b", re.I)
 CODE_INPUT = re.compile(r"<input\b[^>]*(?:\bname\s*=\s*[\"'](?:otp|code|one[-_]?time[-_]?code|verification[-_]?code)[\"'])[^>]*>", re.I)
+
+
+def hue_sat(hexcode):
+    h = hexcode if len(hexcode) == 6 else "".join(c * 2 for c in hexcode)
+    r, g, b = (int(h[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    hh, ll, ss = colorsys.rgb_to_hls(r, g, b)
+    return hh * 360, ss, ll
+
+
+def far_apart_hues(colors):
+    """True when two saturated colors differ by 90 degrees or more in hue."""
+    hues = [h for h, s, l in map(hue_sat, colors) if s >= 0.35 and 0.15 <= l <= 0.9]
+    for i, a in enumerate(hues):
+        for b in hues[i + 1:]:
+            d = abs(a - b) % 360
+            if min(d, 360 - d) >= 90:
+                return True
+    return False
 
 
 def iter_files(paths):
@@ -79,6 +107,14 @@ def find(name, text, max_ms, caps_max):
         for rule, rx, msg in LINE_RULES:
             if rx.search(line):
                 add(rule, n, msg, line)
+        if VH100.search(line):
+            nxt = lines[n] if n < len(lines) else ""
+            if not (DYN_VH.search(line) or DYN_VH.search(nxt)):
+                add("VIEWPORT-100VH", n, "100vh hides content under mobile browser toolbars; add min-height: 100dvh (or svh) after it", line)
+        for m in GRADIENT.finditer(line):
+            body = m.group(1)
+            if not PERCEPTUAL.search(body) and far_apart_hues(HEX.findall(body)):
+                add("GREY-GRADIENT", n, "distant hues interpolated in sRGB go grey midway; write `linear-gradient(90deg in oklch, ...)`", line)
         for m in BEZIER.finditer(line):
             y1, y2 = float(m.group(2)), float(m.group(4))
             if not (0 <= y1 <= 1 and 0 <= y2 <= 1):

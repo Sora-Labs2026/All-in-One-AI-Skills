@@ -67,6 +67,22 @@ class TellScanTests(unittest.TestCase):
         self.assertIn("OTP-AUTOCOMPLETE", rules('<input name="otp" inputmode="numeric">'))
         self.assertNotIn("OTP-AUTOCOMPLETE", rules('<input name="code" autocomplete="one-time-code">'))
 
+    def test_viewport_100vh(self):
+        self.assertIn("VIEWPORT-100VH", rules(".hero{min-height:100vh}", "a.css"))
+        self.assertNotIn("VIEWPORT-100VH", rules(".hero{min-height:100vh;\nmin-height:100dvh}", "a.css"))
+        self.assertIn("VIEWPORT-100VH", rules('<section className="min-h-screen">'))
+        self.assertNotIn("VIEWPORT-100VH", rules('<section className="min-h-screen min-h-dvh">'))
+
+    def test_grey_gradient(self):
+        self.assertIn("GREY-GRADIENT", rules(".b{background:linear-gradient(90deg, #2563eb, #f59e0b)}", "a.css"))
+        self.assertNotIn("GREY-GRADIENT", rules(".b{background:linear-gradient(90deg in oklch, #2563eb, #f59e0b)}", "a.css"))
+        self.assertNotIn("GREY-GRADIENT", rules(".b{background:linear-gradient(#2563eb, #3b82f6)}", "a.css"))
+        self.assertNotIn("GREY-GRADIENT", rules(".b{background:linear-gradient(#000000, #ffffff)}", "a.css"))
+
+    def test_hue_helpers(self):
+        self.assertTrue(ts.far_apart_hues(["f00", "00f"]))
+        self.assertFalse(ts.far_apart_hues(["ff0000", "ff3300"]))
+
     def test_main_exit_codes_json_and_skips(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
