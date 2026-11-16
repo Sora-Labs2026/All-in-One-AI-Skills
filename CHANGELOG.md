@@ -1,5 +1,22 @@
 # Changelog
 
+## ProductCraft 1.13.3 (2026-11-16)
+
+- New `modules/ui-distiller/references/precision-details.md`, a finishing pass on ten small CSS decisions, each with symptom, fix, code and check:
+  - concentric corners;
+  - translucent borders;
+  - OKLCH palettes and OKLCH gradients;
+  - icon stroke weight matched to text;
+  - masked edges on scrolling rows;
+  - blurred icon swaps;
+  - depth in dark mode;
+  - `dvh` and `svh` instead of `100vh`;
+  - multiply-blended product photos.
+- `tell_scan.py` 1.1.0 adds two rules:
+  - `VIEWPORT-100VH`: `100vh` or `h-screen` with no dynamic-viewport value beside it.
+  - `GREY-GRADIENT`: hues 90° or more apart interpolated in sRGB.
+- 3 new tests; the suites hold 1351.
+
 ## ProductCraft 1.13.2 (2026-11-16)
 
 - New `modules/engineering-practices/references/cache-invalidation.md`, a playbook for keeping cached data fresh. It covers:
